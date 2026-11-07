@@ -167,6 +167,7 @@ body.ipad #musn{right:150px;height:58px;line-height:58px;font-size:16px;max-widt
 
 #webb{top:calc(env(safe-area-inset-top,0px) + 10px);left:50%;transform:translateX(-50%);z-index:40;height:40px;line-height:40px;padding:0 18px;border-radius:20px;white-space:nowrap;text-decoration:none;font:600 15px var(--ios);color:#fff;background:rgba(10,132,255,.85);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.3);box-shadow:0 6px 20px rgba(10,132,255,.45)}
 body.ipad #webb{height:48px;line-height:48px;font-size:17px}
+.ios .row .pill{padding:6px 12px;font-size:15px;flex:none}
 </style>
 </head><body>
 <div id="look"></div>
@@ -179,8 +180,8 @@ body.ipad #webb{height:48px;line-height:48px;font-size:17px}
 <div style="display:flex;gap:8px;justify-content:center;margin:2px 0 12px"><button class="pill" id="spprev" aria-label="Zurück">⏮</button><button class="pill blue" id="spplay" style="min-width:64px" aria-label="Abspielen">▶</button><button class="pill" id="spnext" aria-label="Weiter">⏭</button></div>
 <div style="display:flex;gap:12px;align-items:center;margin:0 4px 12px"><div id="spcov"></div><div style="min-width:0;flex:1"><b id="spt" style="font-size:17px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Spotify</b><div id="sps" class="foot" style="text-align:left;margin:2px 0 0">Songs einrichten, dann ▶ drücken</div></div></div>
 <div id="spwrap" style="border-radius:14px;overflow:hidden;min-height:0"></div>
-<div class="cap" style="margin:12px 12px 4px">Playlist</div><div class="grp" id="spl"></div><div class="grp" style="margin-top:10px"><button class="row" id="msfx"><span class="tx"><b>Soundeffekte</b></span><i class="sw on"></i></button><button class="row" id="mbi"><span class="tx"><b>Eingebaute Spielmusik</b><small>Ersatz ohne Spotify</small></span><i class="sw"></i></button><div class="row"><span class="tx"><b>Effekt-Lautstärke</b></span><input id="mvol" type="range" min="0" max="100" value="90" style="padding:0;background:none;flex:1.4"></div><button class="row" id="spset"><span class="tx"><b>Songs einrichten</b><small>11 Titel in fester Reihenfolge</small></span><i class="chev">›</i></button></div>
-<div class="cap">Spotify-Konto</div><div class="grp"><div class="row"><input id="spcid" placeholder="Client-ID (developer.spotify.com)" autocomplete="off"></div><button class="row" id="splogin"><span class="tx"><b id="splt">Mit Spotify anmelden</b><small id="spls">Offizielle Anmeldung über spotify.com</small></span><i class="chev">›</i></button></div><div class="foot" id="spredir" style="text-align:left;word-break:break-all;margin:6px 12px"></div><div id="spcfg" style="display:none"><div class="cap">Reihenfolge</div><ol id="splist" style="margin:0 0 8px 22px;padding:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.85)"></ol><textarea id="splinks" rows="6" placeholder="Entweder 11 Song-Links (einer pro Zeile, in dieser Reihenfolge) ODER ein Playlist-Link"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="pill blue" id="spsave">Speichern</button></div><div class="foot" id="spmsg" style="text-align:left">Tipp: In der Spotify-App Songs markieren, Strg+C (Mac: Cmd+C) drücken und hier einfügen.</div></div></div>
+<div class="cap" style="margin:12px 12px 4px">Playlist</div><div class="grp" id="spl"></div><div class="grp" style="margin-top:10px"><button class="row" id="msfx"><span class="tx"><b>Soundeffekte</b></span><i class="sw on"></i></button><button class="row" id="mbi"><span class="tx"><b>Eingebaute Spielmusik</b><small>Ersatz ohne Spotify</small></span><i class="sw"></i></button><div class="row"><span class="tx"><b>Effekt-Lautstärke</b></span><input id="mvol" type="range" min="0" max="100" value="90" style="padding:0;background:none;flex:1.4"></div><button class="row" id="spset"><span class="tx"><b>Songs bearbeiten</b><small>Ändern, zurücksetzen, eigene hinzufügen</small></span><i class="chev">›</i></button></div>
+<div class="cap">Spotify-Konto</div><div class="grp"><div class="row"><input id="spcid" placeholder="Client-ID (developer.spotify.com)" autocomplete="off"></div><button class="row" id="splogin"><span class="tx"><b id="splt">Mit Spotify anmelden</b><small id="spls">Offizielle Anmeldung über spotify.com</small></span><i class="chev">›</i></button></div><div class="foot" id="spredir" style="text-align:left;word-break:break-all;margin:6px 12px"></div><div id="spcfg" style="display:none"><div class="cap">Meine Songs</div><div class="grp" id="sped"></div><div id="spedin" style="display:none;margin-top:8px"><div class="foot" id="spedt" style="text-align:left"></div><div class="grp"><div class="row"><input id="spedl" placeholder="Spotify-Link (oder Songname, wenn angemeldet)" autocomplete="off"><button class="pill blue" id="spedok">OK</button></div></div></div><div class="cap">Eigenen Song hinzufügen</div><div class="grp"><div class="row"><input id="spadd" placeholder="Spotify-Link (oder Songname, wenn angemeldet)" autocomplete="off"><button class="pill blue" id="spaddgo">+</button></div></div><div class="foot" id="spemsg" style="text-align:left"></div><div class="grp" style="margin-top:8px"><button class="row" id="spreset"><span class="tx"><b>Alles zurücksetzen</b><small>Standard-Songs wiederherstellen, eigene Songs entfernen</small></span><i class="chev">↺</i></button></div><div class="cap">Alle Links auf einmal</div><ol id="splist" style="margin:0 0 8px 22px;padding:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.85)"></ol><textarea id="splinks" rows="6" placeholder="Entweder 11 Song-Links (einer pro Zeile, in dieser Reihenfolge) ODER ein Playlist-Link"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="pill blue" id="spsave">Speichern</button></div><div class="foot" id="spmsg" style="text-align:left">Tipp: In der Spotify-App Songs markieren, Strg+C (Mac: Cmd+C) drücken und hier einfügen.</div></div></div>
 <button id="mb" class="hud">☰</button><canvas id="mini" class="hud" width="231" height="231"></canvas><div id="vig"></div><div id="dhud" class="hud"></div><div id="drive"><div><button class="dp" data-k="left">◀</button><button class="dp" data-k="right">▶</button></div><div><button class="dp" data-k="brk">▼</button><button class="dp" data-k="gas">▲</button></div></div>
 <button id="hlb" class="hud" style="display:none">💡 Licht: AN</button><div id="fade"></div><div id="ov"><div id="box"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -593,7 +594,7 @@ function credits(){closeOv();const c=document.createElement('div');c.id='credits
  document.body.appendChild(c);let done=false;const go=()=>{if(done)return;done=true;c.remove();finalCards()};
  $('skp').onclick=go;setTimeout(go,31500)}
 function finalCards(){const f=document.createElement('div');f.id='fin';document.body.appendChild(f);
- const L=[['<p class="sm">Eine</p>'+cgLogo()+'<div class="cgw">CLOUD GAMES</div><p class="sm" style="margin-top:8px">Produktion</p>',4200],['<p class="sm">Programmiert von</p><h3>Benjamin Beyer</h3>',3000],['<p class="sm">Story</p><h3>Domenic Pozorski</h3>',3000],['<p class="sm">Regie</p><h3>Aaron Möck</h3>',3000],['<h1 style="color:var(--bad);font-size:40px">Zweiter Teil folgt</h1><div style="margin-top:18px">'+p2Logo()+'</div>',5200]];
+ const L=[['<p class="sm">Eine</p>'+cgLogo()+'<div class="cgw">CLOUD GAMES</div><p class="sm" style="margin-top:8px">Produktion</p>',4200],['<p class="sm">Programmiert von</p><h3>Benjamin</h3>',3000],['<p class="sm">Story</p><h3>Domenic</h3>',3000],['<p class="sm">Regie</p><h3>Aaron</h3>',3000],['<p class="sm">Beta-Tester</p><h3>Ben</h3>',3000],['<h1 style="color:var(--bad);font-size:40px">Zweiter Teil folgt</h1><div style="margin-top:18px">'+p2Logo()+'</div>',5200]];
  let k=0;const nx=()=>{if(k>=L.length)return location.reload();const [h,d]=L[k++];f.innerHTML='<div class="fc" style="animation-duration:'+d+'ms">'+h+'</div>';setTimeout(nx,d)};nx()}
 /* ---- Große offene Welt: Garten ---- */
 const gLights=[];
@@ -970,7 +971,7 @@ function endSeq2(){const e=document.createElement('div');e.id='end';document.bod
   e.innerHTML='<div class="paper"><div class="mast">'+a.n+'</div><div class="meta">'+a.m+'</div><h2>'+a.h+'</h2><div class="ph"></div><div class="cap">'+a.c+'</div>'+a.p.map(t=>'<p>'+t+'</p>').join('')+'<div class="qt">'+a.q+'</div></div><button class="btn" id="enx" style="margin-top:14px">'+(i===ART2.length-1?'Weiter ▶':'Weiter ▶')+'</button>';$('enx').onclick=nx};
  $('enx').onclick=nx}
 function finalCards2(){const f=document.createElement('div');f.id='fin';document.body.appendChild(f);
- const L=[['<p class="sm">Eine</p>'+cgLogo()+'<div class="cgw">CLOUD GAMES</div><p class="sm" style="margin-top:8px">Produktion</p>',4200],['<div style="margin:6px">'+p2Logo()+'</div>',3400],['<p class="sm">Programmiert von</p><h3>Benjamin Beyer</h3>',3000],['<p class="sm">Story</p><h3>Domenic Pozorski</h3>',3000],['<p class="sm">Regie</p><h3>Aaron Möck</h3>',3000],['<h3>Danke fürs Testen!</h3><p class="sm">Ende der Beta</p>',4200],['<h1 style="color:var(--bad);font-size:36px">Fortsetzung folgt</h1>',4200]];
+ const L=[['<p class="sm">Eine</p>'+cgLogo()+'<div class="cgw">CLOUD GAMES</div><p class="sm" style="margin-top:8px">Produktion</p>',4200],['<div style="margin:6px">'+p2Logo()+'</div>',3400],['<p class="sm">Programmiert von</p><h3>Benjamin</h3>',3000],['<p class="sm">Story</p><h3>Domenic</h3>',3000],['<p class="sm">Regie</p><h3>Aaron</h3>',3000],['<p class="sm">Beta-Tester</p><h3>Ben</h3>',3000],['<h3>Danke fürs Testen!</h3><p class="sm">Ende der Beta</p>',4200],['<h1 style="color:var(--bad);font-size:36px">Fortsetzung folgt</h1>',4200]];
  let k=0;const nx=()=>{if(k>=L.length)return location.reload();const [h,d]=L[k++];f.innerHTML='<div class="fc" style="animation-duration:'+d+'ms">'+h+'</div>';setTimeout(nx,d)};nx()}
 
 /* ===================== iOS-27-DESIGN ===================== */
@@ -1120,8 +1121,8 @@ async function sapi(path,opt){opt=opt||{};const t=await saAuth();const r=await f
  if(r.status===204)return null;const tx=await r.text();let j=null;try{j=tx?JSON.parse(tx):null}catch(e){}if(!r.ok)throw new Error((j&&j.error&&(j.error.message||j.error))||('Fehler '+r.status));return j}
 const saPack=t=>{const im=(t.album&&t.album.images)||[];return{uri:t.uri,name:t.name,artist:(t.artists||[]).map(a=>a.name).join(', '),img:(im[1]||im[0]||{}).url||''}};
 async function saResolve(){let c={};try{c=JSON.parse(localStorage.getItem('dfSpRes')||'{}')}catch(e){}
- for(let i=0;i<SPT.length;i++){const lid=SP.ids[i]||PRE[i];
-  if(lid){const k='id:'+lid;if(!c[k])c[k]=saPack(await sapi('/tracks/'+lid));SA.info[i]=c[k];continue}
+ SA.info=[];for(let i=0;i<Math.max(SPT.length,SP.ids.length);i++){const lid=SP.ids[i]||PRE[i];
+  if(lid){const k='id:'+lid;if(!c[k]){try{c[k]=saPack(await sapi('/tracks/'+lid))}catch(e){c[k]=null}}SA.info[i]=c[k];continue}
   const k='q:'+SPT[i];if(!(k in c)){const r=await sapi('/search?type=track&limit=1&market=from_token&q='+encodeURIComponent(SPT[i]));const t=r&&r.tracks&&r.tracks.items[0];c[k]=t?saPack(t):null}SA.info[i]=c[k]}
  SA.uris=SA.info.map(x=>x&&x.uri);try{localStorage.setItem('dfSpRes',JSON.stringify(c))}catch(e){}auUI()}
 function saShow(t,playing){if(t){$('spt').textContent=t.name;$('sps').textContent=t.artist||'';if(t.img){$('spcov').style.backgroundImage='url("'+t.img+'")';$('spcov').textContent=''}const k=SA.uris.indexOf(t.uri);if(k>=0)SA.cur=k}
@@ -1155,24 +1156,31 @@ async function saBoot(){$('spcid').value=SA.cid;
   const p=$('musp');p.style.display='block'}
  if(SA.ref||SA.tok)saReady()}
 const _spToggle=spToggle;spToggle=function(){if(SA.on)return saToggle();return _spToggle()};
-const _spGo=spGo;spGo=function(i,a){if(SA.on)return saPlay(((i%SPT.length)+SPT.length)%SPT.length);return _spGo(i,a)};
+const _spGo=spGo;spGo=function(i,a){if(SA.on){const T=Math.max(SPT.length,SP.ids.length);return saPlay(((i%T)+T)%T)}return _spGo(i,a)};
 const _spMeta=spMeta;spMeta=function(){if(SA.on){saShow(SA.last);return}return _spMeta()};
 const _spLoadApi=spLoadApi;spLoadApi=function(){if(SA.on)return;return _spLoadApi()};
 /* Spotify-Player */
 const SPT=['Confession','Things to Do','Divergent','HAYAT','Only Gold Rings','JÄMTLAND','iSpy (feat. Lil Yachty)','LUCKY LUKE','Teenager Dreams 2','Chubina','Come 2gether'];
 const SP={ids:[],list:null,idx:0,ctrl:null,api:null,playing:false,last:0,meta:{},want:false,loading:false,plain:false,t:0,timer:0};
-try{SP.ids=JSON.parse(localStorage.getItem('dfSpIds')||'[]');SP.list=JSON.parse(localStorage.getItem('dfSpList')||'null')}catch(e){}
-const spHas=()=>!!(SP.list||SP.ids.length);
+const USR={over:{},extra:[]},ED={slot:0};SP.bulk=[];
+try{SP.bulk=JSON.parse(localStorage.getItem('dfSpIds')||'[]');SP.list=JSON.parse(localStorage.getItem('dfSpList')||'null');const u=JSON.parse(localStorage.getItem('dfSpUsr')||'null');if(u){USR.over=u.over||{};USR.extra=u.extra||[]}}catch(e){}
+function spMerge(){const ids=(SP.bulk||[]).slice(0,SPT.length);Object.keys(USR.over).forEach(k=>{ids[+k]=USR.over[k]});USR.extra.forEach((x,k)=>{ids[SPT.length+k]=x});SP.ids=ids}
+spMerge();
+const spHas=()=>!!(SP.list||SP.ids.some(Boolean));
 const spUri=()=>SP.list?'spotify:'+SP.list.t+':'+SP.list.id:'spotify:track:'+SP.ids[SP.idx];
 const spUrl=()=>'https://open.spotify.com/'+(SP.list?SP.list.t+'/'+SP.list.id:'track/'+SP.ids[SP.idx]);
 const spSay=t=>{$('sps').textContent=t};
 function musLabel(){const e=$('musn');let t;if(!AU.started)t='♪ Tippen für Musik';else if(SP.playing)t='♪ '+$('spt').textContent;else if(AU.musicOn&&AU.mode==='syn')t='♪ '+TR[AU.track].n;else t='♪ Musik aus';if(musLabel.t!==t){musLabel.t=t;e.textContent=t}}
+function spName(i){const id=SP.ids[i];return (SA.on&&SA.info[i]&&SA.info[i].name)||(id&&SP.meta[id]&&SP.meta[id].title)||SPT[i]||('Eigener Song '+(i-SPT.length+1))}
 function spRender(){const el=$('spl');if(!el)return;let h='';
  if(SP.list&&!SA.on)h+='<div class="row"><span class="tx"><b>Deine Playlist</b><small>Titel im Spotify-Fenster wählen</small></span></div>';
- else h+=SPT.map((t,i)=>{const cur=SA.on?(SA.cur===i&&SA.playing):(SP.ids.length&&i===SP.idx&&SP.playing);return '<button class="row'+(cur?' on':'')+'" data-pi="'+i+'"><span class="tx"><b>'+(i+1)+'. '+t+'</b>'+(SA.on?'<small>'+(SA.info[i]?SA.info[i].artist:'nicht gefunden')+'</small>':(SP.ids[i]?'':'<small>Link fehlt – antippen zum Einrichten</small>'))+'</span><i class="chev">'+(cur?'♪':'▶')+'</i></button>'}).join('');
+ else{const N=Math.max(SPT.length,SP.ids.length);for(let i=0;i<N;i++){const cur=SA.on?(SA.cur===i&&SA.playing):(SP.ids.length&&i===SP.idx&&SP.playing);
+  let sub=SA.on?(SA.info[i]?SA.info[i].artist:'nicht gefunden'):(SP.ids[i]?'':'Link fehlt – antippen zum Einrichten');
+  const tag=(i>=SPT.length?'eigener Song':USR.over[i]?'geändert':'');if(tag)sub=sub?sub+' · '+tag:tag;
+  h+='<button class="row'+(cur?' on':'')+'" data-pi="'+i+'"><span class="tx"><b>'+(i+1)+'. '+spName(i)+'</b>'+(sub?'<small>'+sub+'</small>':'')+'</span><i class="chev">'+(cur?'♪':'▶')+'</i></button>'}}
  h+='<div class="cap" style="margin:10px 12px 4px">Eingebaute Musik</div>'+TR.map((t,i)=>{const cur=AU.musicOn&&AU.mode==='syn'&&AU.track===i;return '<button class="row'+(cur?' on':'')+'" data-bi="'+i+'"><span class="tx"><b>'+t.n+'</b><small>'+t.s+'</small></span><i class="chev">'+(cur?'♪':'▶')+'</i></button>'}).join('');
  el.innerHTML=h;
- el.querySelectorAll('[data-pi]').forEach(b=>b.onclick=()=>{const i=+b.dataset.pi;if(!SA.on&&!SP.ids[i]){spCfg(true);spSay('Für „'+SPT[i]+'“ fehlt der Spotify-Link (siehe unten).');return}spGo(i,true)});
+ el.querySelectorAll('[data-pi]').forEach(b=>b.onclick=()=>{const i=+b.dataset.pi;if(!SA.on&&!SP.ids[i]){spCfg(true);spSay('Für Platz '+(i+1)+' fehlt der Spotify-Link (siehe unten).');return}spGo(i,true)});
  el.querySelectorAll('[data-bi]').forEach(b=>b.onclick=()=>{const i=+b.dataset.bi;AU.auto=false;AU.musicOn=true;if(SP.ctrl&&SP.playing)try{SP.ctrl.pause()}catch(e){}if(AU.ctx)AU.mus.gain.setTargetAtTime(1,AU.ctx.currentTime,.1);auSet(i)})}
 function auUI(){$('msfx').querySelector('.sw').classList.toggle('on',AU.sfxOn);$('mbi').querySelector('.sw').classList.toggle('on',AU.musicOn);$('musb').classList.toggle('off',!(SP.playing||AU.musicOn));$('spplay').textContent=(SP.playing||(!spHas()&&AU.musicOn))?'⏸':'▶';spRender();musLabel()}
 function spParse(t){const r={ids:[],list:null};t=t||'';const L=t.match(/(?:open\.spotify\.com\/(?:intl-[a-z]+\/)?|spotify:)(playlist|album)[\/:]([A-Za-z0-9]{22})/);if(L)r.list={t:L[1],id:L[2]};
@@ -1194,7 +1202,7 @@ function spUpd(d){const was=SP.playing;SP.playing=!d.isPaused;const now=Date.now
  if(!SP.list&&d.duration>0&&d.position>=d.duration-600&&now-SP.last>4000){SP.last=now;spGo(SP.idx+1,true)}auUI()}
 function spGo(i,auto){if(!spHas()){spCfg(true);return}
  if(SP.list){spSay('Playlist-Modus: Wechsle die Titel direkt im Spotify-Fenster.');return}
- const n=SP.ids.length;SP.idx=(i%n+n)%n;spMeta();
+ const n=SP.ids.length,prev=SP.idx;SP.idx=(i%n+n)%n;for(let t=0;t<n&&!SP.ids[SP.idx];t++)SP.idx=(SP.idx+(i<prev?-1:1)+n)%n;spMeta();
  if(SP.plain){spPlain();return}
  if(!SP.ctrl){SP.want=auto!==false;spLoadApi();return}
  SP.ctrl.loadUri(spUri());if(auto!==false)setTimeout(()=>{try{SP.ctrl.play()}catch(e){}},500)}
@@ -1203,8 +1211,8 @@ function spMeta(){const i=SP.idx;if(!spHas()){$('spt').textContent='Spotify';ret
  const show=m=>{if(m&&m.thumbnail_url){$('spcov').style.backgroundImage='url("'+m.thumbnail_url+'")';$('spcov').textContent=''}if(m&&m.title)$('spt').textContent=m.title};
  if(SP.meta[key])return show(SP.meta[key]);
  try{fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(spUrl())).then(r=>r.json()).then(j=>{SP.meta[key]=j;if((SP.list?SP.list.id:SP.ids[SP.idx])===key)show(j)}).catch(()=>{})}catch(e){}}
-function spCfg(open){const c=$('spcfg');c.style.display=open===undefined?(c.style.display==='none'?'block':'none'):(open?'block':'none');
- $('splist').innerHTML=SPT.map(t=>'<li>'+t+'</li>').join('');$('splinks').value=SP.list?spUrl():SP.ids.map(x=>'https://open.spotify.com/track/'+x).join('\n')}
+function spCfg(open){spEd();const c=$('spcfg');c.style.display=open===undefined?(c.style.display==='none'?'block':'none'):(open?'block':'none');
+ $('splist').innerHTML=SPT.map(t=>'<li>'+t+'</li>').join('');$('splinks').value=SP.list?spUrl():SP.bulk.map(x=>'https://open.spotify.com/track/'+x).join('\n')}
 function spToggle(){
  if(!spHas()){AU.musicOn=!AU.musicOn;if(AU.ctx)AU.mus.gain.setTargetAtTime(AU.musicOn?1:0,AU.ctx.currentTime,.1);spSay(AU.musicOn?'Noch keine Spotify-Links: Die eingebaute Musik läuft. Links unter „Songs einrichten“.':'Musik aus.');if(AU.musicOn)spCfg(true);auUI();return}
  if(SP.plain){spSay('Drücke ▶ im Spotify-Fenster unten (Browser-Sperre).');return}
@@ -1213,9 +1221,29 @@ function spToggle(){
 $('musn').onclick=()=>$('musb').onclick();$('musb').onclick=()=>{const p=$('musp'),open=p.style.display==='none';p.style.display=open?'block':'none';if(open){auUI();spMeta();if(!spHas()){spCfg(true);spSay('Noch keine Spotify-Links. ▶ startet vorerst die eingebaute Musik.')}else if(!SP.api&&!SP.plain)spLoadApi()}};
 $('spplay').onclick=spToggle;$('spnext').onclick=()=>spGo(SP.idx+1,true);$('spprev').onclick=()=>spGo(SP.idx-1,true);$('spset').onclick=()=>spCfg();
 $('spsave').onclick=()=>{const r=spParse($('splinks').value),msg=$('spmsg');if(!r.list&&!r.ids.length){msg.textContent='Keine Spotify-Links erkannt (Song-, Playlist- oder Album-Link).';msg.style.color='#ff453a';return}
- SP.list=r.list;SP.ids=r.list?[]:r.ids;SP.idx=0;try{localStorage.setItem('dfSpIds',JSON.stringify(SP.ids));localStorage.setItem('dfSpList',JSON.stringify(SP.list))}catch(e){}
+ SP.list=r.list;SP.bulk=r.list?[]:r.ids;spMerge();SP.idx=0;try{localStorage.setItem('dfSpIds',JSON.stringify(SP.bulk));localStorage.setItem('dfSpList',JSON.stringify(SP.list))}catch(e){}
  msg.style.color=(r.list||r.ids.length===SPT.length)?'#30d158':'#ff9f0a';msg.textContent=r.list?'Playlist gespeichert. Titelwechsel im Spotify-Fenster.':(r.ids.length===SPT.length?'Gespeichert: alle 11 Songs in Reihenfolge.':'Gespeichert: '+r.ids.length+' von 11 Links erkannt.');
  if(SP.ctrl){try{SP.ctrl.destroy()}catch(e){}SP.ctrl=null}spMeta();SP.want=false;SP.plain?spPlain():(SP.api?spMake():spLoadApi())};
+function spEmsg(t,ok){const e=$('spemsg');e.textContent=t;e.style.color=ok?'#30d158':'#ff453a'}
+function spEd(){const el=$('sped');if(!el)return;const N=Math.max(SPT.length,SP.ids.length);let h='';
+ for(let i=0;i<N;i++){const ex=i>=SPT.length,ov=!!USR.over[i];
+  h+='<div class="row"><span class="tx"><b>'+(i+1)+'. '+spName(i)+'</b><small>'+((SA.on&&SA.info[i])?SA.info[i].artist+' · ':'')+(ex?'eigener Song':ov?'geändert':'Standard')+'</small></span>'
+   +'<button class="pill" data-ed="'+i+'" aria-label="Ändern">✎</button>'+(ex?'<button class="pill" data-del="'+(i-SPT.length)+'" aria-label="Löschen">🗑</button>':(ov?'<button class="pill" data-rs="'+i+'" aria-label="Zurücksetzen">↺</button>':''))+'</div>'}
+ el.innerHTML=h;
+ el.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{ED.slot=+b.dataset.ed;$('spedin').style.display='block';$('spedt').textContent='Neuer Song für Platz '+(ED.slot+1)+' ('+spName(ED.slot)+')';$('spedl').value='';$('spedl').focus()});
+ el.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{delete USR.over[+b.dataset.rs];spUsrSave('Zurückgesetzt.')});
+ el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{USR.extra.splice(+b.dataset.del,1);spUsrSave('Song gelöscht.')})}
+async function spFind(txt){txt=(txt||'').trim();if(!txt)return null;const r=spParse(txt);if(r.ids[0])return r.ids[0];
+ if(SA.on){try{const j=await sapi('/search?type=track&limit=1&market=from_token&q='+encodeURIComponent(txt));const t=j&&j.tracks&&j.tracks.items[0];return t?t.id:null}catch(e){return null}}return null}
+function spUsrSave(msg){try{localStorage.setItem('dfSpUsr',JSON.stringify(USR))}catch(e){}spMerge();if(SP.idx>=SP.ids.length)SP.idx=0;
+ if(SP.ctrl&&!SA.on){try{SP.ctrl.destroy()}catch(e){}SP.ctrl=null}
+ const done=()=>{spEd();spMeta();auUI();if(msg)spEmsg(msg,true)};
+ if(SA.on)saResolve().then(done).catch(done);else{if(!SA.on&&spHas()&&!SP.list){SP.plain?spPlain():(SP.api?spMake():0)}done()}}
+$('spedok').onclick=async()=>{spEmsg('Suche …',true);const id=await spFind($('spedl').value);if(!id){spEmsg(SA.on?'Nichts gefunden. Link oder genauer Songname nötig.':'Kein Spotify-Song-Link erkannt.',false);return}
+ if(ED.slot>=SPT.length)USR.extra[ED.slot-SPT.length]=id;else USR.over[ED.slot]=id;$('spedin').style.display='none';spUsrSave('Song geändert. Mit ↺ setzt du ihn zurück.')};
+$('spaddgo').onclick=async()=>{spEmsg('Suche …',true);const id=await spFind($('spadd').value);if(!id){spEmsg(SA.on?'Nichts gefunden. Link oder genauer Songname nötig.':'Kein Spotify-Song-Link erkannt.',false);return}
+ if(USR.extra.includes(id)||SP.ids.includes(id)){spEmsg('Dieser Song ist schon in der Liste.',false);return}USR.extra.push(id);$('spadd').value='';spUsrSave('Song hinzugefügt (ganz unten in der Playlist).')};
+$('spreset').onclick=()=>{if(!confirm('Alle Änderungen und eigenen Songs zurücksetzen?'))return;USR.over={};USR.extra=[];spUsrSave('Alles zurückgesetzt.')};
 $('mvol').oninput=e=>{AU.vol=e.target.value/100;if(AU.master)AU.master.gain.value=AU.vol};
 $('msfx').onclick=()=>{AU.sfxOn=!AU.sfxOn;auUI()};
 $('mbi').onclick=()=>{AU.musicOn=!AU.musicOn;if(AU.ctx)AU.mus.gain.setTargetAtTime(AU.musicOn?1:0,AU.ctx.currentTime,.1);if(AU.musicOn&&SP.playing&&SP.ctrl)try{SP.ctrl.pause()}catch(e){}auUI()};

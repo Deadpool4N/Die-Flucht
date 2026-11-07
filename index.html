@@ -285,9 +285,9 @@ function startClimb(){gd.climb=true;lm=true;gd.taps=0;gd.last='';gd.t0=performan
   if(gd.taps>=DF.taps){gd.on=false;gd.climb=false;p.style.display='none';dogs.forEach(d=>d.visible=false);toast('Geschafft! Du springst über den Zaun.','good');tween(.8,k=>pos.z=-16.2-k*2.2,()=>{H=1.6;tele(7,0,2.6,0,()=>toast('Eine dunkle Straße. Am Rand steht ein Auto! Knacke die Tür mit dem Dietrich.'))})}})}
 function updGame(dt,t,now){if(ovOn)return;
  if(gd.on)dogs.forEach((d,i)=>{const dx=pos.x-(120+d.position.x),dz=pos.z-d.position.z,L=Math.hypot(dx,dz);
-  const sp=now<gd.go?0:(gd.climb?1.1:DF.dog+i*.15)*dt;if(L>.9||!gd.climb){if(L>.01){d.position.x+=dx/L*sp;d.position.z+=dz/L*sp}}
+  const sp=(now<gd.go||now<(d.stun||0))?0:(gd.climb?1.1:DF.dog+i*.15)*dt;if(L>.9||!gd.climb){if(L>.01){d.position.x+=dx/L*sp;d.position.z+=dz/L*sp}}
   d.rotation.y=Math.atan2(dx,dz);d.userData.legs.forEach((l,k)=>l.rotation.x=Math.sin(t*14+k*1.6)*.7);d.position.y=Math.abs(Math.sin(t*10+i))*.08;
-  if(!gd.climb&&now>gd.go&&L<.8)gardenCaught()});
+  if(!gd.climb&&now>gd.go&&now>=(d.stun||0)&&L<.8)gardenCaught()});
  if(gd.climb){const f=1-(now-gd.t0)/DF.climb,b=$('cbar');if(b)b.style.width=Math.max(0,f*100)+'%';if(f<=0)gardenCaught()}
  if(drv.on){const gas=drv.gas||keys.ArrowUp||keys.KeyW,brk=drv.brk||keys.ArrowDown||keys.KeyS;
   drv.sp+=((gas?30:brk?6:16)-drv.sp)*Math.min(1,dt*1.6);
@@ -456,9 +456,9 @@ function updWorld(dt,t,now){if(ovOn)return;
  if(miniOn){$('mini').style.display=cr===3?'block':'none';if(cr===3&&((mT+=dt)>.08)){mT=0;drawMini()}}
  runK+=(mvRun-runK)*Math.min(1,dt*6);mvRun=0;if(!drv.view){cam.fov=70+8*runK;cam.updateProjectionMatrix()}
  let v=0;
- if(ch.on&&cr===5){const dx=pos.x-(100+hunter.position.x),dz=pos.z-hunter.position.z,L=Math.hypot(dx,dz),sp=DF.hunter*dt;
+ if(ch.on&&cr===5){const dx=pos.x-(100+hunter.position.x),dz=pos.z-hunter.position.z,L=Math.hypot(dx,dz),sp=now<(ch.stun||0)?0:DF.hunter*dt;
   if(L>.01){hunter.position.x+=dx/L*sp;hunter.position.z+=dz/L*sp}hunter.rotation.y=Math.atan2(dx,dz);hunter.rotation.z=Math.sin(t*7)*.06;hunter.position.y=Math.abs(Math.sin(t*8))*.06;
-  v=1-Math.min(1,(L-1)/7);if(L<.9&&!CH.god)caught('Der Jäger hat dich!')}
+  v=1-Math.min(1,(L-1)/7);if(L<.9&&!CH.god&&now>=(ch.stun||0))caught('Der Jäger hat dich!')}
  if(gd.on&&!gd.climb)dogs.forEach(d=>{const L=Math.hypot(pos.x-(120+d.position.x),pos.z-d.position.z);v=Math.max(v,1-Math.min(1,(L-1)/7))});
  v=Math.max(v,p2V);vig(v);
  if(!P2&&cr===3&&pos.z<-(MN-1)+.8&&!busy&&!S.f.out){S.f.out=1;toast('Licht! Du hast den Ausgang des Labyrinths gefunden.','good');tele(4,0,2.6,0)}}
@@ -584,7 +584,7 @@ const ART=[
   p:['Einen Tag nach der Flucht haben Spezialkräfte das Anwesen durchsucht. Gefunden wurden aufgebrochene Truhen, ein geöffneter Tresor und ein Keller, der mehr einem Labyrinth als einem Vorratsraum glich. Vom Jäger fehlt dagegen jede Spur.','Die Hunde wurden unverletzt im Garten angetroffen. Sie reagierten laut Tierärzten auf niemanden außer auf ihren verschwundenen Besitzer.','Ermittler prüfen, ob es sich um einen Einzeltäter handelt oder ob das Haus Teil eines größeren Netzwerks war. Mehrere Nachbarn berichten von seltsamen Geräuschen in den vergangenen Monaten, hielten sie aber für Wildtiere.','Die Person, die entkommen ist, steht inzwischen unter dem Schutz der Behörden. Ob sie weitere Hinweise zum Jäger geben kann, wollte die Polizei nicht sagen. Klar ist nur: Diese Geschichte ist noch nicht vorbei.']}];
 function endSeq(){
  const e=document.createElement('div');e.id='end';document.body.appendChild(e);$('fade').style.opacity=0;let i=-1;
- e.innerHTML='<h1 class="eh">Du wurdest befreit.</h1><p class="dim es">… oder besser: Du hast dich selbst befreit.</p><button class="btn" id="enx">Weiter ▶</button>';
+ e.innerHTML='<h1 class="eh">Du wurdest befreit.</h1><p class="dim es">… oder besser: Du hast dich selbst befreit.</p>'+(GUN.justUnlocked?'<p class="es" style="color:#ffd60a;font-weight:700;max-width:420px">🔫 SHOTGUN FREIGESCHALTET!<br><span style="font-weight:400;font-size:15px;color:#ddd">Schwer ohne ein einziges Mal zu sterben geschafft. Ab jetzt hast du die Shotgun in Leicht, Mittel und Teil 2.</span></p>':'')+'<button class="btn" id="enx">Weiter ▶</button>';
  const nx=()=>{i++;if(i>=ART.length){e.remove();return credits()}const a=ART[i];
   e.innerHTML='<div class="paper"><div class="mast">'+a.n+'</div><div class="meta">'+a.m+'</div><h2>'+a.h+'</h2><div class="ph"></div><div class="cap">'+a.c+'</div>'+a.p.map(t=>'<p>'+t+'</p>').join('')+'<div class="qt">'+a.q+'</div></div><button class="btn" id="enx" style="margin-top:14px">'+(i===ART.length-1?'Abspann ▶':'Weiter ▶')+'</button>';
   $('enx').onclick=nx};
@@ -634,7 +634,7 @@ function lampFix(){RM[6].g.visible=cr===6;driveFx();dogFix();if((ovOn||lm)&&docu
  if(drv.view){lamp.position.set(160+drv.x,4,-4);lamp.intensity=drv.lit?.9:.28;lamp.distance=50}
  const bg=cr===6?0x0a1226:0x050507;sc.background.setHex(bg);sc.fog.color.setHex(bg);
  sc.fog.near=cr===6?25:cr===8?12:3;sc.fog.far=cr===6?100:cr===8?(drv.lit?72:36):cr===7?26:cr===5?22:cr===3?13:cr===12?28:15;
- gLights.forEach(l=>l.intensity=cr===6?l.userData.i:0);p2Light();p2Tick();audioTick()}
+ gLights.forEach(l=>l.intensity=cr===6?l.userData.i:0);p2Light();p2Tick();audioTick();gunTick()}
 function gardenIntro(){const t0=performance.now(),D=5200;lm=true;Y=0;Pt=0;AV.h=Math.PI;
  camOv=s=>{const k=Math.min(1,(performance.now()-t0)/D),e=k*k*(3-2*k);
   cam.position.set(136-e*32+s,2.8+e*1.6+s,-1);cam.lookAt(120,2.6,14);
@@ -902,7 +902,7 @@ function bfsPath(r0,c0,r1,c1){const q=[[r0,c0]],pv={};pv[r0+','+c0]=null;while(q
  [[1,0],[-1,0],[0,1],[0,-1]].forEach(([a,b])=>{const nr=r+a,nc=c+b,k=nr+','+nc;if(hzOpen(nr,nc)&&!(k in pv)){pv[k]=r+','+c;q.push([nr,nc])}})}return[]}
 function hzLOS(){const h=(MN-1)/2,x0=hz.position.x,z0=hz.position.z,x1=pos.x-60,z1=pos.z,n=Math.ceil(Math.hypot(x1-x0,z1-z0)/.5);for(let i=1;i<n;i++){const x=x0+(x1-x0)*i/n,z=z0+(z1-z0)*i/n,c=Math.round(x/2+h),r=Math.round(z/2+h);if(MZ[r]&&MZ[r][c]==='#')return false}return true}
 function limbs(o,t,a){const c=o.children;if(c[4]){c[4].rotation.x=Math.sin(t)*a;c[5].rotation.x=-Math.sin(t)*a;c[2].rotation.x=-Math.sin(t)*a;c[3].rotation.x=Math.sin(t)*a}}
-function hzStep(dt){if(lm||busy||ovOn)return;const N=MN,h=(N-1)/2,dx=pos.x-60-hz.position.x,dz=pos.z-hz.position.z,L=Math.hypot(dx,dz);
+function hzStep(dt){if(lm||busy||ovOn||performance.now()<(HZ.stun||0))return;const N=MN,h=(N-1)/2,dx=pos.x-60-hz.position.x,dz=pos.z-hz.position.z,L=Math.hypot(dx,dz);
  const sees=(L<6.5&&hzLOS())||(L<10&&runK>.6);
  if(sees){if(HZ.mode!==1){HZ.path=HZ.path.slice(0,1);toast('Er hat dich bemerkt!','err')}HZ.mode=1;HZ.lost=0}else if(HZ.mode===1){HZ.lost+=dt;if(HZ.lost>4)HZ.mode=0}
  if(!HZ.path.length){const hr=Math.round(hz.position.z/2+h),hc=Math.round(hz.position.x/2+h);
@@ -914,7 +914,7 @@ function hzStep(dt){if(lm||busy||ovOn)return;const N=MN,h=(N-1)/2,dx=pos.x-60-hz
  hz.rotation.y=Math.atan2(HZ.fx,HZ.fz);limbs(hz,performance.now()/1e3*(HZ.mode?9:5),.55);
  p2V=Math.max(0,1-Math.min(1,(L-1)/8))*(HZ.mode?1:.5);
  if(L<.9&&!CH.god)p2Caught('Der Jäger hat dich!')}
-function arStep(dt,now){if(lm||busy||ovOn||S.f.cage)return;const dx=pos.x-240-h3.position.x,dz=pos.z-h3.position.z,L=Math.hypot(dx,dz),sp=DF.hunter*.78*(now<P2D.alarm?1.35:1)*dt;
+function arStep(dt,now){if(lm||busy||ovOn||S.f.cage||now<(S.f.stun||0))return;const dx=pos.x-240-h3.position.x,dz=pos.z-h3.position.z,L=Math.hypot(dx,dz),sp=DF.hunter*.78*(now<P2D.alarm?1.35:1)*dt;
  if(L>.01){h3.position.x+=dx/L*sp;h3.position.z+=dz/L*sp}
  COL[12].forEach(a=>{const x0=a[0]-240-.55,x1=a[1]-240+.55,z0=a[2]-.55,z1=a[3]+.55,lx=h3.position.x,lz=h3.position.z;if(lx>x0&&lx<x1&&lz>z0&&lz<z1){const dl=lx-x0,dr=x1-lx,dt2=lz-z0,db=z1-lz,m=Math.min(dl,dr,dt2,db);if(m===dl)h3.position.x=x0;else if(m===dr)h3.position.x=x1;else if(m===dt2)h3.position.z=z0;else h3.position.z=z1}});
  h3.rotation.y=Math.atan2(dx,dz);limbs(h3,now/1e3*9,.55);p2V=Math.max(0,1-Math.min(1,(L-1)/8));
@@ -987,7 +987,7 @@ function menuStart(){
  ov('<div class="ios"><div class="apptitle">DIE FLUCHT</div><div class="sub">3D · Ein Escape-Abenteuer</div>'
  +'<div class="cap">Steuerung</div>'+segH('data-ct',[['pc','💻 PC'],['ipad','📱 iPad']],CTRL)
  +'<div class="cap">Schwierigkeit</div><div class="grp">'+Object.keys(LV).map(k=>'<button class="row" data-lv="'+k+'"><span class="ic" style="background:'+LICO[k][0]+'">'+LICO[k][1]+'</span><span class="tx"><b>'+k+'</b><small>'+LSUB[k]+'</small></span><i class="chev">›</i></button>').join('')+'</div>'
- +'<div class="cap">Admin-Code</div><div class="grp"><div class="row"><input id="cin" inputmode="numeric" placeholder="Code" autocomplete="off"><button class="pill blue" id="cgo">OK</button></div></div><div id="cmsg" class="foot"></div>'
+ +''+gunLine()+'<div class="cap">Admin-Code</div><div class="grp"><div class="row"><input id="cin" inputmode="numeric" placeholder="Code" autocomplete="off"><button class="pill blue" id="cgo">OK</button></div></div><div id="cmsg" class="foot"></div>'
  +'<div style="text-align:center;margin-top:14px"><button class="p2b" id="p2b">DIE FLUCHT <i>2</i><em>BETA</em></button></div><div class="foot">Im Spiel: ☰ oben rechts für Pause</div></div>');
  bindSeg('data-ct',v=>setCtrl(v));
  $('cgo').onclick=()=>{const ok2=$('cin').value.trim().toUpperCase()==='1709';if(ok2)CHEATS=true;$('cmsg').textContent=ok2?'Admin-Panel freigeschaltet!':'Falscher Code.';$('cmsg').style.color=ok2?'#30d158':'#ff453a'};
@@ -997,15 +997,16 @@ function pauseUI(p2){const J=p2?['Zelle','Serverraum','Katakomben','Maschinenhal
  ov('<div class="ios"><div class="navbar"><b>Pause'+(p2?' · Teil 2':'')+'</b><button class="pill blue" id="m0">Fertig</button></div>'
  +'<div class="cap">Steuerung</div>'+segH('data-ct',[['pc','💻 PC'],['ipad','📱 iPad']],CTRL)
  +'<div class="cap">Schwierigkeit</div>'+segH('data-lvp',Object.keys(LV).map(k=>[k,k]),dnow())
- +(CHEATS?'<div class="cap">Admin-Panel</div><div class="grp">'+swr('god','Unverwundbar')+swr('fast','Turbo-Laufen')+swr('skip',p2?'Rätsel überspringen':'Schlösser überspringen')+swr('noclip','Durch Wände')+'</div>'
+ +(CHEATS?'<div class="cap">Admin-Panel</div><div class="grp">'+swr('god','Unverwundbar')+swr('fast','Turbo-Laufen')+swr('skip',p2?'Rätsel überspringen':'Schlösser überspringen')+swr('noclip','Durch Wände')+swr('infammo','Unendlich Schrot')+'</div>'
   +'<div class="cap">Ansicht</div>'+segH('data-view',[['auto','Auto'],['tp','3. Person'],['fp','Ego']],CH.view)
-  +'<div class="cap">Items</div><div class="grp">'+rowGo('id="mi" data-x','1','Alle Items erhalten')+'</div>'
+  +'<div class="cap">Items</div><div class="grp">'+rowGo('id="mi" data-x','1','Alle Items erhalten')+rowGo('id="mgun" data-x','1','🔫 Shotgun erhalten')+'</div>'
   +'<div class="cap">Springe zu …</div><div class="grp">'+J.map((n,i)=>rowGo('data-j',i+1,n)).join('')+'</div>':'')
  +'<div class="grp" style="margin-top:16px"><button class="row red" id="mr"><span class="tx"><b>Neustart</b></span></button></div></div>');
  $('m0').onclick=closeOv;bindSeg('data-ct',v=>setCtrl(v));bindSeg('data-lvp',v=>{DF=LV[v];toast('Schwierigkeit: '+v)});
  if(CHEATS){bindSeg('data-view',v=>{CH.view=v});
   document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{const k=b.dataset.ch;CH[k]=!CH[k];b.querySelector('.sw').classList.toggle('on',!!CH[k])});
-  $('mi').onclick=()=>{(p2?['Taschenlampe','Sicherung Rot','Sicherung Blau','Sicherung Grün','Notiz','Notizbuch','Rack-Zettel','Wartungsplan','Gebäudeplan']:Object.keys(INFO)).forEach(k=>{if(!has(k))S.inv.push(k)});inv();closeOv();toast('Alle Items im Inventar.','good')};
+  $('mgun').onclick=()=>{if(!has('Shotgun'))S.inv.push('Shotgun');GUN.ammo=6;RUN.jumped=true;inv();closeOv();toast('🔫 Shotgun im Inventar. Tippe sie an, um sie zu ziehen.','good')};
+  $('mi').onclick=()=>{RUN.jumped=true;(p2?['Taschenlampe','Sicherung Rot','Sicherung Blau','Sicherung Grün','Notiz','Notizbuch','Rack-Zettel','Wartungsplan','Gebäudeplan']:Object.keys(INFO)).forEach(k=>{if(!has(k))S.inv.push(k)});inv();closeOv();toast('Alle Items im Inventar.','good')};
   document.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>p2?p2Jump(+b.dataset.j):cheatJump(+b.dataset.j))}
  $('mr').onclick=()=>location.reload()}
 function pauseOnly(){pauseUI(P2)}
@@ -1265,6 +1266,62 @@ auUI();spMeta();
 $('spnext').onclick=()=>SA.on?saSkip(1):spGo(SP.idx+1,true);$('spprev').onclick=()=>SA.on?saSkip(-1):spGo(SP.idx-1,true);
 $('splogin').onclick=()=>{if(SA.on){['dfSpTok','dfSpRes'].forEach(k=>localStorage.removeItem(k));location.reload()}else saLogin()};
 setTimeout(saBoot,0);
+
+/* ===================== SHOTGUN ===================== */
+const GUN={unlocked:false,eq:false,ammo:6,cool:0,rec:0,justUnlocked:false},RUN={deaths:0,jumped:false},_gdv=new THREE.Vector3();
+try{GUN.unlocked=localStorage.getItem('dfShotgun')==='1'}catch(e){}
+INFO.Shotgun='Eine Pump-Shotgun. Tippe sie an, um sie zu ziehen oder wegzustecken. Schießen: Linksklick (PC), 💥-Knopf (iPad) oder Leertaste. Treffer betäuben Jäger und Hunde kurz.';
+MAPS.Shotgun=()=>{GUN.eq=!GUN.eq;toast(GUN.eq?'Shotgun gezogen. Ziele mit dem Punkt in der Mitte. Schrot: '+GUN.ammo:'Shotgun weggesteckt.')};
+function gunLine(){return '<div class="foot">🔫 Shotgun: '+(GUN.unlocked?'<b style="color:#30d158">freigeschaltet</b> (in Leicht, Mittel und Teil 2)':'gesperrt · Schwer ohne ein einziges Mal zu sterben durchspielen')+'</div>'}
+const gunStyle=document.createElement('style');gunStyle.textContent='#shoot{position:fixed;z-index:6;right:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 170px);width:92px;height:92px;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:rgba(220,40,40,.6);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font:700 20px var(--ios);display:none;align-items:center;justify-content:center;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.45)}body.pc #shoot{display:none!important}body.ipad #shoot{width:112px;height:112px;font-size:24px}#xh{position:fixed;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 6px #000;z-index:3;pointer-events:none;display:none}';document.head.appendChild(gunStyle);
+{const b=document.createElement('button');b.id='shoot';b.textContent='💥 6';document.body.appendChild(b);const x=document.createElement('div');x.id='xh';document.body.appendChild(x)}
+/* 3D-Modelle: Ego-Ansicht (an der Kamera) und Spielerfigur */
+sc.add(cam);
+const gv=new THREE.Group();cam.add(gv);gv.position.set(.26,-.24,-.5);gv.rotation.y=-.06;gv.visible=false;
+const gunM=M(0x2a2a2e),gunW=M(0x5a3a1c),mf=new THREE.PointLight(0xffd080,0,12);cam.add(mf);mf.position.set(0,0,-1);
+box(.05,.05,.62,0,0,-.4,gunM,gv);box(.065,.065,.34,0,-.055,-.3,gunM,gv);box(.1,.1,.2,0,-.02,-.02,gunM,gv);box(.085,.12,.2,0,-.07,.14,gunW,gv);box(.12,.05,.14,0,-.06,-.26,gunW,gv);
+const ag=new THREE.Group();av.add(ag);ag.position.set(.3,1.15,.25);ag.visible=false;
+box(.06,.06,.85,0,0,.45,gunM,ag);box(.08,.12,.3,0,-.02,-.08,gunW,ag);box(.1,.1,.25,0,-.02,.1,gunM,ag);
+/* Spielstand: Tode & Freischaltung */
+const _caught=caught;caught=function(m){RUN.deaths++;return _caught(m)};
+const _gcaught=gardenCaught;gardenCaught=function(){if(gd.on&&!CH.god)RUN.deaths++;return _gcaught()};
+const _crash2=crash;crash=function(i){const L0=drv.lives,r=_crash2(i);if(L0>0&&drv.lives<=0&&!CH.god)RUN.deaths++;return r};
+const _cj=cheatJump;cheatJump=function(st){RUN.jumped=true;return _cj(st)};
+const _win=win;win=function(){if(!P2&&DF===LV.Schwer&&RUN.deaths===0&&!RUN.jumped&&!(CH.god||CH.fast||CH.skip||CH.noclip)){GUN.unlocked=true;GUN.justUnlocked=true;try{localStorage.setItem('dfShotgun','1')}catch(e){}}return _win()};
+const _newGame=newGame;newGame=function(){RUN.deaths=0;RUN.jumped=false;GUN.eq=false;GUN.ammo=6;GUN.justUnlocked=false;const r=_newGame();
+ if(DF===LV.Schwer){const k=S.inv.indexOf('Shotgun');if(k>=0)S.inv.splice(k,1)}
+ if(GUN.unlocked&&DF!==LV.Schwer){if(!has('Shotgun'))S.inv.push('Shotgun');inv();setTimeout(()=>toast('🔫 Du hast die Shotgun dabei (freigeschaltet). Tippe sie im Inventar an.','good'),5500)}return r};
+const _sp2=startPart2;startPart2=function(k){const r=_sp2(k);if(GUN.unlocked&&DF!==LV.Schwer){if(!has('Shotgun'))S.inv.push('Shotgun');inv()}GUN.eq=false;GUN.ammo=6;return r};
+const _tele=tele;tele=function(r){if(has('Shotgun')&&(r===5||r===6||(P2&&(r===3||r===12))))GUN.ammo=Math.max(GUN.ammo,6);return _tele.apply(this,arguments)};
+/* Schießen */
+function shotSnd(){if(!AU.ctx||!AU.sfxOn||AU.ctx.state!=='running')return;const t=AU.ctx.currentTime;noiseSrc(t,.4,'lowpass',2600,.9,AU.sfx);tone(120,35,.4,'sawtooth',.5,420);tone(320,180,.07,'square',.08,2000,.45);tone(240,150,.07,'square',.08,2000,.62)}
+function clampTo(o,x0,x1,z0,z1){o.position.x=Math.max(x0,Math.min(x1,o.position.x));o.position.z=Math.max(z0,Math.min(z1,o.position.z))}
+function shoot(){const now=performance.now();if(!GUN.eq||!has('Shotgun')||ovOn||lm||drv.view||S.tied||now<GUN.cool)return;
+ if(GUN.ammo<=0&&!CH.infammo){toast('Keine Patronen mehr!','err');GUN.cool=now+600;return}
+ if(!CH.infammo)GUN.ammo--;GUN.cool=now+950;GUN.rec=1;mf.intensity=4;shotSnd();shake(.16);cam.getWorldDirection(_gdv);
+ const T=[];
+ if(cr===5&&ch.on&&hunter.visible)T.push({o:hunter,x:100+hunter.position.x,z:hunter.position.z,k:'h'});
+ if(cr===6&&gd.on)dogs.forEach(d=>{if(d.visible)T.push({o:d,x:120+d.position.x,z:d.position.z,k:'d'})});
+ if(P2&&cr===3&&hz.visible)T.push({o:hz,x:60+hz.position.x,z:hz.position.z,k:'z'});
+ if(P2&&cr===12&&h3.visible&&!S.f.cage)T.push({o:h3,x:240+h3.position.x,z:h3.position.z,k:'a'});
+ let best=null,bd=1e9;
+ T.forEach(t=>{const vx=t.x-cam.position.x,vy=1-cam.position.y,vz=t.z-cam.position.z,d=Math.hypot(vx,vy,vz),dot=(vx*_gdv.x+vy*_gdv.y+vz*_gdv.z)/d;if(d<18&&dot>(d<5?.9:.955)&&d<bd){bd=d;best=t}});
+ if(!best){toast('Daneben! Schrot: '+GUN.ammo);return}
+ const dx=best.x-pos.x,dz=best.z-pos.z,L=Math.hypot(dx,dz)||1,ux=dx/L,uz=dz/L;
+ if(best.k==='h'){ch.stun=now+3500;best.o.position.x+=ux*4;best.o.position.z+=uz*4;clampTo(best.o,-4.4,4.4,-3.4,13.6)}
+ else if(best.k==='d'){best.o.stun=now+5500;best.o.position.x+=ux*5;best.o.position.z+=uz*5;clampTo(best.o,-28,28,-16.5,33)}
+ else if(best.k==='z'){HZ.stun=now+5000;HZ.path=[]}
+ else{S.f.stun=now+3500;best.o.position.x+=ux*4;best.o.position.z+=uz*4;clampTo(best.o,-7.2,7.2,-7.2,7.2)}
+ sfx('thud');toast('Treffer! Betäubt. Schrot: '+GUN.ammo,'good')}
+function gunTick(){const now=performance.now(),own=has('Shotgun');if(!own)GUN.eq=false;
+ gv.visible=GUN.eq&&!av.visible&&!drv.view&&!ovOn;ag.visible=GUN.eq;GUN.rec*=.88;gv.position.z=-.5+.1*GUN.rec;gv.rotation.x=GUN.rec*.2;
+ mf.intensity*=.7;if(mf.intensity<.05)mf.intensity=0;
+ const show=GUN.eq&&own&&!drv.view&&!ovOn&&!S.tied;$('shoot').style.display=show?'flex':'none';$('xh').style.display=show?'block':'none';
+ if(show){const tx='💥 '+(CH.infammo?'∞':GUN.ammo);if(gunTick.t!==tx){gunTick.t=tx;$('shoot').textContent=tx}}
+ dogs.forEach(d=>{if(now<(d.stun||0))d.rotation.z=.6;else if(d.rotation.z===.6)d.rotation.z=0})}
+$('shoot').onpointerdown=e=>{e.preventDefault();shoot()};
+addEventListener('keydown',e=>{if(e.code==='Space'&&GUN.eq&&!ovOn){e.preventDefault();shoot()}});
+addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0&&CTRL==='pc'&&GUN.eq&&(document.pointerLockElement||e.target===look||(e.target.tagName==='CANVAS')))shoot()},true);
 tween(.01,()=>{},()=>{});
 pos.x=0;Pt=-.8;$('loc').textContent=NAMES[0];inv();
 menuStart();

@@ -270,6 +270,19 @@ body.fpson2 #inv{top:calc(env(safe-area-inset-top,0px) + 172px)}
 body.phone.fpson2 #inv{top:calc(env(safe-area-inset-top,0px) + 166px)}
 /* Fix: Die globale canvas-Regel (Vollbild) darf den FPS-Graphen nicht über die Zahl legen */
 #fps #fpsg{position:static!important;inset:auto!important;display:block;width:140px;height:36px;margin-top:5px}
+
+/* 3D-Maske im Skin-Ladebildschirm */
+.rv-maskwrap{position:absolute;left:50%;top:50%;width:min(30vmin,190px);height:calc(min(30vmin,190px)*1.28);margin-left:calc(min(30vmin,190px)/-2);margin-top:calc(min(30vmin,190px)*-.64);perspective:800px;transition:transform .9s cubic-bezier(.2,1.2,.4,1)}
+#reveal.rev .rv-maskwrap{transform:translate(-125%,-18%) scale(.52)}
+.mk3{position:absolute;inset:0;transform-style:preserve-3d;animation:mkin 2.3s cubic-bezier(.3,.2,.2,1) forwards;filter:drop-shadow(0 0 22px #bf5af2)}
+#reveal.rev .mk3{animation:mkidle 5s linear infinite}
+.mkl{position:absolute;inset:0;border-radius:44% 44% 40% 40%/34% 34% 66% 66%;background:#e9e6e1;border:1px solid #b8b4ad}
+.mkf{box-shadow:inset 0 0 18px rgba(0,0,0,.18)}
+.mke{position:absolute;top:36%;width:25%;height:11%;border-radius:50%;background:#050506}
+.mkn{position:absolute;top:60%;width:6%;height:5%;background:#050506}
+.mkm{position:absolute;left:38%;right:38%;top:76%;height:3.2%;background:#050506}
+@keyframes mkin{0%{transform:translateY(120px) scale(.2) rotateX(10deg) rotateY(0);opacity:0}18%{opacity:1}100%{transform:translateY(0) scale(1) rotateX(8deg) rotateY(1800deg);opacity:1}}
+@keyframes mkidle{from{transform:rotateX(8deg) rotateY(0)}to{transform:rotateX(8deg) rotateY(360deg)}}
 </style>
 </head><body>
 <div id="look"></div>
@@ -347,9 +360,14 @@ const door4=mkDoor(4,3,0x4a3a2a);
 /* Raum 5: Haus + Jäger */
 [[-3.5,-2],[3.5,1],[-3.5,2.5]].forEach(a=>box(.3,1.2,1.4,a[0],1.4,a[1],M(0x4a3a30),RM[5].g));
 const hunter=new THREE.Group(),hm=M(0x0a0a0c);RM[5].g.add(hunter);
-box(.7,1.2,.4,0,1.1,0,hm,hunter);box(.4,.4,.4,0,2,0,hm,hunter);
-box(.15,1,.15,-.48,1.15,.1,hm,hunter);box(.15,1,.15,.48,1.15,.1,hm,hunter);box(.2,.8,.2,-.2,.4,0,hm,hunter);box(.2,.8,.2,.2,.4,0,hm,hunter);
-box(.08,.06,.05,-.1,2.03,.21,M(0,0xff2020),hunter);box(.08,.06,.05,.1,2.03,.21,M(0,0xff2020),hunter);hunter.visible=false;
+{const hood=M(0x121214),pants=M(0x0d0d0f),maskM=M(0xeae7e2,0x2a2826),blk=M(0x050506),hair=M(0x0b0b0c),cuff=M(0x1c1c20),shoe=M(0x3a3a3e);
+ box(.7,1.2,.4,0,1.1,0,hood,hunter);box(.4,.4,.4,0,2,0,maskM,hunter);
+ const aL=box(.15,1,.15,-.48,1.15,.1,hood,hunter),aR=box(.15,1,.15,.48,1.15,.1,hood,hunter),lL=box(.2,.8,.2,-.2,.4,0,pants,hunter),lR=box(.2,.8,.2,.2,.4,0,pants,hunter);
+ box(.1,.075,.03,-.1,2.04,.21,blk,hunter);box(.1,.075,.03,.1,2.04,.21,blk,hunter);
+ [aL,aR].forEach(a=>box(.17,.2,.17,0,-.4,0,cuff,a));[lL,lR].forEach(l=>box(.22,.1,.3,0,-.36,.05,shoe,l));
+ box(.42,.14,.42,0,2.26,-.01,hair,hunter);box(.42,.09,.05,0,2.19,.2,hair,hunter);[-.2,.2].forEach(x=>box(.04,.22,.42,x,2.12,0,hair,hunter));
+ box(.54,.14,.5,0,1.78,0,hood,hunter);box(.04,.04,.02,-.04,1.92,.205,blk,hunter);box(.04,.04,.02,.04,1.92,.205,blk,hunter);box(.12,.025,.02,0,1.84,.205,blk,hunter);box(.42,.22,.02,0,.82,.205,cuff,hunter)}
+hunter.visible=false;
 /* Garten, Straße, Auto, Landstraße */
 RM[6].g.children[1].visible=false;[1,2,3,4,5].forEach(k=>RM[7].g.children[k].visible=false);
 
@@ -603,7 +621,7 @@ const joy=$('joy');let jp=null;
 function jset(e){const r=joy.getBoundingClientRect(),m=r.width/2;let dx=e.clientX-r.left-m,dy=e.clientY-r.top-m;const L=Math.hypot(dx,dy);if(L>m){dx*=m/L;dy*=m/L}jx=dx/m;jz=dy/m;$('knob').style.transform='translate('+dx+'px,'+dy+'px)'}
 joy.addEventListener('pointerdown',e=>{jp=e.pointerId;joy.setPointerCapture(e.pointerId);jset(e)});
 joy.addEventListener('pointermove',e=>{if(e.pointerId===jp)jset(e)});
-['pointerup','pointercancel'].forEach(n=>joy.addEventListener(n,()=>{jp=null;jx=jz=0;$('knob').style.transform=''}));
+['pointerup','pointercancel'].forEach(n=>joy.addEventListener(n,()=>{jp=null;if(CH.stickLock&&Math.hypot(jx,jz)>.2)return;jx=jz=0;$('knob').style.transform=''}));
 addEventListener('keydown',e=>keys[e.code]=1);addEventListener('keyup',e=>keys[e.code]=0);
 let near=null;$('act').onclick=()=>{if(near&&!busy&&!ovOn)near.run()};
 function size(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}addEventListener('resize',size);size();
@@ -850,7 +868,7 @@ addEventListener('keydown',e=>{
  if(e.code==='KeyL'&&drv.on){hlToggle();return}
  if(e.code==='KeyP'&&!e.repeat){if(ovOn){if($('m0')&&$('m0').offsetParent)closeOv()}else openMenu();return}
  if(ovOn&&$('disp')&&document.querySelector('[data-k]')){const k=e.key==='Backspace'?'C':e.key==='Enter'?'OK':(e.key>='0'&&e.key<='9'&&e.key.length===1)?e.key:null;if(k!==null){const b=document.querySelector('[data-k="'+k+'"]');b&&b.click()}return}
- if((e.code==='KeyE'||e.code==='Enter')&&!ovOn&&near&&!busy){near.run();return}
+ if((e.code==='KeyE'||(e.code==='Enter'&&!MP.on))&&!ovOn&&near&&!busy){near.run();return}
  if(gd.climb&&['KeyA','ArrowLeft','KeyD','ArrowRight'].includes(e.code)){const b=document.querySelector('[data-c="'+((e.code==='KeyA'||e.code==='ArrowLeft')?'L':'R')+'"]');b&&b.onpointerdown&&b.onpointerdown()}});
 /* ---- Haus von außen (neu) ---- */
 function buildHouse(g){
@@ -1105,6 +1123,7 @@ function pauseUI(p2){const J=p2?['Zelle','Serverraum','Katakomben','Maschinenhal
  +'<div class="cap">Schwierigkeit</div>'+segH('data-lvp',Object.keys(LV).map(k=>[k,k]),dnow())+skinLine()+'<div class="cap">Leistung</div>'+perfSeg()
  +(CHEATS?'<div class="cap">Admin-Panel</div><div class="grp">'+swr('god','Unverwundbar')+swr('fast','Turbo-Laufen')+swr('skip',p2?'Rätsel überspringen':'Schlösser überspringen')+swr('noclip','Durch Wände')+swr('infammo','Unendlich Schrot')+'</div>'
   +'<div class="cap">Ansicht</div>'+segH('data-view',[['auto','Auto'],['tp','3. Person'],['fp','Ego']],CH.view)
+  +'<div class="cap">Steuerung testen (Dev)</div><div class="grp">'+swr('stickLock','Stick einrasten (Maus-Test)')+swr('touchViz','Touch-Punkte anzeigen')+'</div><div class="foot" style="text-align:left;margin:6px 12px 0">Oben unter „Steuerung“ wählst du PC, iPad oder Handy. Taste <b>F4</b> wechselt im laufenden Spiel. Das gilt im normalen Spiel, nicht nur im Entwicklerraum.</div>'
   +'<div class="cap">Items</div><div class="grp">'+rowGo('id="mi" data-x','1','Alle Items erhalten')+rowGo('id="mgun" data-x','1','🔫 Shotgun erhalten')+rowGo('id="mskin" data-x','1','🎭 Skin „Maskierter“ erhalten')+rowGo('id="mtp" data-x','1','🚪 In den Skin-Raum teleportieren')+'</div>'
   +'<div class="cap">Springe zu …</div><div class="grp">'+J.map((n,i)=>rowGo('data-j',i+1,n)).join('')+'</div>':'')
  +'<div class="grp" style="margin-top:16px"><button class="row red" id="mr"><span class="tx"><b>Neustart</b></span></button></div>'+(CHEATS?devSection():'')+'</div>');
@@ -1582,12 +1601,15 @@ const devH=hunter.clone(),devDog=mkDog(),devLb=mkLabel();
 IA.push(
 {r:13,x:-8.4,z:-2,lab:()=>'Waffenregal: Shotgun nehmen',run(){if(!has('Shotgun'))S.inv.push('Shotgun');GUN.ammo=6;S.sel='Shotgun';inv();toast('🔫 Shotgun gezogen. Hier unendlich Schrot. Schieße auf den Dummy!','good')}},
 {r:13,x:-8.4,z:2,lab:()=>'Item-Kiste: alle Items nehmen',run(){Object.keys(INFO).forEach(k=>{if(!has(k))S.inv.push(k)});inv();toast('Alle Items im Inventar. Tippe sie an, um sie zu testen.','good')}},
-{r:13,x:7.4,z:-2,lab:()=>'Dummys zurücksetzen',run(){DEV.rs++;devH.down=0;devH.hp=4;devH.hpKey='';devH.position.set(0,.2,-6);devDog.stun=0;devDog.rotation.z=0;devDog.position.set(4,0,-4);toast('Dummys zurückgesetzt.','good')}},
+{r:13,x:7.4,z:-2,lab:()=>'Dummys zurücksetzen',run(){DEV.rs++;devH.down=0;devH.hp=4;devH.hpKey='';devH.position.set(...DEVSP.h);devDog.stun=0;devDog.rotation.z=0;devDog.position.set(...DEVSP.d);toast('Dummys zurückgesetzt.','good')}},
 {r:13,x:8.6,z:6,lab:()=>'Entwicklerraum verlassen',run(){location.reload()}});
 function devEnter(){DEV.on=true;RUN.jumped=true;closeOv();lm=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;H=1.6;S.tied=false;
  try{ropes.forEach(r=>r.visible=false)}catch(e){}hunter.visible=false;dogs.forEach(d=>d.visible=false);['chase','drive','dhud','mini'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});
  tele(13,0,9,0,()=>toast('🧪 Entwicklerraum: Waffen, Items und Movement testen. Regale links, Zurücksetzen rechts, Ausgang hinten rechts.'))}
 function devTick(){document.body.classList.toggle('cheaton',!!CHEATS);const inDev=cr===13;devH.visible=inDev;devDog.visible=inDev;const hd=$('devhud');if(hd)hd.style.display=inDev?'block':'none';if(!inDev)return;
+ {const nw=performance.now();
+  if(devDog.stun&&nw>=devDog.stun){devDog.stun=0;devDog.rotation.z=0;devDog.position.set(...DEVSP.d)}
+  if(devH.down&&nw>=devH.down){devH.down=0;devH.hp=4;devH.hpKey='';devH.position.set(...DEVSP.h)}}
  lamp.position.set(260,3.6,0);lamp.distance=34;lamp.intensity=1.5;sc.fog.near=14;sc.fog.far=48;
  const now=performance.now();if(DEV.pt){const dt=(now-DEV.pt)/1e3;if(dt>0){const v=Math.hypot(pos.x-DEV.px,pos.z-DEV.pz)/dt;DEV.sp=Math.hypot(pos.x-DEV.px,pos.z-DEV.pz)>2?DEV.sp:DEV.sp*.8+v*.2}}DEV.px=pos.x;DEV.pz=pos.z;DEV.pt=now;
  if(++DEV.c%6===0){hd.textContent='ENTWICKLERRAUM  ·  x '+(pos.x-260).toFixed(1)+'  z '+pos.z.toFixed(1)+'  ·  '+DEV.sp.toFixed(1)+' m/s\nFPS '+Math.round(PERF.live||PERF.fps||0)+'  ·  Ansicht '+CH.view+'  ·  Schrot ∞';
@@ -1609,6 +1631,7 @@ document.addEventListener('pointerlockchange',()=>{if(!document.pointerLockEleme
 ['touchend','touchcancel'].forEach(n=>addEventListener(n,e=>{if(!e.touches||!e.touches.length)releaseInput()},{passive:true}));
 addEventListener('keydown',e=>{if(e.code==='Escape')releaseInput()});
 addEventListener('contextmenu',releaseInput);
+const DEVSP={h:[0,.2,-6],d:[4,0,-4]};
 const _devEnter=devEnter;devEnter=function(){releaseInput();return _devEnter()};
 const _devTick=devTick;devTick=function(){if(ovOn||lm||busy)releaseInput();return _devTick()};
 
@@ -1655,11 +1678,12 @@ function bindSkin(){bindSeg('data-sk',v=>{applySkin(v)});
 /* Ladebildschirm für Skins (wie bei der Shotgun) */
 const TOKSVG='<svg class="rv-token" viewBox="0 0 200 200"><defs><radialGradient id="tg" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#ffc93c"/><stop offset="1" stop-color="#b8740a"/></radialGradient></defs><circle cx="100" cy="100" r="92" fill="url(#tg)" stroke="#7a4a05" stroke-width="6"/><circle cx="100" cy="100" r="76" fill="none" stroke="#7a4a05" stroke-width="3" stroke-dasharray="6 6"/><g fill="#5a3503"><ellipse cx="100" cy="90" rx="30" ry="28"/><rect x="82" y="106" width="36" height="20" rx="6"/></g><g fill="#ffd96a"><circle cx="88" cy="90" r="8"/><circle cx="112" cy="90" r="8"/><path d="M100 98 l-5 11 h10z"/></g><g stroke="#5a3503" stroke-width="9" stroke-linecap="round"><line x1="52" y1="140" x2="148" y2="162"/><line x1="148" y1="140" x2="52" y2="162"/></g></svg>';
 const SKINART='<svg class="rv-gun rv-skinart" style="height:min(40vh,340px);width:auto" viewBox="0 0 160 290"><rect x="38" y="6" width="84" height="34" fill="#0b0b0c"/><rect x="34" y="20" width="10" height="44" fill="#0b0b0c"/><rect x="116" y="20" width="10" height="44" fill="#0b0b0c"/><rect x="44" y="32" width="72" height="64" fill="#ececec"/><rect x="56" y="52" width="18" height="11" rx="4" fill="#050506"/><rect x="86" y="52" width="18" height="11" rx="4" fill="#050506"/><rect x="72" y="72" width="6" height="6" fill="#050506"/><rect x="82" y="72" width="6" height="6" fill="#050506"/><rect x="72" y="84" width="16" height="3" fill="#050506"/><rect x="32" y="94" width="96" height="14" fill="#161618"/><rect x="40" y="104" width="80" height="92" fill="#111113"/><rect x="4" y="104" width="36" height="96" fill="#0e0e10"/><rect x="120" y="104" width="36" height="96" fill="#0e0e10"/><rect x="4" y="170" width="36" height="10" fill="#171719"/><rect x="120" y="170" width="36" height="10" fill="#171719"/><rect x="42" y="196" width="36" height="76" fill="#0c0c0e"/><rect x="82" y="196" width="36" height="76" fill="#0c0c0e"/><rect x="42" y="272" width="36" height="14" fill="#3a3a3e"/><rect x="82" y="272" width="36" height="14" fill="#3a3a3e"/></svg>';
-const SKINOPT={name:'DER MASKIERTE',rar:'★ MYTHISCH ★',rarStyle:'background:linear-gradient(90deg,#bf5af2,#5e5ce6);color:#fff',art:SKINART,eq:'Anziehen',load:'SKIN WIRD GELADEN …',
+const MASK3D='<div class="rv-maskwrap"><div class="mk3">'+(()=>{let h='';for(let i=13;i>=1;i--)h+='<div class="mkl" style="transform:translateZ('+(-i*2.2)+'px);filter:brightness('+(1-i*.035).toFixed(2)+')"></div>';return h})()+'<div class="mkl mkf"><i class="mke" style="left:17%"></i><i class="mke" style="right:17%"></i><i class="mkn" style="left:41%"></i><i class="mkn" style="right:41%"></i><i class="mkm"></i></div></div></div>';
+const SKINOPT={tok:MASK3D,name:'DER MASKIERTE',rar:'★ MYTHISCH ★',rarStyle:'background:linear-gradient(90deg,#bf5af2,#5e5ce6);color:#fff',art:SKINART,eq:'Anziehen',load:'SKIN WIRD GELADEN …',
  stats:'<span>🎭 Neuer Skin</span><span>👤 Sichtbar in der 3. Person</span><span>⚙ Ausrüsten: Start- oder Pausenmenü</span>'};
 function showRevealX(sub,onGet,onEquip,onClose,o){if(REV.open)return;REV.open=true;
  const d=document.createElement('div');d.id='reveal';
- d.innerHTML='<div class="rv-rays"></div><canvas id="rvc"></canvas><div class="rv-load"><div class="rv-lt">'+o.load+'</div><div class="rv-lb"><i></i></div></div><div class="rv-stage">'+TOKSVG+o.art+'</div>'
+ d.innerHTML='<div class="rv-rays"></div><canvas id="rvc"></canvas><div class="rv-load"><div class="rv-lt">'+o.load+'</div><div class="rv-lb"><i></i></div></div><div class="rv-stage">'+(o.tok||TOKSVG)+o.art+'</div>'
  +'<div class="rv-info"><div class="rv-rar" style="'+(o.rarStyle||'')+'">'+o.rar+'</div><div class="rv-name">'+o.name+'</div><div class="rv-sub">'+sub+'</div><div class="rv-stats">'+o.stats+'</div><div class="rv-btns" id="rvb"><button class="rvb gold" id="rvEq">'+(o.eq||'Ausrüsten')+'</button><button class="rvb" id="rvOk">Weiter</button></div></div><div class="rv-flash"></div>';
  document.body.appendChild(d);const snd=revSounds();snd.rise();
  const close=eq=>{try{onGet&&onGet();if(eq&&onEquip)onEquip()}catch(e){}REV.open=false;d.remove();onClose&&onClose()};
@@ -1711,7 +1735,8 @@ const MPM={
  CL:[[-14,-14.2],[-19.2,2.5],[19.2,-10],[10,14.2]],VT:[19.2,0],EX:[0,13.2],HS:[-14,10],
  PS:[[-3,-2],[3,-2],[-3,2],[3,2],[-2,3.5],[2,-3.5],[0,3.5],[-5,0],[5,0],[0,-2.8]],
  HP:100,DH:60,HH:400,TIME:900,HEAD:20,REV:4,
- NM:{med:'Medkit',nrg:'Energy-Drink',tas:'Taser',trp:'Falle',fuse:'Sicherung'},
+ DB:[[-19.4,-4.2],[6.4,-3.8],[-6.4,13.8]],PV:{med:3,nrg:3,tas:5,trp:5,loot:5},
+ NM:{med:'Medkit',nrg:'Energy-Drink',tas:'Taser',trp:'Falle',fuse:'Sicherung',loot:'Beute'},
  CLR:['#ff453a','#0a84ff','#30d158','#ffd60a','#bf5af2','#ff9f0a','#64d2ff','#ff375f','#ac8e68','#98989d']
 };
 
@@ -1726,6 +1751,24 @@ function mpLayout(){const T=.3,walls=[],add=(x0,z0,x1,z1)=>{const cx=(x0+x1)/2,c
  return {walls,fur,vault:[14,0,.3,3],gate:[0,14.9,4,.3]}}
 const mpBox=a=>[a[0]-a[2]/2,a[0]+a[2]/2,a[1]-a[3]/2,a[1]+a[3]/2];
 const mpBoxes=()=>{const L=mpLayout();return L.walls.map(mpBox).concat(L.fur.map(a=>mpBox([a[0],a[1],a[2],a[3]])))};
+const MPD={leicht:{n:'Leicht',pts:20,hh:300,hf:.74,tm:900,iv:25},mittel:{n:'Mittel',pts:40,hh:400,hf:.78,tm:960,iv:20},schwer:{n:'Schwer',pts:60,hh:500,hf:.82,tm:1080,iv:16},extrem:{n:'Extrem',pts:100,hh:600,hf:.86,tm:1200,iv:12}},MPDL=['leicht','mittel','schwer','extrem'];
+
+/* ---------- Zensur: Beleidigungen werden mit # ersetzt (auch Varianten, Leetspeak, Leerzeichen dazwischen) ---------- */
+const _mpLeet={'0':'o','1':'i','3':'e','4':'a','5':'s','7':'t','8':'b','9':'g','@':'a','$':'s','!':'i','|':'i','+':'t','€':'e','§':'s'};
+function _mpNorm(ch){let c=ch.toLowerCase();if(c==='ß')return 'ss';c=c.normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(_mpLeet[c])c=_mpLeet[c];return /^[a-z]+$/.test(c)?c:''}
+const _mpPn=w=>{let t='';for(const ch of w){const s=_mpNorm(ch);for(const c of s){if(t[t.length-1]!==c)t+=c}}return t};
+const MPBL={
+ stem:['arschloch','arschgeige','scheiss','scheisse','fuck','fick','wichs','wixx','hurensohn','hurenkind','schlampe','fotze','votze','schwuchtel','missgeburt','vollidiot','idiot','trottel','vollpfosten','spast','kanake','neger','motherf','asshole','bitch','bastard','whore','faggot','retard','dickhead','wanker','bullshit','miststuck','mistkerl','drecksau','abschaum','pisser','nigg','cunt','dummkopf','blodmann','arschkriecher','sackgesicht','dreckskerl','hundesohn','schweinehund','penisgesicht','lutscher','vollhonk','honk'].map(_mpPn),
+ word:['arsch','dick','cock','pussy','shit','slut','nazi','hure','nutte','depp','dumm','doof','blod','mongo','loser','looser','noob','opfer','penner','lappen','versager','sau','schwein','kacke','jerk','moron','stupid','pfosten','spacko','spasti','kruppel','behindert','dreck','arme','sack','ekel','affe','fettsack','null','lauch','hund','kuh','ziege'].map(_mpPn).filter(w=>!['arme','null','hund','kuh','ziege','affe','sack','dreck','sau','dick'].includes(w)||['sau','dick','dreck'].includes(w)),
+};
+function mpCensor(text){text=String(text==null?'':text);const n=text.length;let sq='';const map=[];
+ for(let i=0;i<n;i++){const s=_mpNorm(text[i]);for(const c of s){if(sq.length&&sq[sq.length-1]===c){map[map.length-1][1]=i}else{sq+=c;map.push([i,i])}}}
+ const bad=new Array(n).fill(false);
+ MPBL.stem.forEach(w=>{let k=-1;while((k=sq.indexOf(w,k+1))>=0){const a=map[k][0],b=map[k+w.length-1][1];for(let j=a;j<=b;j++)bad[j]=true}});
+ const re=/[^\s.,;:!?()\[\]{}"'<>\/\\*_~^=]+/g;let m;
+ while((m=re.exec(text))){const t=_mpPn(m[0]);if(t.length>=3&&MPBL.word.some(w=>t===w||(w.length>=4&&t.startsWith(w)&&t.length<=w.length+2)))for(let j=m.index;j<m.index+m[0].length;j++)bad[j]=true}
+ const re2=/[^\s.,;:!?()\[\]{}"'<>\/\\*_~^=]+/g;let q;while((q=re2.exec(text))){let any=false;for(let j=q.index;j<q.index+q[0].length;j++)if(bad[j]){any=true;break}if(any)for(let j=q.index;j<q.index+q[0].length;j++)bad[j]=true}
+ let out='';for(let i=0;i<n;i++)out+=bad[i]?'#':text[i];return out}
 const mpDist=(ax,az,bx,bz)=>Math.hypot(ax-bx,az-bz);
 function mpRayBox(ox,oz,dx,dz,b,maxd){let t0=0,t1=maxd;
  const sl=[[ox,dx,b[0],b[1]],[oz,dz,b[2],b[3]]];
@@ -1734,32 +1777,37 @@ function mpRayBox(ox,oz,dx,dz,b,maxd){let t0=0,t1=maxd;
   else{let a=(lo-o)/d,c=(hi-o)/d;if(a>c){const tmp=a;a=c;c=tmp}t0=Math.max(t0,a);t1=Math.min(t1,c);if(t0>t1)return Infinity}}
  return t0}
 class MPHost{
- constructor(send,bcast,walls){this.send=send;this.bcast=bcast;this.walls=walls||[];this.P={};this.order=[];this.phase='lobby';this.W=null;this.hid='';this.tm=0;this.hs=0;this.tr=0;this.res=null;const L=mpLayout();this.vaultB=mpBox(L.vault);this.gateB=mpBox(L.gate)}
+ constructor(send,bcast,walls){this.send=send;this.bcast=bcast;this.walls=walls||[];this.P={};this.order=[];this.phase='lobby';this.W=null;this.hid='';this.tm=0;this.hs=0;this.tr=0;this.res=null;this.hist={};this.lastH='';this.diff='mittel';this.hm=400;this.hf=.78;this.spT=0;const L=mpLayout();this.vaultB=mpBox(L.vault);this.gateB=mpBox(L.gate)}
  dyn(){const W=this.W,a=[];if(W&&!W.vault)a.push(this.vaultB);if(W&&!W.exit)a.push(this.gateB);return a}
  rnd(n){return Math.floor(Math.random()*n)}
+ shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=this.rnd(i+1);const t=a[i];a[i]=a[j];a[j]=t}return a}
+ pickHunter(ids){if(ids.length<2)return '';const min=Math.min(...ids.map(i=>this.hist[i]||0));let c=ids.filter(i=>(this.hist[i]||0)===min);if(c.length>1&&c.includes(this.lastH))c=c.filter(i=>i!==this.lastH);const h=c[this.rnd(c.length)];this.hist[h]=(this.hist[h]||0)+1;this.lastH=h;return h}
+ cleanName(n,id){let t=mpCensor(String(n||'').replace(/[<>&"'\\]/g,'').trim().slice(0,14))||'Spieler';const base=t;let k=2;while(this.order.some(i=>i!==id&&this.P[i]&&this.P[i].name.toLowerCase()===t.toLowerCase())){t=base.slice(0,12)+' '+k++}return t}
+ rename(id,n){const p=this.P[id];if(!p||this.phase!=='lobby')return false;p.name=this.cleanName(n,id);this.lobby();return true}
  add(id,name){if(this.phase!=='lobby'||this.order.length>=10||this.P[id])return false;
   const used=this.order.map(i=>this.P[i].ci);let ci=0;while(used.includes(ci))ci++;
-  this.P[id]={id,name:String(name||'Spieler').replace(/[<>&"']/g,'').slice(0,14)||'Spieler',ci,x:0,z:0,ry:0,m:0,hp:MPM.HP,st:'ok',role:'p',inv:[],boost:0,stun:0,sh:0,cd:0,rl:0,rb:null,rp:0,left:0};
+  this.P[id]={id,name:this.cleanName(name,id),ci,x:0,z:0,ry:0,m:0,hp:MPM.HP,st:'ok',role:'p',inv:[],boost:0,stun:0,sh:0,cd:0,rl:0,rb:null,rp:0,left:0};
   this.order.push(id);this.lobby();return true}
  remove(id){const p=this.P[id];if(!p)return;
   if(this.phase==='lobby'||this.phase==='end'){delete this.P[id];this.order=this.order.filter(i=>i!==id);this.lobby();return}
   p.st='dead';p.left=1;this.drop(p);this.bcast({t:'e',k:'txt',m:p.name+' hat das Spiel verlassen.'});
   if(id===this.hid&&this.phase==='play')this.finish('p','Der Jäger hat das Spiel verlassen.');else this.check()}
- lobby(){this.bcast({t:'lobby',ph:this.phase,ps:this.order.map(i=>({id:i,name:this.P[i].name,ci:this.P[i].ci,host:i==='h0'}))})}
+ setDiff(d){if(this.phase==='lobby'&&MPD[d]){this.diff=d;this.lobby()}}
+ lobby(){this.bcast({t:'lobby',ph:this.phase,diff:this.diff,ps:this.order.map(i=>({id:i,name:this.P[i].name,ci:this.P[i].ci,host:i==='h0'}))})}
  toLobby(){this.phase='lobby';this.W=null;this.hid='';this.res=null;this.order=this.order.filter(i=>!this.P[i].left||(delete this.P[i]&&false));this.order.forEach(i=>{const p=this.P[i];Object.assign(p,{hp:MPM.HP,st:'ok',role:'p',inv:[],boost:0,stun:0,sh:0,cd:0,rl:0,rb:null,rp:0})});this.lobby()}
- start(force){if(this.phase!=='lobby')return 'busy';const n=this.order.length;if(n<2&&!force)return 'min';
-  const ids=this.order.slice();this.hid=n>=2?ids[this.rnd(n)]:'';
-  const pi=this.order.filter(i=>i!==this.hid);let k=0;
+ start(force){if(this.phase!=='lobby')return 'busy';const n=this.order.length;if(n<2&&!force)return 'min';const D=MPD[this.diff];
+  this.hid=this.pickHunter(this.order.slice());
+  const spawns=this.shuf(MPM.PS);let k=0;
   this.order.forEach(i=>{const p=this.P[i];Object.assign(p,{hp:MPM.HP,st:'ok',inv:[],boost:0,stun:0,cd:0,rl:0,rb:null,rp:0,left:0,m:0});
-   if(i===this.hid){p.role='h';p.hp=MPM.HH;p.sh=4;p.x=MPM.HS[0];p.z=MPM.HS[1];p.ry=0}
-   else{p.role='p';p.sh=0;const s=MPM.PS[(k++)%MPM.PS.length];p.x=s[0];p.z=s[1];p.ry=0}});
-  const types=['med','med','med','med','nrg','nrg','nrg','nrg','tas','tas','tas','trp','trp','trp'],it=new Array(MPM.SP.length).fill('');
-  const idx=[...Array(MPM.SP.length).keys()].sort(()=>Math.random()-.5);types.forEach((t,j)=>{it[idx[j]]=t});
+   if(i===this.hid){p.role='h';p.hp=D.hh;p.sh=4;p.x=MPM.HS[0];p.z=MPM.HS[1];p.ry=0}
+   else{p.role='p';p.sh=0;const s=spawns[(k++)%spawns.length];p.x=s[0];p.z=s[1];p.ry=0}});
+  const types=['med','med','med','med','nrg','nrg','nrg','nrg','tas','tas','tas','trp','trp','trp','loot','loot','loot','loot'],it=new Array(MPM.SP.length).fill('');
+  const idx=this.shuf([...Array(MPM.SP.length).keys()]);types.forEach((t,j)=>{it[idx[j]]=t});
   let code='';for(let j=0;j<4;j++)code+=this.rnd(10);
-  this.W={pow:0,fu:0,fa:[1,1,1],pl:[0,0,0],hold:0,vault:0,key:0,kp:null,kh:'',exit:0,it,tr:[],code};
-  this.phase='play';this.tm=MPM.TIME;this.hs=MPM.HEAD;this.tr=0;this.res=null;
+  this.W={pow:0,fu:0,fa:[1,1,1],pl:[0,0,0],hold:0,vault:0,key:0,kp:null,kh:'',exit:0,it,tr:[],code,pts:0,tp:D.pts};
+  this.phase='play';this.tm=D.tm;this.hs=MPM.HEAD;this.tr=0;this.res=null;this.hm=D.hh;this.hf=D.hf;this.spT=0;
   const roster=this.order.map(i=>({id:i,name:this.P[i].name,ci:this.P[i].ci}));
-  this.order.forEach(i=>{const p=this.P[i];this.send(i,{t:'start',you:i,hid:this.hid,ps:roster,hs:this.hs,x:p.x,z:p.z})});
+  this.order.forEach(i=>{const p=this.P[i];this.send(i,{t:'start',you:i,hid:this.hid,ps:roster,hs:this.hs,x:p.x,z:p.z,df:this.diff,pts:D.pts,hf:D.hf,hm:D.hh})});
   return 'ok'}
  drop(p){const W=this.W;if(W&&W.kh===p.id){W.kh='';W.key=1;W.kp=[p.x,p.z]}}
  hurt(p,d){if(p.st==='down'){this.kill(p);return}if(p.st!=='ok')return;p.hp-=d;
@@ -1778,7 +1826,8 @@ class MPHost{
    case 'act':this.act(p,m);break;
    case 'shoot':this.shoot(p,m);break;
    case 'use':this.use(p,m.s|0);break;
-   case 'chat':this.bcast({t:'e',k:'chat',n:p.name,ci:p.ci,m:String(m.m||'').replace(/[<>]/g,'').slice(0,60)});break}}
+   case 'name':this.rename(id,m.n);break;
+   case 'chat':this.bcast({t:'e',k:'chat',n:p.name,ci:p.ci,m:mpCensor(String(m.m||'').replace(/[<>]/g,'').slice(0,60))});break}}
  act(p,m){if(this.phase!=='play'||p.st!=='ok'||p.role!=='p')return;const W=this.W,near=(pt,r)=>pt&&mpDist(p.x,p.z,pt[0],pt[1])<(r||2.9),T=(k,mm)=>this.send(p.id,{t:'e',k:'txt',m:mm});
   switch(m.a){
    case 'pick':{const i=m.i|0;if(i>=0&&i<MPM.SP.length&&W.it[i]&&near(MPM.SP[i])){if(p.inv.length>=3)return T(0,'Inventar voll (max. 3).');p.inv.push(W.it[i]);T(0,MPM.NM[W.it[i]]+' aufgehoben.');W.it[i]=''}break}
@@ -1788,7 +1837,8 @@ class MPHost{
    case 'vault':{if(!near(MPM.VT,3.4))break;if(!W.pow)return T(0,'Kein Strom.');if(!W.vault)return T(0,'Die Tresortür ist noch zu.');if(W.key)return T(0,'Der Tresor ist bereits offen.');
     if(String(m.c)===W.code){W.key=1;W.kp=[MPM.VT[0]-1.4,MPM.VT[1]];this.bcast({t:'e',k:'txt',m:'🔓 Tresor offen! Der Hausschlüssel liegt bereit.'})}else T(0,'Falscher Code.');break}
    case 'key':{if(W.key===1&&near(W.kp,2.8)){W.kh=p.id;W.key=2;W.kp=null;this.bcast({t:'e',k:'txt',m:p.name+' hat den Hausschlüssel!'})}break}
-   case 'exit':{if(!near(MPM.EX,3.4))break;if(!W.pow)return T(0,'Kein Strom.');if(W.kh!==p.id)return T(0,'Du brauchst den Hausschlüssel.');W.exit=1;this.bcast({t:'e',k:'txt',m:'🚪 Die Haustür ist offen! Raus hier!'});break}
+   case 'dep':{if(!MPM.DB.some(b=>near(b)))break;const give=p.inv.filter(t=>t!=='fuse');if(!give.length)return T(0,'Du trägst nichts zum Abgeben.');const pts=give.reduce((a,t)=>a+(MPM.PV[t]||0),0),was=W.pts>=W.tp;p.inv=p.inv.filter(t=>t==='fuse');W.pts+=pts;this.bcast({t:'e',k:'txt',m:'📦 '+p.name+' gibt '+give.length+' Item(s) ab: +'+pts+' Punkte ('+W.pts+'/'+W.tp+')'});if(!was&&W.pts>=W.tp)this.bcast({t:'e',k:'txt',m:'✅ Punkteziel erreicht!'});break}
+   case 'exit':{if(!near(MPM.EX,3.4))break;if(!W.pow)return T(0,'Kein Strom.');if(W.kh!==p.id)return T(0,'Du brauchst den Hausschlüssel.');if(W.pts<W.tp)return T(0,'Es fehlen noch '+(W.tp-W.pts)+' Punkte. Gebt Items an den Abgabekästen ab.');W.exit=1;this.bcast({t:'e',k:'txt',m:'🚪 Die Haustür ist offen! Raus hier!'});break}
    case 'rev':{const t=this.P[m.i];if(t&&t.st==='down'&&!t.rb&&near([t.x,t.z],2.7)){t.rb=p.id;t.rp=0}break}}}
  shoot(p,m){if(this.phase!=='play'||p.role!=='h'||p.st!=='ok'||this.hs>0||p.stun>0||p.cd>0||p.sh<=0||p.rl>0)return;
   let dx=+m.dx,dz=+m.dz;const L=Math.hypot(dx,dz);if(!(L>0))return;dx/=L;dz/=L;p.sh--;p.cd=1;if(p.sh===0)p.rl=2.5;
@@ -1804,7 +1854,8 @@ class MPHost{
   else if(ty==='nrg'){p.boost=8;p.inv.splice(s,1);T('Energy-Drink: 8 Sekunden schneller!')}
   else if(ty==='tas'){const h=this.P[this.hid];if(!h||mpDist(p.x,p.z,h.x,h.z)>4.5)return T('Der Jäger ist zu weit weg (max. 4,5 m).');p.inv.splice(s,1);this.hurtHunter(60,3)}
   else if(ty==='trp'){this.W.tr.push({id:++this.tr,x:+p.x.toFixed(2),z:+p.z.toFixed(2)});p.inv.splice(s,1);T('Falle gelegt. Der Jäger sieht sie nicht.')}
-  else if(ty==='fuse')T('Die Sicherung gehört in den Sicherungskasten in der Küche.')}
+  else if(ty==='fuse')T('Die Sicherung gehört in den Sicherungskasten in der Küche.')
+  else if(ty==='loot')T('Beute bringt Punkte: gib sie an einem Abgabekasten ab.')}
  tick(dt){if(this.phase!=='play')return;const W=this.W,h=this.P[this.hid];
   if(this.hs>0)this.hs=Math.max(0,this.hs-dt);else this.tm=Math.max(0,this.tm-dt);
   this.order.forEach(i=>{const p=this.P[i];p.cd=Math.max(0,p.cd-dt);p.stun=Math.max(0,p.stun-dt);p.boost=Math.max(0,p.boost-dt);
@@ -1812,28 +1863,29 @@ class MPHost{
    if(p.st==='down'){p.hp-=dt;if(p.hp<=0){this.kill(p);return}
     if(p.rb){const r=this.P[p.rb];if(!r||r.st!=='ok'||mpDist(r.x,r.z,p.x,p.z)>3.2){p.rb=null;p.rp=0}else{p.rp+=dt;if(p.rp>=MPM.REV){p.st='ok';p.hp=40;p.rb=null;p.rp=0;this.bcast({t:'e',k:'txt',m:p.name+' wurde wiederbelebt!'})}}}}});
   const pr=[0,0,0];if(W.pow)MPM.PL.forEach((c,k)=>{pr[k]=this.order.some(i=>{const q=this.P[i];return q.role==='p'&&q.st==='ok'&&mpDist(q.x,q.z,c[0],c[1])<1.3})?1:0});
+  if(this.hs<=0){this.spT+=dt;const D=MPD[this.diff];if(this.spT>=D.iv){this.spT=0;const em=[];W.it.forEach((t,i)=>{if(!t)em.push(i)});if(em.length)W.it[em[this.rnd(em.length)]]=['med','nrg','tas','trp','loot','loot','loot'][this.rnd(7)]}}
   W.pl=pr;if(pr[0]&&pr[1]&&pr[2])W.hold+=dt;else W.hold=Math.max(0,W.hold-dt*2);
   if(!W.vault&&W.hold>=2){W.vault=1;this.bcast({t:'e',k:'txt',m:'🔓 Die Tresortür öffnet sich!'})}
   if(h&&h.st==='ok')W.tr=W.tr.filter(t=>{if(mpDist(h.x,h.z,t.x,t.z)<1.1){h.stun=Math.max(h.stun,4);this.bcast({t:'e',k:'txt',m:'🪤 Der Jäger ist in eine Falle getappt!'});this.hurtHunter(120,4);return false}return true});
   if(W.exit)this.order.forEach(i=>{const p=this.P[i];if(p.role==='p'&&p.st==='ok'&&p.z>15.4){p.st='esc';this.bcast({t:'e',k:'txt',m:'🏃 '+p.name+' ist entkommen!'});this.send(p.id,{t:'e',k:'esc'});this.drop(p)}});
   this.check();if(this.phase==='play'&&this.tm<=0)this.finish('h','Die Zeit ist abgelaufen.')}
  snapFor(id){const W=this.W,me=this.P[id],h=this.P[this.hid];if(!W||!me)return null;
-  return {t:'s',tm:Math.ceil(this.tm),hs:Math.ceil(this.hs),hh:h?Math.max(0,Math.round(h.hp)):0,
+  return {t:'s',tm:Math.ceil(this.tm),hs:Math.ceil(this.hs),hh:h?Math.max(0,Math.round(h.hp)):0,hm:this.hm,
    ps:this.order.map(i=>{const p=this.P[i];return [i,+p.x.toFixed(2),+p.z.toFixed(2),+p.ry.toFixed(2),p.st,Math.round(p.hp),p.m?1:0,p.boost>0?1:0,p.stun>0?1:0,+(p.rp/MPM.REV).toFixed(2),p.role==='h'?1:0]}),
-   w:{pow:W.pow,fu:W.fu,fa:W.fa,pl:W.pl,hold:+(W.hold/2).toFixed(2),vault:W.vault,key:W.key,kp:W.kp,kh:W.kh,exit:W.exit,it:W.it,tr:id===this.hid?[]:W.tr},
+   w:{pts:W.pts,tp:W.tp,pow:W.pow,fu:W.fu,fa:W.fa,pl:W.pl,hold:+(W.hold/2).toFixed(2),vault:W.vault,key:W.key,kp:W.kp,kh:W.kh,exit:W.exit,it:W.it,tr:id===this.hid?[]:W.tr},
    me:{inv:me.inv,sh:me.sh,rl:me.rl>0?1:0}}}}
 
 /* ===================== MULTIPLAYER: Client, Netzwerk, Oberfläche ===================== */
 let MPSPD=1;
-const MP={on:false,isHost:false,host:null,code:'',peer:null,conns:{},conn:null,cnt:0,myId:'',name:'',ph:'menu',role:'p',hid:'',order:[],names:{},cis:{},rem:{},snap:null,me:{inv:[],sh:0,rl:0},W:null,hs:0,tm:0,hh:0,clues:[],log:[],lobby:null,spec:'',ft:0,lp:0,hudT:0,iv:null,cd:0,v:{},iaRev:[],_lm:false,ended:null,px:0,pz:0};
+const MP={on:false,isHost:false,host:null,code:'',peer:null,conns:{},conn:null,cnt:0,myId:'',name:'',ph:'menu',role:'p',hid:'',order:[],names:{},cis:{},rem:{},snap:null,me:{inv:[],sh:0,rl:0},W:null,hs:0,tm:0,hh:0,hm:400,hf:.78,df:'mittel',pts:40,clues:[],log:[],lobby:null,spec:'',ft:0,lp:0,hudT:0,iv:null,cd:0,v:{},iaRev:[],_lm:false,ended:null,px:0,pz:0};
 try{MP.name=localStorage.getItem('dfName')||''}catch(e){}
 const mpE=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const MPIC={med:0xff3b30,nrg:0xffd60a,tas:0x0a84ff,trp:0xb0b0b0},MPEM={med:'🩹',nrg:'⚡',tas:'🔌',trp:'🪤',fuse:'🔧'};
+const MPIC={med:0xff3b30,nrg:0xffd60a,tas:0x0a84ff,trp:0xb0b0b0,loot:0xb06bff},MPEM={med:'🩹',nrg:'⚡',tas:'🔌',trp:'🪤',fuse:'🔧',loot:'💎'};
 const mpMe=()=>MP.snap?MP.snap.ps.find(p=>p[0]===MP.myId):null;
 const mpSt=()=>{const m=mpMe();return m?m[4]:'ok'};
 const mpCanAct=()=>MP.on&&MP.ph==='play'&&MP.role==='p'&&mpSt()==='ok'&&!ovOn&&MP.hs>=0;
 {const st=document.createElement('style');st.textContent=`
-#mph,#mpl,#mpi,#mpc,#mprev,#mpbt,#mpsplash,#mpflash{position:fixed;pointer-events:none;display:none;font-family:var(--ios);color:#fff}
+#mph,#mpl,#mpi,#mpc,#mprev,#mpbt,#mpsplash,#mpflash,#mpcd{position:fixed;pointer-events:none;display:none;font-family:var(--ios);color:#fff}
 body.mpon #mph,body.mpon #mpl,body.mpon #mpc{display:block}body.mpon #mpi,body.mpon #mpbt{display:flex}
 #mph{z-index:44;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);text-align:center;background:rgba(0,0,0,.58);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:6px 14px;min-width:220px;font-size:13px;line-height:1.35}
 #mph b{font-size:15px}#mph .ob{display:flex;gap:7px;justify-content:center;margin-top:3px;font-size:12px}#mph .ob i{font-style:normal;opacity:.45}#mph .ob i.d{opacity:1;color:#30d158}
@@ -1851,11 +1903,36 @@ body.mpon #mph,body.mpon #mpl,body.mpon #mpc{display:block}body.mpon #mpi,body.m
 #mpbt button{width:50px;height:50px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(30,30,38,.75);color:#fff;font-size:22px;pointer-events:auto}
 #mpsplash{z-index:60;inset:0;align-items:center;justify-content:center;text-align:center;background:rgba(0,0,0,.72);padding:20px;font-size:18px;line-height:1.5}
 #mpsplash b{display:block;font-size:clamp(30px,8vw,56px);letter-spacing:.06em;margin-bottom:8px}
+#mpcd{z-index:45;top:calc(env(safe-area-inset-top,0px) + 112px);left:50%;transform:translateX(-50%);text-align:center;background:rgba(0,0,0,.66);border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:8px 20px;font-size:14px;line-height:1.3}#mpcd b{display:block;font-size:34px;font-variant-numeric:tabular-nums}#mpcd s{display:block;height:6px;border-radius:3px;background:rgba(255,255,255,.2);margin-top:5px;overflow:hidden}#mpcd s i{display:block;height:100%;background:linear-gradient(90deg,#ff9f0a,#ff453a)}
 #mpflash{z-index:43;inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(255,0,0,.55));opacity:0;transition:opacity .5s}
 body.phone #mph{min-width:170px;font-size:11px;top:calc(env(safe-area-inset-top,0px) + 4px)}body.phone #mpl{font-size:11px;top:36%}body.phone #mpi{bottom:calc(env(safe-area-inset-bottom,0px) + 150px)}body.phone #mpc{bottom:calc(env(safe-area-inset-bottom,0px) + 205px);font-size:11px}body.phone #mpbt{bottom:calc(env(safe-area-inset-bottom,0px) + 200px)}
 `;document.head.appendChild(st)}
-['mph','mpl','mpi','mpc','mprev','mpbt','mpsplash','mpflash'].forEach(id=>{const d=document.createElement('div');d.id=id;document.body.appendChild(d)});
+['mph','mpl','mpi','mpc','mprev','mpbt','mpsplash','mpflash','mpcd'].forEach(id=>{const d=document.createElement('div');d.id=id;document.body.appendChild(d)});
 {const b=$('mpbt');b.innerHTML='<button id="mpchatb" aria-label="Chat">💬</button><button id="mpspecb" aria-label="Zuschauen" style="display:none">👁</button>'}
+
+/* ---------- 3D-Modelle mit Texturen für die Items ---------- */
+const MPT={};
+function mpTex(k,w,h,draw){if(MPT[k])return MPT[k];const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);return MPT[k]=t}
+const mpM=o=>new THREE.MeshStandardMaterial(Object.assign({roughness:.55,metalness:.1},o));
+function mpModel(ty){const g=new THREE.Group(),add=(geo,mat,x,y,z,rx,rz)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x||0,y||0,z||0);if(rx)m.rotation.x=rx;if(rz)m.rotation.z=rz;g.add(m);return m};
+ if(ty==='med'){const cross=mpTex('med',128,128,(x,w,h)=>{x.fillStyle='#f6f6f6';x.fillRect(0,0,w,h);x.fillStyle='#e0261c';x.fillRect(0,0,w,12);x.fillRect(0,h-12,w,12);x.fillRect(w/2-15,22,30,h-44);x.fillRect(22,h/2-15,w-44,30);x.strokeStyle='#999';x.lineWidth=3;x.strokeRect(2,2,w-4,h-4)}),
+   side=mpM({color:0xf2f2f2,emissive:0x2a2a2a}),face=mpM({map:cross,emissive:0x444444});
+  add(new THREE.BoxGeometry(.46,.32,.22),[side,side,side,side,face,face]);add(new THREE.BoxGeometry(.18,.05,.06),mpM({color:0xcfcfcf,metalness:.7,roughness:.3}),0,.19,0)}
+ else if(ty==='nrg'){const lab=mpTex('nrg',256,128,(x,w,h)=>{const gr=x.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#0a3d91');gr.addColorStop(1,'#071f4d');x.fillStyle=gr;x.fillRect(0,0,w,h);x.fillStyle='#ffd60a';for(let i=0;i<4;i++){x.beginPath();const o=i*64;x.moveTo(o+38,10);x.lineTo(o+20,66);x.lineTo(o+34,66);x.lineTo(o+24,118);x.lineTo(o+52,54);x.lineTo(o+36,54);x.lineTo(o+48,10);x.fill()}x.fillStyle='#30d158';x.fillRect(0,0,w,8);x.fillRect(0,h-8,w,8)}),
+   metal=mpM({color:0xc8ccd2,metalness:.85,roughness:.25,emissive:0x222222});
+  add(new THREE.CylinderGeometry(.13,.13,.42,18),[mpM({map:lab,emissive:0x222a44,metalness:.4,roughness:.35}),metal,metal]);add(new THREE.CylinderGeometry(.09,.11,.04,14),metal,0,.23,0);const tab=add(new THREE.BoxGeometry(.06,.01,.05),mpM({color:0xdddddd,metalness:.9}),0,.26,0)}
+ else if(ty==='tas'){const haz=mpTex('tas',128,64,(x,w,h)=>{x.fillStyle='#ffcc00';x.fillRect(0,0,w,h);x.fillStyle='#111';for(let i=-2;i<10;i++){x.beginPath();x.moveTo(i*24,0);x.lineTo(i*24+12,0);x.lineTo(i*24-4+h,h);x.lineTo(i*24-16+h,h);x.fill()}}),
+   body=mpM({map:haz,emissive:0x332800,roughness:.5}),dark=mpM({color:0x1c1c1f,roughness:.7}),el=mpM({color:0x66ccff,emissive:0x2288ff,metalness:.7});
+  add(new THREE.BoxGeometry(.2,.16,.46),body,0,.02,0);add(new THREE.BoxGeometry(.14,.3,.16),dark,0,-.16,-.12);add(new THREE.CylinderGeometry(.015,.015,.16,8),el,-.06,.02,.3,Math.PI/2);add(new THREE.CylinderGeometry(.015,.015,.16,8),el,.06,.02,.3,Math.PI/2);add(new THREE.BoxGeometry(.05,.04,.05),mpM({color:0xff3b30,emissive:0xaa1100}),0,.12,-.1)}
+ else if(ty==='trp'){const st=mpTex('trp',128,128,(x,w,h)=>{x.fillStyle='#6a6e75';x.fillRect(0,0,w,h);for(let i=0;i<500;i++){x.fillStyle='rgba('+(Math.random()>.5?'255,255,255':'0,0,0')+','+(Math.random()*.18)+')';x.fillRect(Math.random()*w,Math.random()*h,2,2)}x.fillStyle='#3a3d42';for(let i=0;i<8;i++){x.beginPath();x.arc(w*(.15+.1*i),h/2,4,0,7);x.fill()}}),
+   steel=mpM({map:st,metalness:.8,roughness:.4,emissive:0x1a1a1a}),rust=mpM({color:0x8a3b12,emissive:0x2a0e00,metalness:.5});
+  add(new THREE.CylinderGeometry(.3,.3,.04,24),steel,0,.02,0);[0,Math.PI].forEach(r=>{const j=add(new THREE.TorusGeometry(.22,.03,6,14,Math.PI),steel,0,.09,0,Math.PI/2);j.rotation.z=r;for(let i=0;i<6;i++){const a=r+i*(Math.PI/5)+.1,t=add(new THREE.ConeGeometry(.028,.1,5),rust,Math.cos(a)*.22,.17,Math.sin(a)*.22);t.rotation.set(0,0,0)}})}
+ else if(ty==='loot'){add(new THREE.IcosahedronGeometry(.24,0),mpM({color:0xb06bff,emissive:0x6a2bd0,metalness:.55,roughness:.15,flatShading:true}));add(new THREE.OctahedronGeometry(.32,0),new THREE.MeshBasicMaterial({color:0xd9a8ff,wireframe:true,transparent:true,opacity:.35}))}
+ else if(ty==='fuse'){const cap=mpM({color:0xd6a33a,metalness:.9,roughness:.25,emissive:0x2a1a00}),glass=new THREE.MeshStandardMaterial({color:0xbfe6ff,transparent:true,opacity:.45,roughness:.1,metalness:.1,emissive:0x112233}),wire=mpM({color:0xff8a00,emissive:0xff6a00});
+  add(new THREE.CylinderGeometry(.07,.07,.3,12),glass,0,0,0,0,Math.PI/2);add(new THREE.CylinderGeometry(.078,.078,.06,12),cap,-.17,0,0,0,Math.PI/2);add(new THREE.CylinderGeometry(.078,.078,.06,12),cap,.17,0,0,0,Math.PI/2);add(new THREE.CylinderGeometry(.008,.008,.3,6),wire,0,0,0,0,Math.PI/2)}
+ else if(ty==='key'){const gold=mpM({color:0xe0b040,metalness:.95,roughness:.2,emissive:0x553a00});
+  add(new THREE.TorusGeometry(.1,.03,8,16),gold,-.18,0,0,Math.PI/2);add(new THREE.BoxGeometry(.32,.05,.05),gold,.04,0,0);add(new THREE.BoxGeometry(.05,.05,.1),gold,.14,0,.06);add(new THREE.BoxGeometry(.05,.05,.07),gold,.2,0,.05)}
+ return g}
 /* ---------- Karte (3D) ---------- */
 (function(){const g=new THREE.Group();g.position.x=300;sc.add(g);const wm=M(0x3a322c),fm=M(0x241e1a),cm=M(0x2a2420);RM[15]={g,m:wm,b:null};COL[15]=[];BND[15]=[-19.5,19.5,-14.5,17.6];NAMES[15]='Haus des Jägers';
  const V=MP.v,L=mpLayout();
@@ -1869,9 +1946,10 @@ body.phone #mph{min-width:170px;font-size:11px;top:calc(env(safe-area-inset-top,
  V.cl=MPM.CL.map(c=>{const m=M(0x080c14);box(.5,1.2,.3,c[0],.6,c[1],M(0x1a1c22),g);box(.4,.4,.05,c[0],1.0,c[1]+(c[1]<0?.18:-.18)*(Math.abs(c[1])>10?1:0),m,g);return m});
  V.fbLed=M(0xff2020,0xff2020);box(.35,1.1,.8,MPM.FB[0],.9,MPM.FB[1],M(0x44484f),g);box(.1,.1,.1,MPM.FB[0]+.22,1.3,MPM.FB[1],V.fbLed,g);
  V.vtM=M(0x080c14);box(.5,1.2,.4,MPM.VT[0],.6,MPM.VT[1],M(0x1a1c22),g);box(.05,.4,.4,MPM.VT[0]-.26,1,MPM.VT[1],V.vtM,g);
- V.fu=MPM.FU.map(c=>box(.3,.3,.3,c[0],.55,c[1],M(0xff8a00,0xaa4400),g));
- V.it=MPM.SP.map(c=>{const q=new THREE.Group();q.position.set(c[0],.6,c[1]);g.add(q);box(.34,.34,.34,0,0,0,M(0xffffff,0x222222),q);q.visible=false;return q});
- V.key=box(.3,.12,.45,0,.5,0,M(0xd9a441,0x886600),g);V.key.visible=false;V.tr={};
+ V.fu=MPM.FU.map(c=>{const q=mpModel('fuse');q.position.set(c[0],.55,c[1]);g.add(q);return q});
+ V.it=MPM.SP.map(c=>{const q=new THREE.Group();q.position.set(c[0],.6,c[1]);g.add(q);q.visible=false;return q});
+ V.key=mpModel('key');V.key.position.y=.5;g.add(V.key);V.key.visible=false;V.tr={};
+ MPM.DB.forEach(c=>{box(.8,.8,.8,c[0],.4,c[1],M(0x2a3a5a),g);box(.7,.06,.7,c[0],.83,c[1],M(0x30a0ff,0x1060c0),g);COL[15].push([300+c[0]-.4,300+c[0]+.4,c[1]-.4,c[1]+.4]);const l=mkLabel();l.position.set(c[0],1.5,c[1]);l.scale.set(1.4,.35,1);setLabel(l,'ABGABE');g.add(l)});
  const ex=mkLabel();ex.position.set(0,3,16.5);setLabel(ex,'AUSGANG');g.add(ex);
  [['Küche',-13,-14],['Wohnzimmer',-18,-4],['Schlafzimmer',-18,6],['Bibliothek',13,-14],['Tresor',17.5,-2.6],['Werkstatt',13,6],['Halle',0,-4.2],['Eingang',0,6]].forEach(a=>{const l=mkLabel();l.position.set(a[1],3.05,a[2]);l.scale.set(1.6,.4,1);setLabel(l,a[0]);g.add(l)})})();
 function mpCol(b,on){const i=COL[15].indexOf(b);if(on&&i<0)COL[15].push(b);if(!on&&i>=0)COL[15].splice(i,1)}
@@ -1898,10 +1976,10 @@ function mpWorld(w){const V=MP.v;
  V.lampM.emissive.setHex(w.pow?0xffd890:0x000000);V.cl.forEach(m=>m.emissive.setHex(w.pow?0x30c0ff:0x050a10));V.vtM.emissive.setHex(w.pow?(w.vault?0x30ff60:0xffa000):0x050a10);
  V.fbLed.emissive.setHex(w.pow?0x30ff60:(w.fu>0?0xffa000:0xff2020));V.pl.forEach((m,i)=>m.material.emissive.setHex(!w.pow?0x000000:(w.pl[i]?0x30ff60:0x2040ff)));
  V.fu.forEach((m,i)=>{m.visible=!!w.fa[i]});
- V.it.forEach((q,i)=>{const t=w.it[i];q.visible=!!t;if(t&&q.userData.t!==t){q.userData.t=t;const m=q.children[0].material;m.color.setHex(MPIC[t]);m.emissive.setHex(MPIC[t])}});
+ V.it.forEach((q,i)=>{const t=w.it[i];q.visible=!!t;if(t&&q.userData.t!==t){q.userData.t=t;while(q.children.length)q.remove(q.children[0]);q.add(mpModel(t))}});
  V.vault.visible=!w.vault;mpCol(V.vaultC,!w.vault);V.gate.visible=!w.exit;mpCol(V.gateC,!w.exit);
  const kp=w.key===1&&w.kp?w.kp:null;V.key.visible=!!kp;if(kp)V.key.position.set(kp[0],.5,kp[1]);
- const ids={};(w.tr||[]).forEach(t=>{ids[t.id]=1;if(!V.tr[t.id]){const m=box(.9,.06,.9,t.x,.03,t.z,M(0x555555,0x551100),RM[15].g);V.tr[t.id]=m}});
+ const ids={};(w.tr||[]).forEach(t=>{ids[t.id]=1;if(!V.tr[t.id]){const m=mpModel('trp');m.position.set(t.x,.02,t.z);RM[15].g.add(m);V.tr[t.id]=m}});
  Object.keys(V.tr).forEach(k=>{if(!ids[k]){RM[15].g.remove(V.tr[k]);delete V.tr[k]}})}
 /* ---------- Netzwerk (PeerJS) ---------- */
 const MPCFG={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'}]}};
@@ -1958,15 +2036,15 @@ function mpEvent(e){switch(e.k){
  case 'down':{const f=$('mpflash');f.style.opacity=1;setTimeout(()=>f.style.opacity=0,900);toast('Du wurdest niedergeschossen! Warte auf Hilfe.','err');shake(.3);break}
  case 'dead':toast('Du bist gestorben. Du schaust jetzt zu.','err');break;
  case 'esc':toast('Du bist entkommen! Du schaust jetzt zu.','good');break}}
-function mpSnap(s){MP.snap=s;MP.W=s.w;MP.me=s.me;MP.hs=s.hs;MP.tm=s.tm;MP.hh=s.hh;if(MP.role==='h')GUN.ammo=s.me.sh;try{mpWorld(s.w)}catch(e){}}
+function mpSnap(s){MP.snap=s;MP.W=s.w;MP.me=s.me;MP.hs=s.hs;MP.tm=s.tm;MP.hh=s.hh;MP.hm=s.hm||MP.hm;if(MP.role==='h')GUN.ammo=s.me.sh;try{mpWorld(s.w)}catch(e){}}
 function mpBegin(m){MP.on=true;MP.ph='play';MP.ended=null;MP.hid=m.hid;MP.order=m.ps.map(p=>p.id);MP.names={};MP.cis={};m.ps.forEach(p=>{MP.names[p.id]=p.name;MP.cis[p.id]=p.ci});
- MP.role=MP.myId===m.hid?'h':'p';MP.clues=[];MP.snap=null;MP.W=null;MP.log=[];MP.spec='';
+ MP.role=MP.myId===m.hid?'h':'p';MP.df=m.df||'mittel';MP.pts=m.pts||40;MP.hf=m.hf||.78;MP.hm=m.hm||400;MP.clues=[];MP.snap=null;MP.W=null;MP.log=[];MP.spec='';
  Object.keys(MP.rem).forEach(k=>RM[15].g.remove(MP.rem[k].g));MP.rem={};MP.order.forEach(id=>{const a=mpAvatar(MP.cis[id],id===m.hid,MP.names[id]);RM[15].g.add(a.g);MP.rem[id]=a});
  S.tied=false;H=1.6;lm=false;busy=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;
  ['chase','drive','dhud','mini'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});
  S.inv=MP.role==='h'?['Shotgun']:[];S.sel=MP.role==='h'?'Shotgun':null;inv();GUN.ammo=4;GUN.eq=MP.role==='h';
  document.body.classList.add('mpon');closeOv();
- tele(15,m.x,m.z,0,()=>{const sp=$('mpsplash');sp.innerHTML=MP.role==='h'?'<div><b>🔫 DU BIST DER JÄGER</b>Du bist stärker, aber langsamer. Knocke die Spieler mit der Shotgun und verhindere ihre Flucht.<br><br>Du kannst dich in '+m.hs+' Sekunden bewegen.</div>':'<div><b>🏃 ENTKOMMT!</b>Löst gemeinsam die Rätsel und flieht aus dem Haus.<br>Der Jäger erwacht in '+m.hs+' Sekunden. Spieler: '+MP.order.filter(i=>i!==m.hid).map(i=>mpE(MP.names[i])).join(', ')+'</div>';sp.style.display='flex';setTimeout(()=>sp.style.display='none',4200)})}
+ tele(15,m.x,m.z,0,()=>{const sp=$('mpsplash');sp.innerHTML=MP.role==='h'?'<div><b>🔫 DU BIST DER JÄGER</b>🎲 Zufällig ausgewählt! Du bist stärker, aber langsamer. Knocke die Spieler mit der Shotgun und verhindere ihre Flucht.<br><br>Du kannst dich in '+m.hs+' Sekunden bewegen.</div>':'<div><b>🏃 ENTKOMMT!</b>🎲 Die Rollen wurden zufällig verteilt: Jäger ist '+mpE(MP.names[m.hid]||'?')+'.<br>Schwierigkeit: '+MPD[MP.df].n+'. Sammelt Items, gebt sie an den 📦 Abgabekästen ab (Ziel: '+MP.pts+' Punkte), löst die Rätsel und flieht.<br>Der Jäger erwacht in '+m.hs+' Sekunden. Spieler: '+MP.order.filter(i=>i!==m.hid).map(i=>mpE(MP.names[i])).join(', ')+'</div>';sp.style.display='flex';setTimeout(()=>sp.style.display='none',4200)})}
 function mpToLobby(){MP.on=false;MP.ph='lobby';document.body.classList.remove('mpon');Object.keys(MP.rem).forEach(k=>RM[15].g.remove(MP.rem[k].g));MP.rem={};S.inv=[];S.sel=null;inv();GUN.eq=false;MPSPD=1;if(MP._lm){lm=false;MP._lm=false}$('mpsplash').style.display='none'}
 function mpEnd(m){MP.ph='end';MP.ended=m;setTimeout(()=>mpEndUI(m),1500)}
 function mpShoot(){if(!MP.on||MP.role!=='h'||MP.ph!=='play'||MP.hs>0||lm||ovOn)return;const me=mpMe();if(me&&(me[8]||me[4]!=='ok'))return;
@@ -1981,6 +2059,7 @@ function mpAct(a,i,ex){mpSend(Object.assign({t:'act',a,i},ex||{}))}
  R(MPM.FB[0],MPM.FB[1],()=>mpCanAct()&&MP.me.inv.includes('fuse')&&('Sicherung einsetzen ('+(MP.W?MP.W.fu:0)+'/3)'),()=>mpAct('fbox'));
  MPM.CL.forEach((c,i)=>R(c[0],c[1],()=>mpCanAct()&&('Hinweis-Terminal '+(i+1)+' lesen'),()=>mpAct('clue',i)));
  R(MPM.VT[0],MPM.VT[1],()=>mpCanAct()&&MP.W&&MP.W.vault&&!MP.W.key&&'Tresor-Terminal: Code eingeben',()=>mpKeypad(c=>mpAct('vault',0,{c})));
+ MPM.DB.forEach(c=>R(c[0],c[1],()=>{if(!mpCanAct())return false;const g=(MP.me.inv||[]).filter(t=>t!=='fuse');if(!g.length)return false;return 'Abgeben: +'+g.reduce((a,t)=>a+(MPM.PV[t]||0),0)+' Punkte'},()=>mpAct('dep')));
  MP.iaKey={r:15,x:0,z:0,lab:()=>mpCanAct()&&MP.W&&MP.W.key===1&&'Hausschlüssel nehmen',run(){mpAct('key')}};IA.push(MP.iaKey);
  R(MPM.EX[0],MPM.EX[1],()=>mpCanAct()&&MP.W&&!MP.W.exit&&MP.W.kh===MP.myId&&'Haustür aufschließen',()=>mpAct('exit'));
  for(let k=0;k<9;k++){const q={r:15,x:0,z:0,id:'',lab:()=>mpCanAct()&&q.id&&'Wiederbeleben: '+mpE(MP.names[q.id]||''),run(){mpAct('rev',q.id)}};MP.iaRev.push(q);IA.push(q)}}
@@ -1995,11 +2074,15 @@ function mpMenu(msg){ov('<div class="ios"><div class="navbar"><b>Multiplayer</b>
  +'<div id="mpmsg" class="foot" style="color:#ff453a">'+mpE(msg||'')+'</div><div class="foot">Regeln: Ein zufälliger Spieler wird zum Jäger. Alle anderen lösen Rätsel (Strom, Druckplatten, Tresor-Code, Schlüssel) und fliehen. Geknockte Spieler können wiederbelebt werden.</div></div>');
  const nm=()=>($('mpn').value.trim()||('Spieler'+Math.floor(Math.random()*900+100)));
  $('mpx').onclick=()=>menuStart();$('mpc1').onclick=()=>mpCreate(nm());$('mpj').onclick=()=>mpJoin(nm(),$('mpcode').value);$('mpcode').onkeydown=e=>{if(e.key==='Enter')mpJoin(nm(),$('mpcode').value)}}
-function mpLobbyUI(){const L=MP.lobby;if(!L||MP.on)return;const ps=L.ps,code=MP.code,cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function mpLobbyUI(){const L=MP.lobby;if(!L||MP.on)return;const ps=L.ps,code=MP.code,df=MPD[L.diff]?L.diff:'mittel',D=MPD[df];
  ov('<div class="ios"><div class="navbar"><b>Lobby</b><button class="pill" id="mpl0">Verlassen</button></div>'
  +'<div class="cap" style="text-align:center">Gruppen-Code</div><div style="text-align:center;font:800 40px ui-monospace,Menlo,monospace;letter-spacing:.18em;margin:2px 0 6px">'+mpE(code)+'</div><div style="text-align:center"><button class="pill" id="mpcp">Code kopieren</button></div>'
+ +'<div class="cap">Dein Name</div><div class="grp"><div class="row"><input id="mpnn" maxlength="14" placeholder="Name" value="'+mpE((ps.find(p=>p.id===MP.myId)||{}).name||MP.name)+'" autocomplete="off"><button class="pill blue" id="mpns">Ändern</button></div></div><div id="mpnm" class="foot">Beleidigungen werden mit # zensiert.</div>'
+ +'<div class="cap">Schwierigkeit</div>'+(MP.isHost?segH('data-md',MPDL.map(k=>[k,MPD[k].n]),df):'<div class="grp"><div class="row"><span class="tx"><b>'+D.n+'</b></span></div></div>')+'<div class="foot">Punkteziel: <b>'+D.pts+' Punkte</b> · Jäger '+D.hh+' Leben · Zeit '+Math.round(D.tm/60)+' Min.'+(MP.isHost?'':' (Host wählt)')+'</div>'
  +'<div class="cap">Spieler ('+ps.length+'/10)</div><div class="grp">'+ps.map(p=>'<div class="row"><span class="ic" style="background:'+MPM.CLR[p.ci%10]+'">'+(p.host?'★':'•')+'</span><span class="tx"><b>'+mpE(p.name)+(p.id===MP.myId?' (du)':'')+'</b><small>'+(p.host?'Host':'bereit')+'</small></span></div>').join('')+'</div>'
  +(MP.isHost?'<div style="margin-top:14px"><button class="pill blue" id="mpgo" style="width:100%;padding:14px">Spiel starten</button></div><div class="foot">'+(ps.length<2?(CHEATS?'Solo-Test möglich (Cheat): kein Jäger.':'Mindestens 2 Spieler nötig.'):'Ein zufälliger Spieler wird der Jäger.')+'</div>':'<div class="foot" style="margin-top:14px">Warte, bis der Host das Spiel startet …</div>')+'</div>');
+ if(MP.isHost)bindSeg('data-md',v=>MP.host.setDiff(v));
+ const rn=()=>{const v=$('mpnn').value.trim();if(!v)return;MP.name=v;mpSave();if(MP.isHost)MP.host.rename('h0',v);else mpSend({t:'name',n:v});$('mpnm').textContent='Name gespeichert.';$('mpnm').style.color='#30d158'};$('mpns').onclick=rn;$('mpnn').onkeydown=e=>{if(e.key==='Enter')rn()};
  $('mpl0').onclick=()=>mpLeave();$('mpcp').onclick=()=>{try{navigator.clipboard.writeText(code);$('mpcp').textContent='Kopiert ✓'}catch(e){$('mpcp').textContent=code}};
  const go=document.getElementById('mpgo');if(go)go.onclick=()=>{const r=MP.host.start(!!CHEATS);if(r==='min')toast('Mindestens 2 Spieler nötig.','err')}}
 function mpEndUI(m){if(!MP.ended||MP.ph!=='end')return;const w=m.win==='p';
@@ -2010,31 +2093,32 @@ function mpEndUI(m){if(!MP.ended||MP.ph!=='end')return;const w=m.win==='p';
 function mpChatUI(){const ph=['Sicherung gefunden!','Ich brauche Hilfe!','Der Jäger ist hier!','Kommt zum Tresor!','Bitte auf die Druckplatte!','Revive mich!','Haustür ist offen!','Wo ist der Schlüssel?'];
  ov('<div class="ios"><div class="navbar"><b>Chat</b><button class="pill blue" id="mpcx">Fertig</button></div><div class="cap">Schnellnachrichten</div><div class="grp">'+ph.map((p,i)=>'<button class="row" data-ph="'+i+'"><span class="tx"><b>'+mpE(p)+'</b></span></button>').join('')
  +MP.clues.map((d,i)=>d===undefined?'':'<button class="row" data-cl="'+i+'"><span class="tx"><b>🔢 Hinweis '+(i+1)+' teilen: Ziffer '+d+'</b></span></button>').join('')+'</div>'
- +'<div class="cap">Eigene Nachricht</div><div class="grp"><div class="row"><input id="mpct" maxlength="60" placeholder="Text …" autocomplete="off"><button class="pill blue" id="mpcs">Senden</button></div></div></div>');
+ +'<div class="cap">Eigene Nachricht</div><div class="grp"><div class="row"><input id="mpct" maxlength="60" placeholder="Nachricht (Enter sendet, Esc schließt)" autocomplete="off"><button class="pill blue" id="mpcs">Senden</button></div></div></div>');
  const send=t=>{mpSend({t:'chat',m:t});closeOv()};
  document.querySelectorAll('[data-ph]').forEach(b=>b.onclick=()=>send(ph[+b.dataset.ph]));document.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>send('Hinweis '+(+b.dataset.cl+1)+': Ziffer '+MP.clues[+b.dataset.cl]));
- $('mpcx').onclick=closeOv;$('mpcs').onclick=()=>{const t=$('mpct').value.trim();if(t)send(t)};$('mpct').onkeydown=e=>{if(e.key==='Enter'){const t=$('mpct').value.trim();if(t)send(t)}}}
+ $('mpcx').onclick=closeOv;$('mpcs').onclick=()=>{const t=$('mpct').value.trim();if(t)send(t)};$('mpct').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const t=$('mpct').value.trim();if(t)send(t);else closeOv()}else if(e.key==='Escape'){closeOv()}};setTimeout(()=>{try{$('mpct').focus()}catch(x){}},60)}
 $('mpchatb').onclick=()=>{if(MP.on&&!ovOn)mpChatUI()};
 $('mpspecb').onclick=()=>{const ids=MP.order.filter(i=>{const p=MP.snap&&MP.snap.ps.find(q=>q[0]===i);return p&&i!==MP.myId&&(p[4]==='ok'||p[4]==='down')});if(!ids.length)return;const k=ids.indexOf(MP.spec);MP.spec=ids[(k+1)%ids.length]};
-addEventListener('keydown',e=>{if(!MP.on||ovOn)return;if(e.code==='KeyT'){e.preventDefault();mpChatUI();return}if(/^Digit[1-3]$/.test(e.code)&&MP.role==='p'&&mpSt()==='ok')mpSend({t:'use',s:+e.key-1})});
+addEventListener('keydown',e=>{if(!MP.on||ovOn)return;if(e.code==='KeyT'||e.code==='Enter'||e.code==='NumpadEnter'){e.preventDefault();mpChatUI();return}if(/^Digit[1-3]$/.test(e.code)&&MP.role==='p'&&mpSt()==='ok')mpSend({t:'use',s:+e.key-1})});
 /* ---------- HUD & Frame ---------- */
 function mpHud(){if(!MP.snap)return;const s=MP.snap,me=mpMe(),st=me?me[4]:'ok',mm=Math.floor(s.tm/60),ss=String(s.tm%60).padStart(2,'0'),W=s.w;
  const d=(c,t)=>'<i class="'+(c?'d':'')+'">'+t+'</i>';
  let h='<b>'+(MP.role==='h'?'🔫 Du bist der JÄGER':st==='esc'?'🏃 Du bist entkommen':st==='dead'?'💀 Du bist ausgeschieden':st==='down'?'⬇ Du bist niedergeschossen!':'🏃 Entkomme dem Jäger')+'</b><br>'+(s.hs>0?'Jäger erwacht in '+s.hs+' s':'⏱ '+mm+':'+ss)
-  +'<div class="ob">'+d(W.pow,'⚡ '+W.fu+'/3')+d(W.vault,'🔘 Platten')+d(W.key,'🔢 Code')+d(W.kh,'🗝 Schlüssel')+d(W.exit,'🚪 Tür')+'</div>';
- if(MP.role==='h'||true)h+='<div class="hb" title="Jäger"><s style="width:'+Math.max(0,Math.min(100,s.hh/MPM.HH*100))+'%"></s></div><small>Jäger '+s.hh+' / '+MPM.HH+'</small>';
+  +'<div class="ob">'+d(W.pts>=W.tp,'📦 '+W.pts+'/'+W.tp)+d(W.pow,'⚡ '+W.fu+'/3')+d(W.vault,'🔘 Platten')+d(W.key,'🔢 Code')+d(W.kh,'🗝 Schlüssel')+d(W.exit,'🚪 Tür')+'</div>';
+ if(MP.role==='h'||true)h+='<div class="hb" title="Jäger"><s style="width:'+Math.max(0,Math.min(100,s.hh/(s.hm||MPM.HH)*100))+'%"></s></div><small>Jäger '+s.hh+' / '+(s.hm||MPM.HH)+'</small>';
  $('mph').innerHTML=h;
  $('mpl').innerHTML=s.ps.map(p=>{const i=p[0],c=MPM.CLR[(MP.cis[i]||0)%10],hp=p[10]?'🔫':(p[4]==='ok'?'❤'+p[5]:p[4]==='down'?'⬇':p[4]==='dead'?'✖':'🏃');return '<div class="r"><span class="dot" style="background:'+c+'"></span>'+mpE(MP.names[i]||i)+' '+hp+'</div>'}).join('');
  if(MP.role==='p'){const inv=MP.me.inv||[];let ib='';for(let k=0;k<3;k++){const t=inv[k];ib+=t?'<button data-u="'+k+'"><b>'+MPEM[t]+'</b>'+(k+1)+' '+MPM.NM[t]+'</button>':'<button class="e"><b>·</b>leer</button>'}$('mpi').innerHTML=ib;$('mpi').querySelectorAll('[data-u]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();mpSend({t:'use',s:+b.dataset.u})})}else $('mpi').innerHTML='<button class="e"><b>🔫</b>'+MP.me.sh+' Schuss'+(MP.me.rl?' (lädt)':'')+'</button>';
  const now=performance.now();MP.log=MP.log.filter(l=>now-l.at<7000);$('mpc').innerHTML=MP.log.slice(-5).map(l=>'<div'+(l.ci!==undefined?' style="border-left:3px solid '+MPM.CLR[l.ci%10]+'"':'')+'>'+mpE(l.t)+'</div>').join('');
  const rv=s.ps.find(p=>p[9]>0&&p[4]==='down');if(rv){const mine=rv[0]===MP.myId;$('mprev').style.display='block';$('mprev').innerHTML=(mine?'Du wirst wiederbelebt …':'Wiederbeleben: '+mpE(MP.names[rv[0]]||''))+'<div><s style="width:'+Math.round(rv[9]*100)+'%"></s></div>'}else $('mprev').style.display='none';
- $('mpspecb').style.display=(st==='dead'||st==='esc')?'block':'none'}
+ $('mpspecb').style.display=(st==='dead'||st==='esc')?'block':'none';
+ const cd=$('mpcd');if(s.hs>0){cd.style.display='block';cd.innerHTML=(MP.role==='h'?'🔒 Du kannst loslaufen in':'⏳ Der Jäger erwacht in')+'<b>'+s.hs+'</b><s><i style="width:'+Math.max(0,Math.min(100,s.hs/MPM.HEAD*100))+'%"></i></s>'}else cd.style.display='none'}
 function mpFrame(){if(!MP.on)return;const now=performance.now(),dt=Math.min(.1,(now-(MP.ft||now))/1e3);MP.ft=now;if(cr!==15)return;
  lamp.position.set(pos.x,2.8,pos.z);lamp.distance=19;lamp.intensity=MP.W&&MP.W.pow?1.6:1.15;sc.fog.near=4;sc.fog.far=MP.W&&MP.W.pow?32:22;
  const me=mpMe(),st=me?me[4]:'ok';MPSPD=1;
- if(MP.role==='h'){MPSPD=.78;if(me&&me[8])MPSPD=0}else{if(st==='down')MPSPD=.3;if(me&&me[7])MPSPD*=1.35}
+ if(MP.role==='h'){MPSPD=MP.hf||.78;if(me&&me[8])MPSPD=0}else{if(st==='down')MPSPD=.3;if(me&&me[7])MPSPD*=1.35}
  H+=((st==='down'||st==='dead'?.6:1.6)-H)*Math.min(1,dt*6);
- const spec=MP.role==='p'&&(st==='dead'||st==='esc'),frozen=MP.role==='h'&&MP.hs>0,want=frozen||spec||MP.ph==='end';if(want!==MP._lm&&MP.ph!=='lobby'){lm=want;MP._lm=want}
+ const spec=MP.role==='p'&&(st==='dead'||st==='esc'),frozen=MP.role==='h'&&MP.hs>0,want=frozen||spec||MP.ph==='end';if(frozen)MPSPD=0;if(MP.ph==='play'||MP.ph==='end'){lm=want;MP._lm=want}
  if(spec&&MP.snap){let t=MP.snap.ps.find(p=>p[0]===MP.spec&&p[0]!==MP.myId&&(p[4]==='ok'||p[4]==='down'));if(!t){t=MP.snap.ps.find(p=>p[0]!==MP.myId&&p[4]==='ok');MP.spec=t?t[0]:''}if(t){pos.set(300+t[1],0,t[2]);Y=t[3]}}
  if(MP.ph==='play'&&!spec&&now-MP.lp>66){MP.lp=now;const mv=Math.hypot(pos.x-MP.px,pos.z-MP.pz)>.01;MP.px=pos.x;MP.pz=pos.z;mpSend({t:'p',x:pos.x-300,z:pos.z,ry:Y,m:mv?1:0})}
  mpRem(dt);
@@ -2044,6 +2128,16 @@ function mpFrame(){if(!MP.on)return;const now=performance.now(),dt=Math.min(.1,(
 function mpLine(){return '<div class="cap">Multiplayer</div><div class="grp"><button class="row" id="mpb"><span class="ic" style="background:#5e5ce6">👥</span><span class="tx"><b>Multiplayer (bis 10 Spieler)</b><small>Entkommen aus dem Haus des Jägers · Gruppe erstellen oder beitreten</small></span><i class="chev">›</i></button></div>'}
 function bindMp(){const b=document.getElementById('mpb');if(b)b.onclick=()=>mpMenu()}
 
+
+/* ===== Steuerung testen (nur mit Entwicklercode): F4 wechselt PC/iPad/Handy, Touch-Punkte sichtbar ===== */
+CH.stickLock=false;CH.touchViz=false;
+{const st=document.createElement('style');st.textContent='#tviz{position:fixed;inset:0;pointer-events:none;z-index:95}#tviz i{position:absolute;width:48px;height:48px;margin:-24px 0 0 -24px;border-radius:50%;border:3px solid #30d158;background:rgba(48,209,88,.25);box-shadow:0 0 12px rgba(48,209,88,.6)}';document.head.appendChild(st);
+ const t=document.createElement('div');t.id='tviz';document.body.appendChild(t)}
+{const dots={},T=()=>document.getElementById('tviz'),set=(e,d)=>{d.style.left=e.clientX+'px';d.style.top=e.clientY+'px'};
+ addEventListener('pointerdown',e=>{if(!CH.touchViz||!CHEATS)return;const d=document.createElement('i');set(e,d);T().appendChild(d);dots[e.pointerId]=d},true);
+ addEventListener('pointermove',e=>{const d=dots[e.pointerId];if(d)set(e,d)},true);
+ ['pointerup','pointercancel'].forEach(n=>addEventListener(n,e=>{const d=dots[e.pointerId];if(d){d.remove();delete dots[e.pointerId]}},true))}
+addEventListener('keydown',e=>{if(e.code==='F4'&&CHEATS){e.preventDefault();const o=['pc','ipad','phone'];setCtrl(o[(o.indexOf(CTRL)+1)%3]);toast('Steuerung: '+({pc:'PC',ipad:'iPad',phone:'Handy'})[CTRL]+' (F4 wechselt)','good')}});
 tween(.01,()=>{},()=>{});
 pos.x=0;Pt=-.8;$('loc').textContent=NAMES[0];inv();
 menuStart();

@@ -1101,7 +1101,7 @@ document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closes
 /* Feste Song-Zuordnung: Titel-Nr. (ab 0) -> Spotify-Track-ID (HAYAT von Ooyy) */
 const PRE={3:'6pcYv6zdmh5iERmzifqt7M',8:'2RFKAbEQGDCElii11VArPJ'};
 /* Spotify-Konto (offizielle Anmeldung, Web API + Web Playback SDK) */
-const SA={cid:'',tok:null,exp:0,ref:null,on:false,dev:null,player:null,info:[],uris:[],cur:0,playing:false,last:null,poll:0,
+const SA={cid:'',tok:null,exp:0,ref:null,on:false,dev:null,player:null,info:[],failed:[],uris:[],cur:0,playing:false,last:null,poll:0,
  mobile:/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent))};
 try{SA.cid=localStorage.getItem('dfSpCid')||'';const t=JSON.parse(localStorage.getItem('dfSpTok')||'null');if(t){SA.tok=t.a;SA.ref=t.r;SA.exp=t.e}}catch(e){}
 const WEBURL='https://taupe-choux-09809a.netlify.app/',ONWEB=location.hostname==='taupe-choux-09809a.netlify.app';
@@ -1121,8 +1121,8 @@ async function sapi(path,opt){opt=opt||{};const t=await saAuth();const r=await f
  if(r.status===204)return null;const tx=await r.text();let j=null;try{j=tx?JSON.parse(tx):null}catch(e){}if(!r.ok)throw new Error((j&&j.error&&(j.error.message||j.error))||('Fehler '+r.status));return j}
 const saPack=t=>{const im=(t.album&&t.album.images)||[];return{uri:t.uri,name:t.name,artist:(t.artists||[]).map(a=>a.name).join(', '),img:(im[1]||im[0]||{}).url||''}};
 async function saResolve(){let c={};try{c=JSON.parse(localStorage.getItem('dfSpRes')||'{}')}catch(e){}
- SA.info=[];for(let i=0;i<Math.max(SPT.length,SP.ids.length);i++){const lid=SP.ids[i]||PRE[i];
-  if(lid){const k='id:'+lid;if(!c[k]){try{c[k]=saPack(await sapi('/tracks/'+lid))}catch(e){c[k]=null}}SA.info[i]=c[k];continue}
+ SA.failed=[];const NN=Math.max(SPT.length,SP.ids.length);SA.info.length=Math.min(SA.info.length,NN);for(let i=0;i<NN;i++){const lid=SP.ids[i]||PRE[i];
+  if(lid){const k='id:'+lid;if(!c[k]){try{c[k]=saPack(await sapi('/tracks/'+lid))}catch(e){c[k]=null}}SA.info[i]=c[k];if(!c[k])SA.failed.push(i+1);continue}
   const k='q:'+SPT[i];if(!(k in c)){const r=await sapi('/search?type=track&limit=1&market=from_token&q='+encodeURIComponent(SPT[i]));const t=r&&r.tracks&&r.tracks.items[0];c[k]=t?saPack(t):null}SA.info[i]=c[k]}
  SA.uris=SA.info.map(x=>x&&x.uri);try{localStorage.setItem('dfSpRes',JSON.stringify(c))}catch(e){}auUI()}
 function saShow(t,playing){if(t){$('spt').textContent=t.name;$('sps').textContent=t.artist||'';if(t.img){$('spcov').style.backgroundImage='url("'+t.img+'")';$('spcov').textContent=''}const k=SA.uris.indexOf(t.uri);if(k>=0)SA.cur=k}
@@ -1224,26 +1224,32 @@ $('spsave').onclick=()=>{const r=spParse($('splinks').value),msg=$('spmsg');if(!
  SP.list=r.list;SP.bulk=r.list?[]:r.ids;spMerge();SP.idx=0;try{localStorage.setItem('dfSpIds',JSON.stringify(SP.bulk));localStorage.setItem('dfSpList',JSON.stringify(SP.list))}catch(e){}
  msg.style.color=(r.list||r.ids.length===SPT.length)?'#30d158':'#ff9f0a';msg.textContent=r.list?'Playlist gespeichert. Titelwechsel im Spotify-Fenster.':(r.ids.length===SPT.length?'Gespeichert: alle 11 Songs in Reihenfolge.':'Gespeichert: '+r.ids.length+' von 11 Links erkannt.');
  if(SP.ctrl){try{SP.ctrl.destroy()}catch(e){}SP.ctrl=null}spMeta();SP.want=false;SP.plain?spPlain():(SP.api?spMake():spLoadApi())};
+const BUILD='Version 8 · Song-Editor (7.11.)';
 function spEmsg(t,ok){const e=$('spemsg');e.textContent=t;e.style.color=ok?'#30d158':'#ff453a'}
 function spEd(){const el=$('sped');if(!el)return;const N=Math.max(SPT.length,SP.ids.length);let h='';
  for(let i=0;i<N;i++){const ex=i>=SPT.length,ov=!!USR.over[i];
-  h+='<div class="row"><span class="tx"><b>'+(i+1)+'. '+spName(i)+'</b><small>'+((SA.on&&SA.info[i])?SA.info[i].artist+' · ':'')+(ex?'eigener Song':ov?'geändert':'Standard')+'</small></span>'
+  h+='<div class="row"><span class="tx"><b>'+(i+1)+'. '+spName(i)+'</b><small>'+((SA.on&&SA.info[i]&&SA.info[i].artist)?SA.info[i].artist+' · ':'')+(ex?'eigener Song':ov?'geändert':'Standard')+'</small></span>'
    +'<button class="pill" data-ed="'+i+'" aria-label="Ändern">✎</button>'+(ex?'<button class="pill" data-del="'+(i-SPT.length)+'" aria-label="Löschen">🗑</button>':(ov?'<button class="pill" data-rs="'+i+'" aria-label="Zurücksetzen">↺</button>':''))+'</div>'}
  el.innerHTML=h;
  el.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{ED.slot=+b.dataset.ed;$('spedin').style.display='block';$('spedt').textContent='Neuer Song für Platz '+(ED.slot+1)+' ('+spName(ED.slot)+')';$('spedl').value='';$('spedl').focus()});
  el.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{delete USR.over[+b.dataset.rs];spUsrSave('Zurückgesetzt.')});
  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{USR.extra.splice(+b.dataset.del,1);spUsrSave('Song gelöscht.')})}
-async function spFind(txt){txt=(txt||'').trim();if(!txt)return null;const r=spParse(txt);if(r.ids[0])return r.ids[0];
- if(SA.on){try{const j=await sapi('/search?type=track&limit=1&market=from_token&q='+encodeURIComponent(txt));const t=j&&j.tracks&&j.tracks.items[0];return t?t.id:null}catch(e){return null}}return null}
-function spUsrSave(msg){try{localStorage.setItem('dfSpUsr',JSON.stringify(USR))}catch(e){}spMerge();if(SP.idx>=SP.ids.length)SP.idx=0;
- if(SP.ctrl&&!SA.on){try{SP.ctrl.destroy()}catch(e){}SP.ctrl=null}
- const done=()=>{spEd();spMeta();auUI();if(msg)spEmsg(msg,true)};
- if(SA.on)saResolve().then(done).catch(done);else{if(!SA.on&&spHas()&&!SP.list){SP.plain?spPlain():(SP.api?spMake():0)}done()}}
-$('spedok').onclick=async()=>{spEmsg('Suche …',true);const id=await spFind($('spedl').value);if(!id){spEmsg(SA.on?'Nichts gefunden. Link oder genauer Songname nötig.':'Kein Spotify-Song-Link erkannt.',false);return}
- if(ED.slot>=SPT.length)USR.extra[ED.slot-SPT.length]=id;else USR.over[ED.slot]=id;$('spedin').style.display='none';spUsrSave('Song geändert. Mit ↺ setzt du ihn zurück.')};
-$('spaddgo').onclick=async()=>{spEmsg('Suche …',true);const id=await spFind($('spadd').value);if(!id){spEmsg(SA.on?'Nichts gefunden. Link oder genauer Songname nötig.':'Kein Spotify-Song-Link erkannt.',false);return}
- if(USR.extra.includes(id)||SP.ids.includes(id)){spEmsg('Dieser Song ist schon in der Liste.',false);return}USR.extra.push(id);$('spadd').value='';spUsrSave('Song hinzugefügt (ganz unten in der Playlist).')};
-$('spreset').onclick=()=>{if(!confirm('Alle Änderungen und eigenen Songs zurücksetzen?'))return;USR.over={};USR.extra=[];spUsrSave('Alles zurückgesetzt.')};
+async function spFind(txt){txt=(txt||'').trim();if(!txt)throw new Error('Bitte einen Spotify-Link oder Songnamen eingeben.');const r=spParse(txt);if(r.ids[0])return r.ids[0];
+ if(!SA.on)throw new Error('Das ist kein Spotify-Song-Link. (Songnamen gehen nur, wenn du bei Spotify angemeldet bist.)');
+ const j=await sapi('/search?type=track&limit=1&market=from_token&q='+encodeURIComponent(txt));const t=j&&j.tracks&&j.tracks.items[0];if(!t)throw new Error('Kein Treffer für „'+txt+'“.');return t.id}
+function spUsrSave(msg){let stored=true;try{localStorage.setItem('dfSpUsr',JSON.stringify(USR))}catch(e){stored=false}
+ spMerge();if(SP.idx>=SP.ids.length)SP.idx=0;
+ if(SA.on)SA.info=SA.info.map((x,i)=>(x&&SP.ids[i]&&x.uri==='spotify:track:'+SP.ids[i])?x:(SP.ids[i]?{name:'Lädt …',artist:'',uri:null}:x));
+ else if(SP.ctrl){try{SP.ctrl.destroy()}catch(e){}SP.ctrl=null}
+ const done=()=>{spEd();spRender();spMeta();auUI()};done();
+ spEmsg((msg||'')+(stored?'':' (Hinweis: Dein Browser speichert nicht dauerhaft, z. B. Privatmodus.)'),stored);
+ if(SA.on)saResolve().then(()=>{done();if(SA.failed.length)spEmsg('Nicht gefunden: Platz '+SA.failed.join(', ')+'. Bitte den Link prüfen.',false)}).catch(e=>{done();spEmsg('Spotify: '+(e.message||e),false)});
+ else if(spHas()&&!SP.list){SP.plain?spPlain():(SP.api?spMake():spLoadApi())}}
+$('spedok').onclick=async()=>{try{spEmsg('Suche …',true);const id=await spFind($('spedl').value);if(ED.slot>=SPT.length)USR.extra[ED.slot-SPT.length]=id;else USR.over[ED.slot]=id;$('spedin').style.display='none';spUsrSave('Song geändert. Mit ↺ setzt du ihn zurück.')}catch(e){spEmsg(e.message||String(e),false)}};
+$('spaddgo').onclick=async()=>{try{spEmsg('Suche …',true);const id=await spFind($('spadd').value);if(USR.extra.includes(id)||SP.ids.includes(id))throw new Error('Dieser Song ist schon in der Liste.');USR.extra.push(id);$('spadd').value='';spUsrSave('Song hinzugefügt (ganz unten in der Playlist).')}catch(e){spEmsg(e.message||String(e),false)}};
+$('spedl').onkeydown=e=>{if(e.key==='Enter')$('spedok').onclick()};$('spadd').onkeydown=e=>{if(e.key==='Enter')$('spaddgo').onclick()};
+$('spreset').onclick=()=>{let ok2=true;try{ok2=confirm('Alle Änderungen und eigenen Songs zurücksetzen?')}catch(e){}if(!ok2)return;USR.over={};USR.extra=[];spUsrSave('Alles zurückgesetzt.')};
+{const bd=document.createElement('div');bd.className='foot';bd.style.textAlign='center';bd.textContent=BUILD;$('musp').appendChild(bd)}
 $('mvol').oninput=e=>{AU.vol=e.target.value/100;if(AU.master)AU.master.gain.value=AU.vol};
 $('msfx').onclick=()=>{AU.sfxOn=!AU.sfxOn;auUI()};
 $('mbi').onclick=()=>{AU.musicOn=!AU.musicOn;if(AU.ctx)AU.mus.gain.setTargetAtTime(AU.musicOn?1:0,AU.ctx.currentTime,.1);if(AU.musicOn&&SP.playing&&SP.ctrl)try{SP.ctrl.pause()}catch(e){}auUI()};

@@ -346,6 +346,10 @@ body.ipad #shoot{width:104px;height:104px;font-size:24px}
 .spc.lk .spa svg{filter:grayscale(1) brightness(.28)!important}
 @keyframes spturn{0%,100%{transform:rotateY(-28deg)}50%{transform:rotateY(28deg)}}
 .opb{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:8px;background:linear-gradient(90deg,#ffd60a,#ff9f0a);color:#1a1408;font-size:11px;font-weight:800}
+
+body.phone #tback{padding:0 10px!important;font-size:13px!important}
+.bkd .btn{display:block;width:100%;margin-top:8px}
+.btn.red{background:#ff453a!important;color:#fff!important}
 </style>
 </head><body>
 <div id="look"></div>
@@ -2402,7 +2406,7 @@ function fsHint(){toast('Vollbild: Teilen → „Zum Home-Bildschirm“, von dor
 function fsToggle(){const d=document.documentElement;try{if(fsOn()){const x=document.exitFullscreen||document.webkitExitFullscreen;x&&x.call(document)}else{const f=d.requestFullscreen||d.webkitRequestFullscreen;if(!f)return fsHint();const p=f.call(d);if(p&&p.catch)p.catch(()=>fsHint())}}catch(e){fsHint()}}
 function fixZoom(){const m=document.querySelector('meta[name=viewport]');if(m){const c=m.content;m.content='width=device-width,initial-scale=1.0001,maximum-scale=1,user-scalable=no,viewport-fit=cover';setTimeout(()=>{m.content=c},60)}try{window.scrollTo(0,0)}catch(e){}}
 function fsUI(){const b=document.getElementById('tfs');if(b){b.textContent=fsOn()?'✕':'⛶';b.title=fsOn()?'Vollbild beenden':'Vollbild'}fixZoom()}
-{const t=document.createElement('div');t.id='topc';t.innerHTML='<button id="tfs" title="Vollbild">⛶</button><button id="tvw" title="Ansicht wechseln (V)">👁</button><button id="tzo" title="Rauszoomen (-)">−</button><button id="tzi" title="Reinzoomen (+)">+</button>';document.body.appendChild(t);
+{const t=document.createElement('div');t.id='topc';t.innerHTML='<button id="tback" title="Zurück zur Lobby" style="width:auto;padding:0 14px;border-radius:21px;font-size:15px;background:rgba(255,69,58,.5)">‹ Lobby</button><button id="tfs" title="Vollbild">⛶</button><button id="tvw" title="Ansicht wechseln (V)">👁</button><button id="tzo" title="Rauszoomen (-)">−</button><button id="tzi" title="Reinzoomen (+)">+</button>';document.body.appendChild(t);
  const x=document.createElement('div');x.id='xhair';document.body.appendChild(x);
  const tap=(id,f)=>{const b=document.getElementById(id);b.onpointerdown=e=>{e.preventDefault();e.stopPropagation();f()}};
  tap('tfs',fsToggle);tap('tvw',viewCycle);tap('tzo',()=>{if(CH.view==='fp'){CH.view='tp';return toast('👁 Ansicht: 3. Person','good')}setZoom(CAMZ*1.2)});tap('tzi',()=>setZoom(CAMZ/1.2))}
@@ -2506,6 +2510,31 @@ accUI=function(msg){const others=Object.values(ACC.list).sort((a,b)=>(b.ts||0)-(
  document.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{if(b.dataset.acc===ACC.active){closeOv();menuStart()}else accSwitch(b.dataset.acc)})};
 if(ACC.list.BB&&!ACC.list.BBBB){ACC.list.BBBB=ACC.list.BB;ACC.list.BBBB.code='BBBB';delete ACC.list.BB;if(ACC.active==='BB')ACC.active='BBBB';accStore()}
 if(isOP())opApply();
+
+/* ===================== Zurück-Knopf: Lobby / Hauptspiel / Online-Lobby ===================== */
+function accFromHash(){const m=/acc=([A-Z2-9]{4})(?:&n=([^&]*))?/.exec(location.hash||'');if(!m)return false;
+ if(!accReady()){const code=m[1];let nm='Spieler';try{nm=decodeURIComponent(m[2]||'')||'Spieler'}catch(e){}
+  if(code==='BBBB'){ACC.list.BBBB={id:'BBBB',code:'BBBB',name:'Entwickler (OP)',op:true,data:Object.assign({},OPDATA),ts:Date.now()};ACC.active='BBBB';accApply(ACC.list.BBBB.data);pcLive(ACC.list.BBBB.data);opApply()}
+  else{const d=pcDec(code);if(d){d.dfName=nm;const id='A'+Date.now().toString(36);ACC.list[id]={id,name:nm,data:d,ts:Date.now(),code};ACC.active=id;accApply(d);pcLive(d)}}}
+ try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}return true}
+accFromHash();
+function goHome(){try{accSave(true)}catch(e){}
+ if(!LS_OK&&accReady()){const a=accCur();try{location.hash='acc='+(a.op?'BBBB':pcEnc(accSnap()))+'&n='+encodeURIComponent(a.name||'Spieler')}catch(e){}}
+ location.reload()}
+function backUI(){if(ovOn||REV.open)return;const st=busy||lm;
+ const box=(t,sub,btns)=>{ov('<div class="ios bkd" style="text-align:center"><h2 style="margin:6px 0">'+t+'</h2><p class="foot">'+sub+'</p>'+btns+'<button class="btn" id="bk0">Weiterspielen</button></div>',true);$('bk0').onclick=()=>closeOv()};
+ if(MP.on||(MP.ph&&MP.ph!=='menu'&&(MP.peer||MP.conn))){
+  if(MP.isHost&&MP.host){box('Zurück zur Lobby?','Du bist der Host. Du kannst alle Spieler zurück in die Gruppen-Lobby holen oder die Gruppe ganz verlassen.',
+    '<button class="btn red" id="bk1">Alle zurück in die Lobby</button><button class="btn" id="bk2">Gruppe verlassen (Hauptmenü)</button>');
+   $('bk1').onclick=()=>{closeOv();if(MP.host.phase==='play')MP.host.bcast({t:'e',k:'txt',m:'Der Host hat die Runde beendet.'});MP.host.toLobby()};
+   $('bk2').onclick=()=>{closeOv();mpLeave()}}
+  else{box('Runde verlassen?','Du verlässt das Online-Spiel und kommst zurück ins Hauptmenü. Deine Gruppe spielt ohne dich weiter.','<button class="btn red" id="bk1">Verlassen</button>');$('bk1').onclick=()=>{closeOv();mpLeave()}}
+  return}
+ if(P2){box('Zurück zum Hauptspiel?','Teil 2 (Beta) wird beendet und du kommst zurück ins Hauptmenü. Freigeschaltete Sachen bleiben erhalten.','<button class="btn red" id="bk1">Zurück zum Hauptspiel</button>');$('bk1').onclick=goHome;return}
+ box('Zurück zur Lobby?','Dieser Durchgang wird beendet und du kommst zurück ins Startmenü. Freigeschaltete Sachen (Shotgun, Skins, Songs) bleiben erhalten.','<button class="btn red" id="bk1">Zurück zur Lobby</button>');$('bk1').onclick=goHome}
+{const b=document.getElementById('tback');b.onpointerdown=e=>{e.preventDefault();e.stopPropagation();backUI()}}
+addEventListener('keydown',e=>{if(e.code==='Backspace'&&!(e.target&&e.target.matches&&e.target.matches('input,textarea'))&&!ovOn){e.preventDefault();backUI()}});
+const _srtBk=snkRspTick;snkRspTick=function(){_srtBk();try{const b=$('tback'),l=MP.on?'‹ Online-Lobby':P2?'‹ Hauptspiel':'‹ Lobby';if(b.textContent!==l)b.textContent=l;b.style.display=($('end')||$('credits'))?'none':''}catch(e){}};
 tween(.01,()=>{},()=>{});
 pos.x=0;Pt=-.8;$('loc').textContent=NAMES[0];inv();
 menuStart();

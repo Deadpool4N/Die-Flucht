@@ -1559,7 +1559,7 @@ function gunLine(){let h='<div class="cap">Ausrüstung</div><div class="grp">';
  if(GUN.avail())h+='<button class="row" id="gunrow"><span class="ic" style="background:#ffd60a">🔫</span><span class="tx"><b>Shotgun</b><small>Legendär · gilt in Leicht, Mittel und Teil 2'+((GUN.cheat&&!GUN.unlocked)?' · per Cheat':'')+'</small></span><i class="sw'+(GUN.loadout?' on':'')+'"></i></button>';
  else h+='<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Shotgun</b><small>Gesperrt: Schwer ohne ein einziges Mal zu sterben durchspielen</small></span></div>';
  if(CHEATS&&!GUN.avail())h+='<button class="row" id="guncheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Shotgun per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>';
- return mpLine()+perfLine()+skinLine()+h+'</div>'}
+ return accLine()+mpLine()+perfLine()+skinLine()+h+'</div>'}
 const _ms=menuStart;menuStart=function(){_ms();bindMp();bindPerf();bindSkin();
  const gr=document.getElementById('gunrow');if(gr)gr.onclick=()=>{GUN.loadout=!GUN.loadout;saveLoad();gr.querySelector('.sw').classList.toggle('on',GUN.loadout)};
  const gc=document.getElementById('guncheat');if(gc)gc.onclick=()=>showReveal('Per Cheat erhalten. Du kannst sie jetzt im Startmenü ausrüsten.',()=>{GUN.cheat=true},()=>{GUN.loadout=true;saveLoad()},()=>menuStart());
@@ -2297,6 +2297,62 @@ const _bs=bindSkin;bindSkin=function(){_bs();
  const a=document.getElementById('msk1');if(a)a.onclick=()=>{closeOv();skinReveal('Per Cheat erhalten.',()=>{})};
  const b=document.getElementById('msk2');if(b)b.onclick=()=>{closeOv();gentReveal('Per Cheat erhalten.',()=>{})};
  const c=document.getElementById('mskall');if(c)c.onclick=()=>{SKIN.unlocked=true;SKIN.g=true;try{localStorage.setItem('dfSkinU','1');localStorage.setItem('dfSkinG','1')}catch(e){}if(!has('Maske'))S.inv.push('Maske');inv();closeOv();toast('✨ Alle Skins freigeschaltet. Auswahl unter „Skin“ im Menü.','good')}};
+
+/* ===================== Accounts: Name -> 4-stelliger Code, Fortschritt pro Account ===================== */
+const ACCK=['dfShotgun','dfShotLoad','dfSkinU','dfSkin','dfSkinS','dfSkinG','dfHeard','dfDev','dfFpsMode','dfPerf','dfPerfAuto','dfName','dfSpUsr','dfSpIds','dfSpList','dfSpCid','dfSpVer','dfSpRes'];
+const ACCA='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+var ACC={list:{},active:'',cloud:null,pushT:0};
+try{ACC.list=JSON.parse(localStorage.getItem('dfAccounts')||'{}')||{};ACC.active=localStorage.getItem('dfAcc')||''}catch(e){}
+const accReady=()=>!!(ACC.active&&ACC.list[ACC.active]);
+const accCur=()=>ACC.list[ACC.active];
+function accSnap(){const d={};ACCK.forEach(k=>{try{const v=localStorage.getItem(k);if(v!==null)d[k]=v}catch(e){}});return d}
+function accApply(d){ACCK.forEach(k=>{try{if(d&&Object.prototype.hasOwnProperty.call(d,k))localStorage.setItem(k,d[k]);else localStorage.removeItem(k)}catch(e){}})}
+function accStore(){try{localStorage.setItem('dfAccounts',JSON.stringify(ACC.list));localStorage.setItem('dfAcc',ACC.active)}catch(e){}}
+function accSave(force){if(!accReady())return;const a=accCur(),d=accSnap(),js=JSON.stringify(d);if(js===a.js&&!force)return;a.data=d;a.js=js;a.ts=Date.now();accStore();cloudPush(a)}
+function accNewCode(){for(let n=0;n<500;n++){let c='';for(let i=0;i<4;i++)c+=ACCA[Math.floor(Math.random()*ACCA.length)];if(!ACC.list[c])return c}return 'X'+Date.now().toString(36).slice(-3).toUpperCase()}
+/* Cloud (optional: netlify/functions/account.mjs) */
+async function cloudReq(method,q,body){try{const r=await fetch('/api/account'+(q||''),{method,headers:{'content-type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});
+ const ct=r.headers.get('content-type')||'';if(!ct.includes('json')){ACC.cloud=false;return {off:true}}ACC.cloud=true;return {status:r.status,data:await r.json().catch(()=>({}))}}catch(e){ACC.cloud=false;return {off:true}}}
+async function cloudCheck(){if(ACC.cloud!==null)return ACC.cloud;await cloudReq('GET','?code=ZZZZ');return ACC.cloud}
+function cloudPush(a,create){clearTimeout(ACC.pushT);ACC.pushT=setTimeout(()=>{cloudReq('POST','',{code:a.code,name:a.name,data:a.data||{},create:!!create})},create?0:2500)}
+async function cloudGet(code){const r=await cloudReq('GET','?code='+code);if(r.off)return {off:true};if(r.status===200&&r.data&&r.data.code)return {acc:r.data};return {none:true}}
+/* Account-Wechsel / Anlegen */
+function accSwitch(code){if(ACC.active!==code)accSave(true);ACC.active=code;accApply(accCur().data||{});accStore();location.reload()}
+async function accCreate(name){const first=!Object.keys(ACC.list).length;let code=accNewCode();
+ if(await cloudCheck()){for(let i=0;i<8;i++){const r=await cloudGet(code);if(r.none)break;code=accNewCode()}}
+ accSave(true);const data=first?accSnap():{};data.dfName=name;ACC.list[code]={code,name,data,ts:Date.now()};ACC.active=code;accApply(data);accStore();
+ if(ACC.cloud)cloudPush(ACC.list[code],true);return code}
+async function accLogin(code){code=code.toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length!==4)return 'Der Code hat 4 Zeichen.';
+ if(ACC.list[code]){accSwitch(code);return ''}
+ const r=await cloudGet(code);if(r.off)return 'Diesen Code gibt es auf diesem Gerät nicht. (Cloud-Speicher ist nicht eingerichtet, Accounts gelten nur pro Gerät.)';
+ if(r.none)return 'Kein Account mit dem Code '+code+' gefunden.';
+ ACC.list[code]={code,name:r.acc.name||'Spieler',data:r.acc.data||{},ts:r.acc.ts||Date.now()};accSwitch(code);return ''}
+/* Oberfläche */
+function accLine(){if(!accReady())return '';const a=accCur();return '<div class="cap">Account</div><div class="grp"><div class="row"><span class="ic" style="background:#0a84ff">👤</span><span class="tx"><b>'+esc(a.name)+'</b><small>Dein Code: <b style="letter-spacing:2px">'+a.code+'</b> · '+(ACC.cloud?'☁️ in der Cloud gespeichert':'📱 auf diesem Gerät gespeichert')+'</small></span><button class="pill" id="accsw" style="flex:none">Wechseln</button></div></div>'}
+function esc(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c])}
+function accUI(msg){const others=Object.values(ACC.list).sort((a,b)=>(b.ts||0)-(a.ts||0));
+ ov('<div class="ios"><h2 style="margin:4px 0 2px">👤 Willkommen!</h2><p class="foot" style="margin:0 0 10px">Lege einen Account an oder melde dich mit deinem Code an. Shotgun, Skins, Songs und Einstellungen werden für dich gespeichert.</p>'
+  +(msg?'<p class="err" style="margin:0 0 8px">'+esc(msg)+'</p>':'')
+  +'<div class="cap">Neu hier? Wie willst du heißen?</div><div class="grp"><div class="row"><input id="accn" maxlength="14" placeholder="Dein Name" autocomplete="off" style="flex:1;min-width:0;background:transparent;border:0;color:inherit;font:600 17px var(--ios);outline:none"><button class="pill" id="accmk" style="flex:none;background:#0a84ff;color:#fff">Erstellen</button></div></div>'
+  +'<div class="cap">Schon einen Account? Code eingeben</div><div class="grp"><div class="row"><input id="accc" maxlength="4" placeholder="z. B. K7P4" autocomplete="off" autocapitalize="characters" style="flex:1;min-width:0;background:transparent;border:0;color:inherit;font:700 20px var(--ios);letter-spacing:4px;text-transform:uppercase;outline:none"><button class="pill" id="acclg" style="flex:none">Einloggen</button></div></div>'
+  +(others.length?'<div class="cap">Accounts auf diesem Gerät</div><div class="grp">'+others.map(a=>'<button class="row" data-acc="'+a.code+'"><span class="ic" style="background:'+(a.code===ACC.active?'#30d158':'#5e5ce6')+'">👤</span><span class="tx"><b>'+esc(a.name)+(a.code===ACC.active?' (aktiv)':'')+'</b><small>Code '+a.code+'</small></span><i class="chev">›</i></button>').join('')+'</div>':'')
+  +'<p class="foot" id="acccl" style="margin-top:10px">Speicherort wird geprüft …</p></div>',true);
+ const go=async(f)=>{const b=document.querySelectorAll('#accmk,#acclg');b.forEach(x=>x.disabled=true);try{await f()}finally{b.forEach(x=>x.disabled=false)}};
+ $('accmk').onclick=()=>go(async()=>{let n=($('accn').value||'').trim().replace(/\s+/g,' ');if(n.length<2)return accUI('Der Name braucht mindestens 2 Zeichen.');
+  try{n=mpCensor(n)}catch(e){}const c=await accCreate(n);accShowCode(n,c)});
+ $('acclg').onclick=()=>go(async()=>{const e=await accLogin($('accc').value||'');if(e)accUI(e)});
+ $('accn').onkeydown=e=>{if(e.key==='Enter')$('accmk').click()};$('accc').onkeydown=e=>{if(e.key==='Enter')$('acclg').click()};
+ document.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{if(b.dataset.acc===ACC.active){closeOv();menuStart()}else accSwitch(b.dataset.acc)});
+ cloudCheck().then(on=>{const e=document.getElementById('acccl');if(e)e.textContent=on?'☁️ Cloud aktiv: Dein Code funktioniert auf jedem Gerät.':'📱 Accounts werden auf diesem Gerät gespeichert.'})}
+function accShowCode(name,code){ov('<div class="ios" style="text-align:center"><h2 style="margin:6px 0">Hallo '+esc(name)+'!</h2><p class="foot">Das ist dein Code. Merk ihn dir oder mach einen Screenshot:</p>'
+  +'<div style="font:800 64px var(--ios);letter-spacing:12px;margin:14px 0;padding:14px;border-radius:22px;background:rgba(10,132,255,.18);border:2px solid #0a84ff">'+code+'</div>'
+  +'<p class="foot">'+(ACC.cloud?'Mit diesem Code kommst du auf jedem Gerät an deinen Fortschritt.':'Mit diesem Code wechselst du auf diesem Gerät zu deinem Account.')+'</p><button class="btn" id="accgo" style="margin-top:10px">Los geht’s</button></div>',true);
+ $('accgo').onclick=()=>location.reload()}
+const _msAcc=menuStart;menuStart=function(){if(!accReady())return accUI();_msAcc.apply(this,arguments);const b=document.getElementById('accsw');if(b)b.onclick=()=>{accSave(true);accUI()}};
+/* Automatisch speichern */
+setInterval(()=>accSave(),8000);
+addEventListener('pagehide',()=>accSave());document.addEventListener('visibilitychange',()=>{if(document.hidden)accSave()});
+if(accReady()){cloudCheck().then(on=>{if(!on)return;cloudGet(ACC.active).then(r=>{if(r.acc&&(r.acc.ts||0)>(accCur().ts||0)+2000){accCur().data=r.acc.data||{};accCur().ts=r.acc.ts;accApply(accCur().data);accStore();toast('☁️ Neuerer Spielstand aus der Cloud geladen – lade neu …','good');setTimeout(()=>location.reload(),1500)}else accSave(true)})})}
 tween(.01,()=>{},()=>{});
 pos.x=0;Pt=-.8;$('loc').textContent=NAMES[0];inv();
 menuStart();

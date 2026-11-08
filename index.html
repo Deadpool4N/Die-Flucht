@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de"><head><meta charset="utf-8"><title>Die Flucht 3D</title>
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <style>
 :root{--acc:#d9a441;--bad:#e0605c;--ok:#6fbf73;--fg:#e6e1d4;--panel:#17171cee;color-scheme:dark}
@@ -321,6 +322,30 @@ body.phone #sneakb{width:70px;height:70px;font-size:12px;right:14px;bottom:calc(
 .vnf{box-shadow:inset 0 0 22px rgba(255,255,255,.08)}
 .vnl-l{position:absolute;left:34%;top:34%;width:32%;height:32%;border-radius:50%;background:radial-gradient(circle,#f2f2f2 0 7%,#c8102e 8% 72%,#7a0d18 73% 100%);display:flex;align-items:center;justify-content:center;color:#fff;font:800 clamp(14px,3vmin,22px) var(--ios)}
 .vng{filter:drop-shadow(0 0 22px #ff375f)}
+
+/* Obere Leiste: Vollbild, Ansicht, Zoom */
+html,body{touch-action:manipulation;overscroll-behavior:none;-webkit-text-size-adjust:100%}
+#look{touch-action:none}
+input,textarea,select{font-size:max(16px,1em)!important}
+#topc{position:fixed;z-index:41;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);display:flex;gap:8px}
+#topc button{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(30,30,38,.45);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font:600 18px var(--ios);display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+body.phone #topc{gap:6px}body.phone #topc button{width:36px;height:36px;font-size:15px}
+#xhair{position:fixed;left:50%;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 6px rgba(0,0,0,.6);z-index:3;pointer-events:none;display:none}
+/* Touch-Layout wie in Shootern: Stick erscheint unter dem Daumen */
+body.phone #joy,body.ipad #joy{opacity:.5;transition:opacity .2s}
+#joy.dyn{opacity:1!important;transition:none}
+body.phone #shoot{width:84px;height:84px;right:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 112px);font-size:20px}
+body.ipad #shoot{width:104px;height:104px;font-size:24px}
+/* Spind */
+.spg{display:flex;gap:10px;overflow-x:auto;padding:6px 2px 12px;scroll-snap-type:x mandatory;touch-action:pan-x}
+.spc{flex:0 0 152px;scroll-snap-align:center;border-radius:20px;padding:12px 8px;text-align:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);display:flex;flex-direction:column;align-items:center;gap:4px}
+.spc.on{border:2px solid #30d158;background:rgba(48,209,88,.12)}
+.spc small{opacity:.75;font-size:12px;line-height:1.25}
+.spa{height:170px;display:flex;align-items:center;justify-content:center;perspective:500px}
+.spa svg{position:static!important;height:160px!important;width:auto!important;opacity:1!important;transform:none;animation:spturn 4.5s ease-in-out infinite!important;transition:none!important}
+.spc.lk .spa svg{filter:grayscale(1) brightness(.28)!important}
+@keyframes spturn{0%,100%{transform:rotateY(-28deg)}50%{transform:rotateY(28deg)}}
+.opb{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:8px;background:linear-gradient(90deg,#ffd60a,#ff9f0a);color:#1a1408;font-size:11px;font-weight:800}
 </style>
 </head><body>
 <div id="look"></div>
@@ -721,7 +746,7 @@ function camUpdate(s){
  if(ch.on&&hunter.visible){const c=hunter.children,p=now/1e3*9,q=Math.sin(p)*.6;c[4].rotation.x=q;c[5].rotation.x=-q;c[2].rotation.x=-q;c[3].rotation.x=q}
  if(camOv){av.visible=showAv;camOv(s);return}
  if(showAv&&wantTP){
-  const d=cr===3?2.6:cr===5?2.8:cr===6?4.4:2.9,pitch=Pt-.12,cp=Math.cos(pitch);
+  const d=(cr===3?2.6:cr===5?2.8:cr===6?4.4:2.9)*(typeof CAMZ==='number'?CAMZ:1),pitch=Pt-.12,cp=Math.cos(pitch);
   const tx=pos.x,ty=yo+1.45,tz=pos.z,dr=[-Math.sin(Y)*cp,Math.sin(pitch),-Math.cos(Y)*cp];
   let k=0;while(k<d){const n=k+.12;if(solidC(tx-dr[0]*n,tz-dr[2]*n))break;k=n}
   cam.position.set(tx-dr[0]*k+s,Math.max(.3,Math.min(cr===6?30:2.75,ty-dr[1]*k))+s,tz-dr[2]*k);
@@ -2353,6 +2378,134 @@ const _msAcc=menuStart;menuStart=function(){if(!accReady())return accUI();_msAcc
 setInterval(()=>accSave(),8000);
 addEventListener('pagehide',()=>accSave());document.addEventListener('visibilitychange',()=>{if(document.hidden)accSave()});
 if(accReady()){cloudCheck().then(on=>{if(!on)return;cloudGet(ACC.active).then(r=>{if(r.acc&&(r.acc.ts||0)>(accCur().ts||0)+2000){accCur().data=r.acc.data||{};accCur().ts=r.acc.ts;accApply(accCur().data);accStore();toast('☁️ Neuerer Spielstand aus der Cloud geladen – lade neu …','good');setTimeout(()=>location.reload(),1500)}else accSave(true)})})}
+
+/* ===================== OP-Entwickler, Touch-Steuerung, Vollbild/Zoom, Spind ===================== */
+/* --- OP-Entwickler-Account (Code: BB) --- */
+const OPDATA={dfShotgun:'1',dfShotLoad:'1',dfSkinU:'1',dfSkinG:'1',dfDev:'1',dfHeard:'[0,1,2,3,4,5]',dfName:'Entwickler'};
+const isOP=()=>accReady()&&!!accCur().op;
+const _accLoginOP=accLogin;accLogin=async function(code){if(String(code||'').trim().toUpperCase()==='BB'){
+  if(!ACC.list.BB)ACC.list.BB={code:'BB',name:'Entwickler (OP)',op:true,data:{},ts:Date.now()};Object.assign(ACC.list.BB.data,OPDATA);ACC.list.BB.op=true;accSwitch('BB');return ''}
+ return _accLoginOP(code)};
+const _cloudPushOP=cloudPush;cloudPush=function(a,c){if(a&&a.op)return;_cloudPushOP(a,c)};
+function opApply(){if(!isOP())return;CHEATS=true;DEV.unlocked=true;SKIN.unlocked=true;SKIN.g=true;GUN.unlocked=true;HEARD.s=[0,1,2,3,4,5];
+ Object.keys(OPDATA).forEach(k=>{if(k!=='dfName')try{localStorage.setItem(k,OPDATA[k])}catch(e){}})}
+opApply();
+const _p2GateOP=p2Gate;p2Gate=function(){if(isOP()){CHEATS=true;return p2Diff()}return _p2GateOP.apply(this,arguments)};
+const _accLineOP=accLine;accLine=function(){let h=_accLineOP();if(isOP())h=h.replace('</b><small>',' <span class="opb">OP</span></b><small>').replace(/Dein Code: <b[^>]*>BB<\/b>[^<]*/,'Entwickler-Zugang · alles freigeschaltet, keine Passwörter');return h};
+
+/* --- Obere Leiste: Vollbild, Ansicht, Zoom --- */
+var CAMZ=1;try{CAMZ=+localStorage.getItem('dfZoom')||1}catch(e){}
+function setZoom(z,quiet){CAMZ=Math.max(.5,Math.min(2,z));try{localStorage.setItem('dfZoom',String(CAMZ))}catch(e){}if(!quiet)toast('🔍 Zoom: '+Math.round(100/CAMZ)+' %','good')}
+function viewCycle(){CH.view={auto:'tp',tp:'fp',fp:'auto'}[CH.view]||'auto';toast('👁 Ansicht: '+({auto:'Automatisch',tp:'3. Person',fp:'Ego (1. Person)'})[CH.view],'good')}
+const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+function fsHint(){toast('Vollbild: Teilen → „Zum Home-Bildschirm“, von dort startet das Spiel ohne Leisten.','err')}
+function fsToggle(){const d=document.documentElement;try{if(fsOn()){const x=document.exitFullscreen||document.webkitExitFullscreen;x&&x.call(document)}else{const f=d.requestFullscreen||d.webkitRequestFullscreen;if(!f)return fsHint();const p=f.call(d);if(p&&p.catch)p.catch(()=>fsHint())}}catch(e){fsHint()}}
+function fixZoom(){const m=document.querySelector('meta[name=viewport]');if(m){const c=m.content;m.content='width=device-width,initial-scale=1.0001,maximum-scale=1,user-scalable=no,viewport-fit=cover';setTimeout(()=>{m.content=c},60)}try{window.scrollTo(0,0)}catch(e){}}
+function fsUI(){const b=document.getElementById('tfs');if(b){b.textContent=fsOn()?'✕':'⛶';b.title=fsOn()?'Vollbild beenden':'Vollbild'}fixZoom()}
+{const t=document.createElement('div');t.id='topc';t.innerHTML='<button id="tfs" title="Vollbild">⛶</button><button id="tvw" title="Ansicht wechseln (V)">👁</button><button id="tzo" title="Rauszoomen (-)">−</button><button id="tzi" title="Reinzoomen (+)">+</button>';document.body.appendChild(t);
+ const x=document.createElement('div');x.id='xhair';document.body.appendChild(x);
+ const tap=(id,f)=>{const b=document.getElementById(id);b.onpointerdown=e=>{e.preventDefault();e.stopPropagation();f()}};
+ tap('tfs',fsToggle);tap('tvw',viewCycle);tap('tzo',()=>{if(CH.view==='fp'){CH.view='tp';return toast('👁 Ansicht: 3. Person','good')}setZoom(CAMZ*1.2)});tap('tzi',()=>setZoom(CAMZ/1.2))}
+document.addEventListener('fullscreenchange',fsUI);document.addEventListener('webkitfullscreenchange',fsUI);
+['gesturestart','gesturechange','gestureend'].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1&&!(e.target.closest&&e.target.closest('#ov,#musp')))e.preventDefault()},{passive:false});
+document.addEventListener('focusout',e=>{if(e.target&&e.target.matches&&e.target.matches('input,textarea'))setTimeout(fixZoom,60)});
+addEventListener('orientationchange',()=>setTimeout(fixZoom,300));
+addEventListener('keydown',e=>{if(e.target&&e.target.matches&&e.target.matches('input,textarea'))return;if(ovOn)return;
+ if(e.code==='KeyV')viewCycle();else if(e.code==='Equal'||e.code==='NumpadAdd'||e.code==='BracketRight')setZoom(CAMZ/1.2);else if(e.code==='Minus'||e.code==='NumpadSubtract'||e.code==='Slash')setZoom(CAMZ*1.2)});
+
+/* --- Touch: Stick erscheint unter dem Daumen (linke Seite), rechts umsehen, Zwei-Finger-Zoom --- */
+var JDYN={id:null,cx:0,cy:0,m:60};
+function jdyn(e){let dx=e.clientX-JDYN.cx,dy=e.clientY-JDYN.cy;const m=JDYN.m,L=Math.hypot(dx,dy);
+ if(L>m){const k=(L-m)/L;JDYN.cx+=dx*k;JDYN.cy+=dy*k;dx=e.clientX-JDYN.cx;dy=e.clientY-JDYN.cy;joy.style.left=(JDYN.cx-m)+'px';joy.style.top=(JDYN.cy-m)+'px'}
+ jx=dx/m;jz=dy/m;$('knob').style.transform='translate('+dx+'px,'+dy+'px)'}
+function jdynEnd(){JDYN.id=null;jp=null;jx=jz=0;$('knob').style.transform='';joy.style.left='';joy.style.top='';joy.style.bottom='';joy.classList.remove('dyn')}
+const PZ={p:{},d0:0,z0:1};
+look.addEventListener('pointerdown',e=>{
+ if(CTRL!=='pc'&&jp===null&&JDYN.id===null&&e.clientX<innerWidth*.42&&!(busy||ovOn||lm)){e.stopImmediatePropagation();
+  try{look.setPointerCapture(e.pointerId)}catch(x){}const r=joy.getBoundingClientRect();JDYN.m=(r.width||120)/2;JDYN.id=e.pointerId;jp=e.pointerId;JDYN.cx=e.clientX;JDYN.cy=e.clientY;
+  joy.style.left=(e.clientX-JDYN.m)+'px';joy.style.top=(e.clientY-JDYN.m)+'px';joy.style.bottom='auto';joy.classList.add('dyn');jdyn(e);return}
+ if(e.pointerType==='mouse')return;PZ.p[e.pointerId]={x:e.clientX,y:e.clientY};const ids=Object.keys(PZ.p);
+ if(ids.length===2){const a=PZ.p[ids[0]],b=PZ.p[ids[1]];PZ.d0=Math.max(30,Math.hypot(a.x-b.x,a.y-b.y));PZ.z0=CAMZ;lp=null;e.stopImmediatePropagation()}},{capture:true});
+look.addEventListener('pointermove',e=>{if(e.pointerId===JDYN.id){e.stopImmediatePropagation();jdyn(e);return}
+ if(PZ.p[e.pointerId]){PZ.p[e.pointerId]={x:e.clientX,y:e.clientY};const ids=Object.keys(PZ.p);if(ids.length>=2){e.stopImmediatePropagation();lp=null;const a=PZ.p[ids[0]],b=PZ.p[ids[1]];const d=Math.max(30,Math.hypot(a.x-b.x,a.y-b.y));setZoom(PZ.z0*PZ.d0/d,true)}}},{capture:true});
+['pointerup','pointercancel'].forEach(n=>look.addEventListener(n,e=>{if(e.pointerId===JDYN.id){e.stopImmediatePropagation();jdynEnd();return}if(PZ.p[e.pointerId]){const multi=Object.keys(PZ.p).length>1;delete PZ.p[e.pointerId];if(multi){lp=null;e.stopImmediatePropagation()}}},{capture:true}));
+/* Blick-Empfindlichkeit */
+var SENSM=1;try{SENSM=+localStorage.getItem('dfSens')||1}catch(e){}
+const _setCtrlS=setCtrl;setCtrl=function(m){_setCtrlS.apply(this,arguments);SENS*=SENSM;if(CTRL==='pc'&&JDYN.id!==null)jdynEnd()};
+setCtrl(CTRL);
+if(ACCK.indexOf('dfSens')<0)ACCK.push('dfSens','dfZoom');
+
+/* --- Spind: alle Skins ansehen und anziehen --- */
+const DEFART='<svg class="rv-gun" viewBox="0 0 160 290"><rect x="40" y="6" width="80" height="22" fill="#3b2414"/><rect x="44" y="22" width="72" height="72" fill="#e0ac7e"/><rect x="40" y="18" width="10" height="26" fill="#3b2414"/><rect x="110" y="18" width="10" height="26" fill="#3b2414"/><rect x="58" y="54" width="12" height="9" fill="#1d1d1f"/><rect x="90" y="54" width="12" height="9" fill="#1d1d1f"/><rect x="72" y="80" width="16" height="3" fill="#9b5a3c"/><rect x="40" y="100" width="80" height="92" fill="#2f6fb0"/><rect x="4" y="104" width="36" height="86" fill="#2a64a0"/><rect x="120" y="104" width="36" height="86" fill="#2a64a0"/><rect x="4" y="190" width="36" height="10" fill="#e0ac7e"/><rect x="120" y="190" width="36" height="10" fill="#e0ac7e"/><rect x="42" y="192" width="36" height="78" fill="#1d2433"/><rect x="82" y="192" width="36" height="78" fill="#1d2433"/><rect x="42" y="270" width="36" height="14" fill="#111"/><rect x="82" y="270" width="36" height="14" fill="#111"/></svg>';
+function spindUI(back){const c=HEARD.s.filter(i=>i<6).length;
+ const it=[{id:'default',n:'Standard',art:DEFART,ok:true,h:''},{id:'mask',n:'Der Maskierte',art:SKINART,ok:!!SKIN.unlocked,h:'Irgendwo im Haus versteckt'},{id:'gent',n:'Der Gentleman',art:GENTART,ok:!!SKIN.g,h:'Höre Song 1–6 der Playlist ('+c+'/6)'}];
+ ov('<div class="ios"><h2 style="margin:4px 0 0">🧥 Spind</h2><div class="sub">'+it.filter(x=>x.ok).length+' von '+it.length+' Skins freigeschaltet · zum Ansehen wischen</div><div class="spg">'
+  +it.map(x=>'<div class="spc'+(SKIN.cur===x.id?' on':'')+(x.ok?'':' lk')+'"><div class="spa">'+x.art.replace(/style="[^"]*"/,'')+'</div><b>'+(x.ok?x.n:'???')+'</b><small>'+(x.ok?(SKIN.cur===x.id?'✓ Angezogen':'Freigeschaltet'):'🔒 '+x.h)+'</small>'+(x.ok&&SKIN.cur!==x.id?'<button class="pill blue" data-wear="'+x.id+'" style="margin-top:4px">Anziehen</button>':'')+'</div>').join('')
+  +'</div><p class="foot">Den Skin siehst du im Spiel in der 3.-Person-Ansicht (👁 oben).</p><button class="btn" id="spx" style="width:100%">Zurück</button></div>',true);
+ document.querySelectorAll('[data-wear]').forEach(b=>b.onclick=()=>{applySkin(b.dataset.wear);toast('🧥 Angezogen: '+({default:'Standard',mask:'Der Maskierte',gent:'Der Gentleman'})[b.dataset.wear],'good');spindUI(back)});
+ $('spx').onclick=()=>{closeOv();if(back)back()}}
+const _sklSp=skinLine;skinLine=function(){return _sklSp()+'<div class="grp" style="margin-top:6px"><button class="row" id="spind"><span class="ic" style="background:#ff9f0a">🧥</span><span class="tx"><b>Spind</b><small>Alle Skins ansehen und anziehen</small></span><i class="chev">›</i></button></div>'
+ +'<div class="cap">Blick-Empfindlichkeit (Touch &amp; Maus)</div>'+segH('data-sens',[['0.7','Langsam'],['1','Normal'],['1.4','Schnell'],['1.8','Sehr schnell']],String(SENSM))};
+const _bsSp=bindSkin;bindSkin=function(){_bsSp();const b=document.getElementById('spind');if(b)b.onclick=()=>{const inStart=cr===0&&S.tied;closeOv();spindUI(inStart?()=>menuStart():()=>openMenu())};
+ bindSeg('data-sens',v=>{SENSM=+v||1;try{localStorage.setItem('dfSens',String(SENSM))}catch(e){}setCtrl(CTRL);toast('Blick-Empfindlichkeit: '+({'0.7':'Langsam','1':'Normal','1.4':'Schnell','1.8':'Sehr schnell'})[v],'good')})};
+
+/* --- Pro Bild: Fadenkreuz & obere Leiste --- */
+const _srtUI=snkRspTick;snkRspTick=function(){_srtUI();try{$('xhair').style.display=(GUN.eq&&!ovOn&&!lm&&!REV.open)?'block':'none';$('topc').style.display=(ovOn||REV.open)?'none':'flex'}catch(e){}};
+
+/* ===================== Fortschritts-Code: funktioniert auf jedem Gerät, ohne Server und ohne Speicher ===================== */
+const LS_OK=(()=>{try{localStorage.setItem('__dft','1');const ok=localStorage.getItem('__dft')==='1';localStorage.removeItem('__dft');return ok}catch(e){return false}})();
+const PCM=524288,PCA=0x2f6b1,PCB=0x1d3a5;
+const PCAI=(()=>{let x=PCA;for(let i=0;i<6;i++){x=(x*((2-((PCA*x)%PCM)+PCM)%PCM))%PCM}return x})();
+const mulM=(a,b)=>{const lo=(a&1023)*b%PCM,hi=((a>>10)*b%PCM)*1024%PCM;return (lo+hi)%PCM};
+function pcChk(b){let h=0x5bd1;for(let i=0;i<13;i++)h=(h*31+((b>>i)&1)+7)&0xffff;return (h^(h>>6))&63}
+function pcBits(d){let b=0;const f=k=>d[k]==='1';if(f('dfShotgun'))b|=1;if(f('dfShotLoad'))b|=2;if(f('dfSkinU'))b|=4;if(f('dfSkinG'))b|=8;if(f('dfDev'))b|=16;
+ let h=[];try{h=JSON.parse(d.dfHeard||'[]')}catch(e){}(h||[]).forEach(i=>{if(i>=0&&i<6)b|=1<<(5+i)});b|=(({mask:1,gent:2})[d.dfSkin]||0)<<11;return b}
+function pcEnc(d){const b=pcBits(d);let n=(mulM((b<<6)|pcChk(b),PCA)+PCB)%PCM;let c='';for(let i=0;i<4;i++){c=ACCA[n%31]+c;n=Math.floor(n/31)}return c}
+function pcDec(code){code=String(code||'').toUpperCase();if(!/^[A-Z2-9]{4}$/.test(code))return null;let n=0;for(const ch of code){const v=ACCA.indexOf(ch);if(v<0)return null;n=n*31+v}
+ if(n>=PCM)return null;const m=mulM((n-PCB+PCM)%PCM,PCAI),b=m>>6;if(pcChk(b)!==(m&63))return null;const h=[];for(let i=0;i<6;i++)if(b&(1<<(5+i)))h.push(i);
+ return {dfShotgun:b&1?'1':'0',dfShotLoad:b&2?'1':'0',dfSkinU:b&4?'1':'0',dfSkinG:b&8?'1':'0',dfDev:b&16?'1':'0',dfHeard:JSON.stringify(h),dfSkin:['default','mask','gent'][(b>>11)&3]||'default'}}
+/* Fortschritt kommt immer aus dem laufenden Spiel (funktioniert auch ohne Speicher) */
+const _accSnapLS=accSnap;accSnap=function(){const d=_accSnapLS();d.dfShotgun=GUN.unlocked?'1':'0';d.dfShotLoad=GUN.loadout?'1':'0';d.dfSkinU=SKIN.unlocked?'1':'0';d.dfSkinG=SKIN.g?'1':'0';d.dfDev=DEV.unlocked?'1':'0';
+ d.dfHeard=JSON.stringify((HEARD.s||[]).filter(i=>i>=0&&i<6));d.dfSkin=SKIN.cur||'default';if(accReady()&&!d.dfName)d.dfName=accCur().name;return d};
+function pcLive(d){GUN.unlocked=d.dfShotgun==='1';GUN.loadout=d.dfShotLoad==='1';SKIN.unlocked=d.dfSkinU==='1';SKIN.g=d.dfSkinG==='1';DEV.unlocked=d.dfDev==='1';
+ try{HEARD.s=JSON.parse(d.dfHeard||'[]')}catch(e){HEARD.s=[]}applySkin(d.dfSkin||'default');if(isOP())opApply()}
+let ACCSTART=false;
+accSave=function(force){if(!accReady())return;const a=accCur(),d=accSnap(),js=JSON.stringify(d);if(js===a.js&&!force)return;a.data=d;a.js=js;a.ts=Date.now();
+ if(!a.op){const c=pcEnc(d);if(ACCSTART&&a.code&&a.code!==c)toast('🔑 Neu freigeschaltet! Dein neuer Code: '+c,'good');a.code=c}ACCSTART=true;accStore()};
+accSwitch=function(id){if(ACC.active!==id)accSave(true);ACC.active=id;const d=accCur().data||{};accApply(d);accStore();
+ if(LS_OK)location.reload();else{pcLive(d);closeOv();menuStart()}};
+accCreate=async function(name){const first=!Object.keys(ACC.list).length;accSave(true);const data=first?accSnap():{dfShotgun:'0',dfShotLoad:'0',dfSkinU:'0',dfSkinG:'0',dfDev:'0',dfHeard:'[]',dfSkin:'default'};
+ data.dfName=name;const id='A'+Date.now().toString(36);ACC.list[id]={id,name,data,ts:Date.now(),code:pcEnc(data)};ACC.active=id;accApply(data);accStore();if(!LS_OK)pcLive(data);return ACC.list[id].code};
+accLogin=async function(raw,nm){const code=String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+ if(code==='BBBB'){if(ACC.list.BB&&!ACC.list.BBBB){ACC.list.BBBB=ACC.list.BB;delete ACC.list.BB}
+  if(!ACC.list.BBBB)ACC.list.BBBB={id:'BBBB',code:'BBBB',name:'Entwickler (OP)',op:true,data:{},ts:Date.now()};Object.assign(ACC.list.BBBB.data,OPDATA);ACC.list.BBBB.op=true;accSwitch('BBBB');return ''}
+ if(code.length!==4)return 'Der Code hat 4 Zeichen.';
+ accSave(true);const hit=Object.keys(ACC.list).find(k=>!ACC.list[k].op&&pcEnc(ACC.list[k].data||{})===code);if(hit){accSwitch(hit);return ''}
+ const d=pcDec(code);if(!d)return 'Diesen Code gibt es nicht. Prüfe die 4 Zeichen (es gibt kein 0, O, 1, I und L).';
+ const name=(nm||'').trim().replace(/\s+/g,' ').slice(0,14)||'Spieler';d.dfName=name;const id='A'+Date.now().toString(36);ACC.list[id]={id,name,data:d,ts:Date.now(),code};accSwitch(id);return ''};
+cloudCheck=async()=>false;cloudPush=()=>{};cloudGet=async()=>({off:true});
+accLine=function(){if(!accReady())return '';const a=accCur();
+ if(a.op)return '<div class="cap">Account</div><div class="grp"><div class="row"><span class="ic" style="background:#ff9f0a">⭐</span><span class="tx"><b>'+esc(a.name)+' <span class="opb">OP</span></b><small>Code BBBB · alles freigeschaltet, keine Passwörter</small></span><button class="pill" id="accsw" style="flex:none">Wechseln</button></div></div>';
+ return '<div class="cap">Account</div><div class="grp"><div class="row"><span class="ic" style="background:#0a84ff">👤</span><span class="tx"><b>'+esc(a.name)+'</b><small>Dein Code: <b style="letter-spacing:2px">'+pcEnc(accSnap())+'</b> · gilt auf jedem Gerät</small></span><button class="pill" id="accsw" style="flex:none">Wechseln</button></div></div>'};
+accShowCode=function(name,code){ov('<div class="ios" style="text-align:center"><h2 style="margin:6px 0">Hallo '+esc(name)+'!</h2><p class="foot">Das ist dein Code. Mach am besten einen Screenshot:</p>'
+  +'<div style="font:800 64px var(--ios);letter-spacing:12px;margin:14px 0;padding:14px;border-radius:22px;background:rgba(10,132,255,.18);border:2px solid #0a84ff">'+code+'</div>'
+  +'<p class="foot">Der Code enthält deinen Fortschritt. Damit kommst du auf <b>jedem</b> Gerät an deine Sachen. Schaltest du etwas Neues frei, bekommst du einen neuen Code – er steht immer im Startmenü.</p><button class="btn" id="accgo" style="margin-top:10px">Los geht’s</button></div>',true);
+ $('accgo').onclick=()=>{if(LS_OK)location.reload();else{closeOv();menuStart()}}};
+accUI=function(msg){const others=Object.values(ACC.list).sort((a,b)=>(b.ts||0)-(a.ts||0));
+ ov('<div class="ios"><h2 style="margin:4px 0 2px">👤 Willkommen!</h2><p class="foot" style="margin:0 0 10px">Gib einen Namen ein und tippe auf „Erstellen“ – oder gib deinen Code ein. Dein Code enthält deine freigeschalteten Sachen.</p>'
+  +(msg?'<p class="err" style="margin:0 0 8px">'+esc(msg)+'</p>':'')
+  +'<div class="cap">Wie willst du heißen?</div><div class="grp"><div class="row"><input id="accn" maxlength="14" placeholder="Dein Name" autocomplete="off" style="flex:1;min-width:0;background:transparent;border:0;color:inherit;font:600 17px var(--ios);outline:none"><button class="pill" id="accmk" style="flex:none;background:#0a84ff;color:#fff">Erstellen</button></div></div>'
+  +'<div class="cap">Schon einen Code?</div><div class="grp"><div class="row"><input id="accc" maxlength="4" placeholder="z. B. K7P4" autocomplete="off" autocapitalize="characters" style="flex:1;min-width:0;background:transparent;border:0;color:inherit;font:700 20px var(--ios);letter-spacing:4px;text-transform:uppercase;outline:none"><button class="pill" id="acclg" style="flex:none">Einloggen</button></div></div>'
+  +(others.length?'<div class="cap">Accounts auf diesem Gerät</div><div class="grp">'+others.map(a=>{const k=Object.keys(ACC.list).find(x=>ACC.list[x]===a);return '<button class="row" data-acc="'+k+'"><span class="ic" style="background:'+(k===ACC.active?'#30d158':a.op?'#ff9f0a':'#5e5ce6')+'">'+(a.op?'⭐':'👤')+'</span><span class="tx"><b>'+esc(a.name)+(k===ACC.active?' (aktiv)':'')+'</b><small>Code '+(a.op?'BBBB':pcEnc(a.data||{}))+'</small></span><i class="chev">›</i></button>'}).join('')+'</div>':'')
+  +'<p class="foot" style="margin-top:10px">🔑 Der Code funktioniert auf jedem Gerät – Handy, iPad oder PC.'+(LS_OK?'':' Hier wird nichts dauerhaft gespeichert, merk dir also deinen Code.')+'</p></div>',true);
+ const go=async f=>{const b=document.querySelectorAll('#accmk,#acclg');b.forEach(x=>x.disabled=true);try{await f()}finally{b.forEach(x=>x.disabled=false)}};
+ $('accmk').onclick=()=>go(async()=>{let n=($('accn').value||'').trim().replace(/\s+/g,' ');if(n.length<2)return accUI('Der Name braucht mindestens 2 Zeichen.');try{n=mpCensor(n)}catch(e){}const c=await accCreate(n);accShowCode(n,c)});
+ $('acclg').onclick=()=>go(async()=>{let n=($('accn').value||'').trim();try{if(n)n=mpCensor(n)}catch(e){}const e=await accLogin($('accc').value||'',n);if(e)accUI(e)});
+ $('accn').onkeydown=e=>{if(e.key==='Enter')$('accmk').click()};$('accc').onkeydown=e=>{if(e.key==='Enter')$('acclg').click()};
+ document.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{if(b.dataset.acc===ACC.active){closeOv();menuStart()}else accSwitch(b.dataset.acc)})};
+if(ACC.list.BB&&!ACC.list.BBBB){ACC.list.BBBB=ACC.list.BB;ACC.list.BBBB.code='BBBB';delete ACC.list.BB;if(ACC.active==='BB')ACC.active='BBBB';accStore()}
+if(isOP())opApply();
 tween(.01,()=>{},()=>{});
 pos.x=0;Pt=-.8;$('loc').textContent=NAMES[0];inv();
 menuStart();

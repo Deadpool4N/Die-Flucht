@@ -2306,7 +2306,7 @@ const GENTOPT={tok:VINYL3D,name:'DER GENTLEMAN',rar:'★ EPISCH ★',rarStyle:'b
  stats:'<span>🎩 Neuer Skin</span><span>🎵 Für 6 gehörte Songs</span><span>⚙ Ausrüsten: Start- oder Pausenmenü</span>'};
 function gentReveal(sub,onClose){lm=true;showRevealX(sub,()=>{SKIN.g=true;try{localStorage.setItem('dfSkinG','1')}catch(e){}},()=>{applySkin('gent')},()=>{lm=false;onClose&&onClose()},GENTOPT)}
 const skReopen=()=>{if(cr===0&&S.tied)menuStart()};
-function skinLine(){const o=[['default','Standard']];if(SKIN.unlocked)o.push(['mask','🎭 Maskierter']);if(SKIN.g)o.push(['gent','🎩 Gentleman']);
+function skinLine(){const o=[['default','Standard']];if(SKIN.unlocked)o.push(['mask','🎭 Maskierter']);if(SKIN.g)o.push(['gent','🎩 Gentleman']);if(SKIN.y)o.push(['ynr','😎 Ynr']);
  let h='<div class="cap">Skin</div>';if(o.length>1)h+=segH('data-sk',o,SKIN.cur);const lk=[];
  if(!SKIN.unlocked)lk.push('<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Der Maskierte</b><small>Gesperrt · irgendwo im Haus versteckt</small></span></div>'+(CHEATS?'<button class="row" id="skincheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Maskierten per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':''));
  if(!SKIN.g)lk.push('<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Der Gentleman</b><small>Höre Song 1–6 der Spotify-Playlist ('+HEARD.s.filter(i=>i<6).length+'/6)</small></span></div>'+(CHEATS?'<button class="row" id="gentcheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Gentleman per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':''));
@@ -2452,11 +2452,11 @@ if(ACCK.indexOf('dfSens')<0)ACCK.push('dfSens','dfZoom');
 /* --- Spind: alle Skins ansehen und anziehen --- */
 const DEFART='<svg class="rv-gun" viewBox="0 0 160 290"><rect x="40" y="6" width="80" height="22" fill="#3b2414"/><rect x="44" y="22" width="72" height="72" fill="#e0ac7e"/><rect x="40" y="18" width="10" height="26" fill="#3b2414"/><rect x="110" y="18" width="10" height="26" fill="#3b2414"/><rect x="58" y="54" width="12" height="9" fill="#1d1d1f"/><rect x="90" y="54" width="12" height="9" fill="#1d1d1f"/><rect x="72" y="80" width="16" height="3" fill="#9b5a3c"/><rect x="40" y="100" width="80" height="92" fill="#2f6fb0"/><rect x="4" y="104" width="36" height="86" fill="#2a64a0"/><rect x="120" y="104" width="36" height="86" fill="#2a64a0"/><rect x="4" y="190" width="36" height="10" fill="#e0ac7e"/><rect x="120" y="190" width="36" height="10" fill="#e0ac7e"/><rect x="42" y="192" width="36" height="78" fill="#1d2433"/><rect x="82" y="192" width="36" height="78" fill="#1d2433"/><rect x="42" y="270" width="36" height="14" fill="#111"/><rect x="82" y="270" width="36" height="14" fill="#111"/></svg>';
 function spindUI(back){const c=HEARD.s.filter(i=>i<6).length;
- const it=[{id:'default',n:'Standard',art:DEFART,ok:true,h:''},{id:'mask',n:'Der Maskierte',art:SKINART,ok:!!SKIN.unlocked,h:'Irgendwo im Haus versteckt'},{id:'gent',n:'Der Gentleman',art:GENTART,ok:!!SKIN.g,h:'Höre Song 1–6 der Playlist ('+c+'/6)'}];
+ const it=[{id:'default',n:'Standard',art:DEFART,ok:true,h:''},{id:'mask',n:'Der Maskierte',art:SKINART,ok:!!SKIN.unlocked,h:'Irgendwo im Haus versteckt'},{id:'gent',n:'Der Gentleman',art:GENTART,ok:!!SKIN.g,h:'Höre Song 1–6 der Playlist ('+c+'/6)'},{id:'ynr',n:'Ynr',art:YNART,ok:!!SKIN.y,h:'Mit Passwort freischalten'}];
  ov('<div class="ios"><h2 style="margin:4px 0 0">🧥 Spind</h2><div class="sub">'+it.filter(x=>x.ok).length+' von '+it.length+' Skins freigeschaltet · zum Ansehen wischen</div><div class="spg">'
   +it.map(x=>'<div class="spc'+(SKIN.cur===x.id?' on':'')+(x.ok?'':' lk')+'"><div class="spa">'+x.art.replace(/style="[^"]*"/,'')+'</div><b>'+(x.ok?x.n:'???')+'</b><small>'+(x.ok?(SKIN.cur===x.id?'✓ Angezogen':'Freigeschaltet'):'🔒 '+x.h)+'</small>'+(x.ok&&SKIN.cur!==x.id?'<button class="pill blue" data-wear="'+x.id+'" style="margin-top:4px">Anziehen</button>':'')+'</div>').join('')
   +'</div><p class="foot">Den Skin siehst du im Spiel in der 3.-Person-Ansicht (👁 oben).</p><button class="btn" id="spx" style="width:100%">Zurück</button></div>',true);
- document.querySelectorAll('[data-wear]').forEach(b=>b.onclick=()=>{applySkin(b.dataset.wear);toast('🧥 Angezogen: '+({default:'Standard',mask:'Der Maskierte',gent:'Der Gentleman'})[b.dataset.wear],'good');spindUI(back)});
+ document.querySelectorAll('[data-wear]').forEach(b=>b.onclick=()=>{applySkin(b.dataset.wear);toast('🧥 Angezogen: '+({default:'Standard',mask:'Der Maskierte',gent:'Der Gentleman',ynr:'Ynr'})[b.dataset.wear],'good');spindUI(back)});
  $('spx').onclick=()=>{closeOv();if(back)back()}}
 const _sklSp=skinLine;skinLine=function(){return _sklSp()+'<div class="grp" style="margin-top:6px"><button class="row" id="spind"><span class="ic" style="background:#ff9f0a">🧥</span><span class="tx"><b>Spind</b><small>Alle Skins ansehen und anziehen</small></span><i class="chev">›</i></button></div>'
  +'<div class="cap">Blick-Empfindlichkeit (Touch &amp; Maus)</div>'+segH('data-sens',[['0.7','Langsam'],['1','Normal'],['1.4','Schnell'],['1.8','Sehr schnell']],String(SENSM))};
@@ -2573,6 +2573,62 @@ look.addEventListener('pointerup',e=>{const t=TAP;TAP=null;if(!t||t.id!==e.point
 addEventListener('keydown',e=>{if(e.code==='KeyM'&&!(e.target&&e.target.matches&&e.target.matches('input,textarea'))&&!ovOn&&CTRL==='pc'){MLOCK=!MLOCK;if(!MLOCK&&document.pointerLockElement)document.exitPointerLock();toast(MLOCK?'🖱 Maus gefangen (Klick ins Bild). M gibt sie wieder frei.':'🖱 Mauszeiger frei – Gegenstände direkt anklicken.','good')}});
 tween(.01,()=>{},()=>{});
 pos.x=0;Pt=-.8;$('loc').textContent=NAMES[0];inv();
+/* ===================== Skin „Ynr“ (Passwort) ===================== */
+var YN=null;
+try{SKIN.y=localStorage.getItem('dfSkinY')==='1'}catch(e){}
+{const g=new THREE.Group();av.add(g);g.visible=false;
+ const hair=M(0x0a0707),brow=M(0x060404),blk=M(0x0b0b0c),wht=M(0xeeeeee),gry=M(0xb4b4b4),lip=M(0xa8706a);
+ /* Haare: Mittelscheitel */
+ const hair2=M(0x17100e);
+ [-1,1].forEach(k=>{const rz=(m,v)=>{m.rotation.z=-k*v;return m};
+  rz(box(.15,.08,.29,k*.1,1.73,.01,hair,g),.12);rz(box(.11,.05,.29,k*.155,1.685,.01,hair2,g),.38);
+  box(.15,.055,.03,k*.1,1.64,.148,hair,g);
+  box(.03,.13,.29,k*.14,1.6,0,hair,g)});
+ /* dicke Augenbrauen + halb geschlossene Lider */
+ [-.07,.07].forEach(x=>{box(.1,.032,.02,x,1.575,.142,brow,g);box(.07,.014,.02,x,1.545,.143,blk,g)});
+ /* Schnurrbart, Lippen, Kinnbart */
+ box(.11,.022,.02,0,1.445,.145,brow,g);box(.075,.016,.02,0,1.415,.144,lip,g);box(.1,.06,.025,0,1.375,.142,brow,g);
+ /* Shirt-Aufdruck */
+ {const cv=document.createElement('canvas');cv.width=512;cv.height=256;const x=cv.getContext('2d');x.textAlign='center';x.textBaseline='middle';
+  x.fillStyle='#e9e6df';x.direction='rtl';x.font='bold 118px "Segoe UI","Noto Naskh Arabic","Geeza Pro",Tahoma,Arial,sans-serif';x.fillText('\u064A\u0648\u0646\u063A\u0646 \u0648\u064A\u0630 \u0643\u0627\u0634',256,88);
+  x.direction='ltr';x.font='bold 40px Arial,Helvetica,sans-serif';x.fillStyle='#d8d5ce';if('letterSpacing' in x)x.letterSpacing='3px';x.fillText('YOUNGIN WITH CASH',256,196);
+  const tx=new THREE.CanvasTexture(cv);tx.anisotropy=4;const pm=new THREE.MeshLambertMaterial({map:tx,transparent:true,emissive:0x2a2a2a});
+  const pl=new THREE.Mesh(new THREE.PlaneGeometry(.4,.2),pm);pl.position.set(0,1.17,.1455);g.add(pl)}
+ /* kurze Ärmel: Unterarme in Hautfarbe */
+ const hands=[aL,aR].map(a=>{const h=box(.14,.3,.14,0,-.43,0,AM.sk,a);h.visible=false;return h});
+ YN={g,hands}}
+const _apY=applySkin;
+applySkin=function(name){
+ if(YN){YN.g.visible=false;YN.hands.forEach(h=>h.visible=false)}
+ if(!(name==='ynr'&&SKIN.y)){_apY(name);return}
+ _apY('default');SKIN.cur='ynr';
+ AM.sh.color.setHex(0x0c0c0d);AM.pa.color.setHex(0x16161b);AM.sk.color.setHex(0xc79a76);AM.hr.color.setHex(0x0a0707);AM.sb.color.setHex(0x0a0a0a);
+ YN.g.visible=true;YN.hands.forEach(h=>h.visible=true);
+ try{localStorage.setItem('dfSkin','ynr')}catch(e){}};
+{let sv='';try{sv=localStorage.getItem('dfSkin')||''}catch(e){}if(sv==='ynr'&&SKIN.y)applySkin('ynr')}
+var YNART='<svg class="rv-gun" viewBox="0 0 160 290"><rect x="50" y="28" width="60" height="68" fill="#c79a76"/><rect x="40" y="14" width="80" height="14" fill="#0a0707"/><rect x="44" y="8" width="33" height="7" fill="#0a0707"/><rect x="83" y="8" width="33" height="7" fill="#0a0707"/><rect x="40" y="26" width="10" height="26" fill="#0a0707"/><rect x="110" y="26" width="10" height="26" fill="#0a0707"/><rect x="50" y="28" width="27" height="8" fill="#0a0707"/><rect x="83" y="28" width="27" height="8" fill="#0a0707"/><rect x="54" y="44" width="22" height="7" fill="#060404"/><rect x="84" y="44" width="22" height="7" fill="#060404"/><rect x="58" y="54" width="14" height="5" fill="#111"/><rect x="88" y="54" width="14" height="5" fill="#111"/><rect x="66" y="78" width="28" height="5" fill="#060404"/><rect x="70" y="85" width="20" height="4" fill="#a8706a"/><rect x="68" y="90" width="24" height="9" fill="#060404"/><rect x="40" y="100" width="80" height="92" fill="#0c0c0d"/><text x="80" y="140" text-anchor="middle" font-size="20" font-weight="bold" fill="#e9e6df" font-family="Tahoma,Arial,sans-serif">يونغن ويذ كاش</text><text x="80" y="156" text-anchor="middle" font-size="8" font-weight="bold" letter-spacing="1" fill="#d8d5ce" font-family="Arial,sans-serif">YOUNGIN WITH CASH</text><rect x="4" y="104" width="36" height="40" fill="#0c0c0d"/><rect x="120" y="104" width="36" height="40" fill="#0c0c0d"/><rect x="4" y="144" width="36" height="56" fill="#c79a76"/><rect x="120" y="144" width="36" height="56" fill="#c79a76"/><rect x="42" y="192" width="36" height="78" fill="#16161b"/><rect x="82" y="192" width="36" height="78" fill="#16161b"/><rect x="42" y="270" width="36" height="14" fill="#0a0a0a"/><rect x="82" y="270" width="36" height="14" fill="#0a0a0a"/></svg>';
+/* Passwort-Panel */
+function pwTry(){const i=document.getElementById('pwin'),m=document.getElementById('pwmsg');if(!i)return;
+ if(i.value.trim().toLowerCase()==='ynr'){const first=!SKIN.y;SKIN.y=true;try{localStorage.setItem('dfSkinY','1')}catch(e){}applySkin('ynr');
+  toast(first?'😎 Skin „Ynr“ freigeschaltet und angezogen!':'😎 Skin „Ynr“ angezogen.','good');
+  if(document.getElementById('cin')){menuStart();const m2=document.getElementById('pwmsg');if(m2){m2.textContent='Skin „Ynr“ angezogen!';m2.style.color='#30d158'}}else closeOv();}
+ else{m.textContent='Falsches Passwort.';m.style.color='#ff453a'}}
+function pwInject(){if(document.getElementById('pwpan'))return;
+ const d=document.createElement('div');d.id='pwpan';
+ d.innerHTML='<div class="cap">Passwort</div><div class="grp"><div class="row"><input id="pwin" placeholder="Passwort" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="pill blue" id="pwgo">OK</button></div></div><div id="pwmsg" class="foot"></div>';
+ const cm=document.getElementById('cmsg');
+ if(cm)cm.after(d);else{const mr=document.getElementById('mr');if(mr&&mr.parentNode&&mr.parentNode.parentNode)mr.parentNode.before(d);else{const o=document.querySelector('.ios');if(!o)return;o.appendChild(d)}}
+ document.getElementById('pwgo').onclick=pwTry;
+ document.getElementById('pwin').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter')pwTry()})}
+const _ms3=menuStart;menuStart=function(){_ms3();pwInject()};
+const _pui3=pauseUI;pauseUI=function(p2){_pui3(p2);pwInject()};
+
+/* Twitch-Link */
+{const a=document.createElement('a');a.id='twl';a.href='https://twitch.tv/keshynr';a.target='_blank';a.rel='noopener noreferrer';a.textContent='📺 Twitch: keshynr';
+ a.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 6px);z-index:70;padding:4px 12px;border-radius:14px;font:600 12px -apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif;color:#fff;background:rgba(145,70,255,.82);text-decoration:none;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);opacity:.9;white-space:nowrap';
+ a.addEventListener('pointerdown',e=>e.stopPropagation());a.addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
+ document.body.appendChild(a)}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

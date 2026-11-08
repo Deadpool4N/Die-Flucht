@@ -463,7 +463,7 @@ function spawnRow(){const lanes=[-3,-1,1,3].sort(()=>Math.random()-.5).slice(0,d
   else if(r<.7)addO(new THREE.Mesh(new THREE.BoxGeometry(2,.8,.3),M(0xdddddd,0x440000)),x,.4,-120,{hw:1,hl:.3});
   else addO(new THREE.Mesh(new THREE.ConeGeometry(.35,.8,8),M(0xff6a00,0x331100)),x,.4,-120,{hw:.4,hl:.35})})}
 function beginDrive(){lm=true;drv.obs.forEach(o=>road.remove(o.m));drv.obs=[];GOAL=DF.goal;drv.lit=true;Object.assign(drv,{on:true,view:true,x:0,sp:0,dist:0,lives:DF.lives,nextD:60,nextDec:0});sc.fog.near=12;sc.fog.far=65;lamp.distance=50;
- ['joy','hint'].forEach(i=>$(i).style.display='none');$('drive').style.display='flex';$('dhud').style.display='block';toast('Fahre los! Weiche den Hindernissen aus. Lenken, Gas, Bremse. Scheinwerfer: Button oder Taste L.')}
+ ['joy','hint'].forEach(i=>$(i).style.display='none');$('drive').style.display='flex';$('dhud').style.display='block';toast('Fahre los! Weiche den Hindernissen aus. Lenken, Gas, Bremse (Leertaste). Scheinwerfer: Button oder Taste L.')}
 function crash(i){const o=drv.obs[i];road.remove(o.m);drv.obs.splice(i,1);if(!CH.god)drv.lives--;drv.sp*=.3;shake(.35);const f=$('fade');f.style.background='#600';f.style.opacity=.5;setTimeout(()=>{f.style.opacity=0;f.style.background='#000'},200);
  if(drv.lives<=0){drv.on=false;$('drive').style.display='none';const p=$('chase');p.style.display='block';p.innerHTML='<h3 class="err" style="margin:4px">Totalschaden!</h3><button class="btn" id="re3">Nochmal fahren</button>';$('re3').onclick=()=>{p.style.display='none';beginDrive()}}}
 function finishDrive(){drv.on=false;$('drive').style.display='none';$('dhud').style.display='none';win()}
@@ -482,7 +482,7 @@ function updGame(dt,t,now){if(ovOn)return;
   d.rotation.y=Math.atan2(dx,dz);d.userData.legs.forEach((l,k)=>l.rotation.x=Math.sin(t*14+k*1.6)*.7);d.position.y=Math.abs(Math.sin(t*10+i))*.08;
   if(!gd.climb&&now>gd.go&&now>=(d.stun||0)&&L<.8)gardenCaught()});
  if(gd.climb){const f=1-(now-gd.t0)/DF.climb,b=$('cbar');if(b)b.style.width=Math.max(0,f*100)+'%';if(f<=0)gardenCaught()}
- if(drv.on){const gas=drv.gas||keys.ArrowUp||keys.KeyW,brk=drv.brk||keys.ArrowDown||keys.KeyS;
+ if(drv.on){const gas=drv.gas||keys.ArrowUp||keys.KeyW,brk=drv.brk||keys.ArrowDown||keys.KeyS||keys.Space;
   drv.sp+=((gas?30:brk?6:16)-drv.sp)*Math.min(1,dt*1.6);
   const st=((drv.right||keys.ArrowRight||keys.KeyD)?1:0)-((drv.left||keys.ArrowLeft||keys.KeyA)?1:0);
   drv.x=Math.max(-3.7,Math.min(3.7,drv.x+st*dt*(3.5+drv.sp*.18)));pcar.position.x=drv.x;pcar.rotation.y=-st*.18;drv.dist+=drv.sp*dt;
@@ -526,7 +526,8 @@ const IA=[
  if(!S.f.chest)return toast('Die Tür ist verschlossen. Ich brauche einen Schlüssel.','err');
  if(!need('Schlüssel','Wähle zuerst den Schlüssel aus.'))return;toast('Der Schlüssel dreht sich. Eine Treppe führt hinab.','good');openDoor(door1,()=>tele(2,0,2.6,0))}},
 {r:2,x:0,z:-2.4,lab:()=>!S.f.safe&&'Tresor untersuchen',run(){keypad()}},
-{r:2,x:3,z:-3.1,lab:()=>S.f.safe&&'Den Gängen folgen',run(){
+{r:2,x:3,z:-3.1,lab:()=>S.f.safe?'Den Gängen folgen':'Dunkle Öffnung untersuchen',run(){
+ if(!S.f.safe)return toast('Die Öffnung ist noch verborgen. Öffne zuerst den Tresor.','err');
  if(!need('Kellerkarte','Ohne Karte verirre ich mich im Dunkeln. Wähle zuerst die Kellerkarte aus.'))return;tele(3,MS.x,MS.z,0,()=>toast('Das Labyrinth! Öffne die Kellerkarte im Inventar und finde den Ausgang.'))}},
 {r:4,x:-2,z:-1.1,lab:()=>!S.f.big&&'Große Truhe öffnen',run(){
  if(!need('Truhenschlüssel','Verschlossen. Wähle zuerst den Truhenschlüssel aus.'))return;S.f.big=1;toast('Das Schloss springt auf. Darin steht eine kleinere Truhe.','good');
@@ -535,7 +536,8 @@ const IA=[
  if(S.sel==='Truhenschlüssel')return toast('Der Schlüssel passt nicht. Das Schloss ist kleiner. Anderes Werkzeug nötig.','err');
  if(!need('Dietrich','Verschlossen. Wähle zuerst ein Werkzeug aus.'))return;
  pick(DF.pins[1],()=>{S.f.small=1;openLid(smallChest.lid);give('Hauskarte','Haustürschlüssel')})}},
-{r:4,x:3,z:-3.1,lab:()=>S.f.small&&'Haustür aufschließen',run(){
+{r:4,x:3,z:-3.1,lab:()=>'Haustür aufschließen',run(){
+ if(!S.f.small)return toast('Die Tür ist verschlossen. Ich brauche den Haustürschlüssel (er liegt in der kleinen Truhe).','err');
  if(!need('Haustürschlüssel','Die Tür ist verschlossen. Wähle zuerst den Haustürschlüssel aus.'))return;openDoor(door4,()=>tele(5,0,10.5,0,chase))}},
 {r:6,x:0,z:-16.2,lab:()=>gd.on&&!gd.climb&&'Über den Zaun klettern',run(){startClimb()}},
 {r:7,x:1.4,z:-1.5,lab:()=>!S.f.carOpen&&'Autotür knacken',run(){
@@ -693,7 +695,7 @@ function jset(e){const r=joy.getBoundingClientRect(),m=r.width/2;let dx=e.client
 joy.addEventListener('pointerdown',e=>{jp=e.pointerId;joy.setPointerCapture(e.pointerId);jset(e)});
 joy.addEventListener('pointermove',e=>{if(e.pointerId===jp)jset(e)});
 ['pointerup','pointercancel'].forEach(n=>joy.addEventListener(n,()=>{jp=null;if(CH.stickLock&&Math.hypot(jx,jz)>.2)return;jx=jz=0;$('knob').style.transform=''}));
-addEventListener('keydown',e=>keys[e.code]=1);addEventListener('keyup',e=>keys[e.code]=0);
+addEventListener('keydown',e=>{keys[e.code]=1;if(e.code==='Space'&&drv.on)e.preventDefault()});addEventListener('keyup',e=>keys[e.code]=0);
 let near=null;$('act').onclick=()=>{if(near&&!busy&&!ovOn)near.run()};
 function size(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}addEventListener('resize',size);size();
 /* ---------- Schleife ---------- */
@@ -706,7 +708,7 @@ function frame(now){requestAnimationFrame(frame);if(perfSkip(now))return;const d
  lampFix();
  spin.forEach(g=>{g.rotation.y+=dt*1.6;g.position.y=g.userData.y0+Math.sin(t*2.5)*.05});
  if(!(busy||ovOn||lm||S.tied)){
-  let f=-jz,r=jx;if(keys.KeyW||keys.ArrowUp)f++;if(keys.KeyS||keys.ArrowDown)f--;if(keys.KeyD||keys.ArrowRight)r++;if(keys.KeyA||keys.ArrowLeft)r--;if(keys.ShiftLeft||keys.ShiftRight){f*=.6;r*=.6}
+  let f=-jz,r=jx;if(keys.KeyW||keys.ArrowUp)f++;if(keys.KeyS||keys.ArrowDown)f--;if(keys.KeyD||keys.ArrowRight)r++;if(keys.KeyA||keys.ArrowLeft)r--;
   const L=Math.hypot(f,r);if(L>.08){const n=Math.min(1,L)/L,sp=(L>.85?(CH.fast?6:4.2):(CH.fast?3.6:2.7))*dt*MPSPD*SNKF,dx=(-Math.sin(Y)*f+Math.cos(Y)*r)*n*sp,dz=(-Math.cos(Y)*f-Math.sin(Y)*r)*n*sp,cx=cr*20;
    moveP(dx,dz);mvRun=L>.85?1:.25;bob+=dt*(L>.85?15:9)}}
  if(false){const f=0;$('bar')&&($('bar').style.width=Math.max(0,f*100)+'%');
@@ -820,7 +822,7 @@ const gLights=[];
   box(.5*sz,2.4*sz,.5*sz,x,1.2*sz,z,tm,g);box(2.8*sz,2.6*sz,2.8*sz,x,3.4*sz,z,cm,g)}
 })();
 const dog3=mkDog();
-function lampFix(){RM[6].g.visible=cr===6;driveFx();dogFix();if((ovOn||lm)&&document.pointerLockElement)document.exitPointerLock();lamp.color.setHex(cr===6?0xaab8ff:0xffd9a0);lamp.distance=16;
+function lampFix(){RM.forEach((r,i)=>{if(r&&r.g){r.g.visible=(i===cr);if(r.b){r.b.visible=false;const c=r.g.children[6];if(c&&c.geometry&&c.geometry.parameters&&c.geometry.parameters.width===.04)c.visible=false}}});driveFx();dogFix();if((ovOn||lm)&&document.pointerLockElement)document.exitPointerLock();lamp.color.setHex(cr===6?0xaab8ff:0xffd9a0);lamp.distance=16;
  if(cr===3){lamp.position.set(pos.x,2.3,pos.z);lamp.distance=9;lamp.intensity=1.5}
  else if(cr===5){lamp.position.set(100,2.6,5);lamp.distance=22}
  else if(cr===6){lamp.position.set(pos.x,7,pos.z);lamp.distance=30;lamp.intensity=1.2}
@@ -929,7 +931,7 @@ function newGame(){CODE=String(1000+Math.floor(Math.random()*9000));_note=null;r
 let CTRL=(navigator.maxTouchPoints>1)?(Math.min((window.screen||{width:999}).width,(window.screen||{height:999}).height)<700?'phone':'ipad'):'pc',SENS=.005;
 function setCtrl(m){CTRL=m;document.body.classList.remove('pc','ipad','phone');document.body.classList.add(m);SENS=m==='ipad'?.0065:m==='phone'?.0078:.005;
  try{R.setPixelRatio(perfRatio());size()}catch(e){}
- $('hint').textContent=m==='pc'?'WASD: laufen · Shift: schleichen · Maus: umsehen (Klick fängt die Maus) · E: Aktion · P: Pause · L: Licht · Mausrad: Inventar · Q: Item nutzen':'Wischen: umsehen · Stick: laufen'}
+ $('hint').textContent=m==='pc'?'WASD: laufen · Maus: umsehen (Klick fängt die Maus) · E: Aktion · P: Pause · L: Licht · Mausrad: Inventar · Q: Item nutzen':'Wischen: umsehen · Stick: laufen'}
 function FOVB(){return (CTRL==='phone'&&innerHeight>innerWidth)?86:70}
 function markCt(){document.querySelectorAll('[data-ct]').forEach(b=>b.style.borderColor=b.dataset.ct===CTRL?'var(--acc)':'')}
 function ctlBtn(){const b=document.createElement('button');b.className='btn';b.id='mctl';b.style.cssText='display:block;width:100%';b.textContent='Steuerung: '+(CTRL==='pc'?'💻 PC':'📱 iPad')+' (wechseln)';$('m0').after(b);b.onclick=()=>{setCtrl(CTRL==='pc'?'ipad':'pc');closeOv();openMenu()}}
@@ -1081,7 +1083,7 @@ IA.push(
 {r:10,x:3,z:-1.2,lab:()=>P2&&'Monitor BLAU ablesen',run(){mon(2)}},{r:10,x:3,z:1.4,lab:()=>P2&&'Monitor GRÜN ablesen',run(){mon(3)}},
 {r:10,x:-2.2,z:-2.6,lab:()=>P2&&!S.f.rack&&'Server-Rack durchsuchen',run(){S.f.rack=1;give('Rack-Zettel')}},
 {r:10,x:1.6,z:-2.5,lab:()=>P2&&!S.f.srv&&'Terminal benutzen',run(){keypad2(P2D.code,()=>{S.f.srv=1;toast('ZUGRIFF GEWÄHRT. Das Schloss öffnet sich.','good');give('Wartungsplan','Gebäudeplan')})}},
-{r:10,x:0,z:-3.1,lab:()=>P2&&'Tür öffnen',run(){if(!S.f.srv)return toast('Verriegelt. Das Terminal steuert das Schloss.','err');openDoor(door10,()=>tele(3,MS.x,MS.z,0,()=>{hzReset();toast('Die Katakomben! Er patrouilliert hier. Rennen macht Lärm: schleichen (Stick halb / Shift).','err')}))}},
+{r:10,x:0,z:-3.1,lab:()=>P2&&'Tür öffnen',run(){if(!S.f.srv)return toast('Verriegelt. Das Terminal steuert das Schloss.','err');openDoor(door10,()=>tele(3,MS.x,MS.z,0,()=>{hzReset();toast('Die Katakomben! Er patrouilliert hier. Rennen macht Lärm: Stick nur halb schieben.','err')}))}},
 {r:12,x:-6.6,z:2,lab:()=>P2&&!S.f.cage&&'Hebel „Dreieck“ ziehen',run(){lever(0)}},{r:12,x:6.6,z:-2,lab:()=>P2&&!S.f.cage&&'Hebel „Kreis“ ziehen',run(){lever(1)}},{r:12,x:-4.5,z:-6.6,lab:()=>P2&&!S.f.cage&&'Hebel „Quadrat“ ziehen',run(){lever(2)}},
 {r:12,x:0,z:-6.4,lab:()=>P2&&S.f.cage&&'Durch das Tor fliehen',run(){p2End()}});
 function mon(k){S.f.mon=S.f.mon||{};S.f.mon[k]=1;if(!has('Notizbuch'))give('Notizbuch');toast('Monitor '+CN[k].toUpperCase()+' zeigt: '+P2D.expr[k]+'  (im Notizbuch vermerkt)')}
@@ -1239,7 +1241,7 @@ function startPart2(key){DF=LV[key];P2=true;NAMES[3]='Die Katakomben';newGame2()
 })();
 
 /* ===================== SOUND & MUSIK (Web Audio, alles selbst erzeugt) ===================== */
-const AU={ctx:null,mus:null,sfx:null,master:null,bus:null,noise:null,mode:'syn',track:0,cur:0,auto:true,musicOn:true,sfxOn:true,vol:.9,next:0,step:0,t0:0,started:false,desired:-1,ext:[],el:null,eng:null,heart:0,bark:0};
+const AU={ctx:null,mus:null,sfx:null,master:null,bus:null,noise:null,mode:'syn',track:0,cur:0,auto:true,musicOn:false,sfxOn:true,vol:.9,next:0,step:0,t0:0,started:false,desired:-1,ext:[],el:null,eng:null,heart:0,bark:0};
 const mtof=n=>440*Math.pow(2,(n-69)/12);
 function nt(f,t,d,o){o=o||{};const c=AU.ctx,os=c.createOscillator(),g=c.createGain(),fl=c.createBiquadFilter(),a=o.a||.01,r=o.r||.2,v=o.g||.1;os.type=o.type||'sine';os.frequency.value=f;if(o.det)os.detune.value=o.det;fl.type='lowpass';fl.frequency.value=o.lp||2400;
  g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.setValueAtTime(v,t+Math.max(a,d));g.gain.exponentialRampToValueAtTime(.0001,t+d+r);os.connect(fl);fl.connect(g);g.connect(AU.bus);os.start(t);os.stop(t+d+r+.05)}
@@ -1779,7 +1781,9 @@ const sleepH=hunter.clone(),secZ=mkLabel();let maskG;
  box(1.5,2.4,.12,0,1.2,4.42,M(0x2a1a0e),g);box(.1,.1,.08,.5,1.1,4.34,gold,g);
  g.add(sleepH);sleepH.position.set(-3.3,.72,1.0);sleepH.rotation.x=-Math.PI/2;sleepH.visible=false;
  secZ.position.set(-3.3,1.7,0);setLabel(secZ,'Zzz …');g.add(secZ);
- box(.06,1.6,1.1,-3.93,.9,.8,M(0x241c18),RM[4].g);box(.04,.5,.06,-3.9,1.0,1.2,M(0x3a2a22),RM[4].g)})();
+ {const r4=RM[4].g,fr=M(0x140c06),dw=M(0x5a3d22,0x1c1108);
+ box(.08,2.3,1.5,-3.87,1.15,.8,fr,r4);box(.1,2.1,1.2,-3.84,1.05,.8,dw,r4);
+ box(.06,.1,.1,-3.76,1.05,1.3,gold,r4);box(.05,.5,.07,-3.77,1.05,1.25,gold,r4)}})();
 function secretEnter(){closeOv();lm=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;H=1.6;S.tied=false;
  hunter.visible=false;dogs.forEach(d=>d.visible=false);['chase','drive','dhud','mini'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});maskG.visible=!S.f.mask;
  tele(14,0,3.2,0,()=>toast('🛏 Das Zimmer des Jägers. Er schläft tief ... Bleib leise. Auf dem Tisch liegt eine Maske.'))}
@@ -1787,7 +1791,7 @@ function secTick(){const on=cr===14;sleepH.visible=on;if(!on)return;
  lamp.position.set(280,2.3,0);lamp.distance=13;lamp.intensity=1;lamp.color.setHex(0xffc890);sc.fog.near=2;sc.fog.far=16;
  const t=performance.now()/1e3;sleepH.scale.y=1+Math.sin(t*1.6)*.015;secZ.position.y=1.7+Math.sin(t*1.2)*.08}
 IA.push(
-{r:4,x:-3.3,z:.8,lab:()=>'Verdächtige Stelle in der Wand abtasten',run(){if(!S.f.hint2){S.f.hint2=1;toast('Es klingt hohl ... Da ist ein Spalt. Tippe nochmal.')}else{SEC.from=4;secretEnter()}}},
+{r:4,x:-3.3,z:.8,lab:()=>'Geheimtür öffnen',run(){SEC.from=4;secretEnter()}},
 {r:14,x:.5,z:-2.9,lab:()=>!S.f.mask&&'Maske aufheben',run(){S.f.mask=1;maskG.visible=false;
   if(SKIN.unlocked){if(!has('Maske'))S.inv.push('Maske');inv();toast('Du nimmst die Maske. Tippe sie im Inventar an.','good');return}
   skinReveal('Gefunden im Zimmer des Jägers. Setze sie im Inventar auf oder rüste den Skin im Startmenü aus.')}},
@@ -2229,9 +2233,9 @@ function snkSet(v){SNK.on=v;$('sneakb').classList.toggle('on',v)}
 let _snkT=0;
 function snkRspTick(){const n=performance.now(),dt=Math.min(.1,(n-(_snkT||n))/1e3);_snkT=n;try{snkTick(dt)}catch(e){console.error('snk',e)}try{rspTick(dt)}catch(e){console.error('rsp',e)}}
 function snkTick(dt){const inRoom=cr===14,keyS=!!(keys.ShiftLeft||keys.ShiftRight);
- $('sneakb').style.display=(CTRL!=='pc'&&!ovOn&&!lm&&(inRoom||cr===13))?'flex':'none';
- const sneaking=SNK.on||keyS;SNKF=sneaking?.42:1;
- if(!inRoom){SNK.noise=0;$('noise').style.display='none';return}
+ $('sneakb').style.display=(CTRL!=='pc'&&!ovOn&&!lm&&inRoom)?'flex':'none';
+ const sneaking=inRoom&&(SNK.on||keyS);SNKF=sneaking?.42:1;
+ if(!inRoom){if(SNK.on)snkSet(false);SNK.noise=0;$('noise').style.display='none';return}
  const now=performance.now(),moving=Math.hypot(pos.x-(SNK.px||pos.x),pos.z-(SNK.pz||pos.z))/Math.max(dt,.001);SNK.px=pos.x;SNK.pz=pos.z;
  if(lm||ovOn||busy){$('noise').style.display='none';return}
  const run=moving>1.6&&!sneaking,walk=moving>.4&&!sneaking;
@@ -2245,9 +2249,9 @@ function snkWake(){if(lm||busy)return;lm=true;SNK.noise=0;shake(.4);sfx('err');
  const iv=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/700);sleepH.rotation.x=-Math.PI/2*(1-k);sleepH.position.set(-3.3+ (pos.x-280+3.3)*k*.9,.72*(1-k),1+(pos.z-1)*k*.9);
   if(k>=1){clearInterval(iv);const f=$('fade');f.style.background='#600';f.style.opacity=.7;const p=$('chase');p.style.display='block';
    p.innerHTML='<h3 class="err" style="margin:4px">Du hast den Jäger geweckt!</h3><p>Er packt dich im Dunkeln ...</p><button class="btn" id="snkr">Nochmal</button>';
-   $('snkr').onclick=()=>{f.style.background='#000';f.style.opacity=0;p.style.display='none';sleepH.rotation.x=-Math.PI/2;sleepH.position.set(-3.3,.72,1);SNK.noise=0;snkSet(true);
-    tele(SEC.from===13?13:SEC.from===9?9:4,0,SEC.from===13?9:SEC.from===9?2:2.6,0,()=>toast('Nochmal: Im Zimmer des Jägers musst du schleichen (🤫 / Shift).','err'))}}},33)}
-const _secEnter=secretEnter;secretEnter=function(){snkSet(true);SNK.noise=0;const r=_secEnter();setTimeout(()=>toast('🤫 Hier musst du SCHLEICHEN. Hörst du auf, wacht er auf und erwischt dich!','err'),2600);return r};
+   $('snkr').onclick=()=>{f.style.background='#000';f.style.opacity=0;p.style.display='none';sleepH.rotation.x=-Math.PI/2;sleepH.position.set(-3.3,.72,1);SNK.noise=0;snkSet(false);
+    tele(SEC.from===13?13:SEC.from===9?9:4,0,SEC.from===13?9:SEC.from===9?2:2.6,0,()=>toast('Nochmal: Im Zimmer des Jägers musst du schleichen (Shift am PC / 🤫-Knopf am iPad & Handy).','err'))}}},33)}
+const _secEnter=secretEnter;secretEnter=function(){snkSet(false);SNK.noise=0;const r=_secEnter();setTimeout(()=>toast('🤫 Hier musst du SCHLEICHEN (Shift halten bzw. 🤫-Knopf). Gehst du normal, steigt der Lärm, und er wacht auf!','err'),2600);return r};
 
 /* ===================== Skin „Der Gentleman“ (Belohnung: Song 1–6 durchhören) ===================== */
 const suitG=new THREE.Group();av.add(suitG);suitG.visible=false;const SUITH=[];

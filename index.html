@@ -283,6 +283,44 @@ body.phone.fpson2 #inv{top:calc(env(safe-area-inset-top,0px) + 166px)}
 .mkm{position:absolute;left:38%;right:38%;top:76%;height:3.2%;background:#050506}
 @keyframes mkin{0%{transform:translateY(120px) scale(.2) rotateX(10deg) rotateY(0);opacity:0}18%{opacity:1}100%{transform:translateY(0) scale(1) rotateX(8deg) rotateY(1800deg);opacity:1}}
 @keyframes mkidle{from{transform:rotateX(8deg) rotateY(0)}to{transform:rotateX(8deg) rotateY(360deg)}}
+
+/* Shotgun dreht sich im Ladebildschirm */
+.sg3w{width:min(62vmin,420px)!important;height:min(26vmin,180px)!important;margin-left:calc(min(62vmin,420px)/-2)!important;margin-top:calc(min(26vmin,180px)/-2)!important}
+#reveal.rev .sg3w{transform:translate(-50%,-10%) scale(1.02)}
+.sg3{filter:drop-shadow(0 0 26px #ffc83c)}
+#reveal.rev .sg3{animation:mkidle 7s linear infinite}
+.sgl{position:absolute;inset:0}
+.sgl i{position:absolute;display:block;border-radius:4px}
+.sgb{left:4%;top:38%;width:58%;height:11%;background:linear-gradient(180deg,#9aa1ad,#4a4f58);border:1px solid #ffd60a}
+.sgp{left:13%;top:52%;width:44%;height:8%;background:linear-gradient(180deg,#848b96,#3e434b);border:1px solid #ffd60a}
+.sgr{left:28%;top:50%;width:18%;height:15%;background:linear-gradient(180deg,#c58446,#6b3d19);border:1px solid #ffd60a}
+.sgg{left:58%;top:31%;width:19%;height:28%;background:linear-gradient(180deg,#9aa1ad,#3c4047);border:1px solid #ffd60a}
+.sgs{left:74%;top:26%;width:24%;height:44%;background:linear-gradient(160deg,#c58446,#5e3414);border:1px solid #ffd60a;border-radius:6px 16px 20px 6px}
+.sgm{left:63%;top:58%;width:9%;height:16%;background:#ffd60a;border-radius:0 0 10px 10px}
+@keyframes sgin{0%{transform:translateY(120px) scale(.2) rotateY(0);opacity:0}18%{opacity:1}100%{transform:translateY(0) scale(1) rotateY(1800deg);opacity:1}}
+/* Respawn-Effekt */
+#sneakb{position:fixed;z-index:6;right:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 280px);width:92px;height:92px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(30,30,38,.72);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font:700 15px var(--ios);display:none;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+#sneakb b{font-size:26px;font-weight:400}
+#sneakb.on{background:rgba(48,209,88,.55);border-color:#30d158}
+body.pc #sneakb{display:none!important}
+body.phone #sneakb{width:70px;height:70px;font-size:12px;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 196px)}
+#noise{position:fixed;z-index:6;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 150px);width:min(60vw,320px);display:none;text-align:center;font:600 13px var(--ios);color:#fff;text-shadow:0 1px 3px #000}
+#noise s{display:block;height:9px;border-radius:5px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:4px}
+#noise s i{display:block;height:100%;width:0;background:linear-gradient(90deg,#30d158,#ffd60a,#ff453a)}
+
+/* Gentleman: drehender Kopf im Ladebildschirm */
+.g2l{position:absolute;inset:0;border-radius:8px;background:#cfd4d8;border:1px solid #9aa0a6}
+.g2f .g2h{position:absolute;left:0;right:0;top:0;height:30%;background:#1d2a48;border-radius:8px 8px 0 0}
+.g2f .g2e{position:absolute;top:42%;width:16%;height:10%;background:#9fe8ff;box-shadow:0 0 14px #5cd6ff,0 0 4px #fff}
+.g2f .g2m{position:absolute;left:36%;right:36%;top:72%;height:4%;background:#6b6f74}
+.g2b .g2h{position:absolute;left:0;right:0;top:0;height:100%;background:#1d2a48;border-radius:8px}
+
+/* Schallplatte (Ladebildschirm Gentleman) */
+.vnw{height:min(30vmin,190px)!important;margin-top:calc(min(30vmin,190px)/-2)!important}
+.vnl{position:absolute;inset:0;border-radius:50%;background:repeating-radial-gradient(circle,#0d0d0f 0 2px,#202024 2px 4px);border:2px solid #000}
+.vnf{box-shadow:inset 0 0 22px rgba(255,255,255,.08)}
+.vnl-l{position:absolute;left:34%;top:34%;width:32%;height:32%;border-radius:50%;background:radial-gradient(circle,#f2f2f2 0 7%,#c8102e 8% 72%,#7a0d18 73% 100%);display:flex;align-items:center;justify-content:center;color:#fff;font:800 clamp(14px,3vmin,22px) var(--ios)}
+.vng{filter:drop-shadow(0 0 22px #ff375f)}
 </style>
 </head><body>
 <div id="look"></div>
@@ -636,7 +674,7 @@ function frame(now){requestAnimationFrame(frame);if(perfSkip(now))return;const d
  spin.forEach(g=>{g.rotation.y+=dt*1.6;g.position.y=g.userData.y0+Math.sin(t*2.5)*.05});
  if(!(busy||ovOn||lm||S.tied)){
   let f=-jz,r=jx;if(keys.KeyW||keys.ArrowUp)f++;if(keys.KeyS||keys.ArrowDown)f--;if(keys.KeyD||keys.ArrowRight)r++;if(keys.KeyA||keys.ArrowLeft)r--;if(keys.ShiftLeft||keys.ShiftRight){f*=.6;r*=.6}
-  const L=Math.hypot(f,r);if(L>.08){const n=Math.min(1,L)/L,sp=(L>.85?(CH.fast?6:4.2):(CH.fast?3.6:2.7))*dt*MPSPD,dx=(-Math.sin(Y)*f+Math.cos(Y)*r)*n*sp,dz=(-Math.cos(Y)*f-Math.sin(Y)*r)*n*sp,cx=cr*20;
+  const L=Math.hypot(f,r);if(L>.08){const n=Math.min(1,L)/L,sp=(L>.85?(CH.fast?6:4.2):(CH.fast?3.6:2.7))*dt*MPSPD*SNKF,dx=(-Math.sin(Y)*f+Math.cos(Y)*r)*n*sp,dz=(-Math.cos(Y)*f-Math.sin(Y)*r)*n*sp,cx=cr*20;
    moveP(dx,dz);mvRun=L>.85?1:.25;bob+=dt*(L>.85?15:9)}}
  if(false){const f=0;$('bar')&&($('bar').style.width=Math.max(0,f*100)+'%');
   hunter.position.z=-3.4+(1-f)*3.6;hunter.position.x=Math.sin(t*5)*.08;hunter.rotation.z=Math.sin(t*6)*.05;if(f<=0)caught('Zu langsam!')}
@@ -756,7 +794,7 @@ function lampFix(){RM[6].g.visible=cr===6;driveFx();dogFix();if((ovOn||lm)&&docu
  if(drv.view){lamp.position.set(160+drv.x,4,-4);lamp.intensity=drv.lit?.9:.28;lamp.distance=50}
  const bg=cr===6?0x0a1226:0x050507;sc.background.setHex(bg);sc.fog.color.setHex(bg);
  sc.fog.near=cr===6?25:cr===8?12:3;sc.fog.far=cr===6?100:cr===8?(drv.lit?72:36):cr===7?26:cr===5?22:cr===3?13:cr===12?28:15;
- gLights.forEach(l=>l.intensity=cr===6?l.userData.i:0);p2Light();p2Tick();audioTick();gunTick();perfTick();devTick();secTick();mpFrame()}
+ gLights.forEach(l=>l.intensity=cr===6?l.userData.i:0);p2Light();p2Tick();audioTick();gunTick();perfTick();devTick();secTick();mpFrame();snkRspTick()}
 function gardenIntro(){const t0=performance.now(),D=5200;lm=true;Y=0;Pt=0;AV.h=Math.PI;
  camOv=s=>{const k=Math.min(1,(performance.now()-t0)/D),e=k*k*(3-2*k);
   cam.position.set(136-e*32+s,2.8+e*1.6+s,-1);cam.lookAt(120,2.6,14);
@@ -977,7 +1015,7 @@ const door9=mkDoor(9,0,0x2a2a30),door10=mkDoor(10,0,0x2a3040);
 (function(){const g=new THREE.Group();g.position.x=240;sc.add(g);const m=M(0x2a2a30);RM[12]={g,m,b:null};
  box(16,.2,16,0,-.1,0,M(0x2a2622),g);box(16,.2,16,0,4.3,0,m,g);[-8,8].forEach(z=>box(16,4.2,.2,0,2.1,z,m,g));[-8,8].forEach(x=>box(.2,4.2,16,x,2.1,0,m,g));
  COL[12]=[];[[-3.2,-2.2],[3.2,-2.2],[-3.2,2.2],[3.2,2.2]].forEach(a=>{box(1.2,4.2,1.2,a[0],2.1,a[1],M(0x3a3a42),g);COL[12].push([240+a[0]-.7,240+a[0]+.7,a[1]-.7,a[1]+.7])});
- BND[12]=[-7.4,7.4,-7.4,7.4];[-4,0,4].forEach(x=>box(1.2,.1,.4,x,4.2,0,M(0xffe0a0,0xffd080),g));
+ BND[12]=[-7.68,7.68,-7.68,7.68];[-4,0,4].forEach(x=>box(1.2,.1,.4,x,4.2,0,M(0xffe0a0,0xffd080),g));
  window.ARG=box(4,4,.3,0,2,-7.85,metal,g);
  const lv=[[-7.6,2,Math.PI/2,0],[7.6,-2,-Math.PI/2,1],[-4.5,-7.6,0,2]];window.LEV=lv.map(a=>{const q=new THREE.Group();q.position.set(a[0],0,a[1]);q.rotation.y=a[2];g.add(q);box(.5,1,.3,0,.5,0,M(0x333338),q);
   const rod=new THREE.Group();rod.position.set(0,1,.2);q.add(rod);box(.1,.8,.1,0,.4,0,metal,rod);box(.22,.22,.22,0,.85,0,M(0x222222,[0xffd030,0x3080ff,0xff3030][a[3]]),rod);
@@ -1124,7 +1162,8 @@ function pauseUI(p2){const J=p2?['Zelle','Serverraum','Katakomben','Maschinenhal
  +(CHEATS?'<div class="cap">Admin-Panel</div><div class="grp">'+swr('god','Unverwundbar')+swr('fast','Turbo-Laufen')+swr('skip',p2?'Rätsel überspringen':'Schlösser überspringen')+swr('noclip','Durch Wände')+swr('infammo','Unendlich Schrot')+'</div>'
   +'<div class="cap">Ansicht</div>'+segH('data-view',[['auto','Auto'],['tp','3. Person'],['fp','Ego']],CH.view)
   +'<div class="cap">Steuerung testen (Dev)</div><div class="grp">'+swr('stickLock','Stick einrasten (Maus-Test)')+swr('touchViz','Touch-Punkte anzeigen')+'</div><div class="foot" style="text-align:left;margin:6px 12px 0">Oben unter „Steuerung“ wählst du PC, iPad oder Handy. Taste <b>F4</b> wechselt im laufenden Spiel. Das gilt im normalen Spiel, nicht nur im Entwicklerraum.</div>'
-  +'<div class="cap">Items</div><div class="grp">'+rowGo('id="mi" data-x','1','Alle Items erhalten')+rowGo('id="mgun" data-x','1','🔫 Shotgun erhalten')+rowGo('id="mskin" data-x','1','🎭 Skin „Maskierter“ erhalten')+rowGo('id="mtp" data-x','1','🚪 In den Skin-Raum teleportieren')+'</div>'
+  +'<div class="cap">Items</div><div class="grp">'+rowGo('id="mi" data-x','1','Alle Items erhalten')+rowGo('id="mgun" data-x','1','🔫 Shotgun erhalten')+rowGo('id="mskin" data-x','1','🎭 Skin „Maskierter“ erhalten')+rowGo('id="mgent" data-x','1','🎩 Skin „Gentleman“ erhalten')+rowGo('id="msuit" data-x','1','🌹 Skin „Gentleman“ erhalten')+rowGo('id="mtp" data-x','1','🚪 In den Skin-Raum teleportieren')+'</div>'
+  +'<div class="cap">Skins (Cheat)</div><div class="grp">'+rowGo('id="msk1" data-x','1','🎭 Maskierter holen (mit Animation)')+rowGo('id="msk2" data-x','1','🎩 Gentleman holen (mit Animation)')+rowGo('id="mskall" data-x','1','✨ Alle Skins sofort freischalten')+'</div>'
   +'<div class="cap">Springe zu …</div><div class="grp">'+J.map((n,i)=>rowGo('data-j',i+1,n)).join('')+'</div>':'')
  +'<div class="grp" style="margin-top:16px"><button class="row red" id="mr"><span class="tx"><b>Neustart</b></span></button></div>'+(CHEATS?devSection():'')+'</div>');
  $('m0').onclick=closeOv;bindSeg('data-ct',v=>setCtrl(v));bindSeg('data-lvp',v=>{DF=LV[v];toast('Schwierigkeit: '+v)});bindPerf();
@@ -1260,10 +1299,10 @@ function saShow(t,playing){if(t){$('spt').textContent=t.name;$('sps').textConten
  if(SA.playing&&AU.musicOn){AU.musicOn=false;if(AU.ctx)AU.mus.gain.setTargetAtTime(0,AU.ctx.currentTime,.1)}auUI()}
 function saSdk(){if(SA.player||SA.mobile)return;window.onSpotifyWebPlaybackSDKReady=()=>{const p=new Spotify.Player({name:'Die Flucht 3D',getOAuthToken:cb=>{saAuth().then(cb).catch(()=>{})},volume:.85});SA.player=p;
  p.addListener('ready',e=>{SA.dev=e.device_id;saSay('Bereit – drücke ▶ oder wähle einen Song.')});p.addListener('not_ready',()=>{SA.dev=null});
- p.addListener('player_state_changed',st=>{if(!st)return;const c=st.track_window.current_track;SA.last=saPack(c);saShow(SA.last,!st.paused)});
+ p.addListener('player_state_changed',st=>{if(!st)return;const c=st.track_window.current_track;SA.last=saPack(c);SA.pos=st.position||0;SA.dur=st.duration||0;SA.posT=performance.now();saShow(SA.last,!st.paused)});
  ['initialization_error','authentication_error','account_error','playback_error'].forEach(ev=>p.addListener(ev,e=>saSay('Spotify: '+e.message)));p.connect()};
  const e=document.createElement('script');e.src='https://sdk.scdn.co/spotify-player.js';document.body.appendChild(e)}
-async function saPollOnce(){try{const j=await sapi('/me/player/currently-playing');if(j&&j.item){SA.last=saPack(j.item);saShow(SA.last,j.is_playing)}else saShow(null,false)}catch(e){}}
+async function saPollOnce(){try{const j=await sapi('/me/player/currently-playing');if(j&&j.item){SA.last=saPack(j.item);SA.pos=j.progress_ms||0;SA.dur=j.item.duration_ms||0;SA.posT=performance.now();saShow(SA.last,j.is_playing)}else saShow(null,false)}catch(e){}}
 async function saDevice(){if(SA.dev)return SA.dev;const d=await sapi('/me/player/devices'),L=(d&&d.devices)||[],a=L.find(x=>x.is_active)||L[0];
  if(!a)throw new Error(SA.mobile?'Öffne die Spotify-App auf diesem Gerät, spiele kurz etwas ab und versuche es dann erneut.':'Kein Abspielgerät gefunden.');return a.id}
 async function saPlay(i){try{if(SA.player&&SA.player.activateElement)await SA.player.activateElement();const dev=await saDevice(),list=SA.uris.filter(Boolean),pos=list.indexOf(SA.uris[i]);
@@ -1326,7 +1365,7 @@ function spMake(){if(SP.plain)return spPlain();if(!SP.api||!spHas())return;if(SP
  $('spwrap').innerHTML='<div id="spemb"></div>';
  SP.api.createController($('spemb'),{uri:spUri(),width:'100%',height:SP.list?352:80},c=>{SP.ctrl=c;c.addListener('playback_update',e=>spUpd(e.data));
   c.addListener('ready',()=>{spSay(SP.list?'Playlist bereit. Drücke ▶.':'Bereit. Drücke ▶.');if(SP.want){SP.want=false;try{c.play()}catch(x){}}});spMeta()})}
-function spUpd(d){const was=SP.playing;SP.playing=!d.isPaused;const now=Date.now();
+function spUpd(d){const was=SP.playing;SP.playing=!d.isPaused;SP.pos=d.position||0;SP.dur=d.duration||0;SP.posT=performance.now();const now=Date.now();
  if(SP.playing&&AU.musicOn){AU.musicOn=false;if(AU.ctx)AU.mus.gain.setTargetAtTime(0,AU.ctx.currentTime,.1)}
  if(SP.playing){clearTimeout(SP.t);spMeta()}
  if(!SP.list&&d.duration>0&&d.position>=d.duration-600&&now-SP.last>4000){SP.last=now;spGo(SP.idx+1,true)}auUI()}
@@ -1435,9 +1474,9 @@ function shoot(){const now=performance.now();if(!GUN.eq||!has('Shotgun')||ovOn||
  if(!best){toast('Daneben! Schrot: '+GUN.ammo);return}
  const dx=best.x-pos.x,dz=best.z-pos.z,L=Math.hypot(dx,dz)||1,ux=dx/L,uz=dz/L;
  let msg='Treffer! Betäubt.';
- if(best.k==='d'){best.o.stun=now+5500;best.o.position.x+=ux*5;best.o.position.z+=uz*5;(cr===13?clampTo(best.o,-9,9,-11,11):clampTo(best.o,-28,28,-16.5,33))}
+ if(best.k==='d'){best.o.stun=now+(cr===13?4000:5500);best.o.position.x+=ux*5;best.o.position.z+=uz*5;(cr===13?clampTo(best.o,-9,9,-11,11):clampTo(best.o,-28,28,-16.5,33))}
  else{const o=best.o,key=best.k==='v'?'v'+DEV.rs:best.k==='h'?'h'+ch.i+'_'+RUN.deaths:best.k==='z'?'z'+(HZ.rs||0):'a'+(GUN.ar||0);
-  if(o.hpKey!==key){o.hpKey=key;o.hp=4}o.hp--;const down=o.hp<=0,dur=down?20000:(best.k==='z'?5000:3500);
+  if(o.hpKey!==key){o.hpKey=key;o.hp=4}o.hp--;const down=o.hp<=0,dur=down?(cr===13?4000:20000):(best.k==='z'?5000:3500);
   if(best.k==='h')ch.stun=now+dur;else if(best.k==='z'){HZ.stun=now+dur;HZ.path=[]}else if(best.k==='a')S.f.stun=now+dur;
   if(best.k==='h'){o.position.x+=ux*4;o.position.z+=uz*4;clampTo(o,-4.4,4.4,-3.4,13.6)}
   else if(best.k==='a'){o.position.x+=ux*4;o.position.z+=uz*4;clampTo(o,-7.2,7.2,-7.2,7.2)}
@@ -1514,22 +1553,7 @@ function revSparks(d){const c=d.querySelector('#rvc'),x=c.getContext('2d');c.wid
  let t0=performance.now();const loop=n=>{const dt=(n-t0)/1000;t0=n;x.clearRect(0,0,c.width,c.height);let alive=false;
   P.forEach(p=>{p.l-=dt;if(p.l<=0)return;alive=true;p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.vx*=.99;x.globalAlpha=Math.min(1,p.l);x.fillStyle='hsl('+p.h+',100%,60%)';x.fillRect(p.x,p.y,p.s,p.s)});
   if(alive&&REV.open)requestAnimationFrame(loop)};requestAnimationFrame(loop)}
-function showReveal(sub,onGet,onEquip,onClose){if(REV.open)return;REV.open=true;
- const d=document.createElement('div');d.id='reveal';
- d.innerHTML='<div class="rv-rays"></div><canvas id="rvc"></canvas>'
- +'<div class="rv-load"><div class="rv-lt">AUSRÜSTUNG WIRD GELADEN …</div><div class="rv-lb"><i></i></div></div>'
- +'<div class="rv-stage"><svg class="rv-token" viewBox="0 0 200 200"><defs><radialGradient id="tg" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#ffc93c"/><stop offset="1" stop-color="#b8740a"/></radialGradient></defs><circle cx="100" cy="100" r="92" fill="url(#tg)" stroke="#7a4a05" stroke-width="6"/><circle cx="100" cy="100" r="76" fill="none" stroke="#7a4a05" stroke-width="3" stroke-dasharray="6 6"/><g fill="#5a3503"><ellipse cx="100" cy="90" rx="30" ry="28"/><rect x="82" y="106" width="36" height="20" rx="6"/></g><g fill="#ffd96a"><circle cx="88" cy="90" r="8"/><circle cx="112" cy="90" r="8"/><path d="M100 98 l-5 11 h10z"/></g><g stroke="#5a3503" stroke-width="9" stroke-linecap="round"><line x1="52" y1="140" x2="148" y2="162"/><line x1="148" y1="140" x2="52" y2="162"/></g></svg>'
- +'<svg class="rv-gun" viewBox="0 0 420 150"><defs><linearGradient id="gm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa1ad"/><stop offset=".5" stop-color="#50565f"/><stop offset="1" stop-color="#262a30"/></linearGradient><linearGradient id="gw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c58446"/><stop offset="1" stop-color="#6b3d19"/></linearGradient></defs>'
- +'<rect x="24" y="54" width="236" height="16" rx="8" fill="url(#gm)" stroke="#ffd60a" stroke-width="2"/><rect x="56" y="74" width="180" height="12" rx="6" fill="url(#gm)" stroke="#ffd60a" stroke-width="2"/><rect x="118" y="72" width="70" height="22" rx="8" fill="url(#gw)" stroke="#ffd60a" stroke-width="2"/><rect x="246" y="46" width="76" height="40" rx="8" fill="url(#gm)" stroke="#ffd60a" stroke-width="2"/><polygon points="316,50 398,36 410,104 340,98 316,84" fill="url(#gw)" stroke="#ffd60a" stroke-width="2" stroke-linejoin="round"/><path d="M270 86 q8 26 28 14" fill="none" stroke="#ffd60a" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="52" r="3.5" fill="#ffd60a"/></svg></div>'
- +'<div class="rv-info"><div class="rv-rar">★ LEGENDÄR ★</div><div class="rv-name">SHOTGUN</div><div class="rv-sub">'+sub+'</div>'
- +'<div class="rv-stats"><span>🔫 6 Schuss pro Jagd</span><span>💥 Jäger hält 4 Treffer aus</span><span>🐕 Hunde 5,5 s betäubt</span></div>'
- +'<div class="rv-btns" id="rvb"><button class="rvb gold" id="rvEq">Ausrüsten</button><button class="rvb" id="rvOk">Weiter</button></div></div><div class="rv-flash"></div>';
- document.body.appendChild(d);const snd=revSounds();snd.rise();
- const close=eq=>{try{onGet&&onGet();if(eq&&onEquip)onEquip()}catch(e){}REV.open=false;d.remove();onClose&&onClose()};
- let revealed=false;const reveal=()=>{if(revealed)return;revealed=true;d.classList.add('rev');snd.boom();revSparks(d);setTimeout(()=>$('rvb')&&$('rvb').classList.add('on'),1500)};
- setTimeout(()=>d.classList.add('go'),40);const tm=setTimeout(reveal,2400);
- d.addEventListener('pointerdown',()=>{if(!revealed&&performance.now()-d._t0>700){clearTimeout(tm);reveal()}});d._t0=performance.now();
- d.querySelector('#rvEq').onclick=()=>close(true);d.querySelector('#rvOk').onclick=()=>close(false)}
+function showReveal(sub,onGet,onEquip,onClose){return showRevealX(sub,onGet,onEquip,onClose,GUNOPT)}
 /* Startmenü: Ausrüstung */
 function gunLine(){let h='<div class="cap">Ausrüstung</div><div class="grp">';
  if(GUN.avail())h+='<button class="row" id="gunrow"><span class="ic" style="background:#ffd60a">🔫</span><span class="tx"><b>Shotgun</b><small>Legendär · gilt in Leicht, Mittel und Teil 2'+((GUN.cheat&&!GUN.unlocked)?' · per Cheat':'')+'</small></span><i class="sw'+(GUN.loadout?' on':'')+'"></i></button>';
@@ -1581,7 +1605,7 @@ const DEV={unlocked:false,on:false,rs:0,px:0,pz:0,pt:0,sp:0,c:0};
 try{DEV.unlocked=localStorage.getItem('dfDev')==='1'}catch(e){}
 NAMES[13]='Entwicklerraum';
 const devH=hunter.clone(),devDog=mkDog(),devLb=mkLabel();
-(function(){const g=new THREE.Group();g.position.x=260;sc.add(g);const m=M(0x2a2e38);RM[13]={g,m,b:null};COL[13]=[];BND[13]=[-9.4,9.4,-11.4,11.4];
+(function(){const g=new THREE.Group();g.position.x=260;sc.add(g);const m=M(0x2a2e38);RM[13]={g,m,b:null};COL[13]=[];BND[13]=[-9.68,9.68,-11.68,11.68];
  box(20,.2,24,0,-.1,0,M(0x1d2028),g);box(20,.2,24,0,4.6,0,m,g);[-12,12].forEach(z=>box(20,4.7,.2,0,2.3,z,m,g));[-10,10].forEach(x=>box(.2,4.7,24,x,2.3,0,m,g));
  for(let z=-11;z<=11;z+=2)box(19.6,.02,.05,0,.01,z,M(0x3a4458),g);for(let x=-9;x<=9;x+=2)box(.05,.02,23.6,x,.01,0,M(0x3a4458),g);
  [-1.2,1.2].forEach(x=>box(.1,.03,14,x,.02,3,M(0x103010,0x30c050),g));
@@ -1601,15 +1625,15 @@ const devH=hunter.clone(),devDog=mkDog(),devLb=mkLabel();
 IA.push(
 {r:13,x:-8.4,z:-2,lab:()=>'Waffenregal: Shotgun nehmen',run(){if(!has('Shotgun'))S.inv.push('Shotgun');GUN.ammo=6;S.sel='Shotgun';inv();toast('🔫 Shotgun gezogen. Hier unendlich Schrot. Schieße auf den Dummy!','good')}},
 {r:13,x:-8.4,z:2,lab:()=>'Item-Kiste: alle Items nehmen',run(){Object.keys(INFO).forEach(k=>{if(!has(k))S.inv.push(k)});inv();toast('Alle Items im Inventar. Tippe sie an, um sie zu testen.','good')}},
-{r:13,x:7.4,z:-2,lab:()=>'Dummys zurücksetzen',run(){DEV.rs++;devH.down=0;devH.hp=4;devH.hpKey='';devH.position.set(...DEVSP.h);devDog.stun=0;devDog.rotation.z=0;devDog.position.set(...DEVSP.d);toast('Dummys zurückgesetzt.','good')}},
+{r:13,x:7.4,z:-2,lab:()=>'Dummys zurücksetzen',run(){DEV.rs++;devH.down=0;devH.hp=4;devH.hpKey='';devH.position.set(...DEVSP.h);devDog.stun=0;devDog.rotation.z=0;devDog.position.set(...DEVSP.d);rspFx(DEVSP.h[0],DEVSP.h[2],0xbf5af2);rspFx(DEVSP.d[0],DEVSP.d[2],0x30d158);toast('Dummys zurückgesetzt.','good')}},
 {r:13,x:8.6,z:6,lab:()=>'Entwicklerraum verlassen',run(){location.reload()}});
 function devEnter(){DEV.on=true;RUN.jumped=true;closeOv();lm=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;H=1.6;S.tied=false;
  try{ropes.forEach(r=>r.visible=false)}catch(e){}hunter.visible=false;dogs.forEach(d=>d.visible=false);['chase','drive','dhud','mini'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});
  tele(13,0,9,0,()=>toast('🧪 Entwicklerraum: Waffen, Items und Movement testen. Regale links, Zurücksetzen rechts, Ausgang hinten rechts.'))}
 function devTick(){document.body.classList.toggle('cheaton',!!CHEATS);const inDev=cr===13;devH.visible=inDev;devDog.visible=inDev;const hd=$('devhud');if(hd)hd.style.display=inDev?'block':'none';if(!inDev)return;
  {const nw=performance.now();
-  if(devDog.stun&&nw>=devDog.stun){devDog.stun=0;devDog.rotation.z=0;devDog.position.set(...DEVSP.d)}
-  if(devH.down&&nw>=devH.down){devH.down=0;devH.hp=4;devH.hpKey='';devH.position.set(...DEVSP.h)}}
+  if(devDog.stun&&nw>=devDog.stun){devDog.stun=0;devDog.rotation.z=0;devDog.position.set(...DEVSP.d);rspFx(DEVSP.d[0],DEVSP.d[2],0x30d158)}
+  if(devH.down&&nw>=devH.down){devH.down=0;devH.hp=4;devH.hpKey='';devH.position.set(...DEVSP.h);rspFx(DEVSP.h[0],DEVSP.h[2],0xbf5af2)}}
  lamp.position.set(260,3.6,0);lamp.distance=34;lamp.intensity=1.5;sc.fog.near=14;sc.fog.far=48;
  const now=performance.now();if(DEV.pt){const dt=(now-DEV.pt)/1e3;if(dt>0){const v=Math.hypot(pos.x-DEV.px,pos.z-DEV.pz)/dt;DEV.sp=Math.hypot(pos.x-DEV.px,pos.z-DEV.pz)>2?DEV.sp:DEV.sp*.8+v*.2}}DEV.px=pos.x;DEV.pz=pos.z;DEV.pt=now;
  if(++DEV.c%6===0){hd.textContent='ENTWICKLERRAUM  ·  x '+(pos.x-260).toFixed(1)+'  z '+pos.z.toFixed(1)+'  ·  '+DEV.sp.toFixed(1)+' m/s\nFPS '+Math.round(PERF.live||PERF.fps||0)+'  ·  Ansicht '+CH.view+'  ·  Schrot ∞';
@@ -1659,26 +1683,36 @@ setFps(FPSM.mode);
 
 /* ===================== SKIN „DER MASKIERTE“ & GEHEIMRAUM ===================== */
 const SKIN={unlocked:false,cur:'default'},SK0={sh:AM.sh.color.getHex(),pa:AM.pa.color.getHex(),sk:AM.sk.color.getHex(),hr:AM.hr.color.getHex(),sb:AM.sb.color.getHex()};
-try{SKIN.unlocked=localStorage.getItem('dfSkinU')==='1';SKIN.cur=localStorage.getItem('dfSkin')==='mask'?'mask':'default'}catch(e){}
+try{SKIN.unlocked=localStorage.getItem('dfSkinU')==='1';SKIN.suit=localStorage.getItem('dfSkinS')==='1';const c0=localStorage.getItem('dfSkin');SKIN.cur=(c0==='mask'||c0==='suit')?c0:'default'}catch(e){}
 const skinG=new THREE.Group();av.add(skinG);skinG.visible=false;
 {const blk=M(0x050506),hairM=M(0x0b0b0c),hood=M(0x141416);
  [-.065,.065].forEach(x=>box(.075,.055,.02,x,1.53,.14,blk,skinG));[-.022,.022].forEach(x=>box(.028,.026,.02,x,1.46,.14,blk,skinG));box(.07,.016,.02,0,1.4,.14,blk,skinG);
  [-.14,.14].forEach(x=>box(.03,.15,.29,x,1.6,0,hairM,skinG));box(.29,.06,.03,0,1.655,.13,hairM,skinG);box(.37,.1,.34,0,1.355,0,hood,skinG)}
-function saveSkin(){try{localStorage.setItem('dfSkinU',SKIN.unlocked?'1':'0');localStorage.setItem('dfSkin',SKIN.cur)}catch(e){}}
-function applySkin(name){SKIN.cur=name==='mask'&&SKIN.unlocked?'mask':'default';const m=SKIN.cur==='mask';
- AM.sh.color.setHex(m?0x141416:SK0.sh);AM.pa.color.setHex(m?0x0d0d0f:SK0.pa);AM.sk.color.setHex(m?0xe8e5e1:SK0.sk);AM.hr.color.setHex(m?0x0b0b0c:SK0.hr);AM.sb.color.setHex(m?0x3a3a3e:SK0.sb);skinG.visible=m;saveSkin()}
+function saveSkin(){try{localStorage.setItem('dfSkinU',SKIN.unlocked?'1':'0');localStorage.setItem('dfSkinS',SKIN.suit?'1':'0');localStorage.setItem('dfSkin',SKIN.cur)}catch(e){}}
+function applySkin(name){SKIN.cur=(name==='mask'&&SKIN.unlocked)?'mask':(name==='suit'&&SKIN.suit)?'suit':'default';const m=SKIN.cur==='mask',u=SKIN.cur==='suit';
+ AM.sh.color.setHex(m?0x141416:u?0x111114:SK0.sh);AM.pa.color.setHex(m?0x0d0d0f:u?0x0c0c0e:SK0.pa);AM.sk.color.setHex(m?0xe8e5e1:u?0xcfd4d8:SK0.sk);AM.hr.color.setHex(m?0x0b0b0c:u?0x1d2a48:SK0.hr);AM.sb.color.setHex(m?0x3a3a3e:u?0x0a0a0b:SK0.sb);
+ skinG.visible=m;if(typeof suitG!=='undefined'){suitG.visible=u;SUITH.forEach(h=>h.visible=u)}saveSkin()}
 INFO.Maske='Eine weiße Maske mit schwarzen Augenlöchern. Tippe sie an, um sie aufzusetzen oder abzunehmen.';
 MAPS.Maske=()=>{applySkin(SKIN.cur==='mask'?'default':'mask');toast(SKIN.cur==='mask'?'Du trägst die Maske. (3. Person zeigt den Skin.)':'Maske abgenommen.')};
-function skinLine(){return '<div class="cap">Skin</div>'+(SKIN.unlocked?segH('data-sk',[['default','Standard'],['mask','🎭 Maskierter']],SKIN.cur)
- :'<div class="grp"><div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Der Maskierte</b><small>Gesperrt · irgendwo im Haus versteckt</small></span></div>'+(CHEATS?'<button class="row" id="skincheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Skin per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':'')+'</div>')}
+function skinLine(){const opts=[['default','Standard']];if(SKIN.unlocked)opts.push(['mask','🎭 Maskierter']);if(SKIN.suit)opts.push(['suit','🌹 Gentleman']);
+ let h='<div class="cap">Skin</div>'+(opts.length>1?segH('data-sk',opts,SKIN.cur):'');const lk=[];
+ if(!SKIN.unlocked)lk.push(['Der Maskierte','Gesperrt · irgendwo im Haus versteckt','skincheat']);
+ if(!SKIN.suit)lk.push(['Der Gentleman','Gesperrt · höre Song 1–6 der Playlist durch ('+plhCount()+'/6)','suitcheat']);
+ if(lk.length)h+='<div class="grp" style="margin-top:6px">'+lk.map(l=>'<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>'+l[0]+'</b><small>'+l[1]+'</small></span></div>'+(CHEATS?'<button class="row" id="'+l[2]+'"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>'+l[0]+' per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':'')).join('')+'</div>';
+ return h}
 function bindSkin(){bindSeg('data-sk',v=>{applySkin(v)});
  const c=document.getElementById('skincheat');if(c)c.onclick=()=>skinReveal('Per Cheat erhalten. Du kannst ihn im Startmenü und im Pausenmenü ausrüsten.',()=>menuStart());
  const m=document.getElementById('mskin');if(m)m.onclick=()=>{closeOv();skinReveal('Per Cheat erhalten.',()=>{})};
+ const sc2=document.getElementById('suitcheat');if(sc2)sc2.onclick=()=>suitReveal('Per Cheat erhalten. Du kannst ihn im Startmenü und im Pausenmenü ausrüsten.',()=>menuStart());
+ const ms2=document.getElementById('msuit');if(ms2)ms2.onclick=()=>{closeOv();suitReveal('Per Cheat erhalten.',()=>{})};
  const t=document.getElementById('mtp');if(t)t.onclick=()=>{RUN.jumped=true;SEC.from=P2?9:4;secretEnter()}}
 /* Ladebildschirm für Skins (wie bei der Shotgun) */
 const TOKSVG='<svg class="rv-token" viewBox="0 0 200 200"><defs><radialGradient id="tg" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#fff2a8"/><stop offset=".5" stop-color="#ffc93c"/><stop offset="1" stop-color="#b8740a"/></radialGradient></defs><circle cx="100" cy="100" r="92" fill="url(#tg)" stroke="#7a4a05" stroke-width="6"/><circle cx="100" cy="100" r="76" fill="none" stroke="#7a4a05" stroke-width="3" stroke-dasharray="6 6"/><g fill="#5a3503"><ellipse cx="100" cy="90" rx="30" ry="28"/><rect x="82" y="106" width="36" height="20" rx="6"/></g><g fill="#ffd96a"><circle cx="88" cy="90" r="8"/><circle cx="112" cy="90" r="8"/><path d="M100 98 l-5 11 h10z"/></g><g stroke="#5a3503" stroke-width="9" stroke-linecap="round"><line x1="52" y1="140" x2="148" y2="162"/><line x1="148" y1="140" x2="52" y2="162"/></g></svg>';
 const SKINART='<svg class="rv-gun rv-skinart" style="height:min(40vh,340px);width:auto" viewBox="0 0 160 290"><rect x="38" y="6" width="84" height="34" fill="#0b0b0c"/><rect x="34" y="20" width="10" height="44" fill="#0b0b0c"/><rect x="116" y="20" width="10" height="44" fill="#0b0b0c"/><rect x="44" y="32" width="72" height="64" fill="#ececec"/><rect x="56" y="52" width="18" height="11" rx="4" fill="#050506"/><rect x="86" y="52" width="18" height="11" rx="4" fill="#050506"/><rect x="72" y="72" width="6" height="6" fill="#050506"/><rect x="82" y="72" width="6" height="6" fill="#050506"/><rect x="72" y="84" width="16" height="3" fill="#050506"/><rect x="32" y="94" width="96" height="14" fill="#161618"/><rect x="40" y="104" width="80" height="92" fill="#111113"/><rect x="4" y="104" width="36" height="96" fill="#0e0e10"/><rect x="120" y="104" width="36" height="96" fill="#0e0e10"/><rect x="4" y="170" width="36" height="10" fill="#171719"/><rect x="120" y="170" width="36" height="10" fill="#171719"/><rect x="42" y="196" width="36" height="76" fill="#0c0c0e"/><rect x="82" y="196" width="36" height="76" fill="#0c0c0e"/><rect x="42" y="272" width="36" height="14" fill="#3a3a3e"/><rect x="82" y="272" width="36" height="14" fill="#3a3a3e"/></svg>';
 const MASK3D='<div class="rv-maskwrap"><div class="mk3">'+(()=>{let h='';for(let i=13;i>=1;i--)h+='<div class="mkl" style="transform:translateZ('+(-i*2.2)+'px);filter:brightness('+(1-i*.035).toFixed(2)+')"></div>';return h})()+'<div class="mkl mkf"><i class="mke" style="left:17%"></i><i class="mke" style="right:17%"></i><i class="mkn" style="left:41%"></i><i class="mkn" style="right:41%"></i><i class="mkm"></i></div></div></div>';
+const SHOT3D='<div class="rv-maskwrap sg3w"><div class="mk3 sg3">'+(()=>{let h='';for(let i=9;i>=0;i--){const b=(1-i*.055).toFixed(2);h+='<div class="sgl" style="transform:translateZ('+(-i*2.6)+'px);filter:brightness('+b+')"><i class="sgb"></i><i class="sgp"></i><i class="sgr"></i><i class="sgg"></i><i class="sgs"></i><i class="sgm"></i></div>'}return h})()+'</div></div>';
+const GUNOPT={tok:SHOT3D,name:'SHOTGUN',rar:'★ LEGENDÄR ★',rarStyle:'',art:'<svg class="rv-gun" viewBox="0 0 420 150" style="opacity:0;width:1px;height:1px"></svg>',eq:'Ausrüsten',load:'AUSRÜSTUNG WIRD GELADEN …',
+ stats:'<span>🔫 6 Schuss pro Jagd</span><span>💥 Jäger hält 4 Treffer aus</span><span>🐕 Hunde 5,5 s betäubt</span>'};
 const SKINOPT={tok:MASK3D,name:'DER MASKIERTE',rar:'★ MYTHISCH ★',rarStyle:'background:linear-gradient(90deg,#bf5af2,#5e5ce6);color:#fff',art:SKINART,eq:'Anziehen',load:'SKIN WIRD GELADEN …',
  stats:'<span>🎭 Neuer Skin</span><span>👤 Sichtbar in der 3. Person</span><span>⚙ Ausrüsten: Start- oder Pausenmenü</span>'};
 function showRevealX(sub,onGet,onEquip,onClose,o){if(REV.open)return;REV.open=true;
@@ -1696,7 +1730,7 @@ function skinReveal(sub,onClose){const wasLm=lm;lm=true;
 /* Das Zimmer des Jägers (Geheimraum) */
 const SEC={from:4};NAMES[14]='Zimmer des Jägers';
 const sleepH=hunter.clone(),secZ=mkLabel();let maskG;
-(function(){const g=new THREE.Group();g.position.x=280;sc.add(g);const wm=M(0x2b2420),fm=M(0x1c1612);RM[14]={g,m:wm,b:null};COL[14]=[];BND[14]=[-4.4,4.4,-3.9,3.9];
+(function(){const g=new THREE.Group();g.position.x=280;sc.add(g);const wm=M(0x2b2420),fm=M(0x1c1612);RM[14]={g,m:wm,b:null};COL[14]=[];BND[14]=[-4.68,4.68,-4.18,4.18];
  box(10,.2,9,0,-.1,0,fm,g);box(10,.2,9,0,3.2,0,M(0x1a1512),g);[-4.5,4.5].forEach(z=>box(10,3.3,.2,0,1.6,z,wm,g));[-5,5].forEach(x=>box(.2,3.3,9,x,1.6,0,wm,g));
  const col=(x,z,w,d,h,mat)=>{box(w,h,d,x,h/2,z,mat,g);COL[14].push([280+x-w/2,280+x+w/2,z-d/2,z+d/2])};
  col(-3.3,0,1.7,2.6,.45,M(0x3a2a20));box(1.5,.18,2.4,-3.3,.54,0,M(0x6a2a2a),g);box(.9,.14,.5,-3.3,.7,-1.0,M(0xd8d2c8),g);
@@ -1934,7 +1968,7 @@ function mpModel(ty){const g=new THREE.Group(),add=(geo,mat,x,y,z,rx,rz)=>{const
   add(new THREE.TorusGeometry(.1,.03,8,16),gold,-.18,0,0,Math.PI/2);add(new THREE.BoxGeometry(.32,.05,.05),gold,.04,0,0);add(new THREE.BoxGeometry(.05,.05,.1),gold,.14,0,.06);add(new THREE.BoxGeometry(.05,.05,.07),gold,.2,0,.05)}
  return g}
 /* ---------- Karte (3D) ---------- */
-(function(){const g=new THREE.Group();g.position.x=300;sc.add(g);const wm=M(0x3a322c),fm=M(0x241e1a),cm=M(0x2a2420);RM[15]={g,m:wm,b:null};COL[15]=[];BND[15]=[-19.5,19.5,-14.5,17.6];NAMES[15]='Haus des Jägers';
+(function(){const g=new THREE.Group();g.position.x=300;sc.add(g);const wm=M(0x3a322c),fm=M(0x241e1a),cm=M(0x2a2420);RM[15]={g,m:wm,b:null};COL[15]=[];BND[15]=[-19.63,19.63,-14.63,18.2];NAMES[15]='Haus des Jägers';
  const V=MP.v,L=mpLayout();
  box(40,.2,30,0,-.1,0,fm,g);box(40,.2,30,0,3.5,0,cm,g);box(40,.2,7,0,-.1,18.5,M(0x1f3a1f),g);
  L.walls.forEach(a=>{box(a[2],3.5,a[3],a[0],1.75,a[1],wm,g);COL[15].push([300+a[0]-a[2]/2,300+a[0]+a[2]/2,a[1]-a[3]/2,a[1]+a[3]/2])});
@@ -2138,6 +2172,131 @@ CH.stickLock=false;CH.touchViz=false;
  addEventListener('pointermove',e=>{const d=dots[e.pointerId];if(d)set(e,d)},true);
  ['pointerup','pointercancel'].forEach(n=>addEventListener(n,e=>{const d=dots[e.pointerId];if(d){d.remove();delete dots[e.pointerId]}},true))}
 addEventListener('keydown',e=>{if(e.code==='F4'&&CHEATS){e.preventDefault();const o=['pc','ipad','phone'];setCtrl(o[(o.indexOf(CTRL)+1)%3]);toast('Steuerung: '+({pc:'PC',ipad:'iPad',phone:'Handy'})[CTRL]+' (F4 wechselt)','good')}});
+
+/* ===================== Respawn-Effekt, Sneak & Schleich-Raum ===================== */
+const RSP=[];
+function rspFx(x,z,col){const g=new THREE.Group();g.position.set(x,0,z);(RM[cr]&&RM[cr].g||sc).add(g);
+ const ringG=new THREE.RingGeometry(.35,.5,24),rm=new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.9,side:THREE.DoubleSide,depthWrite:false});
+ const ring=new THREE.Mesh(ringG,rm);ring.rotation.x=-Math.PI/2;ring.position.y=.05;g.add(ring);
+ const pill=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,2.6,16,1,true),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:.35,side:THREE.DoubleSide,depthWrite:false}));pill.position.y=1.3;g.add(pill);
+ const sp=[];for(let i=0;i<14;i++){const a=i/14*6.283,m=new THREE.Mesh(new THREE.BoxGeometry(.07,.07,.07),new THREE.MeshBasicMaterial({color:col}));m.position.set(Math.cos(a)*.5,.1,Math.sin(a)*.5);g.add(m);sp.push({m,a})}
+ RSP.push({g,ring,pill,sp,t:0,parent:RM[cr]&&RM[cr].g||sc});sfx('good')}
+function rspTick(dt){for(let i=RSP.length-1;i>=0;i--){const r=RSP[i];r.t+=dt;const k=Math.min(1,r.t/.85);
+ r.ring.scale.setScalar(.4+k*3.4);r.ring.material.opacity=.9*(1-k);
+ r.pill.scale.set(1-k*.3,1,1-k*.3);r.pill.material.opacity=.35*(1-k);r.pill.rotation.y+=dt*4;
+ r.sp.forEach(p=>{const d=.5+k*1.5;p.m.position.set(Math.cos(p.a+k*2)*d,.1+k*1.6,Math.sin(p.a+k*2)*d);p.m.material.opacity=1-k;p.m.material.transparent=true});
+ if(k>=1){r.parent.remove(r.g);RSP.splice(i,1)}}}
+/* Sneak */
+const SNK={on:false,noise:0,woke:0};let SNKF=1;
+{const b=document.createElement('button');b.id='sneakb';b.innerHTML='<b>🤫</b>SCHLEICHEN';document.body.appendChild(b);
+ const n=document.createElement('div');n.id='noise';n.innerHTML='<span id="noiseT">Lärm</span><s><i id="noiseB"></i></s>';document.body.appendChild(n);
+ b.onpointerdown=e=>{e.preventDefault();snkSet(!SNK.on)}}
+function snkSet(v){SNK.on=v;$('sneakb').classList.toggle('on',v)}
+let _snkT=0;
+function snkRspTick(){const n=performance.now(),dt=Math.min(.1,(n-(_snkT||n))/1e3);_snkT=n;try{snkTick(dt)}catch(e){console.error('snk',e)}try{rspTick(dt)}catch(e){console.error('rsp',e)}}
+function snkTick(dt){const inRoom=cr===14,keyS=!!(keys.ShiftLeft||keys.ShiftRight);
+ $('sneakb').style.display=(CTRL!=='pc'&&!ovOn&&!lm&&(inRoom||cr===13))?'flex':'none';
+ const sneaking=SNK.on||keyS;SNKF=sneaking?.42:1;
+ if(!inRoom){SNK.noise=0;$('noise').style.display='none';return}
+ const now=performance.now(),moving=Math.hypot(pos.x-(SNK.px||pos.x),pos.z-(SNK.pz||pos.z))/Math.max(dt,.001);SNK.px=pos.x;SNK.pz=pos.z;
+ if(lm||ovOn||busy){$('noise').style.display='none';return}
+ const run=moving>1.6&&!sneaking,walk=moving>.4&&!sneaking;
+ SNK.noise+=(run?dt*1.7:walk?dt*.85:-dt*.6);SNK.noise=Math.max(0,Math.min(1,SNK.noise));
+ const n=$('noise');n.style.display='block';$('noiseB').style.width=Math.round(SNK.noise*100)+'%';
+ $('noiseT').textContent=sneaking?'🤫 Du schleichst – der Jäger schläft':(SNK.noise>.6?'⚠ Er bewegt sich im Schlaf!':'Lärm – schleiche lieber!');
+ if(SNK.noise>.45&&now>SNK.woke){SNK.woke=now+900;shake(.12);sfx('thud')}
+ if(SNK.noise>=1)snkWake()}
+function snkWake(){if(lm||busy)return;lm=true;SNK.noise=0;shake(.4);sfx('err');
+ const t0=performance.now();sleepH.rotation.x=-Math.PI/2;
+ const iv=setInterval(()=>{const k=Math.min(1,(performance.now()-t0)/700);sleepH.rotation.x=-Math.PI/2*(1-k);sleepH.position.set(-3.3+ (pos.x-280+3.3)*k*.9,.72*(1-k),1+(pos.z-1)*k*.9);
+  if(k>=1){clearInterval(iv);const f=$('fade');f.style.background='#600';f.style.opacity=.7;const p=$('chase');p.style.display='block';
+   p.innerHTML='<h3 class="err" style="margin:4px">Du hast den Jäger geweckt!</h3><p>Er packt dich im Dunkeln ...</p><button class="btn" id="snkr">Nochmal</button>';
+   $('snkr').onclick=()=>{f.style.background='#000';f.style.opacity=0;p.style.display='none';sleepH.rotation.x=-Math.PI/2;sleepH.position.set(-3.3,.72,1);SNK.noise=0;snkSet(true);
+    tele(SEC.from===13?13:SEC.from===9?9:4,0,SEC.from===13?9:SEC.from===9?2:2.6,0,()=>toast('Nochmal: Im Zimmer des Jägers musst du schleichen (🤫 / Shift).','err'))}}},33)}
+const _secEnter=secretEnter;secretEnter=function(){snkSet(true);SNK.noise=0;const r=_secEnter();setTimeout(()=>toast('🤫 Hier musst du SCHLEICHEN. Hörst du auf, wacht er auf und erwischt dich!','err'),2600);return r};
+
+/* ===================== Skin „Der Gentleman“ (Belohnung: Song 1–6 durchhören) ===================== */
+const suitG=new THREE.Group();av.add(suitG);suitG.visible=false;const SUITH=[];
+{const hairN=M(0x1d2a48),white=M(0xf0f0f0),red=M(0x8a0f12,0x2a0000),rose=M(0xc0141c,0x400000),leaf=M(0x2f7a32),eye=M(0x9fe8ff,0x55ccff),belt=M(0x3a3a3e),blk=M(0x0a0a0b);
+ [-.065,.065].forEach(x=>box(.06,.04,.02,x,1.53,.14,eye,suitG));box(.06,.012,.02,0,1.42,.14,M(0x6b6f74),suitG);
+ box(.31,.09,.31,0,1.665,0,hairN,suitG);[-.14,.14].forEach(x=>box(.03,.13,.29,x,1.6,-.01,hairN,suitG));box(.29,.11,.04,0,1.6,-.14,hairN,suitG);
+ box(.16,.2,.02,0,1.27,.145,white,suitG);box(.05,.3,.025,0,1.2,.152,red,suitG);
+ box(.07,.07,.03,.15,1.25,.152,rose,suitG);box(.05,.03,.02,.17,1.2,.152,leaf,suitG);
+ box(.5,.05,.29,0,.77,0,blk,suitG);box(.07,.05,.02,0,.77,.148,belt,suitG);
+ [aL,aR].forEach(a=>{const h=box(.12,.09,.12,0,-.6,0,M(0xcfd4d8),a);h.visible=false;SUITH.push(h)})}
+const SUITART='<svg class="rv-gun rv-skinart" style="height:min(40vh,340px);width:auto;filter:drop-shadow(0 0 22px #5cd6ff)" viewBox="0 0 160 290"><rect x="40" y="6" width="80" height="26" fill="#1d2a48"/><rect x="36" y="16" width="8" height="30" fill="#1d2a48"/><rect x="116" y="16" width="8" height="30" fill="#1d2a48"/><rect x="44" y="28" width="72" height="66" fill="#cfd4d8"/><rect x="56" y="52" width="14" height="9" fill="#9fe8ff"/><rect x="90" y="52" width="14" height="9" fill="#9fe8ff"/><rect x="70" y="80" width="20" height="3" fill="#6b6f74"/><rect x="40" y="94" width="80" height="104" fill="#111114"/><polygon points="64,94 96,94 80,132" fill="#f0f0f0"/><rect x="76" y="98" width="8" height="40" fill="#8a0f12"/><rect x="96" y="106" width="10" height="10" fill="#c0141c"/><rect x="104" y="114" width="8" height="5" fill="#2f7a32"/><rect x="40" y="180" width="80" height="8" fill="#0a0a0b"/><rect x="74" y="180" width="12" height="8" fill="#3a3a3e"/><rect x="4" y="94" width="36" height="98" fill="#0f0f12"/><rect x="120" y="94" width="36" height="98" fill="#0f0f12"/><rect x="4" y="184" width="36" height="14" fill="#cfd4d8"/><rect x="120" y="184" width="36" height="14" fill="#cfd4d8"/><rect x="42" y="198" width="36" height="76" fill="#0c0c0e"/><rect x="82" y="198" width="36" height="76" fill="#0c0c0e"/><rect x="42" y="272" width="36" height="12" fill="#0a0a0b"/><rect x="82" y="272" width="36" height="12" fill="#0a0a0b"/></svg>';
+const SUIT3D='<div class="rv-maskwrap"><div class="mk3" style="filter:drop-shadow(0 0 22px #5cd6ff)">'+(()=>{let h='';for(let i=13;i>=1;i--)h+='<div class="g2l g2b" style="transform:translateZ('+(-i*2.6)+'px);filter:brightness('+(1-i*.03).toFixed(2)+')"><i class="g2h" style="opacity:'+(i>11?1:0)+'"></i></div>';return h})()+'<div class="g2l g2f"><i class="g2h"></i><i class="g2e" style="left:20%"></i><i class="g2e" style="right:20%"></i><i class="g2m"></i></div></div></div>';
+const SUITOPT={tok:SUIT3D,name:'DER GENTLEMAN',rar:'★ EPISCH ★',rarStyle:'background:linear-gradient(90deg,#5cd6ff,#0a84ff);color:#001a33',art:SUITART,eq:'Anziehen',load:'SKIN WIRD GELADEN …',
+ stats:'<span>🌹 Anzug mit Rose</span><span>💠 Leuchtende Augen</span><span>🎵 Belohnung fürs Durchhören</span>'};
+function suitReveal(sub,onClose){const wasLm=lm;lm=true;showRevealX(sub,()=>{SKIN.suit=true;saveSkin()},()=>{applySkin('suit')},()=>{lm=false;onClose&&onClose()},SUITOPT)}
+/* Fortschritt: Song 1–6 der Playlist durchhören */
+const PLH={heard:[],ms:{},dur:{},last:0};
+try{PLH.heard=JSON.parse(localStorage.getItem('dfHeard')||'[]')}catch(e){}
+function plhCount(){let c=0;for(let i=0;i<6;i++)if(PLH.heard[i])c++;return c}
+function plhState(){const now=performance.now();
+ if(SA.on){if(!SA.last||SA.uris[SA.cur]!==SA.last.uri)return null;return {i:SA.cur,on:SA.playing,pos:(SA.pos||0)+(SA.playing?now-(SA.posT||now):0),dur:SA.dur||0}}
+ if(SP.playing&&!SP.list)return {i:SP.idx,on:true,pos:(SP.pos||0)+(now-(SP.posT||now)),dur:SP.dur||0};return null}
+function plhTick(){const now=performance.now(),dt=Math.min(5000,now-(PLH.last||now));PLH.last=now;const s=plhState();
+ const el=document.getElementById('plhp');if(el)el.innerHTML=SKIN.suit?'🌹 Skin „Gentleman“ freigeschaltet':'🎁 Höre Song 1–6 durch: <b>'+plhCount()+'/6</b> · Belohnung: Skin „Gentleman“';
+ if(!s||!s.on||s.i<0||s.i>5||PLH.heard[s.i])return;
+ PLH.ms[s.i]=(PLH.ms[s.i]||0)+dt;if(s.dur>0)PLH.dur[s.i]=s.dur;const D=PLH.dur[s.i]||0;
+ if((D>0&&PLH.ms[s.i]>=D*.85)||(!D&&PLH.ms[s.i]>=150000)){PLH.heard[s.i]=true;try{localStorage.setItem('dfHeard',JSON.stringify(PLH.heard))}catch(e){}
+  toast('🎵 Song '+(s.i+1)+' durchgehört ('+plhCount()+'/6)','good');
+  if(plhCount()>=6&&!SKIN.suit){SKIN.suit=true;saveSkin();setTimeout(()=>{if(!REV.open)suitReveal('Freigeschaltet: Du hast Song 1 bis 6 der Playlist durchgehört!',()=>{})},1200)}}}
+setInterval(plhTick,1000);
+{const p=$('musp');if(p){const d=document.createElement('div');d.id='plhp';d.className='foot';d.style.margin='10px 4px 0';d.style.textAlign='left';p.appendChild(d)}}
+applySkin(SKIN.cur);
+
+/* ===================== Skin „Der Gentleman“ (Belohnung: Song 1–6 gehört) ===================== */
+var GENT=null,HEARD={s:[],t:{},lt:0};
+try{HEARD.s=JSON.parse(localStorage.getItem('dfHeard')||'[]');SKIN.g=localStorage.getItem('dfSkinG')==='1'}catch(e){}
+{const g=new THREE.Group();av.add(g);g.visible=false;
+ const wht=M(0xf2f2f2),red=M(0x7a0d18),rose=M(0xc8102e,0x300008),leaf=M(0x2e7d32),eye=M(0x8fe3ff,0x4fc8ff),hr=M(0x0e2a55),lap=M(0x26272c);
+ box(.14,.22,.012,0,1.24,.142,wht,g);box(.045,.26,.014,0,1.2,.149,red,g);box(.06,.06,.02,-.13,1.24,.15,rose,g);box(.04,.025,.02,-.095,1.205,.15,leaf,g);
+ box(.05,.03,.02,-.07,1.525,.155,eye,g);box(.05,.03,.02,.07,1.525,.155,eye,g);box(.29,.06,.03,0,1.63,.13,hr,g);[-.14,.14].forEach(x=>box(.03,.12,.29,x,1.6,0,hr,g));
+ box(.2,.04,.02,0,1.355,.145,wht,g);[.96,.88].forEach(y=>box(.03,.03,.012,0,y,.145,lap,g));
+ const hands=[aL,aR].map(a=>{const h=box(.13,.08,.13,0,-.55,0,AM.sk,a);h.visible=false;return h});GENT={g,hands}}
+function applySkin(name){const ok=n=>n==='default'||(n==='mask'&&SKIN.unlocked)||(n==='gent'&&SKIN.g);
+ SKIN.cur=ok(name)?name:'default';const m=SKIN.cur==='mask',g=SKIN.cur==='gent';
+ const C=m?{sh:0x141416,pa:0x0d0d0f,sk:0xe8e5e1,hr:0x0b0b0c,sb:0x3a3a3e}:g?{sh:0x111214,pa:0x0c0c0e,sk:0xd9dde2,hr:0x0e2a55,sb:0x070707}:SK0;
+ AM.sh.color.setHex(C.sh);AM.pa.color.setHex(C.pa);AM.sk.color.setHex(C.sk);AM.hr.color.setHex(C.hr);AM.sb.color.setHex(C.sb);
+ skinG.visible=m;if(GENT){GENT.g.visible=g;GENT.hands.forEach(h=>{h.visible=g})}
+ try{localStorage.setItem('dfSkinU',SKIN.unlocked?'1':'0');localStorage.setItem('dfSkin',SKIN.cur)}catch(e){}}
+const VINYL3D='<div class="rv-maskwrap vnw"><div class="mk3 vng">'+(()=>{let h='';for(let i=7;i>=1;i--)h+='<div class="vnl" style="transform:translateZ('+(-i*2.4)+'px);filter:brightness('+(1-i*.06).toFixed(2)+')"></div>';return h})()+'<div class="vnl vnf"><div class="vnl-l">♪</div></div></div></div>';
+const GENTART='<svg class="rv-gun" style="height:min(40vh,340px);width:auto;filter:drop-shadow(0 0 22px #ff375f)" viewBox="0 0 160 290"><rect x="38" y="6" width="84" height="26" fill="#0e2a55"/><rect x="34" y="18" width="10" height="24" fill="#0e2a55"/><rect x="116" y="18" width="10" height="24" fill="#0e2a55"/><rect x="44" y="28" width="72" height="66" fill="#d9dde2"/><rect x="58" y="54" width="14" height="8" fill="#8fe3ff"/><rect x="88" y="54" width="14" height="8" fill="#8fe3ff"/><rect x="72" y="82" width="16" height="2" fill="#9aa0a8"/><rect x="60" y="94" width="40" height="10" fill="#f2f2f2"/><rect x="40" y="100" width="80" height="92" fill="#111214"/><polygon points="64,100 96,100 84,142 76,142" fill="#f2f2f2"/><polygon points="77,104 83,104 85,150 80,158 75,150" fill="#7a0d18"/><circle cx="56" cy="122" r="6" fill="#c8102e"/><ellipse cx="63" cy="128" rx="4" ry="2" fill="#2e7d32"/><rect x="78" y="164" width="4" height="4" fill="#333"/><rect x="78" y="176" width="4" height="4" fill="#333"/><rect x="4" y="104" width="36" height="86" fill="#101113"/><rect x="120" y="104" width="36" height="86" fill="#101113"/><rect x="4" y="190" width="36" height="10" fill="#d9dde2"/><rect x="120" y="190" width="36" height="10" fill="#d9dde2"/><rect x="42" y="192" width="36" height="78" fill="#0d0d0f"/><rect x="82" y="192" width="36" height="78" fill="#0d0d0f"/><rect x="42" y="270" width="36" height="14" fill="#050505"/><rect x="82" y="270" width="36" height="14" fill="#050505"/></svg>';
+const GENTOPT={tok:VINYL3D,name:'DER GENTLEMAN',rar:'★ EPISCH ★',rarStyle:'background:linear-gradient(90deg,#ff375f,#8a0f2a);color:#fff',art:GENTART,eq:'Anziehen',load:'SKIN WIRD GELADEN …',
+ stats:'<span>🎩 Neuer Skin</span><span>🎵 Für 6 gehörte Songs</span><span>⚙ Ausrüsten: Start- oder Pausenmenü</span>'};
+function gentReveal(sub,onClose){lm=true;showRevealX(sub,()=>{SKIN.g=true;try{localStorage.setItem('dfSkinG','1')}catch(e){}},()=>{applySkin('gent')},()=>{lm=false;onClose&&onClose()},GENTOPT)}
+const skReopen=()=>{if(cr===0&&S.tied)menuStart()};
+function skinLine(){const o=[['default','Standard']];if(SKIN.unlocked)o.push(['mask','🎭 Maskierter']);if(SKIN.g)o.push(['gent','🎩 Gentleman']);
+ let h='<div class="cap">Skin</div>';if(o.length>1)h+=segH('data-sk',o,SKIN.cur);const lk=[];
+ if(!SKIN.unlocked)lk.push('<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Der Maskierte</b><small>Gesperrt · irgendwo im Haus versteckt</small></span></div>'+(CHEATS?'<button class="row" id="skincheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Maskierten per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':''));
+ if(!SKIN.g)lk.push('<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Der Gentleman</b><small>Höre Song 1–6 der Spotify-Playlist ('+HEARD.s.filter(i=>i<6).length+'/6)</small></span></div>'+(CHEATS?'<button class="row" id="gentcheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Gentleman per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':''));
+ if(lk.length)h+='<div class="grp" style="margin-top:6px">'+lk.join('')+'</div>';return h}
+function bindSkin(){bindSeg('data-sk',v=>applySkin(v));
+ const c=document.getElementById('skincheat');if(c)c.onclick=()=>{closeOv();skinReveal('Per Cheat erhalten.',skReopen)};
+ const g=document.getElementById('gentcheat');if(g)g.onclick=()=>{closeOv();gentReveal('Per Cheat erhalten.',skReopen)};
+ const m=document.getElementById('mskin');if(m)m.onclick=()=>{closeOv();skinReveal('Per Cheat erhalten.',()=>{})};
+ const q=document.getElementById('mgent');if(q)q.onclick=()=>{closeOv();gentReveal('Per Cheat erhalten.',()=>{})};
+ const t=document.getElementById('mtp');if(t)t.onclick=()=>{RUN.jumped=true;SEC.from=P2?9:4;secretEnter()}}
+function heardSave(){try{localStorage.setItem('dfHeard',JSON.stringify(HEARD.s))}catch(e){}}
+function heardTick(){const n=performance.now(),dt=Math.min(.25,(n-(HEARD.lt||n))/1e3);HEARD.lt=n;
+ let idx=-1;if(SA.on&&SA.playing)idx=SA.cur;else if(!SA.on&&SP.playing&&!SP.list)idx=SP.idx;
+ if(idx>=0&&idx<6&&!HEARD.s.includes(idx)){HEARD.t[idx]=(HEARD.t[idx]||0)+dt;if(HEARD.t[idx]>=40){HEARD.s.push(idx);heardSave();const c=HEARD.s.filter(i=>i<6).length;toast('🎵 Song '+(idx+1)+' gehört ('+c+'/6) – weiter so für den Gentleman-Skin!','good');auUI()}}
+ if(!SKIN.g&&[0,1,2,3,4,5].every(i=>HEARD.s.includes(i))&&!ovOn&&!REV.open&&!lm&&!busy)gentReveal('Freigeschaltet: Du hast Song 1–6 der Playlist gehört!',()=>{})}
+{const d=document.createElement('div');d.id='skprog';d.className='foot';d.style.textAlign='left';d.style.margin='8px 6px 0';$('musp').appendChild(d)}
+function heardUI(){const e=document.getElementById('skprog');if(!e)return;const c=HEARD.s.filter(i=>i<6).length;
+ e.textContent=SKIN.g?'🎩 Skin „Gentleman“ freigeschaltet':'🎩 Belohnung: Höre Song 1–6 je mindestens 40 Sekunden für den Skin „Gentleman“ – '+c+'/6';
+ document.querySelectorAll('#spl [data-pi]').forEach(b=>{const i=+b.dataset.pi;if(i<6&&HEARD.s.includes(i)){const bb=b.querySelector('b');if(bb&&!bb.textContent.includes('✓'))bb.textContent+=' ✓'}})}
+const _auUI2=auUI;auUI=function(){_auUI2();try{heardUI()}catch(e){}};
+const _srt=snkRspTick;snkRspTick=function(){_srt();try{heardTick()}catch(e){}};
+{let sv='';try{sv=localStorage.getItem('dfSkin')||''}catch(e){}applySkin(sv==='gent'&&SKIN.g?'gent':SKIN.cur)}
+
+/* Cheat-Menü: eigener Bereich „Skins“ */
+const _bs=bindSkin;bindSkin=function(){_bs();
+ const a=document.getElementById('msk1');if(a)a.onclick=()=>{closeOv();skinReveal('Per Cheat erhalten.',()=>{})};
+ const b=document.getElementById('msk2');if(b)b.onclick=()=>{closeOv();gentReveal('Per Cheat erhalten.',()=>{})};
+ const c=document.getElementById('mskall');if(c)c.onclick=()=>{SKIN.unlocked=true;SKIN.g=true;try{localStorage.setItem('dfSkinU','1');localStorage.setItem('dfSkinG','1')}catch(e){}if(!has('Maske'))S.inv.push('Maske');inv();closeOv();toast('✨ Alle Skins freigeschaltet. Auswahl unter „Skin“ im Menü.','good')}};
 tween(.01,()=>{},()=>{});
 pos.x=0;Pt=-.8;$('loc').textContent=NAMES[0];inv();
 menuStart();

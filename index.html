@@ -1800,7 +1800,7 @@ applySkin(SKIN.cur);
 const MPM={
  SP:[[-17,-13],[-9,-8],[-18,3],[-9,-2],[-17,13],[-9,8],[-4,-13],[4,-8],[-4,3],[4,-3],[-4,12],[4,8],[10,-13],[18,-8],[10,2],[12,-3],[18,13],[10,7]],
  FU:[[0,-11],[14,-12],[14,12]],FB:[-19.2,-10],PL:[[-15,0],[0,-3.5],[0,11]],
- CL:[[-14,-14.2],[-19.2,2.5],[19.2,-10],[10,14.2]],VT:[19.2,0],EX:[0,13.2],HS:[-14,10],
+ CL:[[-14,-14.2],[-19.2,2.5],[19.2,-10],[10,14.2]],VT:[2.9,14.3],EX:[0,13.2],HS:[-14,10],
  PS:[[-3,-2],[3,-2],[-3,2],[3,2],[-2,3.5],[2,-3.5],[0,3.5],[-5,0],[5,0],[0,-2.8]],
  HP:100,DH:60,HH:400,TIME:900,HEAD:20,REV:4,
  DB:[[-19.4,-4.2],[6.4,-3.8],[-6.4,13.8]],PV:{med:3,nrg:3,tas:5,trp:5,loot:5},
@@ -1808,6 +1808,8 @@ const MPM={
  CLR:['#ff453a','#0a84ff','#30d158','#ffd60a','#bf5af2','#ff9f0a','#64d2ff','#ff375f','#ac8e68','#98989d']
 };
 
+MPM.HT={tas:' → Zum Benutzen: Knopf unten antippen oder Taste 1–3, wenn der Jäger nah ist (max. 5,5 m): 60 Schaden + 3 s betäubt.',trp:' → Zum Benutzen: Knopf unten oder Taste 1–3 legt die Falle unter dich. Der Jäger sieht sie nicht und wird 4 s betäubt.',med:' → Knopf unten oder Taste 1–3: heilt 50.',nrg:' → Knopf unten oder Taste 1–3: 8 s schneller.',loot:' → Bring sie zu einem 📦 Abgabekasten (Punkte).',fuse:''};
+MPM.AC={med:'Heilen',nrg:'Trinken',tas:'Taser',trp:'Falle legen',fuse:'Sicherung',loot:'Beute'};
 function mpLayout(){const T=.3,walls=[],add=(x0,z0,x1,z1)=>{const cx=(x0+x1)/2,cz=(z0+z1)/2,w=Math.abs(x1-x0)+(x0===x1?T:0),d=Math.abs(z1-z0)+(z0===z1?T:0);walls.push([cx,cz,w,d])};
  const hw=(zc,xa,xb,gaps)=>{let cur=xa;gaps.slice().sort((a,b)=>a[0]-b[0]).forEach(g=>{if(g[0]>cur)add(cur,zc,g[0],zc);cur=g[1]});if(cur<xb)add(cur,zc,xb,zc)};
  const vw=(xc,za,zb,gaps)=>{let cur=za;gaps.slice().sort((a,b)=>a[0]-b[0]).forEach(g=>{if(g[0]>cur)add(xc,cur,xc,g[0]);cur=g[1]});if(cur<zb)add(xc,cur,xc,zb)};
@@ -1846,7 +1848,7 @@ function mpRayBox(ox,oz,dx,dz,b,maxd){let t0=0,t1=maxd;
  return t0}
 class MPHost{
  constructor(send,bcast,walls){this.send=send;this.bcast=bcast;this.walls=walls||[];this.P={};this.order=[];this.phase='lobby';this.W=null;this.hid='';this.tm=0;this.hs=0;this.tr=0;this.res=null;this.hist={};this.lastH='';this.diff='mittel';this.hm=400;this.hf=.78;this.spT=0;const L=mpLayout();this.vaultB=mpBox(L.vault);this.gateB=mpBox(L.gate)}
- dyn(){const W=this.W,a=[];if(W&&!W.vault)a.push(this.vaultB);if(W&&!W.exit)a.push(this.gateB);return a}
+ dyn(){const W=this.W,a=[];if(W&&!W.exit)a.push(this.gateB);return a}
  rnd(n){return Math.floor(Math.random()*n)}
  shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=this.rnd(i+1);const t=a[i];a[i]=a[j];a[j]=t}return a}
  pickHunter(ids){if(ids.length<2)return '';const min=Math.min(...ids.map(i=>this.hist[i]||0));let c=ids.filter(i=>(this.hist[i]||0)===min);if(c.length>1&&c.includes(this.lastH))c=c.filter(i=>i!==this.lastH);const h=c[this.rnd(c.length)];this.hist[h]=(this.hist[h]||0)+1;this.lastH=h;return h}
@@ -1879,7 +1881,7 @@ class MPHost{
   const types=['med','med','med','med','nrg','nrg','nrg','nrg','tas','tas','tas','trp','trp','trp','loot','loot','loot','loot'],it=new Array(MPM.SP.length).fill('');
   const idx=this.shuf([...Array(MPM.SP.length).keys()]);types.forEach((t,j)=>{it[idx[j]]=t});
   let code='';for(let j=0;j<4;j++)code+=this.rnd(10);
-  this.W={pow:0,fu:0,fa:[1,1,1],pl:[0,0,0],hold:0,vault:0,key:0,kp:null,kh:'',exit:0,it,tr:[],code,pts:0,tp:D.pts};
+  this.W={pow:0,fu:0,fa:[1,1,1],pl:[0,0,0],pt:[0,0,0],hold:0,vault:0,key:0,kp:null,kh:'',exit:0,it,tr:[],code,pts:0,tp:D.pts};
   this.phase='play';this.tm=D.tm;this.hs=MPM.HEAD;this.tr=0;this.res=null;this.hm=D.hh;this.hf=D.hf;this.spT=0;
   const roster=this.order.map(i=>({id:i,name:this.P[i].name,ci:this.P[i].ci,sm:this.P[i].sm}));
   this.order.forEach(i=>{const p=this.P[i];this.send(i,{t:'start',you:i,hid:this.hid,ps:roster,hs:this.hs,x:p.x,z:p.z,df:this.diff,pts:D.pts,hf:D.hf,hm:D.hh})});
@@ -1905,15 +1907,16 @@ class MPHost{
    case 'chat':this.bcast({t:'e',k:'chat',n:p.name,ci:p.ci,m:mpCensor(String(m.m||'').replace(/[<>]/g,'').slice(0,60))});break}}
  act(p,m){if(this.phase!=='play'||p.st!=='ok'||p.role!=='p')return;const W=this.W,near=(pt,r)=>pt&&mpDist(p.x,p.z,pt[0],pt[1])<(r||2.9),T=(k,mm)=>this.send(p.id,{t:'e',k:'txt',m:mm});
   switch(m.a){
-   case 'pick':{const i=m.i|0;if(i>=0&&i<MPM.SP.length&&W.it[i]&&near(MPM.SP[i])){if(p.inv.length>=3)return T(0,'Inventar voll (max. 3).');p.inv.push(W.it[i]);T(0,MPM.NM[W.it[i]]+' aufgehoben.');W.it[i]=''}break}
+   case 'pick':{const i=m.i|0;if(i>=0&&i<MPM.SP.length&&W.it[i]&&near(MPM.SP[i])){if(p.inv.length>=3)return T(0,'Inventar voll (max. 3).');p.inv.push(W.it[i]);T(0,MPM.NM[W.it[i]]+' aufgehoben.'+(MPM.HT[W.it[i]]||''));W.it[i]=''}break}
    case 'fpick':{const i=m.i|0;if(i>=0&&i<3&&W.fa[i]&&near(MPM.FU[i])){if(p.inv.length>=3)return T(0,'Inventar voll (max. 3).');p.inv.push('fuse');W.fa[i]=0;T(0,'Sicherung! Bring sie zum Sicherungskasten in der Küche.')}break}
    case 'fbox':{if(!near(MPM.FB))break;const k=p.inv.indexOf('fuse');if(k<0)return T(0,'Du brauchst eine Sicherung.');p.inv.splice(k,1);W.fu++;this.bcast({t:'e',k:'txt',m:'Sicherung eingesetzt ('+W.fu+'/3).'});if(W.fu>=3){W.pow=1;this.bcast({t:'e',k:'txt',m:'⚡ Der Strom ist da! Terminals und Druckplatten sind aktiv.'})}break}
    case 'clue':{const i=m.i|0;if(i<0||i>3||!near(MPM.CL[i]))break;if(!W.pow)return T(0,'Kein Strom. Erst alle Sicherungen einsetzen.');this.send(p.id,{t:'e',k:'clue',i,d:W.code[i]});break}
-   case 'vault':{if(!near(MPM.VT,3.4))break;if(!W.pow)return T(0,'Kein Strom.');if(!W.vault)return T(0,'Die Tresortür ist noch zu.');if(W.key)return T(0,'Der Tresor ist bereits offen.');
-    if(String(m.c)===W.code){W.key=1;W.kp=[MPM.VT[0]-1.4,MPM.VT[1]];this.bcast({t:'e',k:'txt',m:'🔓 Tresor offen! Der Hausschlüssel liegt bereit.'})}else T(0,'Falscher Code.');break}
+   case 'vault':{if(!near(MPM.VT,3.4))break;if(!W.pow)return T(0,'Kein Strom.');if(!W.vault)return T(0,'Der Türtresor ist noch gesperrt: Drücke zuerst alle drei Druckplatten (Knopf an der Platte).');if(W.key)return T(0,'Der Haustürschlüssel wurde schon genommen.');
+    if(String(m.c)===W.code){W.key=2;W.kh=p.id;W.kp=null;this.bcast({t:'e',k:'txt',m:'🔓 '+p.name+' hat den Türtresor geöffnet und den Haustürschlüssel! Jetzt noch die Beute abgeben und die Haustür aufschließen.'})}else T(0,'Falscher Code. Lies die Ziffern an den Terminals 1 bis 4 (Reihenfolge 1-2-3-4).');break}
    case 'key':{if(W.key===1&&near(W.kp,2.8)){W.kh=p.id;W.key=2;W.kp=null;this.bcast({t:'e',k:'txt',m:p.name+' hat den Hausschlüssel!'})}break}
    case 'dep':{if(!MPM.DB.some(b=>near(b)))break;const give=p.inv.filter(t=>t!=='fuse');if(!give.length)return T(0,'Du trägst nichts zum Abgeben.');const pts=give.reduce((a,t)=>a+(MPM.PV[t]||0),0),was=W.pts>=W.tp;p.inv=p.inv.filter(t=>t==='fuse');W.pts+=pts;this.bcast({t:'e',k:'txt',m:'📦 '+p.name+' gibt '+give.length+' Item(s) ab: +'+pts+' Punkte ('+W.pts+'/'+W.tp+')'});if(!was&&W.pts>=W.tp)this.bcast({t:'e',k:'txt',m:'✅ Punkteziel erreicht!'});break}
-   case 'exit':{if(!near(MPM.EX,3.4))break;if(!W.pow)return T(0,'Kein Strom.');if(W.kh!==p.id)return T(0,'Du brauchst den Hausschlüssel.');if(W.pts<W.tp)return T(0,'Es fehlen noch '+(W.tp-W.pts)+' Punkte. Gebt Items an den Abgabekästen ab.');W.exit=1;this.bcast({t:'e',k:'txt',m:'🚪 Die Haustür ist offen! Raus hier!'});break}
+   case 'exit':{if(!near(MPM.EX,3.4))break;if(!W.pow)return T(0,'Kein Strom.');if(W.kh!==p.id)return T(0,'Du brauchst den Haustürschlüssel: Gib den 4-stelligen Code am Türtresor neben der Tür ein (Ziffern an Terminal 1–4).');if(W.pts<W.tp)return T(0,'Es fehlen noch '+(W.tp-W.pts)+' Punkte. Gebt Items an den Abgabekästen ab.');W.exit=1;this.bcast({t:'e',k:'txt',m:'🚪 Die Haustür ist offen! Raus hier!'});break}
+   case 'plate':{const i=m.i|0;if(i<0||i>2||!near(MPM.PL[i],2.9))break;if(!W.pow)return T(0,'Kein Strom. Erst alle Sicherungen einsetzen.');W.pt[i]=15;this.bcast({t:'e',k:'txt',m:'🔘 '+p.name+' drückt Druckplatte '+(i+1)+' (aktiv für 15 Sekunden)'});break}
    case 'rev':{const t=this.P[m.i];if(t&&t.st==='down'&&!t.rb&&near([t.x,t.z],2.7)){t.rb=p.id;t.rp=0}break}}}
  shoot(p,m){if(this.phase!=='play'||p.role!=='h'||p.st!=='ok'||this.hs>0||p.stun>0||p.cd>0||p.sh<=0||p.rl>0)return;
   let dx=+m.dx,dz=+m.dz;const L=Math.hypot(dx,dz);if(!(L>0))return;dx/=L;dz/=L;p.sh--;p.cd=1;if(p.sh===0)p.rl=2.5;
@@ -1927,7 +1930,7 @@ class MPHost{
  use(p,s){if(this.phase!=='play'||p.st!=='ok'||p.role!=='p')return;const ty=p.inv[s],T=mm=>this.send(p.id,{t:'e',k:'txt',m:mm});if(!ty)return;
   if(ty==='med'){if(p.hp>=MPM.HP)return T('Du bist schon bei voller Gesundheit.');p.hp=Math.min(MPM.HP,p.hp+50);p.inv.splice(s,1);T('Medkit benutzt (+50).')}
   else if(ty==='nrg'){p.boost=8;p.inv.splice(s,1);T('Energy-Drink: 8 Sekunden schneller!')}
-  else if(ty==='tas'){const h=this.P[this.hid];if(!h||mpDist(p.x,p.z,h.x,h.z)>4.5)return T('Der Jäger ist zu weit weg (max. 4,5 m).');p.inv.splice(s,1);this.hurtHunter(60,3)}
+  else if(ty==='tas'){const h=this.P[this.hid];if(!h||mpDist(p.x,p.z,h.x,h.z)>5.5)return T('Der Jäger ist zu weit weg (max. 5,5 m). Geh näher ran.');p.inv.splice(s,1);this.hurtHunter(60,3)}
   else if(ty==='trp'){this.W.tr.push({id:++this.tr,x:+p.x.toFixed(2),z:+p.z.toFixed(2)});p.inv.splice(s,1);T('Falle gelegt. Der Jäger sieht sie nicht.')}
   else if(ty==='fuse')T('Die Sicherung gehört in den Sicherungskasten in der Küche.')
   else if(ty==='loot')T('Beute bringt Punkte: gib sie an einem Abgabekasten ab.')}
@@ -1937,7 +1940,7 @@ class MPHost{
    if(p.rl>0){p.rl-=dt;if(p.rl<=0){p.rl=0;p.sh=4}}
    if(p.st==='down'){p.hp-=dt;if(p.hp<=0){this.kill(p);return}
     if(p.rb){const r=this.P[p.rb];if(!r||r.st!=='ok'||mpDist(r.x,r.z,p.x,p.z)>3.2){p.rb=null;p.rp=0}else{p.rp+=dt;if(p.rp>=MPM.REV){p.st='ok';p.hp=40;p.rb=null;p.rp=0;this.bcast({t:'e',k:'txt',m:p.name+' wurde wiederbelebt!'})}}}}});
-  const pr=[0,0,0];if(W.pow)MPM.PL.forEach((c,k)=>{pr[k]=this.order.some(i=>{const q=this.P[i];return q.role==='p'&&q.st==='ok'&&mpDist(q.x,q.z,c[0],c[1])<1.3})?1:0});
+  const pr=[0,0,0];for(let k=0;k<3;k++)W.pt[k]=Math.max(0,(W.pt[k]||0)-dt);if(W.pow)MPM.PL.forEach((c,k)=>{const stand=this.order.some(i=>{const q=this.P[i];return q.role==='p'&&q.st==='ok'&&mpDist(q.x,q.z,c[0],c[1])<1.3});pr[k]=(stand||W.pt[k]>0)?1:0});
   if(this.hs<=0){this.spT+=dt;const D=MPD[this.diff];if(this.spT>=D.iv){this.spT=0;const em=[];W.it.forEach((t,i)=>{if(!t)em.push(i)});if(em.length)W.it[em[this.rnd(em.length)]]=['med','nrg','tas','trp','loot','loot','loot'][this.rnd(7)]}}
   W.pl=pr;if(pr[0]&&pr[1]&&pr[2])W.hold+=dt;else W.hold=Math.max(0,W.hold-dt*2);
   if(!W.vault&&W.hold>=2){W.vault=1;this.bcast({t:'e',k:'txt',m:'🔓 Die Tresortür öffnet sich!'})}
@@ -1947,7 +1950,7 @@ class MPHost{
  snapFor(id){const W=this.W,me=this.P[id],h=this.P[this.hid];if(!W||!me)return null;
   return {t:'s',tm:Math.ceil(this.tm),hs:Math.ceil(this.hs),hh:h?Math.max(0,Math.round(h.hp)):0,hm:this.hm,
    ps:this.order.map(i=>{const p=this.P[i];return [i,+p.x.toFixed(2),+p.z.toFixed(2),+p.ry.toFixed(2),p.st,Math.round(p.hp),p.m?1:0,p.boost>0?1:0,p.stun>0?1:0,+(p.rp/MPM.REV).toFixed(2),p.role==='h'?1:0]}),
-   w:{pts:W.pts,tp:W.tp,pow:W.pow,fu:W.fu,fa:W.fa,pl:W.pl,hold:+(W.hold/2).toFixed(2),vault:W.vault,key:W.key,kp:W.kp,kh:W.kh,exit:W.exit,it:W.it,tr:id===this.hid?[]:W.tr},
+   w:{pts:W.pts,tp:W.tp,pow:W.pow,fu:W.fu,fa:W.fa,pl:W.pl,pt:W.pt.map(v=>+v.toFixed(1)),hold:+(W.hold/2).toFixed(2),vault:W.vault,key:W.key,kp:W.kp,kh:W.kh,exit:W.exit,it:W.it,tr:id===this.hid?[]:W.tr},
    me:{inv:me.inv,sh:me.sh,rl:me.rl>0?1:0}}}}
 
 /* ===================== MULTIPLAYER: Client, Netzwerk, Oberfläche ===================== */
@@ -2014,19 +2017,23 @@ function mpModel(ty){const g=new THREE.Group(),add=(geo,mat,x,y,z,rx,rz)=>{const
  box(40,.2,30,0,-.1,0,fm,g);box(40,.2,30,0,3.5,0,cm,g);box(40,.2,7,0,-.1,18.5,M(0x1f3a1f),g);
  L.walls.forEach(a=>{box(a[2],3.5,a[3],a[0],1.75,a[1],wm,g);COL[15].push([300+a[0]-a[2]/2,300+a[0]+a[2]/2,a[1]-a[3]/2,a[1]+a[3]/2])});
  L.fur.forEach(a=>{box(a[2],a[4],a[3],a[0],a[4]/2,a[1],M(a[5]),g);COL[15].push([300+a[0]-a[2]/2,300+a[0]+a[2]/2,a[1]-a[3]/2,a[1]+a[3]/2])});
- V.vault=box(.3,3.2,3,14,1.6,0,M(0x555a62,0x110000),g);V.vaultC=[300+13.85,300+14.15,-1.5,1.5];COL[15].push(V.vaultC);
+ V.vault=box(.3,3.2,3,14,1.6,0,M(0x555a62,0x110000),g);V.vault.visible=false;V.vaultC=[300+13.85,300+14.15,-1.5,1.5];
  V.gate=box(4,3.2,.3,0,1.6,14.9,M(0x6a2a2a,0x200000),g);V.gateC=[300-2,300+2,14.75,15.05];COL[15].push(V.gateC);
  V.lampM=M(0x222222);[[-13,-10],[-13,0],[-13,10],[0,-10],[0,0],[0,10],[13,-10],[13,0],[13,10]].forEach(c=>box(1.2,.08,1.2,c[0],3.4,c[1],V.lampM,g));
  V.pl=MPM.PL.map(c=>box(1.6,.05,1.6,c[0],.025,c[1],M(0x333344),g));
- V.cl=MPM.CL.map(c=>{const m=M(0x080c14);box(.5,1.2,.3,c[0],.6,c[1],M(0x1a1c22),g);box(.4,.4,.05,c[0],1.0,c[1]+(c[1]<0?.18:-.18)*(Math.abs(c[1])>10?1:0),m,g);return m});
+ V.pl.forEach((m,i)=>{const l=mkLabel();l.position.set(MPM.PL[i][0],1.1,MPM.PL[i][1]);l.scale.set(1.7,.42,1);setLabel(l,'DRUCKPLATTE '+(i+1));g.add(l)});
+ V.cl=MPM.CL.map((c,i)=>{const m=M(0x080c14),fx=Math.abs(c[0])>Math.abs(c[1])?-Math.sign(c[0]):0,fz=fx?0:-Math.sign(c[1]);
+  box(fx?.3:.5,1.2,fx?.5:.3,c[0],.6,c[1],M(0x1a1c22),g);box(fx?.05:.4,.4,fx?.4:.05,c[0]+fx*.18,1.0,c[1]+fz*.18,m,g);
+  const l=mkLabel();l.position.set(c[0]+fx*.45,1.75,c[1]+fz*.45);l.scale.set(1.5,.38,1);setLabel(l,'TERMINAL '+(i+1));g.add(l);return m});
  V.fbLed=M(0xff2020,0xff2020);box(.35,1.1,.8,MPM.FB[0],.9,MPM.FB[1],M(0x44484f),g);box(.1,.1,.1,MPM.FB[0]+.22,1.3,MPM.FB[1],V.fbLed,g);
- V.vtM=M(0x080c14);box(.5,1.2,.4,MPM.VT[0],.6,MPM.VT[1],M(0x1a1c22),g);box(.05,.4,.4,MPM.VT[0]-.26,1,MPM.VT[1],V.vtM,g);
+ V.vtM=M(0x080c14);{const vx=MPM.VT[0],vz=MPM.VT[1],sf=M(0x6a707a);box(.95,1.15,.75,vx,.575,vz,sf,g);box(.8,1.0,.05,vx,.6,vz-.4,M(0x4a4f58),g);box(.5,.3,.05,vx,.82,vz-.44,V.vtM,g);box(.12,.12,.08,vx+.28,.45,vz-.44,gold,g);
+  COL[15].push([300+vx-.5,300+vx+.5,vz-.4,vz+.4]);const l=mkLabel();l.position.set(vx,1.65,vz-.2);l.scale.set(1.5,.38,1);setLabel(l,'TÜRTRESOR');g.add(l);const l2=mkLabel();l2.position.set(0,2.95,14.6);l2.scale.set(1.5,.38,1);setLabel(l2,'HAUSTÜR');g.add(l2)}
  V.fu=MPM.FU.map(c=>{const q=mpModel('fuse');q.position.set(c[0],.55,c[1]);g.add(q);return q});
  V.it=MPM.SP.map(c=>{const q=new THREE.Group();q.position.set(c[0],.6,c[1]);g.add(q);q.visible=false;return q});
  V.key=mpModel('key');V.key.position.y=.5;g.add(V.key);V.key.visible=false;V.tr={};
  MPM.DB.forEach(c=>{box(.8,.8,.8,c[0],.4,c[1],M(0x2a3a5a),g);box(.7,.06,.7,c[0],.83,c[1],M(0x30a0ff,0x1060c0),g);COL[15].push([300+c[0]-.4,300+c[0]+.4,c[1]-.4,c[1]+.4]);const l=mkLabel();l.position.set(c[0],1.5,c[1]);l.scale.set(1.4,.35,1);setLabel(l,'ABGABE');g.add(l)});
  const ex=mkLabel();ex.position.set(0,3,16.5);setLabel(ex,'AUSGANG');g.add(ex);
- [['Küche',-13,-14],['Wohnzimmer',-18,-4],['Schlafzimmer',-18,6],['Bibliothek',13,-14],['Tresor',17.5,-2.6],['Werkstatt',13,6],['Halle',0,-4.2],['Eingang',0,6]].forEach(a=>{const l=mkLabel();l.position.set(a[1],3.05,a[2]);l.scale.set(1.6,.4,1);setLabel(l,a[0]);g.add(l)})})();
+ [['Küche',-13,-14],['Wohnzimmer',-18,-4],['Schlafzimmer',-18,6],['Bibliothek',13,-14],['Werkstatt',13,6],['Halle',0,-4.2],['Eingang',0,6]].forEach(a=>{const l=mkLabel();l.position.set(a[1],3.05,a[2]);l.scale.set(1.6,.4,1);setLabel(l,a[0]);g.add(l)})})();
 function mpCol(b,on){const i=COL[15].indexOf(b);if(on&&i<0)COL[15].push(b);if(!on&&i>=0)COL[15].splice(i,1)}
 /* ---------- Avatare ---------- */
 function mpAvatar(ci,isH,name){const g=new THREE.Group(),b=new THREE.Group();g.add(b);let a={g,b,h:isH,x:0,z:0,ry:0,first:true,t:Math.random()*6};
@@ -2052,7 +2059,7 @@ function mpWorld(w){const V=MP.v;
  V.fbLed.emissive.setHex(w.pow?0x30ff60:(w.fu>0?0xffa000:0xff2020));V.pl.forEach((m,i)=>m.material.emissive.setHex(!w.pow?0x000000:(w.pl[i]?0x30ff60:0x2040ff)));
  V.fu.forEach((m,i)=>{m.visible=!!w.fa[i]});
  V.it.forEach((q,i)=>{const t=w.it[i];q.visible=!!t;if(t&&q.userData.t!==t){q.userData.t=t;while(q.children.length)q.remove(q.children[0]);q.add(mpModel(t))}});
- V.vault.visible=!w.vault;mpCol(V.vaultC,!w.vault);V.gate.visible=!w.exit;mpCol(V.gateC,!w.exit);
+ V.gate.visible=!w.exit;mpCol(V.gateC,!w.exit);
  const kp=w.key===1&&w.kp?w.kp:null;V.key.visible=!!kp;if(kp)V.key.position.set(kp[0],.5,kp[1]);
  const ids={};(w.tr||[]).forEach(t=>{ids[t.id]=1;if(!V.tr[t.id]){const m=mpModel('trp');m.position.set(t.x,.02,t.z);RM[15].g.add(m);V.tr[t.id]=m}});
  Object.keys(V.tr).forEach(k=>{if(!ids[k]){RM[15].g.remove(V.tr[k]);delete V.tr[k]}})}
@@ -2134,12 +2141,13 @@ function mpAct(a,i,ex){mpSend(Object.assign({t:'act',a,i},ex||{}))}
  MPM.FU.forEach((c,i)=>R(c[0],c[1],()=>mpCanAct()&&MP.W&&MP.W.fa[i]&&MP.me.inv.length<3&&'Sicherung aufheben',()=>mpAct('fpick',i)));
  R(MPM.FB[0],MPM.FB[1],()=>mpCanAct()&&MP.me.inv.includes('fuse')&&('Sicherung einsetzen ('+(MP.W?MP.W.fu:0)+'/3)'),()=>mpAct('fbox'));
  MPM.CL.forEach((c,i)=>R(c[0],c[1],()=>mpCanAct()&&('Hinweis-Terminal '+(i+1)+' lesen'),()=>mpAct('clue',i)));
- R(MPM.VT[0],MPM.VT[1],()=>mpCanAct()&&MP.W&&MP.W.vault&&!MP.W.key&&'Tresor-Terminal: Code eingeben',()=>mpKeypad(c=>mpAct('vault',0,{c})));
+ R(MPM.VT[0],MPM.VT[1],()=>mpCanAct()&&MP.W&&!MP.W.key&&(MP.W.vault?'Türtresor: Code eingeben (Schlüssel für die Haustür)':'Türtresor (gesperrt: erst alle 3 Druckplatten drücken)'),()=>{if(!MP.W.pow)return toast('Kein Strom. Erst alle Sicherungen einsetzen.','err');if(!MP.W.vault)return toast('Der Türtresor ist noch gesperrt: Drücke zuerst alle drei Druckplatten.','err');mpKeypad(c=>mpAct('vault',0,{c}))});
  MPM.DB.forEach(c=>R(c[0],c[1],()=>{if(!mpCanAct())return false;const g=(MP.me.inv||[]).filter(t=>t!=='fuse');if(!g.length)return false;return 'Abgeben: +'+g.reduce((a,t)=>a+(MPM.PV[t]||0),0)+' Punkte'},()=>mpAct('dep')));
  MP.iaKey={r:15,x:0,z:0,lab:()=>mpCanAct()&&MP.W&&MP.W.key===1&&'Hausschlüssel nehmen',run(){mpAct('key')}};IA.push(MP.iaKey);
- R(MPM.EX[0],MPM.EX[1],()=>mpCanAct()&&MP.W&&!MP.W.exit&&MP.W.kh===MP.myId&&'Haustür aufschließen',()=>mpAct('exit'));
+ R(MPM.EX[0],MPM.EX[1],()=>mpCanAct()&&MP.W&&!MP.W.exit&&(MP.W.kh===MP.myId?'Haustür aufschließen':'Haustür (verschlossen: Schlüssel nötig)'),()=>mpAct('exit'));
+ MPM.PL.forEach((c,i)=>R(c[0],c[1],()=>mpCanAct()&&MP.W&&!MP.W.vault&&!(MP.W.pl&&MP.W.pl[i])&&(MP.W.pow?'Druckplatte '+(i+1)+' drücken (aktiv für 15 s)':'Druckplatte '+(i+1)+' (erst Strom einschalten)'),()=>mpAct('plate',i)));
  for(let k=0;k<9;k++){const q={r:15,x:0,z:0,id:'',lab:()=>mpCanAct()&&q.id&&'Wiederbeleben: '+mpE(MP.names[q.id]||''),run(){mpAct('rev',q.id)}};MP.iaRev.push(q);IA.push(q)}}
-function mpKeypad(cb){let v='';ov('<div class="dim">Tresor-Terminal – Code eingeben</div><div id="disp"></div><div class="keys">'+[1,2,3,4,5,6,7,8,9,'C',0,'OK'].map(k=>'<button class="btn" data-k="'+k+'">'+k+'</button>').join('')+'</div><button class="btn" id="cx">Abbrechen</button>');
+function mpKeypad(cb){let v='';ov('<div class="dim">Türtresor: 4-stelligen Code eingeben</div><div id="disp"></div><div class="keys">'+[1,2,3,4,5,6,7,8,9,'C',0,'OK'].map(k=>'<button class="btn" data-k="'+k+'">'+k+'</button>').join('')+'</div><button class="btn" id="cx">Abbrechen</button>');
  const d=$('disp');document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==='C')v='';else if(k==='OK'){closeOv();cb(v);return}else if(v.length<4)v+=k;d.textContent=v});$('cx').onclick=closeOv}
 /* ---------- Oberfläche: Menü, Lobby, Ende, Chat ---------- */
 function mpBusy(t){ov('<div class="ios" style="text-align:center"><div class="apptitle" style="font-size:26px">👥</div><div class="sub">'+mpE(t)+'</div><div class="cap" style="text-align:center">Das kann einen Moment dauern.</div></div>')}
@@ -2182,11 +2190,12 @@ addEventListener('keydown',e=>{if(!MP.on||ovOn)return;if(e.code==='KeyT'||e.code
 function mpHud(){if(!MP.snap)return;const s=MP.snap,me=mpMe(),st=me?me[4]:'ok',mm=Math.floor(s.tm/60),ss=String(s.tm%60).padStart(2,'0'),W=s.w;
  const d=(c,t)=>'<i class="'+(c?'d':'')+'">'+t+'</i>';
  let h='<b>'+(MP.role==='h'?'🔫 Du bist der JÄGER':st==='esc'?'🏃 Du bist entkommen':st==='dead'?'💀 Du bist ausgeschieden':st==='down'?'⬇ Du bist niedergeschossen!':'🏃 Entkomme dem Jäger')+'</b><br>'+(s.hs>0?'Jäger erwacht in '+s.hs+' s':'⏱ '+mm+':'+ss)
-  +'<div class="ob">'+d(W.pts>=W.tp,'📦 '+W.pts+'/'+W.tp)+d(W.pow,'⚡ '+W.fu+'/3')+d(W.vault,'🔘 Platten')+d(W.key,'🔢 Code')+d(W.kh,'🗝 Schlüssel')+d(W.exit,'🚪 Tür')+'</div>';
+  +'<div class="ob">'+d(W.pts>=W.tp,'📦 '+W.pts+'/'+W.tp)+d(W.pow,'⚡ '+W.fu+'/3')+d(W.vault,'🔘 '+(W.pl?W.pl.filter(Boolean).length:0)+'/3')+d(W.key,'🔢 Code')+d(W.kh,'🗝 Schlüssel')+d(W.exit,'🚪 Tür')+'</div>';
+ if(MP.role==='p'&&st==='ok'){const g=!W.pow?'3 Sicherungen in den Sicherungskasten in der Küche bringen':!W.vault?'Terminals 1–4 lesen (Ziffern merken) und alle 3 Druckplatten drücken':!W.key?'Code am Türtresor neben der Haustür eingeben (Schlüssel)':W.pts<W.tp?'Beute an den 📦 Abgabekästen abgeben ('+W.pts+'/'+W.tp+')':!W.exit?'Mit dem Schlüssel die Haustür aufschließen':'Raus aus der Tür und entkommen!';h+='<br><small style="color:#ffd60a">🎯 '+g+'</small>'}
  if(MP.role==='h'||true)h+='<div class="hb" title="Jäger"><s style="width:'+Math.max(0,Math.min(100,s.hh/(s.hm||MPM.HH)*100))+'%"></s></div><small>Jäger '+s.hh+' / '+(s.hm||MPM.HH)+'</small>';
  $('mph').innerHTML=h;
  $('mpl').innerHTML=s.ps.map(p=>{const i=p[0],c=MPM.CLR[(MP.cis[i]||0)%10],hp=p[10]?'🔫':(p[4]==='ok'?'❤'+p[5]:p[4]==='down'?'⬇':p[4]==='dead'?'✖':'🏃');return '<div class="r"><span class="dot" style="background:'+c+'"></span>'+mpE(MP.names[i]||i)+' '+hp+'</div>'}).join('');
- if(MP.role==='p'){const inv=MP.me.inv||[];let ib='';for(let k=0;k<3;k++){const t=inv[k];ib+=t?'<button data-u="'+k+'"><b>'+MPEM[t]+'</b>'+(k+1)+' '+MPM.NM[t]+'</button>':'<button class="e"><b>·</b>leer</button>'}$('mpi').innerHTML=ib;$('mpi').querySelectorAll('[data-u]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();mpSend({t:'use',s:+b.dataset.u})})}else $('mpi').innerHTML='<button class="e"><b>🔫</b>'+MP.me.sh+' Schuss'+(MP.me.rl?' (lädt)':'')+'</button>';
+ if(MP.role==='p'){const inv=MP.me.inv||[];let ib='';for(let k=0;k<3;k++){const t=inv[k];ib+=t?'<button data-u="'+k+'"><b>'+MPEM[t]+'</b>'+(k+1)+' '+(MPM.AC[t]||MPM.NM[t])+'</button>':'<button class="e"><b>·</b>leer</button>'}$('mpi').innerHTML=ib;$('mpi').querySelectorAll('[data-u]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();mpSend({t:'use',s:+b.dataset.u})})}else $('mpi').innerHTML='<button class="e"><b>🔫</b>'+MP.me.sh+' Schuss'+(MP.me.rl?' (lädt)':'')+'</button>';
  const now=performance.now();MP.log=MP.log.filter(l=>now-l.at<7000);$('mpc').innerHTML=MP.log.slice(-5).map(l=>'<div'+(l.ci!==undefined?' style="border-left:3px solid '+MPM.CLR[l.ci%10]+'"':'')+'>'+mpE(l.t)+'</div>').join('');
  const rv=s.ps.find(p=>p[9]>0&&p[4]==='down');if(rv){const mine=rv[0]===MP.myId;$('mprev').style.display='block';$('mprev').innerHTML=(mine?'Du wirst wiederbelebt …':'Wiederbeleben: '+mpE(MP.names[rv[0]]||''))+'<div><s style="width:'+Math.round(rv[9]*100)+'%"></s></div>'}else $('mprev').style.display='none';
  $('mpspecb').style.display=(st==='dead'||st==='esc')?'block':'none';

@@ -900,7 +900,7 @@ function chStep(){const [room,opts]=STEPS[ch.i];RM[5].m.color.setHex(SCOL[ch.i])
 /* ---- Labyrinth nach Schwierigkeit ---- */
 let MN=11,MS={x:0,z:8},MSC=5,mzSeen=new Set(),mzBlobs=[];const mzObjs=[];
 function buildMaze(){const g=RM[3].g,N=DF.mz||13,h=(N-1)/2,rn=()=>Math.random();
- [0,1,2,3,4,5].forEach(k=>g.children[k].visible=false);R3P.forEach(o=>{o.visible=false});mzObjs.forEach(o=>g.remove(o));mzObjs.length=0;COL[3].length=0;
+ [0,1,2,3,4,5,6,7].forEach(k=>{if(g.children[k])g.children[k].visible=false});R3P.forEach(o=>{o.visible=false});mzObjs.forEach(o=>g.remove(o));mzObjs.length=0;COL[3].length=0;
  const G=Array.from({length:N},()=>Array(N).fill('#')),st=[[1,1]];G[1][1]='.';
  while(st.length){const [r,c]=st[st.length-1],nb=[[0,2],[0,-2],[2,0],[-2,0]].filter(([a,b])=>{const nr=r+a,nc=c+b;return nr>0&&nc>0&&nr<N-1&&nc<N-1&&G[nr][nc]==='#'}).sort(()=>rn()-.5);
   if(!nb.length){st.pop();continue}const [a,b]=nb[0];G[r+a/2][c+b/2]='.';G[r+a][c+b]='.';st.push([r+a,c+b])}
@@ -2672,6 +2672,12 @@ function mpStrLabels(){if(!MP.sm)return;Object.keys(MP.rem).forEach(id=>{if(!MP.
 const _mpFrameS=mpFrame;mpFrame=function(){_mpFrameS();try{if(MP.on&&MP.sm&&Object.keys(MP.sm).some(k=>MP.sm[k])){const n=performance.now();if(n-(MP._sl||0)>1000){MP._sl=n;twStatus();mpStrLabels()}}}catch(e){}};
 setInterval(()=>{document.querySelectorAll('[data-str]').forEach(e=>{e.textContent=mpStrTxt()});if(document.querySelector('[data-str]'))twStatus()},4000);
 const _mpBeginS=mpBegin;mpBegin=function(m){MP.sm={};(m.ps||[]).forEach(p=>{if(p.sm)MP.sm[p.id]=1});const r=_mpBeginS.apply(this,arguments);try{mpStrLabels()}catch(e){}return r};
+
+
+/* ===== Nur der Raum, in dem du bist, wird gezeichnet: keine Geisterwände mehr (Räume liegen im Labyrinth-Bereich übereinander) ===== */
+const _lfRooms=lampFix;lampFix=function(){RM.forEach((r,i)=>{if(r&&r.g)r.g.visible=(i===cr)});
+ if(RM[3]){const g=RM[3].g;[6,7].forEach(k=>{if(g.children[k])g.children[k].visible=false})}
+ _lfRooms()};
 
 menuStart();
 requestAnimationFrame(frame);

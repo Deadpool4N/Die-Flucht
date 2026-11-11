@@ -1301,7 +1301,7 @@ const PRE={3:'6pcYv6zdmh5iERmzifqt7M',8:'2RFKAbEQGDCElii11VArPJ'};
 const SA={cid:'',tok:null,exp:0,ref:null,on:false,dev:null,player:null,info:[],failed:[],errs:[],uris:[],cur:0,playing:false,last:null,poll:0,
  mobile:/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent))};
 try{SA.cid=localStorage.getItem('dfSpCid')||'';const t=JSON.parse(localStorage.getItem('dfSpTok')||'null');if(t){SA.tok=t.a;SA.ref=t.r;SA.exp=t.e}}catch(e){}
-const WEBURL='https://taupe-choux-09809a.netlify.app/',ONWEB=location.hostname==='taupe-choux-09809a.netlify.app';
+const WEBURL='https://taupe-choux-09809a.netlify.app/',ONWEB=location.protocol==='https:';
 const saRedir=()=>location.origin+location.pathname.replace(/index\.html$/,'');
 const saSay=t=>{$('spls').textContent=t;$('sps').textContent=t};
 const b64url=buf=>btoa(String.fromCharCode.apply(null,new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');

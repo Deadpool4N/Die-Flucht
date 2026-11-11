@@ -1970,6 +1970,14 @@ body.mpon #mph,body.mpon #mpl,body.mpon #mpc{display:block}body.mpon #mpi,body.m
 #mph .hb{height:7px;border-radius:4px;background:rgba(255,255,255,.18);margin-top:4px;overflow:hidden}#mph .hb s{display:block;height:100%;background:linear-gradient(90deg,#ff453a,#ff9f0a)}
 #mpl{z-index:44;left:calc(env(safe-area-inset-left,0px) + 10px);top:32%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:6px 9px;font-size:12px;line-height:1.5;max-width:44vw}
 #mpl .r{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#mpl .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+#rptt::placeholder{color:rgba(235,235,245,.4)}
+.rpimgw{padding:10px 14px 14px}
+.adm .tile{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.09)}.adm .tile:last-child{border-bottom:0}
+.adm .tile b{font-size:26px;min-width:64px;text-align:right}.adm .tile span{color:rgba(235,235,245,.7);font-size:15px}
+.adm .rep{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.09);font-size:15px}.adm .rep:last-child{border-bottom:0}
+.adm .rep small{display:block;color:rgba(235,235,245,.55);font-size:12px;margin-top:3px}
+.adm .rep img{width:100%;border-radius:14px;margin-top:8px}
+.adm .mini{display:inline-block;border:0;border-radius:14px;padding:7px 12px;margin:8px 6px 0 0;background:rgba(255,255,255,.16);color:#fff;font:600 13px var(--ios)}
 #mpi{z-index:44;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 112px);gap:8px;pointer-events:auto}
 #mpi button{min-width:64px;height:56px;border-radius:16px;border:1px solid rgba(255,255,255,.3);background:rgba(30,30,38,.75);color:#fff;font:600 12px var(--ios);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;pointer-events:auto}
 #mpi button b{font-size:22px;font-weight:400}#mpi button.e{opacity:.35}
@@ -2520,7 +2528,7 @@ accLogin=async function(raw,nm){const code=String(raw||'').toUpperCase().replace
 cloudCheck=async()=>false;cloudPush=()=>{};cloudGet=async()=>({off:true});
 accLine=function(){if(!accReady())return '';const a=accCur();
  if(a.str)return '<div class="cap">Account</div><div class="grp"><div class="row"><span class="ic" style="background:#9146ff">📺</span><span class="tx"><b>'+esc(a.name)+' <span class="opb" style="background:linear-gradient(90deg,#b980ff,#9146ff);color:#fff">STREAMER</span></b><small>Code JAU5 · über deinem Namen im Online-Modus stehen „Streamer“ und die Zuschauer</small></span><button class="pill" id="accsw" style="flex:none">Wechseln</button></div></div>';
- if(a.op)return '<div class="cap">Account</div><div class="grp"><div class="row"><span class="ic" style="background:#ff9f0a">⭐</span><span class="tx"><b>'+esc(a.name)+' <span class="opb">OP</span></b><small>Code BBBB · alles freigeschaltet, keine Passwörter</small></span><button class="pill" id="accsw" style="flex:none">Wechseln</button></div></div>';
+ if(a.op)return '<div class="cap">Account</div><div class="grp"><div class="row"><span class="ic" style="background:#ff9f0a">⭐</span><span class="tx"><b>'+esc(a.name)+' <span class="opb">OP</span></b><small>Code BBBB · alles freigeschaltet, keine Passwörter</small></span><button class="pill" id="accsw" style="flex:none">Wechseln</button></div><button class="row" id="adminopen"><span class="ic" style="background:#5e5ce6">📊</span><span class="tx"><b>Admin-Zentrale</b><small>Spieler online, Rekord, Spiele gesamt, Bug-Meldungen</small></span><i class="chev">›</i></button></div>';
  return '<div class="cap">Account</div><div class="grp"><div class="row"><span class="ic" style="background:#0a84ff">👤</span><span class="tx"><b>'+esc(a.name)+'</b><small>Dein Code: <b style="letter-spacing:2px">'+pcEnc(accSnap())+'</b> · gilt auf jedem Gerät</small></span><button class="pill" id="accsw" style="flex:none">Wechseln</button></div></div>'};
 accShowCode=function(name,code){ov('<div class="ios" style="text-align:center"><h2 style="margin:6px 0">Hallo '+esc(name)+'!</h2><p class="foot">Das ist dein Code. Mach am besten einen Screenshot:</p>'
   +'<div style="font:800 64px var(--ios);letter-spacing:12px;margin:14px 0;padding:14px;border-radius:22px;background:rgba(10,132,255,.18);border:2px solid #0a84ff">'+code+'</div>'
@@ -2678,6 +2686,105 @@ const _mpBeginS=mpBegin;mpBegin=function(m){MP.sm={};(m.ps||[]).forEach(p=>{if(p
 const _lfRooms=lampFix;lampFix=function(){RM.forEach((r,i)=>{if(r&&r.g)r.g.visible=(i===cr)});
  if(RM[3]){const g=RM[3].g;[6,7].forEach(k=>{if(g.children[k])g.children[k].visible=false})}
  _lfRooms()};
+
+
+/* ===================== Zentrale: Statistik, Bug-Meldungen, Admin-Zentrale ===================== */
+const DFBUILD='11.11.2026';
+const OPS={url:'/api/ops',sid:(()=>{try{return crypto.randomUUID()}catch(e){return 's'+Math.random().toString(36).slice(2)+Date.now().toString(36)}})(),on:location.protocol!=='file:',fail:0};
+const opsMode=()=>MP.on?'mp':P2?'p2':(ovOn?'menu':'solo');
+async function opsPost(b,keep){if(!OPS.on)return null;try{const r=await fetch(OPS.url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({sid:OPS.sid},b)),keepalive:!!keep});if(r.status===401||r.status===403)return {error:'auth'};if(r.status===429)return {error:'limit'};if(!r.ok)throw new Error('http '+r.status);OPS.fail=0;return await r.json()}catch(e){OPS.fail++;if(OPS.fail>=4)OPS.on=false;return null}}
+setTimeout(()=>opsPost({a:'hb',m:opsMode(),v:DFBUILD}),2500);
+setInterval(()=>{if(!document.hidden)opsPost({a:'hb',m:opsMode(),v:DFBUILD})},30000);
+addEventListener('pagehide',()=>{try{if(OPS.on&&navigator.sendBeacon)navigator.sendBeacon(OPS.url,new Blob([JSON.stringify({a:'bye',sid:OPS.sid})],{type:'application/json'}))}catch(e){}});
+/* Spiele zählen: jeder Start eines Spiels (Einzelspieler, Teil 2, Online-Runde) */
+{const _ng=newGame;newGame=function(){const r=_ng.apply(this,arguments);opsPost({a:'game',m:'solo'});return r};
+ const _p2=startPart2;startPart2=function(){const r=_p2.apply(this,arguments);opsPost({a:'game',m:'p2'});return r};
+ const _mb=mpBegin;mpBegin=function(){const r=_mb.apply(this,arguments);opsPost({a:'game',m:'mp'});return r}}
+/* ---- Fehler melden: nur im Menü (Hauptmenü, Ergebnis nach einer Online-Runde), nie mitten im Spiel ---- */
+const RPT={cat:'bug',shot:null,last:0,backFn:null};
+function rptCtx(){let diff='';for(const k in LV)if(LV[k]===DF)diff=k;const cx=cr*20;return {build:DFBUILD,menu:true,mode:MP.on?'Online':P2?'Teil 2':'Einzelspieler',room:NAMES[cr]||('Raum '+cr),cr,x:+(pos.x-cx).toFixed(2),z:+pos.z.toFixed(2),diff,ctrl:CTRL,perf:PERF.lv,fps:Math.round(PERF.fps||0),w:innerWidth,h:innerHeight,acc:accReady()?accCur().name:'',ua:String(navigator.userAgent||'').slice(0,110)}}
+function rptImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=()=>rej(new Error('lesen'));fr.onload=()=>{const im=new Image();im.onerror=()=>rej(new Error('kein Bild'));im.onload=()=>{try{const m=1000,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);let q=.74,u=c.toDataURL('image/jpeg',q);while(u.length>420000&&q>.3){q-=.12;u=c.toDataURL('image/jpeg',q)}u.length>440000?rej(new Error('zu groß')):res(u)}catch(e){rej(e)}};im.src=fr.result};fr.readAsDataURL(file)})}
+function rptShow(){const has=!!RPT.shot;$('rpimgw').style.display=has?'block':'none';if(has)$('rpimg').src=RPT.shot;$('rpft').textContent=has?'Anderen Screenshot wählen':'Screenshot einfügen'}
+async function rptSet(file){const m=$('rpm');m.style.color='';m.textContent='Bild wird verarbeitet …';try{RPT.shot=await rptImg(file);m.textContent='';rptShow()}catch(e){RPT.shot=null;rptShow();m.style.color='#ff453a';m.textContent=/groß/.test(e.message)?'Das Bild ist zu groß. Wähle einen kleineren Screenshot.':'Das war kein Bild, oder es konnte nicht gelesen werden.'}}
+function rptMenu(back){RPT.backFn=back||RPT.backFn||menuStart;RPT.shot=null;RPT.cat='bug';
+ ov('<div class="ios"><div class="navbar"><b style="font-size:26px">🐞 Fehler melden</b><button class="pill" id="rpx">Zurück</button></div><div class="sub">Was ist kaputt oder was findest du schlecht? Zum Beispiel eine Wand, durch die du laufen kannst. Ehrliche Meinungen sind willkommen.</div>'
+  +'<div class="cap">Was ist passiert?</div><div class="grp"><div class="row"><textarea id="rptt" maxlength="1000" rows="4" placeholder="Zum Beispiel: Im Keller kann ich links durch die Wand laufen … oder: Das Labyrinth ist mir zu schwer." style="flex:1;min-width:0;background:transparent;border:0;color:inherit;font:16px var(--ios);outline:none;resize:vertical;min-height:96px"></textarea></div></div>'
+  +'<div class="cap">Art</div><div class="seg" id="rptc" style="font-size:13px"><button data-c="bug" class="on">🐞 Fehler</button><button data-c="wand">🧱 Wand</button><button data-c="lag">🐢 Lag</button><button data-c="sonst">💡 Idee</button><button data-c="meinung">💬 Meinung</button></div>'
+  +'<div class="cap">Screenshot (freiwillig)</div><div class="grp"><button class="row" id="rpfile"><span class="ic" style="background:#0a84ff">📎</span><span class="tx"><b id="rpft">Screenshot einfügen</b><small>Aus Fotos oder Dateien. Am PC geht auch Strg+V im Textfeld.</small></span><i class="chev">›</i></button><div class="rpimgw" id="rpimgw" style="display:none"><img id="rpimg" style="width:100%;border-radius:14px;display:block"><button class="pill" id="rprm" style="margin-top:8px">Entfernen</button></div></div><input id="rpf" type="file" accept="image/*" style="display:none">'
+  +'<p class="foot" id="rpm" style="text-align:center;min-height:20px;margin:10px 0 4px"></p>'
+  +'<div class="grp"><button class="row" id="rpsend" style="justify-content:center"><b style="color:#0a84ff;font-size:18px">Senden</b></button></div>'
+  +'<p class="foot" style="margin-top:8px">Mitgeschickt werden dein Name, die letzte Position im Spiel, dein Gerät und die Version.</p></div>');
+ $('rpx').onclick=()=>RPT.backFn();
+ const ta=$('rptt');['keydown','keyup','keypress'].forEach(n=>ta.addEventListener(n,e=>e.stopPropagation()));
+ ta.addEventListener('paste',e=>{const f=[...((e.clipboardData&&e.clipboardData.files)||[])].find(x=>/^image\//.test(x.type));if(f){e.preventDefault();rptSet(f)}});
+ document.querySelectorAll('#rptc button').forEach(b=>b.onclick=()=>{RPT.cat=b.dataset.c;document.querySelectorAll('#rptc button').forEach(x=>x.classList.toggle('on',x===b))});
+ $('rpfile').onclick=()=>$('rpf').click();$('rpf').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)rptSet(f)};
+ $('rprm').onclick=()=>{RPT.shot=null;rptShow()};$('rpsend').onclick=rptSend}
+async function rptSend(){const ta=$('rptt'),m=$('rpm'),text=ta.value.trim();
+ if(text.length<5){m.style.color='#ff9f0a';m.textContent='Bitte schreibe etwas mehr (mindestens 5 Zeichen).';return}
+ if(Date.now()-RPT.last<15000){m.style.color='#ff9f0a';m.textContent='Einen Moment bitte, dann kannst du die nächste Meldung senden.';return}
+ const g=$('rpsend');g.disabled=true;m.style.color='';m.textContent='Wird gesendet …';
+ const name=accReady()?accCur().name:(MP.name||'Spieler'),ctx=rptCtx();
+ const r=await opsPost({a:'report',name,cat:RPT.cat,text,ctx,shot:RPT.shot||null});
+ if(r&&r.ok){RPT.last=Date.now();m.style.color='#30d158';m.textContent='Danke! Deine Meldung ist angekommen. ✅';ta.value='';setTimeout(()=>{try{RPT.backFn()}catch(e){menuStart()}},1500);return}
+ g.disabled=false;m.style.color='#ff453a';
+ if(r&&r.error==='limit'){m.textContent='Du hast gerade schon viele Meldungen gesendet. Versuche es später noch einmal.';return}
+ m.innerHTML='Senden hat nicht geklappt (keine Verbindung zum Server). <u id="rptcp">Text kopieren</u>';
+ const cp=$('rptcp');if(cp)cp.onclick=async()=>{const t='Fehler in „Die Flucht 3D“: '+text+'\n'+Object.entries(ctx).map(([k,v])=>k+': '+v).join('\n');try{await navigator.clipboard.writeText(t);m.style.color='#30d158';m.textContent='Kopiert. Schicke den Text direkt weiter.'}catch(e){m.textContent='Kopieren nicht möglich.'}}}
+/* Zeile „Fehler melden“ unten in Menüs anhängen (nur nach dem Spiel) */
+function rptAppend(back){RPT.backFn=back;const box=$('box');if(!box||(box.querySelector&&box.querySelector('#rptopen')))return;const root=(box.querySelector&&box.querySelector('.ios'))||box;
+ root.insertAdjacentHTML('beforeend','<div class="grp" style="margin-top:12px"><button class="row" id="rptopen"><span class="ic" style="background:#ff9f0a">🐞</span><span class="tx"><b>Fehler melden</b><small>Bug, durchlaufbare Wand, Ruckeln oder Idee</small></span><i class="chev">›</i></button></div>')}
+{const _ms=menuStart;menuStart=function(){const r=_ms.apply(this,arguments);try{if(accReady())rptAppend(menuStart)}catch(e){}return r};
+ const _me=mpEndUI;mpEndUI=function(m){const r=_me.apply(this,arguments);try{if(MP.ph==='end'&&MP.ended)rptAppend(()=>mpEndUI(MP.ended))}catch(e){}return r}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#rptopen');if(b){e.preventDefault();rptMenu(RPT.backFn||menuStart)}},true);
+/* ---- Admin-Zentrale + Postfach (nur im OP-Account) ---- */
+const opsFmt=t=>{try{return new Date(t).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}catch(e){return ''}};
+const CATN={bug:'🐞 Fehler',wand:'🧱 Wand',lag:'🐢 Ruckeln',sonst:'💡 Idee',meinung:'💬 Meinung'};
+function opsRepText(r){const c=r.ctx||{};const hint=r.cat==='wand'?'COL['+c.cr+'] und BND['+c.cr+'] an dieser Stelle prüfen (durchlaufbare oder unsichtbare Wand).':r.cat==='meinung'?'Rückmeldung eines Spielers: einordnen, ob und was im Spiel verbessert werden sollte.':r.cat==='sonst'?'Idee bewerten und, wenn sinnvoll, umsetzen.':'Stelle im Spiel nachstellen, Ursache im Code suchen und beheben.';
+ return 'Meldung von '+r.name+' ('+opsFmt(r.t)+')\nArt: '+(CATN[r.cat]||r.cat)+'\nText: '+r.text+'\nWo: '+(c.room||'?')+' (Raum '+c.cr+'), letzte Position x='+c.x+', z='+c.z+' (relativ zum Raum), Modus: '+c.mode+(c.diff?', Stufe '+c.diff:'')+'\nGerät: '+(c.ctrl||'?')+', '+(c.w||'?')+'×'+(c.h||'?')+', FPS '+(c.fps||'?')+', Version '+(c.build||'?')+'\nHinweis: '+hint}
+const opsKey=()=>{try{return localStorage.dfAdminKey||'1709'}catch(e){return '1709'}};
+const opsSeen=()=>{try{return +localStorage.dfInboxSeen||0}catch(e){return 0}};
+const opsSetSeen=t=>{try{localStorage.dfInboxSeen=String(t)}catch(e){}};
+async function opsGet(){let r=await opsPost({a:'admin',key:opsKey()});if(r&&r.error==='auth'){const k=prompt('Admin-Schlüssel der Zentrale (in Netlify als ADMIN_KEY gesetzt):');if(k){try{localStorage.dfAdminKey=k}catch(e){}r=await opsPost({a:'admin',key:k})}}return r}
+function opsFail(r,title){ov('<div class="ios"><h2 style="margin:4px 0 2px">'+title+'</h2><p class="err">'+(r&&r.error==='auth'?'Falscher Schlüssel.':'Die Zentrale ist nicht erreichbar. Sie läuft nur auf der Netlify-Seite, und die Datei <b>netlify/functions/ops.mjs</b> muss dort liegen.')+'</p><div class="grp"><button class="row" id="admb"><span class="tx"><b>Zurück</b></span></button></div></div>');$('admb').onclick=()=>menuStart()}
+async function opsAdmin(){ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📊 Admin-Zentrale</h2><p class="foot">Wird geladen …</p></div>');
+ const r=await opsGet();if(!r||!r.ok)return opsFail(r,'📊 Admin-Zentrale');
+ const S=r.stats,T=S.total,seen=opsSeen(),nNew=r.reports.filter(x=>x.t>seen).length;
+ const tile=(n,l)=>'<div class="tile"><b>'+n+'</b><span>'+l+'</span></div>';
+ const days=(S.days||[]).map(d=>d.d.slice(5)+': '+d.n).join(' · ');
+ ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📊 Admin-Zentrale</h2><p class="foot">Stand '+opsFmt(r.now)+'. „Online“ heißt: in den letzten 90 Sekunden gemeldet.</p>'
+  +'<div class="cap">Jetzt</div><div class="grp">'+tile(S.online,'Spiele online (geöffnete Fenster)')+tile(S.inGame,'davon mitten im Spiel')+tile(S.byMode.mp,'davon im Online-Modus')+'</div>'
+  +'<div class="cap">Rekord & Summe</div><div class="grp">'+tile(S.peak.n,'Rekord: gleichzeitig online'+(S.peak.t?' (am '+opsFmt(S.peak.t)+')':''))+tile(T.all,'Spiele insgesamt gestartet')+tile(S.today,'Spiele heute')+'</div>'
+  +'<p class="foot" style="margin:8px 4px">Einzelspieler '+T.solo+' · Online '+T.mp+' · Teil 2 '+T.p2+(days?'<br>Letzte Tage: '+days:'')+'</p>'
+  +'<div class="cap">Nachrichten</div><div class="grp"><button class="row" id="admix"><span class="ic" style="background:#0a84ff">📬</span><span class="tx"><b>Postfach</b><small>'+r.reports.length+' Nachrichten'+(nNew?' · '+nNew+' neu':'')+'</small></span><i class="chev">›</i></button></div>'
+  +'<div class="grp" style="margin-top:12px"><button class="row" id="admre"><span class="tx"><b>Aktualisieren</b></span></button><button class="row" id="admb"><span class="tx"><b>Zurück</b></span></button></div></div>');
+ $('admix').onclick=()=>opsInbox('all');$('admre').onclick=opsAdmin;$('admb').onclick=()=>menuStart()}
+/* Postfach: alle Meldungen, Meinungen und Ideen der Spieler */
+async function opsInbox(flt){flt=flt||'all';ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📬 Postfach</h2><p class="foot">Wird geladen …</p></div>');
+ const r=await opsGet();if(!r||!r.ok)return opsFail(r,'📬 Postfach');
+ const seen=opsSeen(),all=r.reports,isNew=x=>x.t>seen,nNew=all.filter(isNew).length;opsSetSeen(r.now);
+ const FL={all:()=>true,bug:x=>['bug','wand','lag'].includes(x.cat),idee:x=>['sonst','meinung'].includes(x.cat)};
+ const list=all.filter(FL[flt]||FL.all);
+ const card=x=>{const c=x.ctx||{};return '<div class="rep" data-id="'+esc(x.id)+'"><div style="display:flex;align-items:center;gap:8px"><span class="udot" style="width:10px;height:10px;border-radius:50%;flex:none;background:'+(isNew(x)?'#0a84ff':'transparent')+'"></span><b style="flex:1">'+esc(CATN[x.cat]||x.cat)+' · '+esc(x.name)+'</b><small style="margin:0">'+esc(opsFmt(x.t))+'</small></div>'
+  +'<div style="margin:6px 0 0 18px;white-space:pre-wrap">'+esc(x.text)+'</div><small style="margin-left:18px">'+esc(c.room||'?')+' · x '+esc(c.x)+', z '+esc(c.z)+' · '+esc(c.mode||'')+(c.ctrl?' · '+esc(c.ctrl):'')+'</small>'
+  +'<div style="margin-left:18px">'+(x.hasShot?'<button class="mini" data-a="shot">Bild ansehen</button>':'')+'<button class="mini" data-a="copy">Für Claude Code kopieren</button><button class="mini" data-a="del" style="background:rgba(255,69,58,.35)">Löschen</button></div></div>'};
+ ov('<div class="ios adm"><div class="navbar"><b style="font-size:26px">📬 Postfach</b><button class="pill" id="pxb">Zurück</button></div>'
+  +'<p class="foot" style="margin:0 4px 8px">'+all.length+' Nachrichten'+(nNew?' · <b style="color:#0a84ff">'+nNew+' neu</b>':' · nichts Neues')+'</p>'
+  +'<div class="seg" id="pxf"><button data-f="all"'+(flt==='all'?' class="on"':'')+'>Alle</button><button data-f="bug"'+(flt==='bug'?' class="on"':'')+'>Fehler</button><button data-f="idee"'+(flt==='idee'?' class="on"':'')+'>Meinungen & Ideen</button></div>'
+  +'<div class="grp" style="margin-top:12px" id="pxl">'+(list.length?list.map(card).join(''):'<div class="rep">Keine Nachrichten in dieser Ansicht.</div>')+'</div>'
+  +'<div class="grp" style="margin-top:12px"><button class="row" id="pxre"><span class="tx"><b>Aktualisieren</b></span></button></div></div>');
+ $('pxb').onclick=()=>opsAdmin();$('pxre').onclick=()=>opsInbox(flt);
+ document.querySelectorAll('#pxf button').forEach(b=>b.onclick=()=>opsInbox(b.dataset.f));
+ document.querySelectorAll('#pxl .mini').forEach(b=>b.onclick=async()=>{const box=b.closest('.rep'),id=box.dataset.id,rep=all.find(x=>x.id===id);
+  if(b.dataset.a==='copy'){try{await navigator.clipboard.writeText(opsRepText(rep));b.textContent='Kopiert ✓'}catch(e){b.textContent='Nicht möglich'}}
+  else if(b.dataset.a==='shot'){b.textContent='Lädt …';const q=await opsPost({a:'shot',key:opsKey(),id});if(q&&q.shot){const im=document.createElement('img');im.src=q.shot;box.appendChild(im);b.remove()}else b.textContent='Kein Bild'}
+  else if(b.dataset.a==='del'){if(!confirm('Diese Nachricht löschen?'))return;const q=await opsPost({a:'del',key:opsKey(),id});if(q&&q.ok)box.remove();else b.textContent='Fehler'}})}
+/* Postfach-Zeile unten im Hauptmenü (nur Admin-Account) mit Zähler für Neues */
+async function inboxAppend(){const box=$('box');if(!box||(box.querySelector&&box.querySelector('#inboxopen')))return;const root=(box.querySelector&&box.querySelector('.ios'))||box;
+ root.insertAdjacentHTML('beforeend','<div class="grp" style="margin-top:12px"><button class="row" id="inboxopen"><span class="ic" style="background:#0a84ff">📬</span><span class="tx"><b>Postfach</b><small id="inboxbd">Meldungen, Meinungen und Ideen der Spieler</small></span><i class="chev">›</i></button></div>');
+ const r=await opsPost({a:'admin',key:opsKey()});if(r&&r.ok){const n=r.reports.filter(x=>x.t>opsSeen()).length,e=$('inboxbd');if(e)e.innerHTML=n?'<b style="color:#0a84ff">'+n+' neu</b> · '+r.reports.length+' insgesamt':r.reports.length+' Nachrichten · nichts Neues'}}
+{const _ms2=menuStart;menuStart=function(){const r=_ms2.apply(this,arguments);try{if(accReady()&&accCur().op)inboxAppend()}catch(e){}return r}}
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('#adminopen');if(a){e.preventDefault();opsAdmin();return}const b=e.target.closest&&e.target.closest('#inboxopen');if(b){e.preventDefault();opsInbox('all')}},true);
 
 menuStart();
 requestAnimationFrame(frame);

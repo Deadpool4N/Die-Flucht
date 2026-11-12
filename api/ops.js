@@ -1,1 +1,149 @@
+// Zentrale für „Die Flucht 3D“ auf Vercel: Spielerzahlen, Spiele-Zähler und Postfach (Bug-Meldungen)
+// Pfad im GitHub-Projekt: api/ops.js   ·   Speicher: Upstash Redis (Vercel → Storage → Upstash, Gratis-Plan)
+// Vercel trägt KV_REST_API_URL und KV_REST_API_TOKEN automatisch ein. Optional: ADMIN_KEY (Standard: 1709).
+const DB_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+const DB_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+const ADMIN_KEY = process.env.ADMIN_KEY || "1709";
 
+const ONLINE_MS = 150 * 1000;   // so lange zählt ein Spieler nach seinem letzten Lebenszeichen als online
+const MAX_REPORTS = 150;        // älteste Meldungen werden automatisch gelöscht
+const CATS = ["bug", "wand", "lag", "sonst", "meinung"];
+const MODES = ["menu", "solo", "mp", "p2"];
+const ID_RE = /^r-\d{15}-[a-z0-9]+$/;
+
+async function db(cmds) {       // mehrere Redis-Befehle in einem Aufruf
+  const r = await fetch(DB_URL + "/pipeline", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + DB_TOKEN, "content-type": "application/json" },
+    body: JSON.stringify(cmds),
+  });
+  if (!r.ok) throw new Error("Datenbank antwortet mit " + r.status);
+  const j = await r.json();
+  return j.map((x) => { if (x && x.error) throw new Error(x.error); return x ? x.result : null; });
+}
+const str = (v, n) => String(v == null ? "" : v).replace(/[\u0000-\u001f]/g, " ").slice(0, n);
+const hash = (s) => { let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
+const dayKey = (t) => { try { return new Date(t).toLocaleDateString("sv-SE", { timeZone: "Europe/Berlin" }); } catch (e) { return new Date(t).toISOString().slice(0, 10); } };
+const pairs = (arr) => { const o = {}; for (let i = 0; arr && i < arr.length; i += 2) o[arr[i]] = arr[i + 1]; return o; };
+
+export default async function handler(req, res) {
+  res.setHeader("cache-control", "no-store");
+  const send = (obj, status = 200) => res.status(status).json(obj);
+  if (req.method !== "POST") return send({ error: "method" }, 405);
+  if (!DB_URL || !DB_TOKEN) return send({ error: "nodb" }, 503);
+  let b = req.body;
+  if (typeof b === "string") { try { b = JSON.parse(b); } catch (e) { b = null; } }
+  if (!b || typeof b.a !== "string") return send({ error: "bad" }, 400);
+  const now = Date.now();
+  const sid = str(b.sid, 64);
+  try {
+    switch (b.a) {
+      case "hb": {                                    // Lebenszeichen (jede Minute)
+        if (!sid) return send({ error: "sid" }, 400);
+        const m = MODES.includes(b.m) ? b.m : "menu";
+        const [, , , n, pk] = await db([["ZADD", "df:on", now, sid], ["HSET", "df:mode", sid, m], ["ZREMRANGEBYSCORE", "df:on", "-inf", now - ONLINE_MS], ["ZCARD", "df:on"], ["GET", "df:peak"]]);
+        const peak = pk ? JSON.parse(pk) : { n: 0, t: 0 };
+        if (n > peak.n) await db([["SET", "df:peak", JSON.stringify({ n, t: now })]]);
+        return send({ ok: true, online: n });
+      }
+      case "bye": {
+        if (sid) await db([["ZREM", "df:on", sid], ["HDEL", "df:mode", sid]]);
+        return send({ ok: true });
+      }
+      case "visit": {                                 // ein Besuch der Seite (einmal pro Öffnen)
+        const vid = str(b.vid, 64);
+        if (!vid) return send({ error: "vid" }, 400);
+        const day = dayKey(now);
+        await db([["SADD", "df:vis", vid], ["INCR", "df:visits"], ["SADD", "df:vd:" + day, vid], ["EXPIRE", "df:vd:" + day, 3456000], ["HINCRBY", "df:vdays", day, 1]]);
+        return send({ ok: true });
+      }
+      case "legacy": {                                // Zahlen der alten Webseite (vom Admin eingetragen)
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const n = (v) => Math.max(0, Math.min(1e7, Math.floor(+v || 0)));
+        await db([["HSET", "df:legacy", "players", n(b.players), "visits", n(b.visits), "games", n(b.games)]]);
+        return send({ ok: true });
+      }
+      case "game": {                                  // ein Spiel wurde gestartet
+        const m = ["solo", "mp", "p2"].includes(b.m) ? b.m : "solo";
+        const cmds = [["HINCRBY", "df:total", "all", 1], ["HINCRBY", "df:total", m, 1], ["HINCRBY", "df:days", dayKey(now), 1]];
+        if (sid) cmds.push(["HSET", "df:mode", sid, m]);
+        await db(cmds);
+        return send({ ok: true });
+      }
+      case "report": {                                // Meldung eines Spielers
+        const text = str(b.text, 1200).trim();
+        if (text.length < 5) return send({ error: "short" }, 400);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rl:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 8) return send({ error: "limit" }, 429);
+        const id = "r-" + String(now).padStart(15, "0") + "-" + Math.random().toString(36).slice(2, 6);
+        let ctx = {};
+        try { ctx = JSON.parse(JSON.stringify(b.ctx || {})); } catch (e) {}
+        if (JSON.stringify(ctx).length > 1800) ctx = { note: "zu groß" };
+        const hasShot = typeof b.shot === "string" && b.shot.startsWith("data:image/jpeg;base64,") && b.shot.length < 340000;
+        const rep = { id, t: now, name: str(b.name, 20) || "Spieler", cat: CATS.includes(b.cat) ? b.cat : "bug", text, ctx, hasShot };
+        const cmds = [["SET", "df:r:" + id, JSON.stringify(rep)], ["ZADD", "df:rep", now, id]];
+        if (hasShot) cmds.push(["SET", "df:s:" + id, b.shot]);
+        cmds.push(["ZCARD", "df:rep"]);
+        const out = await db(cmds);
+        const total = out[out.length - 1];
+        if (total > MAX_REPORTS) {
+          const [old] = await db([["ZRANGE", "df:rep", 0, total - MAX_REPORTS - 1]]);
+          if (old && old.length) await db([["ZREM", "df:rep", ...old], ["DEL", ...old.map((k) => "df:r:" + k), ...old.map((k) => "df:s:" + k)]]);
+        }
+        return send({ ok: true, id });
+      }
+      case "admin": {                                 // Zahlen + Meldungen für den Administrator
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const [, on, modeArr, pk, totArr, dayArr, ids, visU, visN, visToday, legArr, vdayArr] = await db([["ZREMRANGEBYSCORE", "df:on", "-inf", now - ONLINE_MS], ["ZRANGE", "df:on", 0, -1], ["HGETALL", "df:mode"], ["GET", "df:peak"], ["HGETALL", "df:total"], ["HGETALL", "df:days"], ["ZREVRANGE", "df:rep", 0, 99], ["SCARD", "df:vis"], ["GET", "df:visits"], ["SCARD", "df:vd:" + dayKey(now)], ["HGETALL", "df:legacy"], ["HGETALL", "df:vdays"]]);
+        const modes = pairs(modeArr), tot = pairs(totArr), days = pairs(dayArr);
+        const online = on || [];
+        const stale = Object.keys(modes).filter((k) => !online.includes(k));
+        const oldDays = Object.keys(days).sort().slice(0, -30);
+        const clean = [];
+        if (stale.length) clean.push(["HDEL", "df:mode", ...stale]);
+        if (oldDays.length) clean.push(["HDEL", "df:days", ...oldDays]);
+        if (clean.length) await db(clean);
+        let reports = [];
+        if (ids && ids.length) { const [vals] = await db([["MGET", ...ids.map((k) => "df:r:" + k)]]); reports = (vals || []).filter(Boolean).map((v) => JSON.parse(v)); }
+        const by = (m) => online.filter((k) => modes[k] === m).length;
+        const today = dayKey(now);
+        const stats = {
+          online: online.length,
+          inGame: online.filter((k) => modes[k] && modes[k] !== "menu").length,
+          byMode: { solo: by("solo"), mp: by("mp"), p2: by("p2"), menu: by("menu") },
+          peak: pk ? JSON.parse(pk) : { n: 0, t: 0 },
+          total: { all: +(tot.all || 0), solo: +(tot.solo || 0), mp: +(tot.mp || 0), p2: +(tot.p2 || 0) },
+          today: +(days[today] || 0),
+          days: Object.keys(days).sort().slice(-7).map((d) => ({ d, n: +days[d] })),
+        };
+        const leg = pairs(legArr), vdays = pairs(vdayArr);
+        stats.visitors = {
+          unique: +(visU || 0), visits: +(visN || 0), today: +(visToday || 0),
+          days: Object.keys(vdays).sort().slice(-7).map((d) => ({ d, n: +vdays[d] })),
+          legacy: { players: +(leg.players || 0), visits: +(leg.visits || 0), games: +(leg.games || 0) },
+        };
+        return send({ ok: true, stats, reports, now });
+      }
+      case "shot": {
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const id = str(b.id, 40);
+        if (!ID_RE.test(id)) return send({ error: "bad" }, 400);
+        const [shot] = await db([["GET", "df:s:" + id]]);
+        return shot ? send({ ok: true, shot }) : send({ error: "none" }, 404);
+      }
+      case "del": {
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const id = str(b.id, 40);
+        if (!ID_RE.test(id)) return send({ error: "bad" }, 400);
+        await db([["ZREM", "df:rep", id], ["DEL", "df:r:" + id, "df:s:" + id]]);
+        return send({ ok: true });
+      }
+    }
+    return send({ error: "action" }, 400);
+  } catch (e) {
+    return send({ error: "server", detail: String(e && e.message || e).slice(0, 120) }, 500);
+  }
+}

@@ -3100,7 +3100,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 
 /* ===================== Skins sehen verschieden aus: eigene Teile + Shop-Vorschau ===================== */
 const CXRAR={mask:{r:'Selten',c:'#4da3ff',d:'Schwarze Kleidung, eine weiße Maske mit Augenlöchern und eine tiefe Kapuze.'},gent:{r:'Episch',c:'#b86bff',d:'Dunkler Anzug mit roter Krawatte, roter Rose, blauen Haaren und leuchtenden Augen.'},gold:{r:'Legendär',c:'#ffb020',d:'Goldene Rüstung mit Krone, Brustplatte, Schulterpanzern und einem Rubin.'},neon:{r:'Episch',c:'#ff3df0',d:'Leuchtendes Visier, pinke Stacheln, Neon-Streifen und glühende Handschuhe.'},ghost:{r:'Selten',c:'#7fd0ff',d:'Ein weißes Laken mit Löchern fürs Gesicht. Halb durchsichtig und schwebt fast.'},pirate:{r:'Selten',c:'#4da3ff',d:'Rotes Kopftuch, Augenklappe, Bart, gestreiftes Hemd und ein Haken statt Hand.'},knight:{r:'Episch',c:'#b86bff',d:'Silberne Rüstung mit Helm, rotem Federbusch, Brustplatte und Schulterpanzern.'},robot:{r:'Episch',c:'#ff3df0',d:'Metallkörper mit Antenne, rotem Augenstreifen, Brustpanel und Krallenhänden.'},dragon:{r:'Legendär',c:'#ffb020',d:'Rote Schuppen, Hörner, glühende Augen, Rückenstacheln und ein langer Schwanz.'}};
-const CXPRICE={'Selten':500,'Episch':1000,'Legendär':2500},CXRARW={'Selten':1,'Episch':2,'Legendär':3};
+const CXPRICE={'Selten':4500,'Episch':5000,'Legendär':6500},CXRARW={'Selten':1,'Episch':2,'Legendär':3};
 const cxPrice=id=>CXPRICE[(CXRAR[id]||{}).r]||1000,cxRarW=id=>CXRARW[(CXRAR[id]||{}).r]||0;
 function cxBuildSkin(id,root,armL,armR){const g=new THREE.Group();root.add(g);const limbs=[];const L=(arm,w,h,d,x,y,z,m)=>{if(arm)limbs.push(box(w,h,d,x,y,z,m,arm))};
  if(id==='gold'){const au=M(0xffd60a,0x6b4a00),dk=M(0x5a3a00),rb=M(0xff2d55,0x500010);
@@ -3177,6 +3177,26 @@ function cxAdminSection(){const root=$('box').querySelector&&$('box').querySelec
 function mpAdminUI(){ov('<div class="ios"><div class="navbar"><b style="font-size:22px">⚙ Admin · Online</b><button class="pill blue" id="admx">Fertig</button></div>'+cxAdminHTML(true)+'</div>');$('admx').onclick=closeOv;cxAdminBind(true)}
 {const _bs2=bindSkin;bindSkin=function(){_bs2();const c=document.getElementById('mskall');if(c&&!c._cx){c._cx=1;const old=c.onclick;c.onclick=function(){try{cxAdminUnlockAll()}catch(e){}return old&&old.apply(this,arguments)}}}}
 {const _pu=pauseUI;pauseUI=function(p2){if(MP.on&&MP.ph==='play'&&CHEATS&&!ovOn)return mpAdminUI();const r=_pu.apply(this,arguments);try{if(CHEATS)cxAdminSection()}catch(e){}return r}}
+
+
+/* ===================== Admin-Account (BBBB): alle Skins + Admin-Panel direkt von der Startseite ===================== */
+const cxIsOp=()=>{try{return !!(accReady()&&accCur().op)}catch(e){return false}};
+function cxOpSetup(){if(!cxIsOp())return;CHEATS=true;if(cxOpSetup.id!==ACC.active){cxOpSetup.id=ACC.active;cxAdminUnlockAll()}}
+function opHome(){const sw=(k,t,sm)=>'<button class="row" data-och="'+k+'"><span class="tx"><b>'+t+'</b><small>'+sm+'</small></span><i class="sw'+(CH[k]?' on':'')+'"></i></button>';
+ const go=(id,ic,bg,t,sm)=>'<button class="row" id="'+id+'"><span class="ic" style="background:'+bg+'">'+ic+'</span><span class="tx"><b>'+t+'</b><small>'+sm+'</small></span><i class="chev">›</i></button>';
+ ov('<div class="ios"><div class="navbar"><b style="font-size:24px">⚙ Admin-Panel</b><button class="pill" id="ohx">Zurück</button></div><div class="sub">Nur für den Admin-Account. Die Schalter gelten im nächsten Spiel.</div>'
+  +'<div class="cap" style="margin-top:12px">Schalter</div><div class="grp">'+sw('god','Unverwundbar','Der Jäger und die Hunde können dich nicht fangen')+sw('fast','Turbo-Laufen','Viel schneller laufen')+sw('skip','Rätsel überspringen','Schlösser und Rätsel werden übersprungen')+sw('noclip','Durch Wände','Du läufst durch Wände')+'</div>'
+  +'<div class="cap" style="margin-top:12px">Schnellzugriff</div><div class="grp">'+go('oha','📊','#0a84ff','Admin-Zentrale','Spieler, Zahlen, Rekord')+go('ohp','📬','#ff9f0a','Postfach','Meldungen der Spieler')+go('ohs','🧥','#bf5af2','Spind','Alle Skins ansehen und anziehen')+go('ohm','🛒','#30d158','Shop & Aufgaben','Zum Testen')+'</div>'
+  +cxAdminHTML(false)+'</div>');
+ const g=id=>document.getElementById(id);g('ohx').onclick=()=>menuStart();
+ document.querySelectorAll('[data-och]').forEach(b=>b.onclick=()=>{CH[b.dataset.och]=!CH[b.dataset.och];opHome()});
+ if(g('oha'))g('oha').onclick=()=>opsAdmin();if(g('ohp'))g('ohp').onclick=()=>opsInbox('all');if(g('ohs'))g('ohs').onclick=()=>spindUI(()=>opHome());if(g('ohm'))g('ohm').onclick=()=>shopUI('skins');
+ cxAdminBind(false)}
+function cxOpAppend(){const box=$('box');if(!box||(box.querySelector&&box.querySelector('#ophome')))return;
+ const html='<div class="grp" style="margin-top:12px"><button class="row" id="ophome"><span class="ic" style="background:#ff453a">⚙</span><span class="tx"><b>Admin-Panel</b><small>Coins, Skins, Cheats – direkt von hier</small></span><i class="chev">›</i></button></div>';
+ const sh=box.querySelector&&box.querySelector('#shopopen'),g=sh&&sh.closest&&sh.closest('.grp');if(g)g.insertAdjacentHTML('beforebegin',html);else((box.querySelector&&box.querySelector('.ios'))||box).insertAdjacentHTML('beforeend',html)}
+{const _m=menuStart;menuStart=function(){try{cxOpSetup()}catch(e){}const r=_m.apply(this,arguments);try{if(cxIsOp())cxOpAppend()}catch(e){}return r}}
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#ophome');if(b){e.preventDefault();opHome()}},true);
 
 menuStart();
 requestAnimationFrame(frame);

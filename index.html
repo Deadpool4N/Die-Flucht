@@ -1921,7 +1921,9 @@ class MPHost{
   if(p.hp<=0){p.st='down';p.hp=MPM.DH;p.rb=null;p.rp=0;p.boost=0;this.drop(p);this.send(p.id,{t:'e',k:'down'});this.bcast({t:'e',k:'txt',m:p.name+' wurde niedergeschossen! Helft ihm hoch!'});this.check()}
   else this.send(p.id,{t:'e',k:'hit',d})}
  kill(p){if(p.st==='dead')return;p.st='dead';p.hp=0;p.rb=null;this.drop(p);this.send(p.id,{t:'e',k:'dead'});this.bcast({t:'e',k:'txt',m:p.name+' ist gestorben.'});this.check()}
- hurtHunter(d,stun){const h=this.P[this.hid];if(!h)return;h.hp-=d;h.stun=Math.max(h.stun,stun);this.bcast({t:'e',k:'txt',m:'Der Jäger wurde getroffen! ('+Math.max(0,Math.round(h.hp))+' Leben)'});if(h.hp<=0)this.finish('p','Der Jäger wurde besiegt!')}
+ hurtHunter(d,stun){const h=this.P[this.hid];if(!h||h.ko>0)return;h.hp-=d;h.stun=Math.max(h.stun,stun);
+  if(h.hp<=0){h.hp=0;h.ko=15;h.stun=15;this.bcast({t:'e',k:'txt',m:'😵 Der Jäger ist ausgeknockt! 15 Sekunden – nutzt die Zeit!'})}
+  else this.bcast({t:'e',k:'txt',m:'Der Jäger wurde getroffen! ('+Math.max(0,Math.round(h.hp))+' Leben)'})}
  check(){if(this.phase!=='play')return;const ps=this.order.map(i=>this.P[i]).filter(p=>p.role==='p');
   const stand=ps.filter(p=>p.st==='ok').length,esc=ps.filter(p=>p.st==='esc').length;
   if(stand===0){if(esc>0)this.finish('p','Mindestens ein Spieler ist entkommen!');else this.finish('h','Alle Spieler wurden erledigt.')}}
@@ -1951,20 +1953,25 @@ class MPHost{
  shoot(p,m){if(this.phase!=='play'||p.role!=='h'||p.st!=='ok'||this.hs>0||p.stun>0||p.cd>0||p.sh<=0||p.rl>0)return;
   let dx=+m.dx,dz=+m.dz;const L=Math.hypot(dx,dz);if(!(L>0))return;dx/=L;dz/=L;p.sh--;p.cd=1;if(p.sh===0)p.rl=2.5;
   this.bcast({t:'e',k:'shot',id:p.id});const dmg={};
-  for(let k=0;k<6;k++){const a=(k-2.5)*.045,c=Math.cos(a),s=Math.sin(a),px=dx*c-dz*s,pz=dx*s+dz*c;
+  for(let k=0;k<6;k++){const a=(k-2.5)*.028,c=Math.cos(a),s=Math.sin(a),px=dx*c-dz*s,pz=dx*s+dz*c;
    let wall=22;for(const b of this.walls.concat(this.dyn())){const t=mpRayBox(p.x,p.z,px,pz,b,22);if(t<wall)wall=t}
    let best=null,bt=wall;
    this.order.forEach(i=>{const q=this.P[i];if(q.role!=='p'||(q.st!=='ok'&&q.st!=='down'))return;const vx=q.x-p.x,vz=q.z-p.z,t=vx*px+vz*pz;if(t<.2||t>=bt)return;if(Math.abs(vx*pz-vz*px)<=.55){best=q;bt=t}});
    if(best){dmg[best.id]=(dmg[best.id]||0)+Math.max(3,Math.round(14*(1-bt/28)))}}
+  const q=m.tid&&this.P[m.tid];
+  if(q&&q.role==='p'&&(q.st==='ok'||q.st==='down')){const vx=q.x-p.x,vz=q.z-p.z,d=Math.hypot(vx,vz);
+   if(d>.2&&d<=22&&(vx*dx+vz*dz)/d>Math.cos(.45)){let wall=99;for(const b of this.walls.concat(this.dyn())){const t=mpRayBox(p.x,p.z,vx/d,vz/d,b,d);if(t<wall)wall=t}
+    if(wall>=d-.3){const base=4*Math.max(3,Math.round(14*(1-d/28)));if((dmg[q.id]||0)<base)dmg[q.id]=base}}}
   Object.keys(dmg).forEach(id=>{this.hurt(this.P[id],dmg[id]);this.send(p.id,{t:'e',k:'hm'})})}
  use(p,s){if(this.phase!=='play'||p.st!=='ok'||p.role!=='p')return;const ty=p.inv[s],T=mm=>this.send(p.id,{t:'e',k:'txt',m:mm});if(!ty)return;
   if(ty==='med'){if(p.hp>=MPM.HP)return T('Du bist schon bei voller Gesundheit.');p.hp=Math.min(MPM.HP,p.hp+50);p.inv.splice(s,1);T('Medkit benutzt (+50).')}
   else if(ty==='nrg'){p.boost=8;p.inv.splice(s,1);T('Energy-Drink: 8 Sekunden schneller!')}
-  else if(ty==='tas'){const h=this.P[this.hid];if(!h||mpDist(p.x,p.z,h.x,h.z)>5.5)return T('Der Jäger ist zu weit weg (max. 5,5 m). Geh näher ran.');p.inv.splice(s,1);this.hurtHunter(60,3)}
+  else if(ty==='tas'){const h=this.P[this.hid];if(h&&h.ko>0)return T('Der Jäger ist schon ausgeknockt – spar dir den Taser.');if(!h||mpDist(p.x,p.z,h.x,h.z)>5.5)return T('Der Jäger ist zu weit weg (max. 5,5 m). Geh näher ran.');p.inv.splice(s,1);this.hurtHunter(60,3)}
   else if(ty==='trp'){this.W.tr.push({id:++this.tr,x:+p.x.toFixed(2),z:+p.z.toFixed(2)});p.inv.splice(s,1);T('Falle gelegt. Der Jäger sieht sie nicht.')}
   else if(ty==='fuse')T('Die Sicherung gehört in den Sicherungskasten in der Küche.')
   else if(ty==='loot')T('Beute bringt Punkte: gib sie an einem Abgabekasten ab.')}
  tick(dt){if(this.phase!=='play')return;const W=this.W,h=this.P[this.hid];
+  if(h&&h.ko>0){h.ko=Math.max(0,h.ko-dt);h.stun=Math.max(h.stun,h.ko);if(h.ko<=0){h.hp=this.hm;h.stun=0;this.bcast({t:'e',k:'txt',m:'⚠️ Der Jäger ist wieder auf den Beinen – mit vollen Leben!'})}}
   if(this.hs>0)this.hs=Math.max(0,this.hs-dt);else this.tm=Math.max(0,this.tm-dt);
   this.order.forEach(i=>{const p=this.P[i];p.cd=Math.max(0,p.cd-dt);p.stun=Math.max(0,p.stun-dt);p.boost=Math.max(0,p.boost-dt);
    if(p.rl>0){p.rl-=dt;if(p.rl<=0){p.rl=0;p.sh=4}}
@@ -1974,11 +1981,11 @@ class MPHost{
   if(this.hs<=0){this.spT+=dt;const D=MPD[this.diff];if(this.spT>=D.iv){this.spT=0;const em=[];W.it.forEach((t,i)=>{if(!t)em.push(i)});if(em.length)W.it[em[this.rnd(em.length)]]=['med','nrg','tas','trp','loot','loot','loot'][this.rnd(7)]}}
   W.pl=pr;if(pr[0]&&pr[1]&&pr[2])W.hold+=dt;else W.hold=Math.max(0,W.hold-dt*2);
   if(!W.vault&&W.hold>=2){W.vault=1;this.bcast({t:'e',k:'txt',m:'🔓 Die Tresortür öffnet sich!'})}
-  if(h&&h.st==='ok')W.tr=W.tr.filter(t=>{if(mpDist(h.x,h.z,t.x,t.z)<1.1){h.stun=Math.max(h.stun,4);this.bcast({t:'e',k:'txt',m:'🪤 Der Jäger ist in eine Falle getappt!'});this.hurtHunter(120,4);return false}return true});
+  if(h&&h.st==='ok'&&!(h.ko>0))W.tr=W.tr.filter(t=>{if(mpDist(h.x,h.z,t.x,t.z)<1.1){h.stun=Math.max(h.stun,4);this.bcast({t:'e',k:'txt',m:'🪤 Der Jäger ist in eine Falle getappt!'});this.hurtHunter(120,4);return false}return true});
   if(W.exit)this.order.forEach(i=>{const p=this.P[i];if(p.role==='p'&&p.st==='ok'&&p.z>15.4){p.st='esc';this.bcast({t:'e',k:'txt',m:'🏃 '+p.name+' ist entkommen!'});this.send(p.id,{t:'e',k:'esc'});this.drop(p)}});
   this.check();if(this.phase==='play'&&this.tm<=0)this.finish('h','Die Zeit ist abgelaufen.')}
  snapFor(id){const W=this.W,me=this.P[id],h=this.P[this.hid];if(!W||!me)return null;
-  return {t:'s',tm:Math.ceil(this.tm),hs:Math.ceil(this.hs),hh:h?Math.max(0,Math.round(h.hp)):0,hm:this.hm,
+  return {t:'s',tm:Math.ceil(this.tm),hs:Math.ceil(this.hs),hh:h?Math.max(0,Math.round(h.hp)):0,hm:this.hm,hko:h&&h.ko>0?Math.ceil(h.ko):0,
    ps:this.order.map(i=>{const p=this.P[i];return [i,+p.x.toFixed(2),+p.z.toFixed(2),+p.ry.toFixed(2),p.st,Math.round(p.hp),p.m?1:0,p.boost>0?1:0,p.stun>0?1:0,+(p.rp/MPM.REV).toFixed(2),p.role==='h'?1:0]}),
    w:{pts:W.pts,tp:W.tp,pow:W.pow,fu:W.fu,fa:W.fa,pl:W.pl,pt:W.pt.map(v=>+v.toFixed(1)),hold:+(W.hold/2).toFixed(2),vault:W.vault,key:W.key,kp:W.kp,kh:W.kh,exit:W.exit,it:W.it,tr:id===this.hid?[]:W.tr},
    me:{inv:me.inv,sh:me.sh,rl:me.rl>0?1:0}}}}
@@ -2157,7 +2164,7 @@ function mpEvent(e){switch(e.k){
  case 'down':{const f=$('mpflash');f.style.opacity=1;setTimeout(()=>f.style.opacity=0,900);toast('Du wurdest niedergeschossen! Warte auf Hilfe.','err');shake(.3);break}
  case 'dead':toast('Du bist gestorben. Du schaust jetzt zu.','err');break;
  case 'esc':toast('Du bist entkommen! Du schaust jetzt zu.','good');break}}
-function mpSnap(s){MP.snap=s;MP.W=s.w;MP.me=s.me;MP.hs=s.hs;MP.tm=s.tm;MP.hh=s.hh;MP.hm=s.hm||MP.hm;if(MP.role==='h')GUN.ammo=s.me.sh;try{mpWorld(s.w)}catch(e){}}
+function mpSnap(s){MP.snap=s;MP.W=s.w;MP.me=s.me;MP.hs=s.hs;MP.tm=s.tm;MP.hh=s.hh;MP.hm=s.hm||MP.hm;MP.hko=s.hko||0;if(MP.role==='h')GUN.ammo=s.me.sh;try{mpWorld(s.w)}catch(e){}}
 function mpBegin(m){MP.on=true;MP.ph='play';MP.ended=null;MP.hid=m.hid;MP.order=m.ps.map(p=>p.id);MP.names={};MP.cis={};m.ps.forEach(p=>{MP.names[p.id]=p.name;MP.cis[p.id]=p.ci});
  MP.role=MP.myId===m.hid?'h':'p';MP.df=m.df||'mittel';MP.pts=m.pts||40;MP.hf=m.hf||.78;MP.hm=m.hm||400;MP.clues=[];MP.snap=null;MP.W=null;MP.log=[];MP.spec='';
  Object.keys(MP.rem).forEach(k=>RM[15].g.remove(MP.rem[k].g));MP.rem={};MP.order.forEach(id=>{const a=mpAvatar(MP.cis[id],id===m.hid,MP.names[id]);RM[15].g.add(a.g);MP.rem[id]=a});
@@ -2170,7 +2177,7 @@ function mpToLobby(){MP.on=false;MP.ph='lobby';document.body.classList.remove('m
 function mpEnd(m){MP.ph='end';MP.ended=m;setTimeout(()=>mpEndUI(m),1500)}
 function mpShoot(){if(!MP.on||MP.role!=='h'||MP.ph!=='play'||MP.hs>0||lm||ovOn)return;const me=mpMe();if(me&&(me[8]||me[4]!=='ok'))return;
  const now=performance.now();if(now<MP.cd)return;if(MP.me.sh<=0){toast('Nachladen …','err');MP.cd=now+400;return}
- MP.cd=now+950;GUN.rec=1;mf.intensity=4;shotSnd();shake(.16);GUN.ammo=Math.max(0,GUN.ammo-1);mpSend({t:'shoot',dx:-Math.sin(Y),dz:-Math.cos(Y)})}
+ MP.cd=now+950;GUN.rec=.6;mf.intensity=4;shotSnd();shake(.07);GUN.ammo=Math.max(0,GUN.ammo-1);const tg=mpAimTarget(.13);mpSend({t:'shoot',dx:-Math.sin(Y),dz:-Math.cos(Y),tid:tg?tg.id:''})}
 const _shoot3=shoot;shoot=function(){if(MP.on)return mpShoot();return _shoot3()};
 function mpAct(a,i,ex){mpSend(Object.assign({t:'act',a,i},ex||{}))}
 /* ---------- Interaktionen ---------- */
@@ -2230,6 +2237,7 @@ function mpHud(){if(!MP.snap)return;const s=MP.snap,me=mpMe(),st=me?me[4]:'ok',m
  let h='<b>'+(MP.role==='h'?'🔫 Du bist der JÄGER':st==='esc'?'🏃 Du bist entkommen':st==='dead'?'💀 Du bist ausgeschieden':st==='down'?'⬇ Du bist niedergeschossen!':'🏃 Entkomme dem Jäger')+'</b><br>'+(s.hs>0?'Jäger erwacht in '+s.hs+' s':'⏱ '+mm+':'+ss)
   +'<div class="ob">'+d(W.pts>=W.tp,'📦 '+W.pts+'/'+W.tp)+d(W.pow,'⚡ '+W.fu+'/3')+d(W.vault,'🔘 '+(W.pl?W.pl.filter(Boolean).length:0)+'/3')+d(W.key,'🔢 Code')+d(W.kh,'🗝 Schlüssel')+d(W.exit,'🚪 Tür')+'</div>';
  if(MP.role==='p'&&st==='ok'){const g=!W.pow?'3 Sicherungen in den Sicherungskasten in der Küche bringen':!W.vault?'Terminals 1–4 lesen (Ziffern merken) und alle 3 Druckplatten drücken':!W.key?'Code am Türtresor neben der Haustür eingeben (Schlüssel)':W.pts<W.tp?'Beute an den 📦 Abgabekästen abgeben ('+W.pts+'/'+W.tp+')':!W.exit?'Mit dem Schlüssel die Haustür aufschließen':'Raus aus der Tür und entkommen!';h+='<br><small style="color:#ffd60a">🎯 '+g+'</small>'}
+ if(MP.hko>0)h+='<br><small style="color:#ff9f0a">😵 Jäger ausgeknockt: noch '+MP.hko+' s</small>';
  if(MP.role==='h'||true)h+='<div class="hb" title="Jäger"><s style="width:'+Math.max(0,Math.min(100,s.hh/(s.hm||MPM.HH)*100))+'%"></s></div><small>Jäger '+s.hh+' / '+(s.hm||MPM.HH)+'</small>';
  $('mph').innerHTML=h;
  $('mpl').innerHTML=s.ps.map(p=>{const i=p[0],c=MPM.CLR[(MP.cis[i]||0)%10],hp=p[10]?'🔫':(p[4]==='ok'?'❤'+p[5]:p[4]==='down'?'⬇':p[4]==='dead'?'✖':'🏃');return '<div class="r"><span class="dot" style="background:'+c+'"></span>'+mpE(MP.names[i]||i)+' '+hp+'</div>'}).join('');
@@ -2873,6 +2881,20 @@ function spPwUI(msg,col){const el=document.getElementById('sppw');if(!el)return;
  if($$('sppwr'))$$('sppwr').onclick=()=>{spPwUI.del=true;spPwUI()};
  if($$('sppwdo'))$$('sppwdo').onclick=async()=>{if(await spHash($$('sppwd').value,SPL.s)!==SPL.h){spPwUI.del=true;return spPwUI('Falsches Passwort.','#ff453a')}SPL.h='';SPL.s='';try{localStorage.removeItem('dfSpPw')}catch(e){}spPwUI.del=false;spPwUI('Passwort entfernt. Spotify ist jetzt ohne Passwort.','#30d158')}}
 spPwUI();setTimeout(()=>{spPwUI();if(SPL.locked)try{saSay('🔒 Spotify ist gesperrt – unten im Musik-Menü Passwort eingeben.')}catch(e){}},300);
+
+
+/* ===================== Online-Jäger: genaueres Zielen, angenehmere Steuerung, K.o.-Anzeige ===================== */
+function mpAimTarget(maxA){if(!MP.on||MP.role!=='h'||!MP.snap||!MP.snap.ps)return null;const ax=-Math.sin(Y),az=-Math.cos(Y);let best=null,bs=1e9;
+ MP.snap.ps.forEach(q=>{if(q[0]===MP.myId||q[10])return;if(q[4]!=='ok'&&q[4]!=='down')return;const a=MP.rem[q[0]];const wx=300+(a&&a.g?a.g.position.x:q[1]),wz=(a&&a.g?a.g.position.z:q[2]);
+  const vx=wx-pos.x,vz=wz-pos.z,d=Math.hypot(vx,vz);if(d<.3||d>22)return;const ang=Math.acos(Math.max(-1,Math.min(1,(vx*ax+vz*az)/d))),lat=Math.abs(vx*az-vz*ax);
+  if(ang>maxA&&lat>.6)return;const sc=ang*6+d*.02;if(sc<bs){bs=sc;best={id:q[0],d,ang,wx,wz}}});return best}
+const _mpFrameAim=mpFrame;mpFrame=function(){_mpFrameAim();try{
+ const now=performance.now(),dt=Math.min(.05,(now-(MP._at||now))/1000);MP._at=now;
+ if(MP.on&&MP.role==='h'&&MP.ph==='play'&&!ovOn){const tg=mpAimTarget(.07),xh=$('xhair');
+  if(xh){xh.style.borderColor=tg?'#ff453a':'';xh.style.transform=tg?'scale(1.35)':''}
+  const me=mpMe();if(CTRL!=='pc'&&tg&&!lm&&!(me&&me[8])){const ty=Math.atan2(-(tg.wx-pos.x),-(tg.wz-pos.z));let df=ty-Y;while(df>Math.PI)df-=2*Math.PI;while(df<-Math.PI)df+=2*Math.PI;Y+=df*Math.min(1,dt*3.2)}}
+ const a=MP.rem&&MP.rem[MP.hid];if(a&&a.hc){a.hc.rotation.x=MP.hko>0?-1.45:0;a.hc.position.y=MP.hko>0?.25:0}
+}catch(e){}};
 
 menuStart();
 requestAnimationFrame(frame);

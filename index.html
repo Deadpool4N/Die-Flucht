@@ -145,7 +145,15 @@ body.ipad #mb{width:58px;height:58px}body.ipad #toast{font-size:20px}body.ipad .
 .ios .sw.on{background:#30d158}.ios .sw.on::after{left:22px}
 .ios .seg{display:flex;gap:2px;padding:3px;border-radius:16px;background:rgba(120,120,128,.3);border:1px solid rgba(255,255,255,.08)}
 .ios .seg button{flex:1;border:0;background:transparent;color:#fff;font-weight:600;font-size:15px;padding:10px 6px;border-radius:13px;transition:background .2s,color .2s}
-.ios .seg button.on{background:rgba(255,255,255,.94);color:#000;box-shadow:0 2px 10px rgba(0,0,0,.3)}
+.ios .seg.segs{display:flex;gap:4px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:relative}
+.seg.segs::-webkit-scrollbar{display:none}
+.seg.segs button{flex:0 0 auto;white-space:nowrap;scroll-snap-align:start;padding:10px 15px}
+.seg.segs button:first-child{position:sticky;left:0;z-index:2;background:#3a3d48;box-shadow:8px 0 10px -6px rgba(0,0,0,.55)}
+.seg.segs button:first-child.on{background:rgba(255,255,255,.94)}
+.seg.segs button:first-child::after{content:"";position:absolute;left:100%;top:-1px;bottom:-1px;width:16px;background:linear-gradient(90deg,#34373f 25%,rgba(52,55,63,0));pointer-events:none}
+.seg.segs.more{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 34px),transparent)}
+.seg.segw{display:grid;grid-template-columns:1fr 1fr;gap:4px}.seg.segw button{flex:none;white-space:normal;line-height:1.2;padding:10px 6px}
+.seg button.on{background:rgba(255,255,255,.94);color:#000;box-shadow:0 2px 10px rgba(0,0,0,.3)}
 .ios input{flex:1;min-width:0;padding:11px 14px;border-radius:14px;border:0;background:rgba(120,120,128,.26);color:#fff;font-size:17px;outline:none;-webkit-user-select:text;user-select:text}
 .ios .pill{border:0;border-radius:22px;padding:10px 18px;font-weight:600;font-size:16px;background:rgba(255,255,255,.18);color:#fff}
 .ios .pill.blue{background:#0a84ff;box-shadow:0 6px 18px rgba(10,132,255,.45)}
@@ -1202,7 +1210,7 @@ function finalCards2(){const f=document.createElement('div');f.id='fin';document
 const LSUB={Leicht:'Entspannt · langsame Gegner · viel Zeit',Mittel:'Ausgewogen · das normale Spielerlebnis',Schwer:'Gnadenlos · schnelle Gegner · wenig Zeit'},LICO={Leicht:['#30d158','🌿'],Mittel:['#ff9f0a','⚡'],Schwer:['#ff453a','🔥']};
 const dnow=()=>Object.keys(LV).find(k=>LV[k]===DF);
 const swr=(k,l)=>'<button class="row" data-ch="'+k+'"><span class="tx"><b>'+l+'</b></span><i class="sw'+(CH[k]?' on':'')+'"></i></button>';
-const segH=(attr,items,cur)=>'<div class="seg">'+items.map(a=>'<button '+attr+'="'+a[0]+'"'+(a[0]===cur?' class="on"':'')+'>'+a[1]+'</button>').join('')+'</div>';
+const segH=(attr,items,cur)=>'<div class="seg'+(items.length>4?(attr==='data-sk'?' segs':' segw'):'')+'">'+items.map(a=>'<button '+attr+'="'+a[0]+'"'+(a[0]===cur?' class="on"':'')+'>'+a[1]+'</button>').join('')+'</div>';
 const rowGo=(attr,i,n)=>'<button class="row" '+attr+'="'+i+'"><span class="tx"><b>'+n+'</b></span><i class="chev">›</i></button>';
 function bindSeg(attr,cb){const key=attr.slice(5);document.querySelectorAll('['+attr+']').forEach(b=>b.onclick=()=>{document.querySelectorAll('['+attr+']').forEach(x=>x.classList.remove('on'));b.classList.add('on');cb(b.dataset[key])})}
 function markCt(){document.querySelectorAll('[data-ct]').forEach(b=>b.classList.toggle('on',b.dataset.ct===CTRL))}
@@ -3197,6 +3205,26 @@ function cxOpAppend(){const box=$('box');if(!box||(box.querySelector&&box.queryS
  const sh=box.querySelector&&box.querySelector('#shopopen'),g=sh&&sh.closest&&sh.closest('.grp');if(g)g.insertAdjacentHTML('beforebegin',html);else((box.querySelector&&box.querySelector('.ios'))||box).insertAdjacentHTML('beforeend',html)}
 {const _m=menuStart;menuStart=function(){try{cxOpSetup()}catch(e){}const r=_m.apply(this,arguments);try{if(cxIsOp())cxOpAppend()}catch(e){}return r}}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#ophome');if(b){e.preventDefault();opHome()}},true);
+
+
+/* ===================== Skin-Leiste: durchscrollen, hinter „Standard“ verschwinden, nächsten Skin aufdecken ===================== */
+{const more=el=>{if(el&&el.classList)el.classList.toggle('more',el.scrollLeft+el.clientWidth<el.scrollWidth-3)};
+ const stick=el=>{const f=el.firstElementChild;return f?f.getBoundingClientRect().width+6:0};
+ /* Mausrad: senkrechtes Drehen scrollt die Leiste seitlich */
+ document.addEventListener('wheel',e=>{const el=e.target.closest&&e.target.closest('.seg.segs');if(!el)return;const d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;if(!d)return;const max=el.scrollWidth-el.clientWidth;if((d<0&&el.scrollLeft<=0)||(d>0&&el.scrollLeft>=max-1))return;e.preventDefault();el.scrollLeft+=d;more(el)},{passive:false});
+ /* Maus ziehen (Touch scrollt von selbst) */
+ let dr=null;
+ document.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button)return;const el=e.target.closest&&e.target.closest('.seg.segs');if(!el)return;dr={el,x:e.clientX,sl:el.scrollLeft,moved:false}},true);
+ document.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x;if(Math.abs(dx)>5)dr.moved=true;if(dr.moved){dr.el.scrollLeft=dr.sl-dx;more(dr.el)}},true);
+ const end=()=>{if(dr){const d=dr;setTimeout(()=>{if(dr===d)dr=null},0);d.el.dataset.drag=d.moved?'1':'';setTimeout(()=>{d.el.dataset.drag=''},60)}};
+ document.addEventListener('pointerup',end,true);document.addEventListener('pointercancel',end,true);
+ /* Klick: nach dem Ziehen nichts auswählen; sonst den nächsten Skin aufdecken */
+ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.seg.segs button');if(!b)return;const el=b.parentElement;if(el.dataset.drag==='1'){e.stopPropagation();e.preventDefault();return}
+  const c=el.getBoundingClientRect(),r=b.getBoundingClientRect(),L=c.left+stick(el),R=c.right;let delta=0;
+  if(b!==el.firstElementChild){const nx=b.nextElementSibling,tr=(nx||b).getBoundingClientRect();if(tr.right>R-2)delta=tr.right-R+4;else if(r.left<L)delta=r.left-L-4}
+  if(delta)el.scrollBy({left:delta,behavior:'smooth'});setTimeout(()=>more(el),380)},true);
+ document.addEventListener('scroll',e=>{const el=e.target;if(el&&el.classList&&el.classList.contains('segs'))more(el)},true);
+ const upd=()=>document.querySelectorAll('.seg.segs').forEach(more);new MutationObserver(upd).observe(document.body,{childList:true,subtree:true});addEventListener('resize',upd);setTimeout(upd,200)}
 
 menuStart();
 requestAnimationFrame(frame);

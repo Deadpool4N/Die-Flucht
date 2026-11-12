@@ -2720,12 +2720,14 @@ const _lfRooms=lampFix;lampFix=function(){RM.forEach((r,i)=>{if(r&&r.g)r.g.visib
 
 /* ===================== Zentrale: Statistik, Bug-Meldungen, Admin-Zentrale ===================== */
 const DFBUILD='11.11.2026';
-const OPS={url:'/api/ops',sid:(()=>{try{return crypto.randomUUID()}catch(e){return 's'+Math.random().toString(36).slice(2)+Date.now().toString(36)}})(),on:location.protocol!=='file:',fail:0};
+const OPS={url:'/api/ops',sid:(()=>{let v='';try{v=sessionStorage.getItem('dfSid')||''}catch(e){}if(!v){try{v=crypto.randomUUID()}catch(e){v='s'+Math.random().toString(36).slice(2)+Date.now().toString(36)}try{sessionStorage.setItem('dfSid',v)}catch(e){}}return v})(),on:location.protocol!=='file:',fail:0};
 const opsMode=()=>MP.on?'mp':P2?'p2':(ovOn?'menu':'solo');
 async function opsPost(b,keep){if(!OPS.on)return null;try{const r=await fetch(OPS.url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({sid:OPS.sid},b)),keepalive:!!keep});if(r.status===401||r.status===403)return {error:'auth'};if(r.status===429)return {error:'limit'};if(!r.ok){OPS.last={status:r.status};throw new Error('http '+r.status)}const ct=r.headers&&r.headers.get?(r.headers.get('content-type')||''):'json';if(!/json/.test(ct)){OPS.last={status:r.status,html:true};throw new Error('keine JSON-Antwort')}OPS.fail=0;OPS.last=null;return await r.json()}catch(e){if(!OPS.last)OPS.last={net:String(e&&e.message||e).slice(0,80)};OPS.fail++;if(OPS.fail>=4)OPS.on=false;return null}}
 function opsRetry(){if(location.protocol!=='file:'){OPS.on=true;OPS.fail=0}}
 function opsWhy(){const l=OPS.last;if(location.protocol==='file:')return 'Du hast das Spiel als Datei geöffnet. Die Zentrale läuft nur auf deiner Webseite (https://die-flucht.vercel.app).';if(!l)return 'Keine Antwort vom Server.';if(l.status===404||l.html)return 'Der Server antwortet mit „'+(l.status||'keine Funktion')+'“: Die Datei <b>api/ops.js</b> fehlt in deinem GitHub-Projekt oder Vercel hat noch nicht neu veröffentlicht. Prüfe in Vercel unter „Deployments“, ob der neueste Eintrag „Ready“ ist.';if(l.status===503)return 'Die Datenbank ist noch nicht verbunden: In Vercel unter „Storage“ eine Upstash-Datenbank (Gratis-Plan) mit diesem Projekt verbinden und danach unter „Deployments“ neu veröffentlichen („Redeploy“).';if(l.status>=500)return 'Der Server meldet Fehler '+l.status+'. Schau in Vercel unter „Logs“ nach der Fehlermeldung.';return 'Verbindungsproblem ('+(l.net||l.status)+'). Prüfe deine Internetverbindung.'}
 setTimeout(()=>opsPost({a:'hb',m:opsMode(),v:DFBUILD}),2500);
+const VID=(()=>{try{let v=localStorage.getItem('dfVid');if(!v){v='v'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem('dfVid',v)}return v}catch(e){return OPS.sid}})();
+setTimeout(()=>{let first=true;try{first=!sessionStorage.getItem('dfVisit');sessionStorage.setItem('dfVisit','1')}catch(e){}if(first)opsPost({a:'visit',vid:VID})},2700);
 setInterval(()=>{if(!document.hidden)opsPost({a:'hb',m:opsMode(),v:DFBUILD})},60000);
 addEventListener('pagehide',()=>{try{if(OPS.on&&navigator.sendBeacon)navigator.sendBeacon(OPS.url,new Blob([JSON.stringify({a:'bye',sid:OPS.sid})],{type:'application/json'}))}catch(e){}});
 /* Spiele zählen: jeder Start eines Spiels (Einzelspieler, Teil 2, Online-Runde) */
@@ -2782,16 +2784,26 @@ async function opsGet(){opsRetry();let r=await opsPost({a:'admin',key:opsKey()})
 function opsFail(r,title){ov('<div class="ios"><h2 style="margin:4px 0 2px">'+title+'</h2><p class="err">'+(r&&r.error==='auth'?'Falscher Schlüssel.':'Die Zentrale ist nicht erreichbar.<br><span style="font-weight:400;font-size:14px">'+opsWhy()+'</span>')+'</p><div class="grp"><button class="row" id="admb"><span class="tx"><b>Zurück</b></span></button></div></div>');$('admb').onclick=()=>menuStart()}
 async function opsAdmin(){ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📊 Admin-Zentrale</h2><p class="foot">Wird geladen …</p></div>');
  const r=await opsGet();if(!r||!r.ok)return opsFail(r,'📊 Admin-Zentrale');
- const S=r.stats,T=S.total,seen=opsSeen(),nNew=r.reports.filter(x=>x.t>seen).length;
+ const S=r.stats,T=S.total,seen=opsSeen(),nNew=r.reports.filter(x=>x.t>seen).length,V=S.visitors||{unique:0,visits:0,today:0,days:[],legacy:{}},L=Object.assign({players:0,visits:0,games:0},V.legacy||{});
  const tile=(n,l)=>'<div class="tile"><b>'+n+'</b><span>'+l+'</span></div>';
  const days=(S.days||[]).map(d=>d.d.slice(5)+': '+d.n).join(' · ');
  ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📊 Admin-Zentrale</h2><p class="foot">Stand '+opsFmt(r.now)+'. „Online“ heißt: in den letzten 2½ Minuten gemeldet.</p>'
   +'<div class="cap">Jetzt</div><div class="grp">'+tile(S.online,'Spiele online (geöffnete Fenster)')+tile(S.inGame,'davon mitten im Spiel')+tile(S.byMode.mp,'davon im Online-Modus')+'</div>'
-  +'<div class="cap">Rekord & Summe</div><div class="grp">'+tile(S.peak.n,'Rekord: gleichzeitig online'+(S.peak.t?' (am '+opsFmt(S.peak.t)+')':''))+tile(T.all,'Spiele insgesamt gestartet')+tile(S.today,'Spiele heute')+'</div>'
-  +'<p class="foot" style="margin:8px 4px">Einzelspieler '+T.solo+' · Online '+T.mp+' · Teil 2 '+T.p2+(days?'<br>Letzte Tage: '+days:'')+'</p>'
+  +'<div class="cap">Rekord & Summe</div><div class="grp">'+tile(S.peak.n,'Rekord: gleichzeitig online'+(S.peak.t?' (am '+opsFmt(S.peak.t)+')':''))+tile(T.all+L.games,'Spiele insgesamt gestartet'+(L.games?' (neue Seite '+T.all+' · alte Seite '+L.games+')':''))+tile(S.today,'Spiele heute')+'</div>'
+  +'<div class="cap">Besucher</div><div class="grp">'+tile(V.unique+L.players,'Spieler insgesamt (verschiedene Geräte)'+(L.players?' – neue Seite '+V.unique+' · alte Seite '+L.players:''))+tile(V.visits+L.visits,'Besuche insgesamt'+(L.visits?' – neue Seite '+V.visits+' · alte Seite '+L.visits:''))+tile(V.today,'Spieler heute')+'</div>'
+  +'<div class="grp" style="margin-top:8px"><button class="row" id="admleg"><span class="ic" style="background:#8e8e93">🕰</span><span class="tx"><b>Zahlen der alten Webseite</b><small>'+(L.players||L.visits||L.games?'Spieler '+L.players+' · Besuche '+L.visits+' · Spiele '+L.games+' (werden oben dazugezählt)':'Noch nichts eingetragen – hier eintragen')+'</small></span><i class="chev">›</i></button></div>'
+  +'<p class="foot" style="margin:8px 4px">Einzelspieler '+T.solo+' · Online '+T.mp+' · Teil 2 '+T.p2+(days?'<br>Spiele letzte Tage: '+days:'')+((V.days||[]).length?'<br>Besuche letzte Tage: '+V.days.map(d=>d.d.slice(5)+': '+d.n).join(' · '):'')+'</p>'
   +'<div class="cap">Nachrichten</div><div class="grp"><button class="row" id="admix"><span class="ic" style="background:#0a84ff">📬</span><span class="tx"><b>Postfach</b><small>'+nN(r.reports.length)+(nNew?' · '+nNew+' neu':'')+'</small></span><i class="chev">›</i></button></div>'
   +'<div class="grp" style="margin-top:12px"><button class="row" id="admre"><span class="tx"><b>Aktualisieren</b></span></button><button class="row" id="admb"><span class="tx"><b>Zurück</b></span></button></div></div>');
- $('admix').onclick=()=>opsInbox('all');$('admre').onclick=opsAdmin;$('admb').onclick=()=>menuStart()}
+ $('admix').onclick=()=>opsInbox('all');$('admleg').onclick=()=>opsLegacy(L);$('admre').onclick=opsAdmin;$('admb').onclick=()=>menuStart()}
+
+function opsLegacy(L){L=L||{players:0,visits:0,games:0};
+ const f=(id,lab,v)=>'<div class="row"><span class="tx"><b>'+lab+'</b></span><input id="'+id+'" type="number" min="0" inputmode="numeric" value="'+(+v||0)+'" style="max-width:130px;text-align:right"></div>';
+ ov('<div class="ios"><div class="navbar"><b style="font-size:24px">🕰 Alte Webseite</b><button class="pill" id="lgx">Zurück</button></div><div class="sub">Die alte Seite (taupe-choux-09809a.netlify.app) hatte keine eigene Zählung. Trag hier ein, was du weißt – zum Beispiel aus der Netlify-Übersicht oder geschätzt. Die Zahlen werden in der Admin-Zentrale zu den neuen dazugezählt.</div>'
+  +'<div class="grp" style="margin-top:12px">'+f('lgp','Spieler',L.players)+f('lgv','Besuche',L.visits)+f('lgg','Gestartete Spiele',L.games)+'</div><p class="foot" id="lgm" style="text-align:center;min-height:18px"></p><div class="grp"><button class="row" id="lgs" style="justify-content:center"><b style="color:#0a84ff">Speichern</b></button></div></div>');
+ ['lgp','lgv','lgg'].forEach(id=>['keydown','keyup','keypress'].forEach(n=>$(id).addEventListener(n,e=>e.stopPropagation())));
+ $('lgx').onclick=()=>opsAdmin();
+ $('lgs').onclick=async()=>{$('lgm').textContent='Wird gespeichert …';const q=await opsPost({a:'legacy',key:opsKey(),players:+$('lgp').value||0,visits:+$('lgv').value||0,games:+$('lgg').value||0});if(q&&q.ok)opsAdmin();else{$('lgm').style.color='#ff453a';$('lgm').textContent=q&&q.error==='auth'?'Falscher Admin-Schlüssel.':'Speichern hat nicht geklappt. '+opsWhy()}}}
 /* Postfach: alle Meldungen, Meinungen und Ideen der Spieler */
 async function opsInbox(flt){flt=flt||'all';ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📬 Postfach</h2><p class="foot">Wird geladen …</p></div>');
  const r=await opsGet();if(!r||!r.ok)return opsFail(r,'📬 Postfach');

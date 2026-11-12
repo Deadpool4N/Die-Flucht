@@ -28,6 +28,10 @@ const pairs = (arr) => { const o = {}; for (let i = 0; arr && i < arr.length; i 
 
 export default async function handler(req, res) {
   res.setHeader("cache-control", "no-store");
+  res.setHeader("Access-Control-Allow-Origin", "*");            // erlaubt dem Bug-Scanner, die Meldungen zu laden (Admin-Schlüssel nötig)
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "content-type");
+  if (req.method === "OPTIONS") return res.status(204).end();
   const send = (obj, status = 200) => res.status(status).json(obj);
   if (req.method !== "POST") return send({ error: "method" }, 405);
   if (!DB_URL || !DB_TOKEN) return send({ error: "nodb" }, 503);
@@ -62,6 +66,49 @@ export default async function handler(req, res) {
         const n = (v) => Math.max(0, Math.min(1e7, Math.floor(+v || 0)));
         await db([["HSET", "df:legacy", "players", n(b.players), "visits", n(b.visits), "games", n(b.games)]]);
         return send({ ok: true });
+      }
+      case "score": {                                 // Siegerzeit einreichen (Bestenliste)
+        const mode = String(b.mode || ""), diff = String(b.diff || "").toLowerCase();
+        if (!["solo", "p2", "mp"].includes(mode) || !/^[a-zäöü]{3,10}$/.test(diff)) return send({ error: "bad" }, 400);
+        const t = Math.round(+b.t * 10) / 10;
+        if (!(t >= (mode === "mp" ? 20 : 90) && t <= 14400)) return send({ error: "time" }, 400);
+        const name = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim() || "Spieler";
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rls:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 40) return send({ error: "limit" }, 429);
+        const key = "df:lb:" + mode + ":" + diff, hk = "df:lbv:" + mode + ":" + diff;
+        const who = mode === "mp" ? "n:" + name.toLowerCase() : "v:" + str(b.vid || sid, 64);   // pro Gerät bzw. Name nur die beste Zeit
+        const [old] = await db([["HGET", hk, who]]);
+        let oldT = null, oldRank = null;
+        if (old) { const [sc, rk] = await db([["ZSCORE", key, old], ["ZRANK", key, old]]); oldT = sc == null ? null : +sc; oldRank = rk == null ? null : +rk; }
+        const improved = oldT == null || t < oldT;
+        let member = old;
+        if (improved) {
+          member = JSON.stringify({ n: name, d: dayKey(now), i: Math.random().toString(36).slice(2, 6) });
+          const cmds = [];
+          if (old) cmds.push(["ZREM", key, old]);
+          cmds.push(["ZADD", key, t, member], ["HSET", hk, who, member], ["ZREMRANGEBYRANK", key, 100, -1]);
+          await db(cmds);
+        }
+        const [rank, count, top] = await db([["ZRANK", key, member], ["ZCARD", key], ["ZRANGE", key, 0, 0, "WITHSCORES"]]);
+        let best = null;
+        try { if (top && top.length) best = Object.assign(JSON.parse(top[0]), { t: +top[1] }); } catch (e) {}
+        const newRank = rank == null ? null : +rank + 1;
+        // beat = wie viele Zeiten du mit diesem Ergebnis überholt hast (für die Rang-Coins im Spiel)
+        let beat = 0;
+        if (improved && newRank != null) beat = oldRank != null ? Math.max(0, oldRank + 1 - newRank) : Math.max(0, +count - newRank);
+        return send({ ok: true, rank: newRank, count: +count, best, improved, mine: improved ? t : oldT, beat });
+      }
+      case "board": {                                 // Bestenliste lesen (öffentlich)
+        const mode = String(b.mode || ""), diff = String(b.diff || "").toLowerCase();
+        if (!["solo", "p2", "mp"].includes(mode) || !/^[a-zäöü]{3,10}$/.test(diff)) return send({ error: "bad" }, 400);
+        const key = "df:lb:" + mode + ":" + diff;
+        const [flat, count] = await db([["ZRANGE", key, 0, 9, "WITHSCORES"], ["ZCARD", key]]);
+        const list = [];
+        for (let i = 0; flat && i + 1 < flat.length; i += 2) { try { list.push(Object.assign(JSON.parse(flat[i]), { t: +flat[i + 1] })); } catch (e) {} }
+        return send({ ok: true, list, count: +count });
       }
       case "game": {                                  // ein Spiel wurde gestartet
         const m = ["solo", "mp", "p2"].includes(b.m) ? b.m : "solo";

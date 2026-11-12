@@ -370,16 +370,17 @@ body.phone #tback{padding:0 10px!important;font-size:13px!important}
 <button id="act" class="hud"></button>
 <div id="joy" class="hud"><div id="knob"></div></div>
 <div id="hint" class="hud">Wischen: umsehen · Stick: laufen</div>
-<a id="webb" class="hud" href="https://taupe-choux-09809a.netlify.app/" target="_blank" rel="noopener" style="display:none">🌐 Als Webseite spielen</a><div id="musn" class="hud">♪ Tippen für Musik</div><button id="musb" class="hud off" aria-label="Spotify-Player"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1ED760"/><g fill="none" stroke="#000" stroke-linecap="round"><path d="M5.2 8.4C9.7 7 15.2 7.5 19 9.8" stroke-width="2.1"/><path d="M5.9 12.2C9.4 11.2 14 11.5 17.5 13.4" stroke-width="1.8"/><path d="M6.7 15.5C9.6 14.7 13 15 15.7 16.5" stroke-width="1.5"/></g><line id="musslash" x1="3.2" y1="21" x2="21" y2="3.2" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><line x1="3.2" y1="21" x2="21" y2="3.2" stroke="#000" stroke-opacity=".0" stroke-width="0"/></svg></button><div id="musp" class="ios" style="display:none">
+<a id="webb" class="hud" href="https://die-flucht.vercel.app/" target="_blank" rel="noopener" style="display:none">🌐 Als Webseite spielen</a><div id="musn" class="hud">♪ Tippen für Musik</div><button id="musb" class="hud off" aria-label="Spotify-Player"><svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1ED760"/><g fill="none" stroke="#000" stroke-linecap="round"><path d="M5.2 8.4C9.7 7 15.2 7.5 19 9.8" stroke-width="2.1"/><path d="M5.9 12.2C9.4 11.2 14 11.5 17.5 13.4" stroke-width="1.8"/><path d="M6.7 15.5C9.6 14.7 13 15 15.7 16.5" stroke-width="1.5"/></g><line id="musslash" x1="3.2" y1="21" x2="21" y2="3.2" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><line x1="3.2" y1="21" x2="21" y2="3.2" stroke="#000" stroke-opacity=".0" stroke-width="0"/></svg></button><div id="musp" class="ios" style="display:none">
 <div style="display:flex;gap:8px;justify-content:center;margin:2px 0 12px"><button class="pill" id="spprev" aria-label="Zurück">⏮</button><button class="pill blue" id="spplay" style="min-width:64px" aria-label="Abspielen">▶</button><button class="pill" id="spnext" aria-label="Weiter">⏭</button></div>
 <div style="display:flex;gap:12px;align-items:center;margin:0 4px 12px"><div id="spcov"></div><div style="min-width:0;flex:1"><b id="spt" style="font-size:17px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Spotify</b><div id="sps" class="foot" style="text-align:left;margin:2px 0 0">Songs einrichten, dann ▶ drücken</div></div></div>
 <div id="spwrap" style="border-radius:14px;overflow:hidden;min-height:0"></div>
 <div class="cap" style="margin:12px 12px 4px">Playlist</div><div class="grp" id="spl"></div><div class="grp" style="margin-top:10px"><button class="row" id="msfx"><span class="tx"><b>Soundeffekte</b></span><i class="sw on"></i></button><button class="row" id="mbi"><span class="tx"><b>Eingebaute Spielmusik</b><small>Ersatz ohne Spotify</small></span><i class="sw"></i></button><div class="row"><span class="tx"><b>Effekt-Lautstärke</b></span><input id="mvol" type="range" min="0" max="100" value="90" style="padding:0;background:none;flex:1.4"></div><button class="row" id="spset"><span class="tx"><b>Songs bearbeiten</b><small>Ändern, zurücksetzen, eigene hinzufügen</small></span><i class="chev">›</i></button></div>
-<div class="cap">Spotify-Konto</div><div class="grp"><div class="row"><input id="spcid" placeholder="Client-ID (developer.spotify.com)" autocomplete="off"></div><button class="row" id="splogin"><span class="tx"><b id="splt">Mit Spotify anmelden</b><small id="spls">Offizielle Anmeldung über spotify.com</small></span><i class="chev">›</i></button></div><div class="foot" id="spredir" style="text-align:left;word-break:break-all;margin:6px 12px"></div><div id="spcfg" style="display:none"><div class="cap">Meine Songs</div><div class="grp" id="sped"></div><div id="spedin" style="display:none;margin-top:8px"><div class="foot" id="spedt" style="text-align:left"></div><div class="grp"><div class="row"><input id="spedl" placeholder="Spotify-Link (oder Songname, wenn angemeldet)" autocomplete="off"><button class="pill blue" id="spedok">OK</button></div></div></div><div class="cap">Eigenen Song hinzufügen</div><div class="grp"><div class="row"><input id="spadd" placeholder="Spotify-Link (oder Songname, wenn angemeldet)" autocomplete="off"><button class="pill blue" id="spaddgo">+</button></div></div><div class="foot" id="spemsg" style="text-align:left"></div><div class="cap">Aus meiner Spotify-Playlist übernehmen</div><div class="grp"><div class="row"><input id="sppl" placeholder="Playlist-Link einfügen (nur eigene Playlists)" autocomplete="off"><button class="pill blue" id="spplgo">OK</button></div></div><div class="grp" style="margin-top:8px"><button class="row" id="spreset"><span class="tx"><b>Alles zurücksetzen</b><small>Standard-Songs wiederherstellen, eigene Songs entfernen</small></span><i class="chev">↺</i></button></div><div class="cap">Alle Links auf einmal</div><ol id="splist" style="margin:0 0 8px 22px;padding:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.85)"></ol><textarea id="splinks" rows="6" placeholder="Entweder 11 Song-Links (einer pro Zeile, in dieser Reihenfolge) ODER ein Playlist-Link"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="pill blue" id="spsave">Speichern</button></div><div class="foot" id="spmsg" style="text-align:left">Tipp: In der Spotify-App Songs markieren, Strg+C (Mac: Cmd+C) drücken und hier einfügen.</div></div></div>
+<div class="cap">Spotify-Konto</div><div class="grp"><div class="row"><input id="spcid" placeholder="Client-ID (developer.spotify.com)" autocomplete="off"></div><button class="row" id="splogin"><span class="tx"><b id="splt">Mit Spotify anmelden</b><small id="spls">Offizielle Anmeldung über spotify.com</small></span><i class="chev">›</i></button></div><div class="foot" id="spredir" style="text-align:left;word-break:break-all;margin:6px 12px"></div><div id="sppw"></div><div id="spcfg" style="display:none"><div class="cap">Meine Songs</div><div class="grp" id="sped"></div><div id="spedin" style="display:none;margin-top:8px"><div class="foot" id="spedt" style="text-align:left"></div><div class="grp"><div class="row"><input id="spedl" placeholder="Spotify-Link (oder Songname, wenn angemeldet)" autocomplete="off"><button class="pill blue" id="spedok">OK</button></div></div></div><div class="cap">Eigenen Song hinzufügen</div><div class="grp"><div class="row"><input id="spadd" placeholder="Spotify-Link (oder Songname, wenn angemeldet)" autocomplete="off"><button class="pill blue" id="spaddgo">+</button></div></div><div class="foot" id="spemsg" style="text-align:left"></div><div class="cap">Aus meiner Spotify-Playlist übernehmen</div><div class="grp"><div class="row"><input id="sppl" placeholder="Playlist-Link einfügen (nur eigene Playlists)" autocomplete="off"><button class="pill blue" id="spplgo">OK</button></div></div><div class="grp" style="margin-top:8px"><button class="row" id="spreset"><span class="tx"><b>Alles zurücksetzen</b><small>Standard-Songs wiederherstellen, eigene Songs entfernen</small></span><i class="chev">↺</i></button></div><div class="cap">Alle Links auf einmal</div><ol id="splist" style="margin:0 0 8px 22px;padding:0;font-size:14px;line-height:1.5;color:rgba(255,255,255,.85)"></ol><textarea id="splinks" rows="6" placeholder="Entweder 11 Song-Links (einer pro Zeile, in dieser Reihenfolge) ODER ein Playlist-Link"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="pill blue" id="spsave">Speichern</button></div><div class="foot" id="spmsg" style="text-align:left">Tipp: In der Spotify-App Songs markieren, Strg+C (Mac: Cmd+C) drücken und hier einfügen.</div></div></div>
 <button id="mb" class="hud">☰</button><canvas id="mini" class="hud" width="231" height="231"></canvas><div id="vig"></div><div id="dhud" class="hud"></div><div id="drive"><div><button class="dp" data-k="left">◀</button><button class="dp" data-k="right">▶</button></div><div><button class="dp" data-k="brk">▼</button><button class="dp" data-k="gas">▲</button></div></div>
 <button id="hlb" class="hud" style="display:none">💡 Licht: AN</button><div id="fade"></div><div id="ov"><div id="box"></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
+<script>function qReload(){try{window.name='dfQuick'}catch(e){}location.reload()}
+
 const $=id=>document.getElementById(id);
 const S={tied:true,inv:[],sel:null,f:{}};
 let CODE=String(1000+Math.floor(Math.random()*9000));const ROUTE=['Links','Geradeaus','Rechts','Links'];
@@ -447,6 +448,17 @@ const hunter=new THREE.Group(),hm=M(0x0a0a0c);RM[5].g.add(hunter);
  box(.42,.14,.42,0,2.26,-.01,hair,hunter);box(.42,.09,.05,0,2.19,.2,hair,hunter);[-.2,.2].forEach(x=>box(.04,.22,.42,x,2.12,0,hair,hunter));
  box(.54,.14,.5,0,1.78,0,hood,hunter);box(.04,.04,.02,-.04,1.92,.205,blk,hunter);box(.04,.04,.02,.04,1.92,.205,blk,hunter);box(.12,.025,.02,0,1.84,.205,blk,hunter);box(.42,.22,.02,0,.82,.205,cuff,hunter)}
 hunter.visible=false;
+/* Jäger-Look wie auf dem Moon-Games-Profilbild: Kapuze, rot glühende Augen, Riss, Kordeln, Flinte auf dem Rücken */
+(function(){const hd=M(0x121214),red=M(0xff2a1f,0xff2a1f),crk=M(0x4a453e),cord=M(0x9a9ea8),tip=M(0xc9ccd4),metal=M(0x2a2d36),wood=M(0x3a2414);
+ box(.52,.07,.52,0,2.25,-.01,hd,hunter);[-.255,.255].forEach(x=>box(.06,.5,.5,x,2.0,-.01,hd,hunter));box(.52,.5,.06,0,2.0,-.255,hd,hunter);
+ const c1=box(.014,.09,.006,.13,2.15,.203,crk,hunter);c1.rotation.z=.35;const c2=box(.014,.06,.006,.11,2.105,.203,crk,hunter);c2.rotation.z=-.45;
+ const cv=document.createElement('canvas');cv.width=cv.height=64;const cx=cv.getContext('2d');if(cx&&cx.createRadialGradient){const gr=cx.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,90,70,1)');gr.addColorStop(.35,'rgba(255,40,30,.55)');gr.addColorStop(1,'rgba(255,0,0,0)');cx.fillStyle=gr;cx.fillRect(0,0,64,64)}
+ const gm=new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),color:0xffffff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false});
+ [-.1,.1].forEach(x=>{const p=box(.035,.025,.006,x,2.04,.228,red,hunter);p.userData.jEye=1;const sp=new THREE.Sprite(gm);sp.position.set(x,2.04,.26);sp.scale.set(.24,.16,1);sp.userData.jEye=1;hunter.add(sp)});
+ [-.07,.07].forEach(x=>{box(.022,.24,.022,x,1.6,.215,cord,hunter);box(.03,.05,.03,x,1.46,.215,tip,hunter)});
+ const gun=new THREE.Group();gun.position.set(0,1.35,-.235);gun.rotation.z=.62;gun.userData.jGun=1;hunter.add(gun);
+ box(.04,1.0,.04,-.024,0,0,metal,gun);box(.04,1.0,.04,.024,0,0,metal,gun);box(.1,.05,.06,0,.5,0,M(0x1d1f26),gun);box(.09,.34,.06,0,-.62,0,wood,gun);
+})();
 /* Garten, Straße, Auto, Landstraße */
 RM[6].g.children[1].visible=false;[1,2,3,4,5].forEach(k=>RM[7].g.children[k].visible=false);
 
@@ -486,7 +498,7 @@ function startClimb(){gd.climb=true;lm=true;gd.taps=0;gd.last='';gd.t0=performan
   if(gd.taps>=DF.taps){gd.on=false;gd.climb=false;p.style.display='none';dogs.forEach(d=>d.visible=false);toast('Geschafft! Du springst über den Zaun.','good');tween(.8,k=>pos.z=-16.2-k*2.2,()=>{H=1.6;tele(7,0,2.6,0,()=>toast('Eine dunkle Straße. Am Rand steht ein Auto! Knacke die Tür mit dem Dietrich.'))})}})}
 function updGame(dt,t,now){if(ovOn)return;
  if(gd.on)dogs.forEach((d,i)=>{const dx=pos.x-(120+d.position.x),dz=pos.z-d.position.z,L=Math.hypot(dx,dz);
-  const sp=(now<gd.go||now<(d.stun||0))?0:(gd.climb?1.1:DF.dog+i*.15)*dt;if(L>.9||!gd.climb){if(L>.01){d.position.x+=dx/L*sp;d.position.z+=dz/L*sp}}
+  const sp=(now<gd.go||now<(d.stun||0))?0:(gd.climb?1.1:DF.dog+i*.15)*dt;if(L>.9||!gd.climb){if(L>.01)dogStep(d,dx/L*sp,dz/L*sp)}
   d.rotation.y=Math.atan2(dx,dz);d.userData.legs.forEach((l,k)=>l.rotation.x=Math.sin(t*14+k*1.6)*.7);d.position.y=Math.abs(Math.sin(t*10+i))*.08;
   if(!gd.climb&&now>gd.go&&now>=(d.stun||0)&&L<.8)gardenCaught()});
  if(gd.climb){const f=1-(now-gd.t0)/DF.climb,b=$('cbar');if(b)b.style.width=Math.max(0,f*100)+'%';if(f<=0)gardenCaught()}
@@ -596,7 +608,7 @@ function caught(m){ch.on=false;const f=$('fade');f.style.background='#600';f.sty
 function win(){ch.on=false;hunter.visible=false;$('chase').style.display='none';$('fade').style.opacity=1;
  setTimeout(()=>ov('<h2 style="color:var(--ok)">Du bist entkommen!</h2><p>Du rast durch die Nacht, bis die Lichter der Stadt auftauchen. Weder der Jäger noch die Hunde können dich jetzt noch einholen.</p><button class="btn" onclick="credits()">Abspann ansehen</button>'),500)}
 function credits(){closeOv();const c=document.createElement('div');c.id='credits';
- c.innerHTML='<div class="cr"><p class="sm">Eine</p><h1>Moon Games</h1><p class="sm">Produktion</p><h2>Die Flucht</h2><p class="sm">Entwickler</p><h3>Dor Benjamin</h3><p class="sm">Story</p><h3>Dominik</h3><p class="sm">Idee &amp; Konzept</p><h3>Aaron</h3><p class="sm" style="margin-top:80px">Danke fürs Spielen!</p></div><button class="btn again" onclick="location.reload()">Nochmal spielen</button>';
+ c.innerHTML='<div class="cr"><p class="sm">Eine</p><h1>Moon Games</h1><p class="sm">Produktion</p><h2>Die Flucht</h2><p class="sm">Entwickler</p><h3>Dor Benjamin</h3><p class="sm">Story</p><h3>Dominik</h3><p class="sm">Idee &amp; Konzept</p><h3>Aaron</h3><p class="sm" style="margin-top:80px">Danke fürs Spielen!</p></div><button class="btn again" onclick="qReload()">Nochmal spielen</button>';
  document.body.appendChild(c)}
 /* ===== Schwierigkeit, Menü, offene Welt, Labyrinth, Haus ===== */
 const LV={Leicht:{dog:2.4,climb:7000,taps:6,pins:[4,5,6],hunter:2.6,lives:5,gap:6,goal:700},Mittel:{dog:3.2,climb:5000,taps:8,pins:[5,6,7],hunter:3.4,lives:3,gap:0,goal:1000},Schwer:{dog:3.9,climb:4000,taps:10,pins:[6,7,8],hunter:4,lives:2,gap:-3,goal:1300}};
@@ -623,7 +635,7 @@ const MAPS={Kellerkarte:mapKeller,Hauskarte:mapHaus};
  box(44,.2,52,0,-.1,-4,M(0x1c3a1c),g);
  for(let k=-17.7;k<=17.8;k+=.6)box(.22,2,.08,k,1,-18,M(0x6b4a2a),g);box(36,.12,.12,0,.8,-18.1,wood,g);box(36,.12,.12,0,1.5,-18.1,wood,g);
  box(1.4,1,1.4,0,.5,-17.2,wood,g);box(1,.6,1,0,1.3,-17.2,wood,g);
- [[-12,2],[-8,-8],[10,-2],[13,-10],[-14,-14],[6,-14],[-4,-4],[4,2],[15,5],[-15,6]].forEach(a=>{box(.5,2.2,.5,a[0],1.1,a[1],M(0x4a3020),g);box(2.6,2.2,2.6,a[0],3.2,a[1],M(0x14341a),g);COL[6].push([120+a[0]-.3,120+a[0]+.3,a[1]-.3,a[1]+.3])});
+ 
  const mn=new THREE.Mesh(new THREE.SphereGeometry(3,16,12),new THREE.MeshBasicMaterial({color:0xdde6ff,fog:false}));mn.position.set(25,26,-60);g.add(mn)})();
 /* Haus-Halle zum Durchrennen */
 function mkLabel(){const cv=document.createElement('canvas');cv.width=256;cv.height=64;const tx=new THREE.CanvasTexture(cv),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true}));sp.scale.set(2,.5,1);sp.userData={cv,tx};return sp}
@@ -652,7 +664,7 @@ function caught(m){ch.on=false;lm=true;shake(.25);vig(0);const f=$('fade');f.sty
  $('re').onclick=()=>{f.style.background='#000';f.style.opacity=0;ch.i=0;tele(5,0,10.5,0,chStep)}}
 function garden(){ch.on=false;hunter.visible=false;$('chase').style.display='none';vig(0);toast('Du stürmst durch die Hintertür in den Garten. Hunde bellen!','err');tele(6,0,8.6,0,startGarden)}
 function startGarden(){gd.on=true;gd.climb=false;H=1.6;dogs[0].position.set(-15,0,2);dogs[1].position.set(15,0,-1);dogs.forEach(d=>d.visible=true);gd.go=performance.now()+2500;
- toast('Der Garten! Zwei Hunde! Renne (Stick ganz ausschlagen) zum Zaun im Norden und klettere über die Kisten!','err')}
+ toast('Der Garten! Zwei Hunde! Renne zum Zaun im Norden und klettere über die Kisten!','err')}
 function updWorld(dt,t,now){if(ovOn)return;
  if(miniOn){$('mini').style.display=cr===3?'block':'none';if(cr===3&&((mT+=dt)>.08)){mT=0;drawMini()}}
  runK+=(mvRun-runK)*Math.min(1,dt*6);mvRun=0;if(!drv.view){cam.fov=FOVB()+8*runK;cam.updateProjectionMatrix()}
@@ -671,14 +683,14 @@ function mapKeller(){miniOn=!miniOn;$('mini').style.display=miniOn&&cr===3?'bloc
 function drawMini(){const c=$('mini').getContext('2d');mrt=mrt||new Set(mzRoute());c.clearRect(0,0,231,231);
  MZ.forEach((row,r)=>[...row].forEach((v,k)=>{if(v==='#'){c.fillStyle='#3a3a46';c.fillRect(k*21,r*21,21,21)}else if(mrt.has(r+','+k)){c.fillStyle='#a33';c.fillRect(k*21,r*21,21,21)}}));
  c.save();c.translate((pos.x-60)/2*21+115.5,pos.z/2*21+115.5);c.rotate(-Y);c.fillStyle='#4af';c.beginPath();c.moveTo(0,-9);c.lineTo(6,6);c.lineTo(-6,6);c.closePath();c.fill();c.restore()}
-function pauseOnly(){ov('<h3 style="margin:4px;color:var(--acc)">Pause</h3><div class="dim">Schwierigkeit: '+Object.keys(LV).find(k=>LV[k]===DF)+'</div><button class="btn" id="m0" style="display:block;width:100%">Weiter</button><button class="btn" id="mr" style="display:block;width:100%;margin-top:10px">Neustart</button>');$('m0').onclick=closeOv;ctlBtn();$('mr').onclick=()=>location.reload()}
+function pauseOnly(){ov('<h3 style="margin:4px;color:var(--acc)">Pause</h3><div class="dim">Schwierigkeit: '+Object.keys(LV).find(k=>LV[k]===DF)+'</div><button class="btn" id="m0" style="display:block;width:100%">Weiter</button><button class="btn" id="mr" style="display:block;width:100%;margin-top:10px">Neustart</button>');$('m0').onclick=closeOv;ctlBtn();$('mr').onclick=()=>qReload()}
 function openMenu(){if(ovOn)return;if(!CHEATS)return pauseOnly();
  ov('<h3 style="margin:4px;color:var(--acc)">Pause</h3><div class="dim">Schwierigkeit: '+Object.keys(LV).find(k=>LV[k]===DF)+'</div><button class="btn" id="m0" style="display:block;width:100%">Weiter</button><div class="dim" style="margin-top:10px">Admin-Panel</div>'+[['god','Unverwundbar'],['fast','Turbo-Laufen'],['skip','Schlösser überspringen'],['noclip','Durch Wände']].map(a=>'<button class="btn" data-ch="'+a[0]+'">'+a[1]+': '+(CH[a[0]]?'AN':'AUS')+'</button>').join('')+'<button class="btn" id="mv">Ansicht: '+({auto:'Automatisch',tp:'Dritte Person',fp:'Ego'}[CH.view])+'</button><button class="btn" id="mi">Alle Items</button><div class="dim" style="margin-top:10px">Springe zu ...</div>'+['Lagerraum','Keller','Labyrinth','Ausgang','Haus (Jagd)','Garten','Straße','Autofahrt'].map((n,i)=>'<button class="btn" data-j="'+(i+1)+'">'+n+'</button>').join('')+'<button class="btn" id="mr" style="display:block;width:100%;margin-top:10px">Neustart</button>');
  $('m0').onclick=closeOv;ctlBtn();
  document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{CH[b.dataset.ch]=!CH[b.dataset.ch];closeOv();openMenu()});
  $('mv').onclick=()=>{CH.view={auto:'tp',tp:'fp',fp:'auto'}[CH.view];closeOv();openMenu()};$('mi').onclick=()=>{Object.keys(INFO).forEach(k=>{if(!has(k))S.inv.push(k)});inv();closeOv();toast('Alle Items im Inventar.','good')};
  document.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>cheatJump(+b.dataset.j));
- $('mr').onclick=()=>location.reload()}
+ $('mr').onclick=()=>qReload()}
 function cheatJump(st){closeOv();lm=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;
  ['chase','drive','dhud'].forEach(i=>$(i).style.display='none');$('joy').style.display='';$('hint').style.display='';hunter.visible=false;dogs.forEach(d=>d.visible=false);vig(0);H=1.6;
  const a=['Brecheisen','Schlüssel','Zettel mit Code'],b=['Kellerkarte','Truhenschlüssel'],c=['Hauskarte','Haustürschlüssel'];
@@ -796,7 +808,7 @@ function credits(){closeOv();const c=document.createElement('div');c.id='credits
  $('skp').onclick=go;setTimeout(go,31500)}
 function finalCards(){const f=document.createElement('div');f.id='fin';document.body.appendChild(f);
  const L=[['<p class="sm">Eine</p>'+cgLogo()+'<div class="cgw">MOON GAMES</div><p class="sm" style="margin-top:8px">Produktion</p>',4200],['<p class="sm">Programmiert von</p><h3>Benjamin</h3>',3000],['<p class="sm">Story</p><h3>Domenic</h3>',3000],['<p class="sm">Regie</p><h3>Aaron</h3>',3000],['<p class="sm">Beta-Tester</p><h3>Ben</h3>',3000],['<h1 style="color:var(--bad);font-size:40px">Zweiter Teil folgt</h1><div style="margin-top:18px">'+p2Logo()+'</div>',5200]];
- let k=0;const nx=()=>{if(k>=L.length)return location.reload();const [h,d]=L[k++];f.innerHTML='<div class="fc" style="animation-duration:'+d+'ms">'+h+'</div>';setTimeout(nx,d)};nx()}
+ let k=0;const nx=()=>{if(k>=L.length)return qReload();const [h,d]=L[k++];f.innerHTML='<div class="fc" style="animation-duration:'+d+'ms">'+h+'</div>';setTimeout(nx,d)};nx()}
 /* ---- Große offene Welt: Garten ---- */
 const gLights=[];
 (function(){const g=RM[6].g,W=120,fm=M(0x6b4a2a),tm=M(0x4a3020),cm=M(0x14341a);
@@ -821,13 +833,26 @@ const gLights=[];
  box(4.2,2.6,3.6,21,1.3,-7,M(0x4a3a2c),g);box(4.8,.2,4.2,21,2.7,-7,M(0x2a1a1a),g);box(.9,1.8,.1,21,.9,-5.15,M(0x2a1a0e),g);COL[6].push([W+18.8,W+23.2,-9,-5]);
  [[-8,6],[8,6],[-14,12],[14,10],[-20,18],[19,22],[-5,24],[6,30],[-24,-12],[26,-4]].forEach(a=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.85,8,6),M(0x1a4a22));m.position.set(a[0],.7,a[1]);g.add(m);COL[6].push([W+a[0]-.75,W+a[0]+.75,a[1]-.75,a[1]+.75])});
  for(let x=-8;x<=8;x+=1.4){if(Math.abs(x)<2)continue;box(.4,.3,.4,x,.15,9.1,M(0xb04a78,0x300818),g)}
- [[-22,-10],[-24,10],[24,-12],[22,14],[-18,22],[14,26],[-9,28],[9,24],[26,28],[-26,30]].forEach(a=>{box(.5,2.2,.5,a[0],1.1,a[1],tm,g);box(2.6,2.2,2.6,a[0],3.2,a[1],cm,g);COL[6].push([W+a[0]-.3,W+a[0]+.3,a[1]-.3,a[1]+.3])});
- let sd=7;const rnd=()=>(sd=(sd*9301+49297)%233280)/233280;
- for(let i=0;i<70;i++){const sdI=i%4,sz=.9+rnd()*.9;let x,z;
-  if(sdI===0){x=-32-rnd()*6;z=-24+rnd()*66}else if(sdI===1){x=32+rnd()*6;z=-24+rnd()*66}else if(sdI===2){x=-32+rnd()*64;z=37+rnd()*5}else{x=-36+rnd()*72;z=-22-rnd()*6}
-  box(.5*sz,2.4*sz,.5*sz,x,1.2*sz,z,tm,g);box(2.8*sz,2.6*sz,2.8*sz,x,3.4*sz,z,cm,g)}
+ {const leaf=M(0x2f6b2a),leaf2=M(0x255c22),apple=M(0xc0281c,0x2a0303);
+ [[-11,-9],[12,-12],[-22,4],[21,4],[-15,28]].forEach((a,i)=>{const x=a[0],z=a[1];box(.38,1.7,.38,x,.85,z,tm,g);
+  [[0,2.5,0,1.45,leaf],[-.75,2.2,.3,1,leaf2],[.75,2.25,-.2,1.05,leaf2],[0,3.25,.1,.95,leaf]].forEach(c=>{const m=new THREE.Mesh(new THREE.SphereGeometry(c[3],10,8),c[4]);m.position.set(x+c[0],c[1],z+c[2]);g.add(m)});
+  for(let k=0;k<11;k++){const an=k*2.39+i,r=1.18+(k%4)*.08,yy=1.95+((k*53)%7)/7*1.35,m=new THREE.Mesh(new THREE.SphereGeometry(.12,7,5),apple);m.position.set(x+Math.cos(an)*r,yy,z+Math.sin(an)*r);g.add(m)}
+  [[.9,.4],[-.6,.8],[.3,-1.1]].forEach(o=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.12,7,5),apple);m.position.set(x+o[0],.1,z+o[1]);g.add(m)});
+  COL[6].push([W+x-.3,W+x+.3,z-.3,z+.3])})}
+ /* Dichter Tannenwald hinter Hecke und Zaun */
+ {let sd=7;const rnd=()=>(sd=(sd*9301+49297)%233280)/233280,T=[];
+  const band=(x0,x1,z0,z1,skip)=>{for(let z=z0;z<=z1;z+=2.3)for(let x=x0;x<=x1;x+=2.3){const px=x+(rnd()-.5)*1.8,pz=z+(rnd()-.5)*1.8;if(skip&&skip(px,pz))continue;T.push([px,pz,.85+rnd()*.8,rnd()*6.28])}};
+  band(-54,-33,-39.5,58);band(33,54,-39.5,58);band(-32,32,-39.5,-22.5,(x,z)=>Math.abs(x)<5.5);band(-32,32,38.5,58);
+  const cones=[[1.75,2.2,1.9],[1.4,1.9,3.15],[1.05,1.6,4.25],[.62,1.3,5.25]],cols=[0x0d2411,0x102d15,0x133419,0x163b1c];
+  const parts=[[new THREE.BoxGeometry(.4,1.6,.4),M(0x3a2617),.8]].concat(cones.map((c,k)=>[new THREE.ConeGeometry(c[0],c[1],8),M(cols[k]),c[2]]));
+  const IM=THREE.InstancedMesh;
+  if(IM&&IM.prototype&&typeof IM.prototype.setMatrixAt==='function'){const d=new THREE.Object3D();
+   parts.forEach(([geo,mat,y])=>{const im=new IM(geo,mat,T.length);T.forEach((t,i)=>{d.position.set(t[0],y*t[2],t[1]);d.scale.set(t[2],t[2],t[2]);d.rotation.set(0,t[3],0);d.updateMatrix();im.setMatrixAt(i,d.matrix)});im.instanceMatrix.needsUpdate=true;im.frustumCulled=false;im.userData.forest=1;g.add(im)})}
+  else T.forEach(t=>parts.forEach(([geo,mat,y])=>{const m=new THREE.Mesh(geo,mat);m.position.set(t[0],y*t[2],t[1]);m.scale.set(t[2],t[2],t[2]);g.add(m)}));
+  window.__pines=T.length}
 })();
 const dog3=mkDog();
+const FOREST={trunks:[]};function dogStep(d,mx,mz){d.position.x+=mx;d.position.z+=mz}
 function lampFix(){RM[6].g.visible=cr===6;driveFx();dogFix();if((ovOn||lm)&&document.pointerLockElement)document.exitPointerLock();lamp.color.setHex(cr===6?0xaab8ff:0xffd9a0);lamp.distance=16;
  if(cr===3){lamp.position.set(pos.x,2.3,pos.z);lamp.distance=9;lamp.intensity=1.5}
  else if(cr===5){lamp.position.set(100,2.6,5);lamp.distance=22}
@@ -854,17 +879,20 @@ function cgLogo(){
  +'<g class="cgmoon"><path d="M124.23 27.15 A58 58 0 1 0 170.50 113.53 A49 49 0 0 1 124.23 27.15 Z" fill="url(#mg1)"/><circle cx="80" cy="92" r="5.5" fill="#c3c8d6"/><circle cx="92" cy="64" r="4" fill="#c8ccda"/><circle cx="101" cy="112" r="6.5" fill="#bfc4d3"/><circle cx="112" cy="88" r="3" fill="#cacedb"/></g>'
  +'<rect class="cgstar" x="22" y="28" width="4" height="4"/><rect class="cgstar" style="animation-delay:.7s" x="206" y="40" width="4" height="4"/><rect class="cgstar" style="animation-delay:1.3s" x="30" y="130" width="3" height="3"/><rect class="cgstar" style="animation-delay:1.9s" x="212" y="124" width="4" height="4"/><rect class="cgstar" style="animation-delay:.4s" x="60" y="12" width="3" height="3"/><rect class="cgstar" style="animation-delay:1.6s" x="182" y="14" width="3" height="3"/></svg>'}
 (function(){
+ let lobbyMode=false;try{if(window.name==='dfQuick'){window.name='';return}if(window.name==='dfLobby'){window.name='';lobbyMode=true}}catch(e){}
  const b=document.createElement('div');b.id='boot';
  b.innerHTML='<div class="bfl"></div><div class="bs on" id="b1">'+cgLogo()+'<div class="cgw">MOON GAMES</div><div class="cgt">präsentiert</div></div>'
  +'<div class="bs" id="b2"><svg class="kh" viewBox="0 0 60 90"><circle cx="30" cy="26" r="20" fill="none" stroke="#d9a441" stroke-width="5"/><path d="M30 20 a7 7 0 1 1 -.1 0 M25 36 h10 l5 40 h-20z" fill="#d9a441"/></svg>'
  +'<div class="ft">DIE FLUCHT</div><div class="fs">Ein 3D-Escape-Abenteuer</div><div class="lb"><i id="bi"></i></div><div class="lt" id="bt">Lade ...</div><div class="tap" id="btap">Tippen zum Starten</div></div>';
  document.body.appendChild(b);
- const msgs=['Schlösser werden verriegelt ...','Hunde werden gefüttert ...','Der Jäger wird geweckt ...','Keller wird verdunkelt ...','Labyrinth wird gebaut ...','Mond wird aufgehängt ...','Fast fertig ...'];
+ const msgs=lobbyMode?['Spielstand wird gespeichert ...','Der Jäger wird zurückgeschickt ...','Hunde werden eingefangen ...','Türen werden wieder verriegelt ...','Lobby wird vorbereitet ...','Fast fertig ...']:['Schlösser werden verriegelt ...','Hunde werden gefüttert ...','Der Jäger wird geweckt ...','Keller wird verdunkelt ...','Labyrinth wird gebaut ...','Mond wird aufgehängt ...','Fast fertig ...'];
  let p=0,iv,ready=false;
  setTimeout(()=>{$('b1').classList.remove('on');setTimeout(()=>{$('b2').classList.add('on');
-  iv=setInterval(()=>{p=Math.min(100,p+(Math.random()<.2?0:Math.random()*7));$('bi').style.width=p+'%';$('bt').textContent=p>=100?'Bereit.':msgs[Math.min(msgs.length-1,Math.floor(p/100*msgs.length))];
-   if(p>=100&&!ready){ready=true;clearInterval(iv);$('btap').classList.add('on')}},110)},700)},3200);
- const go=()=>{if(!ready)return;b.classList.add('out');setTimeout(()=>b.remove(),1000)};
+  iv=setInterval(()=>{p=Math.min(100,p+(lobbyMode?2.1:(Math.random()<.2?0:Math.random()*7)));$('bi').style.width=p+'%';$('bt').textContent=p>=100?'Bereit.':msgs[Math.min(msgs.length-1,Math.floor(p/100*msgs.length))];
+   if(p>=100&&!ready){ready=true;clearInterval(iv);if(lobbyMode){$('bt').textContent='Willkommen zurück in der Lobby.';setTimeout(go,450)}else $('btap').classList.add('on')}},110)},700)},3200);
+ let gone=false;const go=()=>{if(!ready||gone)return;gone=true;b.classList.add('out');b.style.pointerEvents='auto';
+  const ev=['click','pointerup','mouseup','touchend'],block=x=>{x.stopPropagation();x.preventDefault()};ev.forEach(n=>document.addEventListener(n,block,true));
+  setTimeout(()=>{ev.forEach(n=>document.removeEventListener(n,block,true));b.remove()},700)};
  b.addEventListener('pointerdown',go);addEventListener('keydown',go)
 })();
 
@@ -1143,7 +1171,7 @@ openMenu=function(){if(!P2)return _openMenu1();if(ovOn)return;
  document.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{CH[b.dataset.ch]=!CH[b.dataset.ch];closeOv();openMenu()});
  $('mv').onclick=()=>{CH.view={auto:'tp',tp:'fp',fp:'auto'}[CH.view];closeOv();openMenu()};
  $('mi').onclick=()=>{['Taschenlampe','Sicherung Rot','Sicherung Blau','Sicherung Grün','Notiz','Notizbuch','Rack-Zettel','Wartungsplan','Gebäudeplan'].forEach(k=>{if(!has(k))S.inv.push(k)});inv();closeOv();toast('Alle Items im Inventar.','good')};
- document.querySelectorAll('[data-j2]').forEach(b=>b.onclick=()=>p2Jump(+b.dataset.j2));$('mr').onclick=()=>location.reload()};
+ document.querySelectorAll('[data-j2]').forEach(b=>b.onclick=()=>p2Jump(+b.dataset.j2));$('mr').onclick=()=>qReload()};
 $('mb').onclick=()=>openMenu();
 function p2Jump(st){closeOv();lm=false;busy=false;const add=(...a)=>a.forEach(i=>{if(!has(i))S.inv.push(i)});
  if(st>=2){S.f.power=1;add('Taschenlampe','Notiz');FL=true}
@@ -1165,7 +1193,7 @@ function endSeq2(){const e=document.createElement('div');e.id='end';document.bod
  $('enx').onclick=nx}
 function finalCards2(){const f=document.createElement('div');f.id='fin';document.body.appendChild(f);
  const L=[['<p class="sm">Eine</p>'+cgLogo()+'<div class="cgw">MOON GAMES</div><p class="sm" style="margin-top:8px">Produktion</p>',4200],['<div style="margin:6px">'+p2Logo()+'</div>',3400],['<p class="sm">Programmiert von</p><h3>Benjamin</h3>',3000],['<p class="sm">Story</p><h3>Domenic</h3>',3000],['<p class="sm">Regie</p><h3>Aaron</h3>',3000],['<p class="sm">Beta-Tester</p><h3>Ben</h3>',3000],['<h3>Danke fürs Testen!</h3><p class="sm">Ende der Beta</p>',4200],['<h1 style="color:var(--bad);font-size:36px">Fortsetzung folgt</h1>',4200]];
- let k=0;const nx=()=>{if(k>=L.length)return location.reload();const [h,d]=L[k++];f.innerHTML='<div class="fc" style="animation-duration:'+d+'ms">'+h+'</div>';setTimeout(nx,d)};nx()}
+ let k=0;const nx=()=>{if(k>=L.length)return qReload();const [h,d]=L[k++];f.innerHTML='<div class="fc" style="animation-duration:'+d+'ms">'+h+'</div>';setTimeout(nx,d)};nx()}
 
 /* ===================== iOS-27-DESIGN ===================== */
 const LSUB={Leicht:'Entspannt · langsame Gegner · viel Zeit',Mittel:'Ausgewogen · das normale Spielerlebnis',Schwer:'Gnadenlos · schnelle Gegner · wenig Zeit'},LICO={Leicht:['#30d158','🌿'],Mittel:['#ff9f0a','⚡'],Schwer:['#ff453a','🔥']};
@@ -1203,7 +1231,7 @@ function pauseUI(p2){const J=p2?['Zelle','Serverraum','Katakomben','Maschinenhal
   $('mgun').onclick=()=>{RUN.jumped=true;closeOv();showReveal('Per Cheat erhalten',()=>{if(!has('Shotgun'))S.inv.push('Shotgun');GUN.ammo=6;inv()},()=>{S.sel='Shotgun';inv();toast('🔫 Shotgun ausgerüstet. Linksklick (PC) oder 💥 schießt.','good')})};
   $('mi').onclick=()=>{RUN.jumped=true;(p2?['Taschenlampe','Sicherung Rot','Sicherung Blau','Sicherung Grün','Notiz','Notizbuch','Rack-Zettel','Wartungsplan','Gebäudeplan']:Object.keys(INFO)).forEach(k=>{if(!has(k))S.inv.push(k)});inv();closeOv();toast('Alle Items im Inventar.','good')};
   document.querySelectorAll('[data-j]').forEach(b=>b.onclick=()=>p2?p2Jump(+b.dataset.j):cheatJump(+b.dataset.j))}
- $('mr').onclick=()=>location.reload()}
+ $('mr').onclick=()=>qReload()}
 function pauseOnly(){pauseUI(P2)}
 openMenu=function(){if(ovOn)return;pauseUI(P2)};
 function p2Gate(){ov('<div class="ios"><div style="text-align:center;margin:10px 0 4px">'+p2Logo()+'</div><div class="sub">Geschlossene Beta · Passwort erforderlich</div><div class="grp" style="margin-top:16px"><div class="row"><input id="p2in" type="password" inputmode="numeric" placeholder="Passwort" autocomplete="off"><button class="pill blue" id="p2ok">OK</button></div></div><div id="p2m" class="foot" style="min-height:1.6em"></div><div style="text-align:center"><button class="pill" id="p2x">Zurück</button></div></div>');
@@ -1296,12 +1324,15 @@ const _crash=crash;crash=function(i){sfx('crash');return _crash(i)};
 ['pointerdown','keydown','touchstart'].forEach(ev=>addEventListener(ev,()=>{if(!AU.started)auStart()},{capture:true,passive:true}));
 document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('button'))sfx('tap')},true);
 /* Feste Song-Zuordnung: Titel-Nr. (ab 0) -> Spotify-Track-ID (HAYAT von Ooyy) */
-const PRE={3:'6pcYv6zdmh5iERmzifqt7M',8:'2RFKAbEQGDCElii11VArPJ'};
+const PRE={3:'6pcYv6zdmh5iERmzifqt7M',8:'2RFKAbEQGDCElii11VArPJ',11:'5lZqOS3qWYECmvThY3fQBg'};
 /* Spotify-Konto (offizielle Anmeldung, Web API + Web Playback SDK) */
 const SA={cid:'',tok:null,exp:0,ref:null,on:false,dev:null,player:null,info:[],failed:[],errs:[],uris:[],cur:0,playing:false,last:null,poll:0,
  mobile:/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent))};
 try{SA.cid=localStorage.getItem('dfSpCid')||'';const t=JSON.parse(localStorage.getItem('dfSpTok')||'null');if(t){SA.tok=t.a;SA.ref=t.r;SA.exp=t.e}}catch(e){}
-const WEBURL='https://taupe-choux-09809a.netlify.app/',ONWEB=location.protocol==='https:';
+/* Spotify-Passwort (freiwillig): gesperrt bis zur Eingabe, in jeder neuen Sitzung */
+const SPL={h:'',s:'',locked:false,hold:null};
+try{const x=JSON.parse(localStorage.getItem('dfSpPw')||'null');if(x&&x.h){SPL.h=x.h;SPL.s=x.s;if(SA.tok||SA.ref){SPL.hold={a:SA.tok,r:SA.ref,e:SA.exp};SA.tok=null;SA.ref=null;SA.exp=0;SPL.locked=true}}}catch(e){}
+const WEBURL='https://die-flucht.vercel.app/',ONWEB=location.hostname==='die-flucht.vercel.app';
 const saRedir=()=>location.origin+location.pathname.replace(/index\.html$/,'');
 const saSay=t=>{$('spls').textContent=t;$('sps').textContent=t};
 const b64url=buf=>btoa(String.fromCharCode.apply(null,new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -1354,6 +1385,7 @@ async function saBoot(){$('spcid').value=SA.cid;
  const q=new URLSearchParams(location.search),code=q.get('code'),err=q.get('error');
  if(err){history.replaceState(null,'',saRedir());saSay('Anmeldung abgebrochen.')}
  if(code){history.replaceState(null,'',saRedir());try{await saToken({grant_type:'authorization_code',code,redirect_uri:saRedir(),code_verifier:localStorage.getItem('dfSpVer')||''})}catch(e){saSay('Spotify: '+e.message);return}
+  try{localStorage.removeItem('dfSpPw')}catch(e){}SPL.h='';SPL.s='';SPL.locked=false;SPL.hold=null;
   const p=$('musp');p.style.display='block'}
  if(SA.ref||SA.tok)saReady()}
 const _spToggle=spToggle;spToggle=function(){if(SA.on)return saToggle();return _spToggle()};
@@ -1361,7 +1393,7 @@ const _spGo=spGo;spGo=function(i,a){if(SA.on){const T=Math.max(SPT.length,SP.ids
 const _spMeta=spMeta;spMeta=function(){if(SA.on){saShow(SA.last);return}return _spMeta()};
 const _spLoadApi=spLoadApi;spLoadApi=function(){if(SA.on)return;return _spLoadApi()};
 /* Spotify-Player */
-const SPT=['Confession','Things to Do','Divergent','HAYAT','Only Gold Rings','JÄMTLAND','iSpy (feat. Lil Yachty)','LUCKY LUKE','Teenager Dreams 2','Chubina','Come 2gether'];
+const SPT=['Confession','Things to Do','Divergent','HAYAT','Only Gold Rings','JÄMTLAND','iSpy (feat. Lil Yachty)','LUCKY LUKE','Teenager Dreams 2','Chubina','Come 2gether','Farex Pull My Pearl'];
 const SP={ids:[],list:null,idx:0,ctrl:null,api:null,playing:false,last:0,meta:{},want:false,loading:false,plain:false,t:0,timer:0};
 const USR={over:{},extra:[]},ED={slot:0};SP.bulk=[];
 try{SP.bulk=JSON.parse(localStorage.getItem('dfSpIds')||'[]');SP.list=JSON.parse(localStorage.getItem('dfSpList')||'null');const u=JSON.parse(localStorage.getItem('dfSpUsr')||'null');if(u){USR.over=u.over||{};USR.extra=u.extra||[]}}catch(e){}
@@ -1460,7 +1492,7 @@ $('msfx').onclick=()=>{AU.sfxOn=!AU.sfxOn;auUI()};
 $('mbi').onclick=()=>{AU.musicOn=!AU.musicOn;if(AU.ctx)AU.mus.gain.setTargetAtTime(AU.musicOn?1:0,AU.ctx.currentTime,.1);if(AU.musicOn&&SP.playing&&SP.ctrl)try{SP.ctrl.pause()}catch(e){}auUI()};
 auUI();spMeta();
 $('spnext').onclick=()=>SA.on?saSkip(1):spGo(SP.idx+1,true);$('spprev').onclick=()=>SA.on?saSkip(-1):spGo(SP.idx-1,true);
-$('splogin').onclick=()=>{if(SA.on){['dfSpTok','dfSpRes'].forEach(k=>localStorage.removeItem(k));location.reload()}else saLogin()};
+$('splogin').onclick=()=>{if(SA.on){['dfSpTok','dfSpRes','dfSpPw'].forEach(k=>localStorage.removeItem(k));qReload()}else saLogin()};
 setTimeout(saBoot,0);
 
 /* ===================== SHOTGUN ===================== */
@@ -1658,7 +1690,7 @@ IA.push(
 {r:13,x:-8.4,z:-2,lab:()=>'Waffenregal: Shotgun nehmen',run(){if(!has('Shotgun'))S.inv.push('Shotgun');GUN.ammo=6;S.sel='Shotgun';inv();toast('🔫 Shotgun gezogen. Hier unendlich Schrot. Schieße auf den Dummy!','good')}},
 {r:13,x:-8.4,z:2,lab:()=>'Item-Kiste: alle Items nehmen',run(){Object.keys(INFO).forEach(k=>{if(!has(k))S.inv.push(k)});inv();toast('Alle Items im Inventar. Tippe sie an, um sie zu testen.','good')}},
 {r:13,x:7.4,z:-2,lab:()=>'Dummys zurücksetzen',run(){DEV.rs++;devH.down=0;devH.hp=4;devH.hpKey='';devH.position.set(...DEVSP.h);devDog.stun=0;devDog.rotation.z=0;devDog.position.set(...DEVSP.d);rspFx(DEVSP.h[0],DEVSP.h[2],0xbf5af2);rspFx(DEVSP.d[0],DEVSP.d[2],0x30d158);toast('Dummys zurückgesetzt.','good')}},
-{r:13,x:8.6,z:6,lab:()=>'Entwicklerraum verlassen',run(){location.reload()}});
+{r:13,x:8.6,z:6,lab:()=>'Entwicklerraum verlassen',run(){qReload()}});
 function devEnter(){DEV.on=true;RUN.jumped=true;closeOv();lm=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;H=1.6;S.tied=false;
  try{ropes.forEach(r=>r.visible=false)}catch(e){}hunter.visible=false;dogs.forEach(d=>d.visible=false);['chase','drive','dhud','mini'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});
  tele(13,0,9,0,()=>toast('🧪 Entwicklerraum: Waffen, Items und Movement testen. Regale links, Zurücksetzen rechts, Ausgang hinten rechts.'))}
@@ -2103,7 +2135,7 @@ function mpJoin(name,code){MP.name=name;mpSave();code=String(code||'').toUpperCa
    c.on('open',()=>{clearTimeout(to);MP.code=code;c.send({t:'hello',name,sm:isStr()?1:0})});c.on('data',mpRecv);
    c.on('close',()=>{if(MP.peer){toast('Verbindung zum Host verloren.','err');mpLeave()}});c.on('error',e=>mpFail(e))});
   peer.on('error',e=>mpFail(e))})}
-function mpLeave(){mpCleanup();setTimeout(()=>location.reload(),300)}
+function mpLeave(){mpCleanup();try{window.name='dfQuick'}catch(e){}setTimeout(()=>qReload(),150)}
 /* ---------- Nachrichten ---------- */
 function mpRecv(m){if(!m)return;try{switch(m.t){
  case 'welcome':MP.myId=m.id;break;
@@ -2369,14 +2401,14 @@ function accApply(d){ACCK.forEach(k=>{try{if(d&&Object.prototype.hasOwnProperty.
 function accStore(){try{localStorage.setItem('dfAccounts',JSON.stringify(ACC.list));localStorage.setItem('dfAcc',ACC.active)}catch(e){}}
 function accSave(force){if(!accReady())return;const a=accCur(),d=accSnap(),js=JSON.stringify(d);if(js===a.js&&!force)return;a.data=d;a.js=js;a.ts=Date.now();accStore();cloudPush(a)}
 function accNewCode(){for(let n=0;n<500;n++){let c='';for(let i=0;i<4;i++)c+=ACCA[Math.floor(Math.random()*ACCA.length)];if(!ACC.list[c])return c}return 'X'+Date.now().toString(36).slice(-3).toUpperCase()}
-/* Cloud (optional: netlify/functions/account.mjs) */
+/* Cloud (alt, nicht mehr genutzt) */
 async function cloudReq(method,q,body){try{const r=await fetch('/api/account'+(q||''),{method,headers:{'content-type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});
  const ct=r.headers.get('content-type')||'';if(!ct.includes('json')){ACC.cloud=false;return {off:true}}ACC.cloud=true;return {status:r.status,data:await r.json().catch(()=>({}))}}catch(e){ACC.cloud=false;return {off:true}}}
 async function cloudCheck(){if(ACC.cloud!==null)return ACC.cloud;await cloudReq('GET','?code=ZZZZ');return ACC.cloud}
 function cloudPush(a,create){clearTimeout(ACC.pushT);ACC.pushT=setTimeout(()=>{cloudReq('POST','',{code:a.code,name:a.name,data:a.data||{},create:!!create})},create?0:2500)}
 async function cloudGet(code){const r=await cloudReq('GET','?code='+code);if(r.off)return {off:true};if(r.status===200&&r.data&&r.data.code)return {acc:r.data};return {none:true}}
 /* Account-Wechsel / Anlegen */
-function accSwitch(code){if(ACC.active!==code)accSave(true);ACC.active=code;accApply(accCur().data||{});accStore();location.reload()}
+function accSwitch(code){if(ACC.active!==code)accSave(true);ACC.active=code;accApply(accCur().data||{});accStore();qReload()}
 async function accCreate(name){const first=!Object.keys(ACC.list).length;let code=accNewCode();
  if(await cloudCheck()){for(let i=0;i<8;i++){const r=await cloudGet(code);if(r.none)break;code=accNewCode()}}
  accSave(true);const data=first?accSnap():{};data.dfName=name;ACC.list[code]={code,name,data,ts:Date.now()};ACC.active=code;accApply(data);accStore();
@@ -2406,12 +2438,12 @@ function accUI(msg){const others=Object.values(ACC.list).sort((a,b)=>(b.ts||0)-(
 function accShowCode(name,code){ov('<div class="ios" style="text-align:center"><h2 style="margin:6px 0">Hallo '+esc(name)+'!</h2><p class="foot">Das ist dein Code. Merk ihn dir oder mach einen Screenshot:</p>'
   +'<div style="font:800 64px var(--ios);letter-spacing:12px;margin:14px 0;padding:14px;border-radius:22px;background:rgba(10,132,255,.18);border:2px solid #0a84ff">'+code+'</div>'
   +'<p class="foot">'+(ACC.cloud?'Mit diesem Code kommst du auf jedem Gerät an deinen Fortschritt.':'Mit diesem Code wechselst du auf diesem Gerät zu deinem Account.')+'</p><button class="btn" id="accgo" style="margin-top:10px">Los geht’s</button></div>',true);
- $('accgo').onclick=()=>location.reload()}
+ $('accgo').onclick=()=>qReload()}
 const _msAcc=menuStart;menuStart=function(){if(!accReady())return accUI();_msAcc.apply(this,arguments);const b=document.getElementById('accsw');if(b)b.onclick=()=>{accSave(true);accUI()}};
 /* Automatisch speichern */
 setInterval(()=>accSave(),8000);
 addEventListener('pagehide',()=>accSave());document.addEventListener('visibilitychange',()=>{if(document.hidden)accSave()});
-if(accReady()){cloudCheck().then(on=>{if(!on)return;cloudGet(ACC.active).then(r=>{if(r.acc&&(r.acc.ts||0)>(accCur().ts||0)+2000){accCur().data=r.acc.data||{};accCur().ts=r.acc.ts;accApply(accCur().data);accStore();toast('☁️ Neuerer Spielstand aus der Cloud geladen – lade neu …','good');setTimeout(()=>location.reload(),1500)}else accSave(true)})})}
+if(accReady()){cloudCheck().then(on=>{if(!on)return;cloudGet(ACC.active).then(r=>{if(r.acc&&(r.acc.ts||0)>(accCur().ts||0)+2000){accCur().data=r.acc.data||{};accCur().ts=r.acc.ts;accApply(accCur().data);accStore();toast('☁️ Neuerer Spielstand aus der Cloud geladen – lade neu …','good');setTimeout(()=>qReload(),1500)}else accSave(true)})})}
 
 /* ===================== OP-Entwickler, Touch-Steuerung, Vollbild/Zoom, Spind ===================== */
 /* --- OP-Entwickler-Account (Code: BB) --- */
@@ -2512,7 +2544,7 @@ let ACCSTART=false;
 accSave=function(force){if(!accReady())return;const a=accCur(),d=accSnap(),js=JSON.stringify(d);if(js===a.js&&!force)return;a.data=d;a.js=js;a.ts=Date.now();
  if(!a.op&&!a.str){const c=pcEnc(d);if(ACCSTART&&a.code&&a.code!==c)toast('🔑 Neu freigeschaltet! Dein neuer Code: '+c,'good');a.code=c}ACCSTART=true;accStore()};
 accSwitch=function(id){if(ACC.active!==id)accSave(true);ACC.active=id;const d=accCur().data||{};accApply(d);accStore();
- if(LS_OK)location.reload();else{pcLive(d);closeOv();menuStart()}};
+ if(LS_OK)qReload();else{pcLive(d);closeOv();menuStart()}};
 accCreate=async function(name){const first=!Object.keys(ACC.list).length;accSave(true);const data=first?accSnap():{dfShotgun:'0',dfShotLoad:'0',dfSkinU:'0',dfSkinG:'0',dfDev:'0',dfHeard:'[]',dfSkin:'default'};
  data.dfName=name;const id='A'+Date.now().toString(36);ACC.list[id]={id,name,data,ts:Date.now(),code:pcEnc(data)};ACC.active=id;accApply(data);accStore();if(!LS_OK)pcLive(data);return ACC.list[id].code};
 accLogin=async function(raw,nm){const code=String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
@@ -2531,7 +2563,7 @@ accLine=function(){if(!accReady())return '';const a=accCur();
 accShowCode=function(name,code){ov('<div class="ios" style="text-align:center"><h2 style="margin:6px 0">Hallo '+esc(name)+'!</h2><p class="foot">Das ist dein Code. Mach am besten einen Screenshot:</p>'
   +'<div style="font:800 64px var(--ios);letter-spacing:12px;margin:14px 0;padding:14px;border-radius:22px;background:rgba(10,132,255,.18);border:2px solid #0a84ff">'+code+'</div>'
   +'<p class="foot">Der Code enthält deinen Fortschritt. Damit kommst du auf <b>jedem</b> Gerät an deine Sachen. Schaltest du etwas Neues frei, bekommst du einen neuen Code – er steht immer im Startmenü.</p><button class="btn" id="accgo" style="margin-top:10px">Los geht’s</button></div>',true);
- $('accgo').onclick=()=>{if(LS_OK)location.reload();else{closeOv();menuStart()}}};
+ $('accgo').onclick=()=>{if(LS_OK)qReload();else{closeOv();menuStart()}}};
 accUI=function(msg){const others=Object.values(ACC.list).sort((a,b)=>(b.ts||0)-(a.ts||0));
  ov('<div class="ios"><h2 style="margin:4px 0 2px">👤 Willkommen!</h2><p class="foot" style="margin:0 0 10px">Gib einen Namen ein und tippe auf „Erstellen“ – oder gib deinen Code ein. Dein Code enthält deine freigeschalteten Sachen.</p>'
   +(msg?'<p class="err" style="margin:0 0 8px">'+esc(msg)+'</p>':'')
@@ -2557,7 +2589,7 @@ function accFromHash(){const m=/acc=([A-Z2-9]{4})(?:&n=([^&]*))?/.exec(location.
 accFromHash();
 function goHome(){try{accSave(true)}catch(e){}
  if(!LS_OK&&accReady()){const a=accCur();try{location.hash='acc='+(a.op?'BBBB':a.str?'JAU5':pcEnc(accSnap()))+'&n='+encodeURIComponent(a.name||'Spieler')}catch(e){}}
- location.reload()}
+ qReload()}
 function backUI(){if(ovOn||REV.open)return;const st=busy||lm;
  const box=(t,sub,btns)=>{ov('<div class="ios bkd" style="text-align:center"><h2 style="margin:6px 0">'+t+'</h2><p class="foot">'+sub+'</p>'+btns+'<button class="btn" id="bk0">Weiterspielen</button></div>',true);$('bk0').onclick=()=>closeOv()};
  if(MP.on||(MP.ph&&MP.ph!=='menu'&&(MP.peer||MP.conn))){
@@ -2569,7 +2601,7 @@ function backUI(){if(ovOn||REV.open)return;const st=busy||lm;
   return}
  if(P2){box('Zurück zum Hauptspiel?','Teil 2 (Beta) wird beendet und du kommst zurück ins Hauptmenü. Freigeschaltete Sachen bleiben erhalten.','<button class="btn red" id="bk1">Zurück zum Hauptspiel</button>');$('bk1').onclick=goHome;return}
  box('Zurück zur Lobby?','Dieser Durchgang wird beendet und du kommst zurück ins Startmenü. Freigeschaltete Sachen (Shotgun, Skins, Songs) bleiben erhalten.','<button class="btn red" id="bk1">Zurück zur Lobby</button>');$('bk1').onclick=goHome}
-{const b=document.getElementById('tback');b.onpointerdown=e=>{e.preventDefault();e.stopPropagation();backUI()}}
+{const b=document.getElementById('tback');b.onpointerdown=e=>{e.preventDefault();e.stopPropagation();lobbyBtn()}}
 addEventListener('keydown',e=>{if(e.code==='Backspace'&&!(e.target&&e.target.matches&&e.target.matches('input,textarea'))&&!ovOn){e.preventDefault();backUI()}});
 const _srtBk=snkRspTick;snkRspTick=function(){_srtBk();try{const b=$('tback'),l=MP.on?'‹ Online-Lobby':P2?'‹ Hauptspiel':'‹ Lobby';if(b.textContent!==l)b.textContent=l;b.style.display=($('end')||$('credits'))?'none':''}catch(e){}};
 
@@ -2692,9 +2724,9 @@ const OPS={url:'/api/ops',sid:(()=>{try{return crypto.randomUUID()}catch(e){retu
 const opsMode=()=>MP.on?'mp':P2?'p2':(ovOn?'menu':'solo');
 async function opsPost(b,keep){if(!OPS.on)return null;try{const r=await fetch(OPS.url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({sid:OPS.sid},b)),keepalive:!!keep});if(r.status===401||r.status===403)return {error:'auth'};if(r.status===429)return {error:'limit'};if(!r.ok){OPS.last={status:r.status};throw new Error('http '+r.status)}const ct=r.headers&&r.headers.get?(r.headers.get('content-type')||''):'json';if(!/json/.test(ct)){OPS.last={status:r.status,html:true};throw new Error('keine JSON-Antwort')}OPS.fail=0;OPS.last=null;return await r.json()}catch(e){if(!OPS.last)OPS.last={net:String(e&&e.message||e).slice(0,80)};OPS.fail++;if(OPS.fail>=4)OPS.on=false;return null}}
 function opsRetry(){if(location.protocol!=='file:'){OPS.on=true;OPS.fail=0}}
-function opsWhy(){const l=OPS.last;if(location.protocol==='file:')return 'Du hast das Spiel als Datei geöffnet. Die Zentrale läuft nur auf deiner Netlify-Seite (https://…netlify.app).';if(!l)return 'Keine Antwort vom Server.';if(l.status===404||l.html)return 'Der Server antwortet mit „'+(l.status||'keine Funktion')+'“: Die Funktion <b>netlify/functions/ops.mjs</b> ist auf Netlify nicht vorhanden. Prüfe in GitHub den genauen Dateipfad und in Netlify unter „Deploys“, ob der letzte Deploy grün („Published“) ist.';if(l.status>=500)return 'Der Server meldet Fehler '+l.status+'. Meistens fehlt <b>package.json</b> mit „@netlify/blobs“ im Hauptordner des Projekts. Schau in Netlify unter „Functions → ops“ in die Logs.';return 'Verbindungsproblem ('+(l.net||l.status)+'). Prüfe deine Internetverbindung und öffne die Netlify-Seite direkt.'}
+function opsWhy(){const l=OPS.last;if(location.protocol==='file:')return 'Du hast das Spiel als Datei geöffnet. Die Zentrale läuft nur auf deiner Webseite (https://die-flucht.vercel.app).';if(!l)return 'Keine Antwort vom Server.';if(l.status===404||l.html)return 'Der Server antwortet mit „'+(l.status||'keine Funktion')+'“: Die Datei <b>api/ops.js</b> fehlt in deinem GitHub-Projekt oder Vercel hat noch nicht neu veröffentlicht. Prüfe in Vercel unter „Deployments“, ob der neueste Eintrag „Ready“ ist.';if(l.status===503)return 'Die Datenbank ist noch nicht verbunden: In Vercel unter „Storage“ eine Upstash-Datenbank (Gratis-Plan) mit diesem Projekt verbinden und danach unter „Deployments“ neu veröffentlichen („Redeploy“).';if(l.status>=500)return 'Der Server meldet Fehler '+l.status+'. Schau in Vercel unter „Logs“ nach der Fehlermeldung.';return 'Verbindungsproblem ('+(l.net||l.status)+'). Prüfe deine Internetverbindung.'}
 setTimeout(()=>opsPost({a:'hb',m:opsMode(),v:DFBUILD}),2500);
-setInterval(()=>{if(!document.hidden)opsPost({a:'hb',m:opsMode(),v:DFBUILD})},30000);
+setInterval(()=>{if(!document.hidden)opsPost({a:'hb',m:opsMode(),v:DFBUILD})},60000);
 addEventListener('pagehide',()=>{try{if(OPS.on&&navigator.sendBeacon)navigator.sendBeacon(OPS.url,new Blob([JSON.stringify({a:'bye',sid:OPS.sid})],{type:'application/json'}))}catch(e){}});
 /* Spiele zählen: jeder Start eines Spiels (Einzelspieler, Teil 2, Online-Runde) */
 {const _ng=newGame;newGame=function(){const r=_ng.apply(this,arguments);opsPost({a:'game',m:'solo'});return r};
@@ -2703,7 +2735,7 @@ addEventListener('pagehide',()=>{try{if(OPS.on&&navigator.sendBeacon)navigator.s
 /* ---- Fehler melden: nur im Menü (Hauptmenü, Ergebnis nach einer Online-Runde), nie mitten im Spiel ---- */
 const RPT={cat:'bug',shot:null,last:0,backFn:null};
 function rptCtx(){let diff='';for(const k in LV)if(LV[k]===DF)diff=k;const cx=cr*20;return {build:DFBUILD,menu:true,mode:MP.on?'Online':P2?'Teil 2':'Einzelspieler',room:NAMES[cr]||('Raum '+cr),cr,x:+(pos.x-cx).toFixed(2),z:+pos.z.toFixed(2),diff,ctrl:CTRL,perf:PERF.lv,fps:Math.round(PERF.fps||0),w:innerWidth,h:innerHeight,acc:accReady()?accCur().name:'',ua:String(navigator.userAgent||'').slice(0,110)}}
-function rptImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=()=>rej(new Error('lesen'));fr.onload=()=>{const im=new Image();im.onerror=()=>rej(new Error('kein Bild'));im.onload=()=>{try{const m=1000,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);let q=.74,u=c.toDataURL('image/jpeg',q);while(u.length>420000&&q>.3){q-=.12;u=c.toDataURL('image/jpeg',q)}u.length>440000?rej(new Error('zu groß')):res(u)}catch(e){rej(e)}};im.src=fr.result};fr.readAsDataURL(file)})}
+function rptImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=()=>rej(new Error('lesen'));fr.onload=()=>{const im=new Image();im.onerror=()=>rej(new Error('kein Bild'));im.onload=()=>{try{const m=900,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*k));c.height=Math.max(1,Math.round(im.height*k));c.getContext('2d').drawImage(im,0,0,c.width,c.height);let q=.74,u=c.toDataURL('image/jpeg',q);while(u.length>300000&&q>.3){q-=.12;u=c.toDataURL('image/jpeg',q)}u.length>330000?rej(new Error('zu groß')):res(u)}catch(e){rej(e)}};im.src=fr.result};fr.readAsDataURL(file)})}
 function rptShow(){const has=!!RPT.shot;$('rpimgw').style.display=has?'block':'none';if(has)$('rpimg').src=RPT.shot;$('rpft').textContent=has?'Anderen Screenshot wählen':'Screenshot einfügen'}
 async function rptSet(file){const m=$('rpm');m.style.color='';m.textContent='Bild wird verarbeitet …';try{RPT.shot=await rptImg(file);m.textContent='';rptShow()}catch(e){RPT.shot=null;rptShow();m.style.color='#ff453a';m.textContent=/groß/.test(e.message)?'Das Bild ist zu groß. Wähle einen kleineren Screenshot.':'Das war kein Bild, oder es konnte nicht gelesen werden.'}}
 function rptMenu(back){RPT.backFn=back||RPT.backFn||menuStart;RPT.shot=null;RPT.cat='bug';
@@ -2746,14 +2778,14 @@ function opsRepText(r){const c=r.ctx||{};const hint=r.cat==='wand'?'COL['+c.cr+'
 const opsKey=()=>{try{return localStorage.dfAdminKey||'1709'}catch(e){return '1709'}};
 const opsSeen=()=>{try{return +localStorage.dfInboxSeen||0}catch(e){return 0}};
 const opsSetSeen=t=>{try{localStorage.dfInboxSeen=String(t)}catch(e){}};
-async function opsGet(){opsRetry();let r=await opsPost({a:'admin',key:opsKey()});if(r&&r.error==='auth'){const k=prompt('Admin-Schlüssel der Zentrale (in Netlify als ADMIN_KEY gesetzt):');if(k){try{localStorage.dfAdminKey=k}catch(e){}r=await opsPost({a:'admin',key:k})}}return r}
+async function opsGet(){opsRetry();let r=await opsPost({a:'admin',key:opsKey()});if(r&&r.error==='auth'){const k=prompt('Admin-Schlüssel der Zentrale (in Vercel als ADMIN_KEY gesetzt):');if(k){try{localStorage.dfAdminKey=k}catch(e){}r=await opsPost({a:'admin',key:k})}}return r}
 function opsFail(r,title){ov('<div class="ios"><h2 style="margin:4px 0 2px">'+title+'</h2><p class="err">'+(r&&r.error==='auth'?'Falscher Schlüssel.':'Die Zentrale ist nicht erreichbar.<br><span style="font-weight:400;font-size:14px">'+opsWhy()+'</span>')+'</p><div class="grp"><button class="row" id="admb"><span class="tx"><b>Zurück</b></span></button></div></div>');$('admb').onclick=()=>menuStart()}
 async function opsAdmin(){ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📊 Admin-Zentrale</h2><p class="foot">Wird geladen …</p></div>');
  const r=await opsGet();if(!r||!r.ok)return opsFail(r,'📊 Admin-Zentrale');
  const S=r.stats,T=S.total,seen=opsSeen(),nNew=r.reports.filter(x=>x.t>seen).length;
  const tile=(n,l)=>'<div class="tile"><b>'+n+'</b><span>'+l+'</span></div>';
  const days=(S.days||[]).map(d=>d.d.slice(5)+': '+d.n).join(' · ');
- ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📊 Admin-Zentrale</h2><p class="foot">Stand '+opsFmt(r.now)+'. „Online“ heißt: in den letzten 90 Sekunden gemeldet.</p>'
+ ov('<div class="ios adm"><h2 style="margin:4px 0 2px">📊 Admin-Zentrale</h2><p class="foot">Stand '+opsFmt(r.now)+'. „Online“ heißt: in den letzten 2½ Minuten gemeldet.</p>'
   +'<div class="cap">Jetzt</div><div class="grp">'+tile(S.online,'Spiele online (geöffnete Fenster)')+tile(S.inGame,'davon mitten im Spiel')+tile(S.byMode.mp,'davon im Online-Modus')+'</div>'
   +'<div class="cap">Rekord & Summe</div><div class="grp">'+tile(S.peak.n,'Rekord: gleichzeitig online'+(S.peak.t?' (am '+opsFmt(S.peak.t)+')':''))+tile(T.all,'Spiele insgesamt gestartet')+tile(S.today,'Spiele heute')+'</div>'
   +'<p class="foot" style="margin:8px 4px">Einzelspieler '+T.solo+' · Online '+T.mp+' · Teil 2 '+T.p2+(days?'<br>Letzte Tage: '+days:'')+'</p>'
@@ -2786,6 +2818,49 @@ async function inboxAppend(){const box=$('box');if(!box||(box.querySelector&&box
  const r=await opsPost({a:'admin',key:opsKey()});if(r&&r.ok){const n=r.reports.filter(x=>x.t>opsSeen()).length,e=$('inboxbd');if(e)e.innerHTML=n?'<b style="color:#0a84ff">'+n+' neu</b> · '+r.reports.length+' insgesamt':nN(r.reports.length)+' · nichts Neues'}}
 {const _ms2=menuStart;menuStart=function(){const r=_ms2.apply(this,arguments);try{if(accReady()&&accCur().op)inboxAppend()}catch(e){}return r}}
 document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('#adminopen');if(a){e.preventDefault();opsAdmin();return}const b=e.target.closest&&e.target.closest('#inboxopen');if(b){e.preventDefault();opsInbox('all')}},true);
+
+try{sleepH.traverse(o=>{if(o.userData&&(o.userData.jEye||o.userData.jGun))o.visible=false})}catch(e){}
+
+/* ===================== Zurück zur Lobby: sofort ins Hauptmenü, ohne Intro und Ladebalken ===================== */
+let GAMEON=false;
+{const a=newGame;newGame=function(){GAMEON=true;return a.apply(this,arguments)};
+ const b=startPart2;startPart2=function(){GAMEON=true;return b.apply(this,arguments)};
+ const c=mpBegin;mpBegin=function(){GAMEON=true;return c.apply(this,arguments)}}
+goHome=function(){try{accSave(true)}catch(e){}
+ if(!LS_OK&&accReady()){const a=accCur();try{location.hash='acc='+(a.op?'BBBB':a.str?'JAU5':pcEnc(accSnap()))+'&n='+encodeURIComponent(a.name||'Spieler')}catch(e){}}
+ try{window.name='dfLobby'}catch(e){}location.reload()};
+function lobbyBtn(){if(REV.open)return;
+ const inMP=MP.on||(MP.ph&&MP.ph!=='menu'&&(MP.peer||MP.conn));
+ if(inMP){if(ovOn)ovOn=false;return backUI()}
+ const box=$('box'),onMain=ovOn&&box&&box.querySelector&&box.querySelector('[data-lv]');
+ if(onMain){toast('Du bist schon in der Lobby.');return}
+ if(!GAMEON){menuStart();return}
+ if(ovOn)ovOn=false;backUI()}
+
+
+/* ===================== Spotify-Passwort: Bedienung ===================== */
+async function spHash(pw,salt){const t='df|'+salt+'|'+pw;try{if(crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}}catch(e){}let h=5381;for(let i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return 'd'+(h>>>0).toString(16)}
+const spHasConn=()=>!!(SA.tok||SA.ref||SPL.hold);
+function spPwUI(msg,col){const el=document.getElementById('sppw');if(!el)return;let h='<div class="cap">Spotify-Passwort</div><div class="grp">';
+ const info=(ic,bg,t,sm)=>'<div class="row"><span class="ic" style="background:'+bg+'">'+ic+'</span><span class="tx"><b>'+t+'</b><small>'+sm+'</small></span></div>';
+ const inp=(id,ph)=>'<div class="row"><input id="'+id+'" type="password" placeholder="'+ph+'" autocomplete="off"></div>';
+ const btn=(id,t,c)=>'<button class="row" id="'+id+'"><span class="tx"><b'+(c?' style="color:'+c+'"':'')+'>'+t+'</b></span><i class="chev">›</i></button>';
+ if(!spHasConn())h+=info('🎵','#8e8e93','Noch kein Spotify verbunden','Nach der Anmeldung kannst du hier wählen: mit oder ohne Passwort.');
+ else if(SPL.locked)h+=info('🔒','#ff9f0a','Spotify ist mit Passwort geschützt','Gib dein Spotify-Passwort ein, um deine Musik zu nutzen.')+inp('sppwi','Spotify-Passwort')+btn('sppwu','Entsperren','#0a84ff')+btn('sppwf','Passwort vergessen? Spotify trennen','#ff453a');
+ else if(!SPL.h)h+=info('🔓','#30d158','Ohne Passwort','Jeder, der hier in dein Spiel kommt, kann deinen Spotify nutzen.')+(spPwUI.set?inp('sppw1','Neues Passwort (mind. 4 Zeichen)')+inp('sppw2','Passwort wiederholen')+btn('sppws','Passwort speichern','#0a84ff'):btn('sppwn','Passwort festlegen','#0a84ff'));
+ else h+=info('🔐','#5e5ce6','Mit Passwort geschützt','Für diese Sitzung entsperrt. Beim nächsten Start wird wieder gefragt.')+(spPwUI.del?inp('sppwd','Aktuelles Passwort')+btn('sppwdo','Passwort entfernen','#ff453a'):btn('sppwl','Jetzt sperren')+btn('sppwr','Passwort entfernen','#ff453a'));
+ h+='</div><div class="foot" id="sppwm" style="text-align:left;margin:6px 12px;min-height:16px'+(col?';color:'+col:'')+'">'+(msg||'')+'</div>';el.innerHTML=h;
+ const $$=id=>document.getElementById(id),stop=id=>{const e=$$(id);if(e)['keydown','keyup','keypress'].forEach(n=>e.addEventListener(n,x=>x.stopPropagation()))};['sppwi','sppw1','sppw2','sppwd'].forEach(stop);
+ if($$('sppwn'))$$('sppwn').onclick=()=>{spPwUI.set=true;spPwUI()};
+ if($$('sppws'))$$('sppws').onclick=async()=>{const a=$$('sppw1').value,b=$$('sppw2').value;if(a.length<4)return spPwUI.call(null,'Mindestens 4 Zeichen.','#ff453a')||($$('sppw1')&&0);if(a!==b){spPwUI.set=true;return spPwUI('Die beiden Passwörter sind verschieden.','#ff453a')}
+  const salt=Math.random().toString(36).slice(2,10),hh=await spHash(a,salt);SPL.h=hh;SPL.s=salt;try{localStorage.setItem('dfSpPw',JSON.stringify({h:hh,s:salt}))}catch(e){}spPwUI.set=false;spPwUI('Gespeichert. Ab dem nächsten Start fragt das Spiel nach dem Passwort.','#30d158')};
+ const unlock=async()=>{const v=$$('sppwi').value;if(await spHash(v,SPL.s)!==SPL.h)return spPwUI('Falsches Passwort.','#ff453a');const k=SPL.hold;SA.tok=k.a;SA.ref=k.r;SA.exp=k.e;SPL.hold=null;SPL.locked=false;spPwUI('Entsperrt. Spotify wird verbunden …','#30d158');try{saReady()}catch(e){}};
+ if($$('sppwu'))$$('sppwu').onclick=unlock;if($$('sppwi'))$$('sppwi').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
+ if($$('sppwf'))$$('sppwf').onclick=()=>{if(!confirm('Spotify auf diesem Gerät trennen? Danach kann sich jeder neu mit seinem eigenen Spotify anmelden.'))return;['dfSpTok','dfSpRes','dfSpPw'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});qReload()};
+ if($$('sppwl'))$$('sppwl').onclick=()=>qReload();
+ if($$('sppwr'))$$('sppwr').onclick=()=>{spPwUI.del=true;spPwUI()};
+ if($$('sppwdo'))$$('sppwdo').onclick=async()=>{if(await spHash($$('sppwd').value,SPL.s)!==SPL.h){spPwUI.del=true;return spPwUI('Falsches Passwort.','#ff453a')}SPL.h='';SPL.s='';try{localStorage.removeItem('dfSpPw')}catch(e){}spPwUI.del=false;spPwUI('Passwort entfernt. Spotify ist jetzt ohne Passwort.','#30d158')}}
+spPwUI();setTimeout(()=>{spPwUI();if(SPL.locked)try{saSay('🔒 Spotify ist gesperrt – unten im Musik-Menü Passwort eingeben.')}catch(e){}},300);
 
 menuStart();
 requestAnimationFrame(frame);

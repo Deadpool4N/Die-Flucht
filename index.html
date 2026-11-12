@@ -17,7 +17,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #toast.err{color:var(--bad)}#toast.good{color:var(--ok)}
 #act{left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);transform:translateX(-50%);display:none;background:var(--acc);color:#1a1408;border:0;border-radius:30px;padding:16px 28px;font:bold 18px Georgia,serif;box-shadow:0 0 24px #d9a44188}
 #joy{left:calc(env(safe-area-inset-left,0px) + 24px);bottom:calc(env(safe-area-inset-bottom,0px) + 28px);width:130px;height:130px;border-radius:50%;background:#ffffff14;border:2px solid #ffffff30;touch-action:none}
-#knob{position:absolute;left:41px;top:41px;width:48px;height:48px;border-radius:50%;background:#ffffff55;pointer-events:none}
+#knob{position:absolute;left:50%;top:50%;margin:-24px 0 0 -24px;width:48px;height:48px;border-radius:50%;background:#ffffff55;pointer-events:none}
 #hint{right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);font-size:12px;color:#8a8678;pointer-events:none}
 #chase{top:14%;left:50%;transform:translateX(-50%);width:min(92%,460px);text-align:center;display:none;background:#0c0c10cc;border:1px solid #3a3a46;border-radius:10px;padding:10px}
 #bar{height:6px;background:var(--bad);border-radius:3px;margin:6px 0}
@@ -103,7 +103,7 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #hlb{left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);transform:translateX(-50%);z-index:4;background:#fff3c0dd;color:#222;border:0;border-radius:24px;padding:14px 22px;font:bold 17px Georgia,serif}
 body.pc #joy,body.pc #drive{display:none!important}
 body.ipad #joy{width:170px;height:170px;left:calc(env(safe-area-inset-left,0px) + 34px);bottom:calc(env(safe-area-inset-bottom,0px) + 40px)}
-body.ipad #knob{left:56px;top:56px;width:58px;height:58px}
+body.ipad #knob{left:50%;top:50%;margin:-29px 0 0 -29px;width:58px;height:58px}
 body.ipad #act{font-size:24px;padding:20px 38px;bottom:calc(env(safe-area-inset-bottom,0px) + 70px)}
 body.ipad .item{font-size:17px;padding:10px 16px}body.ipad .dp{width:118px;height:118px;font-size:46px}
 body.ipad #mb{width:58px;height:58px}body.ipad #toast{font-size:20px}body.ipad .btn{font-size:20px;padding:16px 22px}body.ipad #chase{font-size:19px}body.ipad #hint{font-size:14px}
@@ -488,7 +488,7 @@ const gd={on:false,climb:false,taps:0,last:'',t0:0,go:0},drv={on:false,view:fals
 let GOAL=1000,gDash=new THREE.BoxGeometry(.14,.02,2.6),mDash=new THREE.MeshBasicMaterial({color:0xdddddd}),gPost=new THREE.BoxGeometry(.2,1.4,.2),mPost=M(0x888888);
 document.querySelectorAll('.dp').forEach(b=>{const k=b.dataset.k,on=v=>e=>{e.preventDefault();drv[k]=v};b.onpointerdown=on(1);['pointerup','pointerleave','pointercancel'].forEach(n=>b['on'+n]=on(0))});
 function addO(m,x,y,z,o){m.position.set(x,y,z);road.add(m);drv.obs.push(Object.assign({m,hw:0,hl:0,v:0},o));return m}
-function spawnRow(){const lanes=[-3,-1,1,3].sort(()=>Math.random()-.5).slice(0,drv.dist>250&&Math.random()<.6?2:1);
+function spawnRow(){const lanes=cxLanes().sort(()=>Math.random()-.5).slice(0,drv.dist>250&&Math.random()<.6?2:1);
  lanes.forEach(x=>{const r=Math.random();
   if(r<.4)addO(mkCar([0x1f4a8a,0x2a6a2a,0xcccccc][Math.floor(Math.random()*3)]),x,0,-120,{hw:.85,hl:1.8,v:7});
   else if(r<.7)addO(new THREE.Mesh(new THREE.BoxGeometry(2,.8,.3),M(0xdddddd,0x440000)),x,.4,-120,{hw:1,hl:.3});
@@ -516,14 +516,14 @@ function updGame(dt,t,now){if(ovOn)return;
  if(drv.on){const gas=drv.gas||keys.ArrowUp||keys.KeyW,brk=drv.brk||keys.ArrowDown||keys.KeyS;
   drv.sp+=((gas?30:brk?6:16)-drv.sp)*Math.min(1,dt*1.6);
   const st=((drv.right||keys.ArrowRight||keys.KeyD)?1:0)-((drv.left||keys.ArrowLeft||keys.KeyA)?1:0);
-  drv.x=Math.max(-3.7,Math.min(3.7,drv.x+st*dt*(3.5+drv.sp*.18)));pcar.position.x=drv.x;pcar.rotation.y=-st*.18;drv.dist+=drv.sp*dt;
+  drv.x=Math.max(-3.7,Math.min(3.7,drv.x+st*dt*(3.5+drv.sp*.18)));pcar.position.x=drv.x;pcar.rotation.y=-st*.18;drv.dist+=drv.sp*dt;cxFuelStep(dt);
   if(drv.dist>=drv.nextDec){drv.nextDec+=7;sceneSpawn();[-2,0,2].forEach(x=>addO(new THREE.Mesh(gDash,mDash),x,.02,-120,{deco:1}));[-5.6,5.6].forEach(x=>addO(new THREE.Mesh(gPost,mPost),x,.7,-120,{deco:1}))}
   if(drv.dist>=drv.nextD&&drv.dist<GOAL-90){drv.nextD=drv.dist+Math.max(DF.sp0-6,DF.sp0-12*drv.dist/GOAL);spawnRow()}
   for(let i=drv.obs.length-1;i>=0;i--){const o=drv.obs[i],m=o.m;m.position.z+=(drv.sp-o.v)*dt;
    if(m.position.z>12){road.remove(m);drv.obs.splice(i,1);continue}
    if(!o.deco&&Math.abs(m.position.z)<o.hl+1.8&&Math.abs(m.position.x-drv.x)<o.hw+.8)crash(i)}
   if(drv.on&&drv.dist>=GOAL)finishDrive()}
- if(drv.view&&drv.on)$('dhud').textContent='❤'.repeat(Math.max(0,drv.lives))+'  '+Math.round(drv.dist)+' / '+GOAL+' m'}
+ if(drv.view&&drv.on)$('dhud').innerHTML='❤'.repeat(Math.max(0,drv.lives))+'  '+Math.round(drv.dist)+' / '+GOAL+' m'+cxFuelTxt()}
 /* ---------- Tween & Effekte ---------- */
 const tw=[];function tween(d,f,done){tw.push({t:0,d,f,done})}
 let sh=0;const shake=a=>{tween(.5,k=>sh=a*(1-k))};
@@ -1942,7 +1942,7 @@ class MPHost{
   this.res={t:'end',win,why,esc:ps.filter(p=>p.st==='esc').map(p=>p.name),et:Object.fromEntries(ps.filter(p=>p.st==='esc').map(p=>[p.name,p.et||0])),df:this.diff,ch:this.cheat?1:0,dead:ps.filter(p=>p.st==='dead').map(p=>p.name),hunter:(this.P[this.hid]||{}).name||''};this.bcast(this.res)}
  msg(id,m){const p=this.P[id];if(!p||!m)return;
   switch(m.t){
-   case 'p':if(this.phase==='play'&&(p.st==='ok'||p.st==='down')&&isFinite(m.x)&&isFinite(m.z)){p.x=Math.max(-21,Math.min(21,+m.x));p.z=Math.max(-16,Math.min(19,+m.z));p.ry=+m.ry||0;p.m=m.m?1:0}break;
+   case 'p':if(this.phase==='play'&&(p.st==='ok'||p.st==='down')&&isFinite(m.x)&&isFinite(m.z)){p.x=Math.max(-21,Math.min(21,+m.x));p.z=Math.max(-16,Math.min(19,+m.z));p.ry=+m.ry||0;p.pt=Math.max(-1.5,Math.min(1.5,+m.pt||0));p.m=m.m?1:0}break;
    case 'act':this.act(p,m);break;
    case 'shoot':this.shoot(p,m);break;
    case 'use':this.use(p,m.s|0);break;
@@ -2005,7 +2005,7 @@ class MPHost{
   this.check();if(this.phase==='play'&&this.tm<=0)this.finish('h','Die Zeit ist abgelaufen.')}
  snapFor(id){const W=this.W,me=this.P[id],h=this.P[this.hid];if(!W||!me)return null;
   return {t:'s',tm:Math.ceil(this.tm),hs:Math.ceil(this.hs),hh:h?Math.max(0,Math.round(h.hp)):0,hm:this.hm,hko:h&&h.ko>0?Math.ceil(h.ko):0,
-   ps:this.order.map(i=>{const p=this.P[i];return [i,+p.x.toFixed(2),+p.z.toFixed(2),+p.ry.toFixed(2),p.st,Math.round(p.hp),p.m?1:0,p.boost>0?1:0,p.stun>0?1:0,+(p.rp/MPM.REV).toFixed(2),p.role==='h'?1:0]}),
+   ps:this.order.map(i=>{const p=this.P[i];return [i,+p.x.toFixed(2),+p.z.toFixed(2),+p.ry.toFixed(2),p.st,Math.round(p.hp),p.m?1:0,p.boost>0?1:0,p.stun>0?1:0,+(p.rp/MPM.REV).toFixed(2),p.role==='h'?1:0,+(p.pt||0).toFixed(2)]}),
    w:{pts:W.pts,tp:W.tp,pow:W.pow,fu:W.fu,fa:W.fa,pl:W.pl,pt:W.pt.map(v=>+v.toFixed(1)),hold:+(W.hold/2).toFixed(2),vault:W.vault,key:W.key,kp:W.kp,kh:W.kh,exit:W.exit,it:W.it,tr:id===this.hid?[]:W.tr},
    me:{inv:me.inv,sh:me.sh,rl:me.rl>0?1:0}}}}
 
@@ -2264,15 +2264,16 @@ function mpHud(){if(!MP.snap)return;const s=MP.snap,me=mpMe(),st=me?me[4]:'ok',m
  const now=performance.now();MP.log=MP.log.filter(l=>now-l.at<7000);$('mpc').innerHTML=MP.log.slice(-5).map(l=>'<div'+(l.ci!==undefined?' style="border-left:3px solid '+MPM.CLR[l.ci%10]+'"':'')+'>'+mpE(l.t)+'</div>').join('');
  const rv=s.ps.find(p=>p[9]>0&&p[4]==='down');if(rv){const mine=rv[0]===MP.myId;$('mprev').style.display='block';$('mprev').innerHTML=(mine?'Du wirst wiederbelebt …':'Wiederbeleben: '+mpE(MP.names[rv[0]]||''))+'<div><s style="width:'+Math.round(rv[9]*100)+'%"></s></div>'}else $('mprev').style.display='none';
  $('mpspecb').style.display=(st==='dead'||st==='esc')?'block':'none';
+ {const sl=document.getElementById('mpspecl');if(sl){const on=st==='dead'||st==='esc';sl.style.display=on?'block':'none';if(on)sl.innerHTML='👁 Du siehst durch die Augen von <b>'+mpE(MP.specN||'…')+'</b><small>Tippe hier für den nächsten Spieler</small>'}}
  const cd=$('mpcd');if(s.hs>0){cd.style.display='block';cd.innerHTML=(MP.role==='h'?'🔒 Du kannst loslaufen in':'⏳ Der Jäger erwacht in')+'<b>'+s.hs+'</b><s><i style="width:'+Math.max(0,Math.min(100,s.hs/MPM.HEAD*100))+'%"></i></s>'}else cd.style.display='none'}
 function mpFrame(){if(!MP.on)return;const now=performance.now(),dt=Math.min(.1,(now-(MP.ft||now))/1e3);MP.ft=now;if(cr!==15)return;
  lamp.position.set(pos.x,2.8,pos.z);lamp.distance=19;lamp.intensity=MP.W&&MP.W.pow?1.6:1.15;sc.fog.near=4;sc.fog.far=MP.W&&MP.W.pow?32:22;
  const me=mpMe(),st=me?me[4]:'ok';MPSPD=1;
  if(MP.role==='h'){MPSPD=MP.hf||.78;if(me&&me[8])MPSPD=0}else{if(st==='down')MPSPD=.3;if(me&&me[7])MPSPD*=1.35}
- H+=((st==='down'||st==='dead'?.6:1.6)-H)*Math.min(1,dt*6);
+ const _sp0=MP.role==='p'&&(st==='dead'||st==='esc');H+=((_sp0?(MP.specH||1.6):(st==='down'||st==='dead'?.6:1.6))-H)*Math.min(1,dt*6);
  const spec=MP.role==='p'&&(st==='dead'||st==='esc'),frozen=MP.role==='h'&&MP.hs>0,want=frozen||spec||MP.ph==='end';if(frozen)MPSPD=0;if(MP.ph==='play'||MP.ph==='end'){lm=want;MP._lm=want}
- if(spec&&MP.snap){let t=MP.snap.ps.find(p=>p[0]===MP.spec&&p[0]!==MP.myId&&(p[4]==='ok'||p[4]==='down'));if(!t){t=MP.snap.ps.find(p=>p[0]!==MP.myId&&p[4]==='ok');MP.spec=t?t[0]:''}if(t){pos.set(300+t[1],0,t[2]);Y=t[3]}}
- if(MP.ph==='play'&&!spec&&now-MP.lp>66){MP.lp=now;const mv=Math.hypot(pos.x-MP.px,pos.z-MP.pz)>.01;MP.px=pos.x;MP.pz=pos.z;mpSend({t:'p',x:pos.x-300,z:pos.z,ry:Y,m:mv?1:0})}
+ if(spec&&MP.snap){let t=MP.snap.ps.find(p=>p[0]===MP.spec&&p[0]!==MP.myId&&(p[4]==='ok'||p[4]==='down'));if(!t){t=MP.snap.ps.find(p=>p[0]!==MP.myId&&p[4]==='ok');MP.spec=t?t[0]:''}if(t){pos.set(300+t[1],0,t[2]);Y=t[3];Pt+=((t[11]||0)-Pt)*Math.min(1,dt*12);MP.specH=t[4]==='down'?.6:1.6;MP.specN=MP.names[t[0]]||''}}
+ if(MP.ph==='play'&&!spec&&now-MP.lp>66){MP.lp=now;const mv=Math.hypot(pos.x-MP.px,pos.z-MP.pz)>.01;MP.px=pos.x;MP.pz=pos.z;mpSend({t:'p',x:pos.x-300,z:pos.z,ry:Y,pt:+Pt.toFixed(2),m:mv?1:0})}
  mpRem(dt);
  const t=now/1e3;MP.v.it.forEach(q=>{if(q.visible){q.rotation.y+=dt*1.6;q.position.y=.6+Math.sin(t*2.2+q.position.x)*.08}});MP.v.fu.forEach(m=>{if(m.visible)m.rotation.y+=dt*1.4});
  if(MP.snap){const others=MP.order.filter(i=>i!==MP.myId);MP.iaRev.forEach((q,k)=>{const id=others[k],p=id&&MP.snap.ps.find(x=>x[0]===id);if(p&&p[4]==='down'){q.id=id;q.x=p[1];q.z=p[2]}else{q.id='';q.x=999;q.z=999}});if(MP.W&&MP.W.kp){MP.iaKey.x=MP.W.kp[0];MP.iaKey.z=MP.W.kp[1]}else{MP.iaKey.x=999;MP.iaKey.z=999}}
@@ -2417,7 +2418,7 @@ const _bs=bindSkin;bindSkin=function(){_bs();
  const c=document.getElementById('mskall');if(c)c.onclick=()=>{SKIN.unlocked=true;SKIN.g=true;try{localStorage.setItem('dfSkinU','1');localStorage.setItem('dfSkinG','1')}catch(e){}if(!has('Maske'))S.inv.push('Maske');inv();closeOv();toast('✨ Alle Skins freigeschaltet. Auswahl unter „Skin“ im Menü.','good')}};
 
 /* ===================== Accounts: Name -> 4-stelliger Code, Fortschritt pro Account ===================== */
-const ACCK=['dfShotgun','dfShotLoad','dfSkinU','dfSkin','dfSkinS','dfSkinG','dfHeard','dfDev','dfFpsMode','dfPerf','dfPerfAuto','dfName','dfSpUsr','dfSpIds','dfSpList','dfSpCid','dfSpVer','dfSpRes','dfCoins','dfStats','dfShop','dfInv','dfMis'];
+const ACCK=['dfShotgun','dfShotLoad','dfSkinU','dfSkin','dfSkinS','dfSkinG','dfHeard','dfDev','dfFpsMode','dfPerf','dfPerfAuto','dfName','dfSpUsr','dfSpIds','dfSpList','dfSpCid','dfSpVer','dfSpRes','dfCoins','dfStats','dfShop','dfInv','dfMis','dfInf'];
 const ACCA='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 var ACC={list:{},active:'',cloud:null,pushT:0};
 try{ACC.list=JSON.parse(localStorage.getItem('dfAccounts')||'{}')||{};ACC.active=localStorage.getItem('dfAcc')||''}catch(e){}
@@ -3006,8 +3007,9 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 /* ===================== Coins, Aufgaben & Shop ===================== */
 const cxRead=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}};
 const cxWrite=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}try{accSave()}catch(e){}};
-const cxCoins=()=>{try{return Math.max(0,Math.floor(+localStorage.getItem('dfCoins')||0))}catch(e){return 0}};
-function cxSet(v){try{localStorage.setItem('dfCoins',String(Math.max(0,Math.floor(v))))}catch(e){}try{accSave()}catch(e){}}
+const cxInfOn=()=>{try{return localStorage.getItem('dfInf')==='1'}catch(e){return false}};
+const cxCoins=()=>{if(cxInfOn())return Infinity;try{return Math.max(0,Math.floor(+localStorage.getItem('dfCoins')||0))}catch(e){return 0}};
+function cxSet(v){if(cxInfOn())return;try{localStorage.setItem('dfCoins',String(Math.max(0,Math.floor(v))))}catch(e){}try{accSave()}catch(e){}}
 function cxAdd(n){n=Math.floor(+n||0);if(!n)return 0;cxSet(cxCoins()+n);if(n>0){const st=cxRead('dfStats',{});st.earned=(st.earned||0)+n;cxWrite('dfStats',st)}return n}
 const cxInv=()=>cxRead('dfInv',{});
 const cxBn=()=>['tas','med','nrg'].filter(t=>(cxInv()[t]||0)>0);
@@ -3171,7 +3173,7 @@ function cxAdminHTML(online){const bal=cxCoins().toLocaleString('de-DE');
  const row=(id,t,c)=>'<button class="row" id="'+id+'"><span class="tx"><b'+(c?' style="color:'+c+'"':'')+'>'+t+'</b></span></button>';
  let h='<div class="cap" style="margin-top:14px">🪙 Coins (Admin)</div><div class="grp" id="admcoins"><div class="row"><span class="tx"><b>Guthaben: <span id="admbal">'+bal+'</span></b></span></div>'
   +'<div class="row"><input id="admcn" type="number" inputmode="numeric" placeholder="Beliebiger Betrag" autocomplete="off" style="flex:1;min-width:0"><button class="pill blue" id="admca">Hinzufügen</button></div>'
-  +row('admc1','+ 1.000')+row('admc2','+ 10.000')+row('admc3','+ 1.000.000')+row('admc0','Auf 0 setzen','#ff453a')+row('admsk','🎁 Alle Skins freischalten')+'</div>';
+  +'<button class="row" id="admif"><span class="tx"><b>∞ Unendlich Coins</b><small>Das Guthaben sinkt nie, alles ist gratis</small></span><i class="sw'+(cxInfOn()?' on':'')+'"></i></button>'+row('admc1','+ 1.000')+row('admc2','+ 10.000')+row('admc3','+ 1.000.000')+row('admc0','Auf 0 setzen','#ff453a')+row('admsk','🎁 Alle Skins freischalten')+'</div>';
  if(online)h+='<div class="cap" style="margin-top:14px">⏩ Online überspringen (nur diese Runde)</div><div class="grp">'+row('admo1','⚡ Strom einschalten')+row('admo2','🔓 Tresor öffnen + Schlüssel nehmen')+row('admo3','🎯 Punkteziel erreichen')+row('admo4','🚪 Alles überspringen: Haustür öffnen')+'</div><p class="foot" style="text-align:center">Runden mit Admin-Funktionen zählen nicht für Coins und Bestenliste.</p>';
  return h}
 function cxAdminBind(online){const g=id=>document.getElementById(id),bal=()=>{const e=g('admbal');if(e)e.textContent=cxCoins().toLocaleString('de-DE')},T=m=>{try{toast(m,'good')}catch(e){}};
@@ -3179,7 +3181,8 @@ function cxAdminBind(online){const g=id=>document.getElementById(id),bal=()=>{co
  const on=(id,f)=>{const e=g(id);if(e)e.onclick=f};
  on('admca',()=>{const v=+((g('admcn')||{}).value)||0;if(!v)return T('Gib einen Betrag ein.');cxAdminAdd(v);bal();T('+'+v.toLocaleString('de-DE')+' 🪙')});
  on('admc1',()=>{cxAdminAdd(1000);bal();T('+1.000 🪙')});on('admc2',()=>{cxAdminAdd(10000);bal();T('+10.000 🪙')});on('admc3',()=>{cxAdminAdd(1000000);bal();T('+1.000.000 🪙')});
- on('admc0',()=>{cxAdminZero();bal();T('Guthaben auf 0')});on('admsk',()=>{const n=cxAdminUnlockAll();try{menuStart&&0}catch(e){}T('🎁 Alle Skins freigeschaltet ('+n+')')});
+ on('admif',()=>{try{localStorage.setItem('dfInf',cxInfOn()?'':'1')}catch(e){}try{accSave()}catch(e){}const e=g('admif');if(e){const sw=e.querySelector('.sw');if(sw)sw.classList.toggle('on',cxInfOn())}bal();T(cxInfOn()?'∞ Unendlich Coins an':'Unendlich Coins aus')});
+ on('admc0',()=>{try{localStorage.setItem('dfInf','')}catch(e){}cxAdminZero();bal();T('Guthaben auf 0')});on('admsk',()=>{const n=cxAdminUnlockAll();try{menuStart&&0}catch(e){}T('🎁 Alle Skins freigeschaltet ('+n+')')});
  if(online)[['admo1','pow'],['admo2','vault'],['admo3','pts'],['admo4','door']].forEach(([id,k])=>on(id,()=>{try{mpSend({t:'adm',pw:'1709',k})}catch(e){}T('Gesendet')}))}
 function cxAdminSection(){const root=$('box').querySelector&&$('box').querySelector('.ios');if(!root||(root.querySelector&&root.querySelector('#admcoins')))return;root.insertAdjacentHTML('beforeend',cxAdminHTML(false));cxAdminBind(false)}
 function mpAdminUI(){ov('<div class="ios"><div class="navbar"><b style="font-size:22px">⚙ Admin · Online</b><button class="pill blue" id="admx">Fertig</button></div>'+cxAdminHTML(true)+'</div>');$('admx').onclick=closeOv;cxAdminBind(true)}
@@ -3224,7 +3227,210 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
   if(b!==el.firstElementChild){const nx=b.nextElementSibling,tr=(nx||b).getBoundingClientRect();if(tr.right>R-2)delta=tr.right-R+4;else if(r.left<L)delta=r.left-L-4}
   if(delta)el.scrollBy({left:delta,behavior:'smooth'});setTimeout(()=>more(el),380)},true);
  document.addEventListener('scroll',e=>{const el=e.target;if(el&&el.classList&&el.classList.contains('segs'))more(el)},true);
- const upd=()=>document.querySelectorAll('.seg.segs').forEach(more);new MutationObserver(upd).observe(document.body,{childList:true,subtree:true});addEventListener('resize',upd);setTimeout(upd,200)}
+ const upd=()=>document.querySelectorAll('.seg.segs').forEach(more);try{new MutationObserver(upd).observe(document.body,{childList:true,subtree:true})}catch(e){}addEventListener('resize',upd);setTimeout(upd,200)}
+
+
+/* ===================== Oberes Menü ausblenden + Zuschauer-Anzeige ===================== */
+{const css=document.createElement('style');css.textContent=
+ '#huddb{position:fixed;z-index:60;left:calc(env(safe-area-inset-left,0px) + 10px);top:calc(env(safe-area-inset-top,0px) + 60px);width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:rgba(30,32,40,.5);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);color:#fff;font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;opacity:.6;padding:0}#huddb:active{opacity:1}'
+ +'body.huoff #loc,body.huoff #webb,body.huoff #musn,body.huoff #musb,body.huoff #mb,body.huoff #topc,body.huoff #chb,body.huoff #runt,body.huoff #fps{display:none!important}body.huoff #huddb{opacity:.35}'
+ +'#mpspecl{position:fixed;z-index:46;left:50%;top:calc(env(safe-area-inset-top,0px) + 150px);transform:translateX(-50%);display:none;text-align:center;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.22);border-radius:16px;padding:8px 18px;color:#fff;font:13px var(--ios);line-height:1.35;max-width:80vw;cursor:pointer}#mpspecl small{display:block;opacity:.65;font-size:11px}';
+ document.head.appendChild(css);
+ const b=document.createElement('button');b.id='huddb';b.setAttribute('aria-label','Oberes Menü ein- oder ausblenden');document.body.appendChild(b);
+ const set=on=>{document.body.classList.toggle('huoff',!!on);b.textContent=on?'👁‍🗨':'🙈';b.title=on?'Menü wieder einblenden':'Oberes Menü ausblenden';try{localStorage.setItem('dfHudOff',on?'1':'')}catch(e){}};
+ b.onclick=e=>{e.stopPropagation();set(!document.body.classList.contains('huoff'))};
+ ['pointerdown','touchstart','mousedown'].forEach(n=>b.addEventListener(n,e=>e.stopPropagation()));
+ addEventListener('keydown',e=>{if(e.code==='KeyH'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!(e.target&&/INPUT|TEXTAREA/.test(e.target.tagName||''))){set(!document.body.classList.contains('huoff'))}});
+ let st0='';try{st0=localStorage.getItem('dfHudOff')||''}catch(e){}set(!!st0);
+ const sl=document.createElement('div');sl.id='mpspecl';document.body.appendChild(sl);sl.onclick=()=>{try{$('mpspecb').click()}catch(e){}};['pointerdown','touchstart','mousedown'].forEach(n=>sl.addEventListener(n,e=>e.stopPropagation()))}
+
+
+/* ===================== Autobahn: Tanken ===================== */
+const CXFUEL={Leicht:{range:420,first:240,gap:260},Mittel:{range:360,first:260,gap:300},Schwer:{range:330,first:240,gap:300}};
+const cxFuelCfg=()=>{for(const k in LV)if(LV[k]===DF)return CXFUEL[k];return CXFUEL.Mittel};
+function cxStations(){const c=cxFuelCfg(),out=[];for(let d=c.first;d<GOAL-100;d+=c.gap)out.push(d);return out}
+function cxLanes(){const L=[-3,-1,1,3];if(!drv.on||drv.fuel==null)return L;return cxStations().some(sd=>drv.dist>=sd-225&&drv.dist<=sd-50)?[-3,-1,1]:L}
+function cxSpawnStation(){const A=(w,h,d,x,y,z,m)=>addO(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m),x,y,z,{deco:1});
+ A(3.6,.03,60,4.5,.03,-150,M(0x2f6a3a,0x0a2a12));A(.12,.04,60,2.7,.05,-150,M(0xffd60a,0x553d00));A(4.8,.25,44,4.9,4.4,-150,M(0x2a2a30));
+ [-132,-168].forEach(z=>A(.22,4.4,.22,7.0,2.2,z,M(0x55555c)));
+ [-135,-150,-165].forEach(z=>{A(.5,1.3,.5,5.7,.65,z,M(0xc8102e,0x300008));A(.34,.34,.05,5.7,1.1,z+.28,M(0xffffff,0x888888))});
+ let sm;try{sm=new THREE.MeshBasicMaterial({map:mpTex('cxsign',256,80,(g,w,h)=>{g.fillStyle='#0a5a2a';g.fillRect(0,0,w,h);g.strokeStyle='#fff';g.lineWidth=5;g.strokeRect(5,5,w-10,h-10);g.fillStyle='#fff';g.font='bold 38px sans-serif';g.textAlign='center';g.fillText('⛽ TANKSTELLE',w/2,54)})})}catch(e){sm=M(0x0a5a2a,0x0a5a2a)}
+ A(.12,3.6,.12,3.2,1.8,-121,M(0x55555c));A(3.2,1,.12,3.2,3.9,-121,sm)}
+function cxFuelTxt(){if(drv.fuel==null)return '';const f=Math.round(drv.fuel),n=Math.max(0,Math.min(10,Math.round(f/10))),sts=cxStations(),nx=sts.find(sd=>sd+60>drv.dist);
+ const col=f<25?'#ff453a':f<50?'#ffd60a':'#30d158',inw=nx!=null&&drv.dist>=nx;
+ const hint=nx==null?'keine Tankstelle mehr':inw?'<b>Rechts halten und bremsen!</b>':'nächste Tankstelle in '+Math.max(0,Math.round(nx-drv.dist))+' m';
+ return '<br><small style="font-size:.7em;letter-spacing:.03em"><span style="color:'+col+'">⛽ '+'▰'.repeat(n)+'▱'.repeat(10-n)+' '+f+'%</span> · '+hint+'</small>'}
+function cxFuelStep(dt){if(!drv.on||drv.fuel==null||drv.fuelOut)return;const c=cxFuelCfg(),sts=cxStations();
+ sts.forEach(sd=>{if(!drv.stSpawn[sd]&&drv.dist>=sd-118){drv.stSpawn[sd]=1;try{cxSpawnStation()}catch(e){}}});
+ if(!CH.god)drv.fuel=Math.max(0,drv.fuel-drv.sp*dt*100/c.range);
+ const st=sts.find(sd=>drv.dist>=sd&&drv.dist<=sd+60);
+ if(st!=null){if(st>drv.lastSt)drv.lastSt=st;
+  if(drv.x>=2.4&&drv.sp<=11&&drv.fuel<100){drv.fuel=Math.min(100,drv.fuel+40*dt);if(!drv.filling){drv.filling=1;toast('⛽ Tanken …','good')}if(drv.fuel>=100){drv.filling=0;toast('⛽ Tank voll! Weiter geht’s.','good')}}}
+ else drv.filling=0;
+ sts.forEach(sd=>{if(drv.dist>sd+60&&!drv.passed[sd]){drv.passed[sd]=1;if(drv.fuel<60&&!drv.fedAt[sd])toast('⛽ Tankstelle verpasst! Achte auf die nächste.','err')}});
+ if(drv.dist>=0)sts.forEach(sd=>{if(drv.dist>=sd&&drv.dist<=sd+60&&drv.fuel>=99.9)drv.fedAt[sd]=1});
+ if(drv.fuel<25&&!drv.warnLow){drv.warnLow=1;toast('⛽ Tank fast leer! Such die nächste Tankstelle (rechts).','err')}if(drv.fuel>=45)drv.warnLow=0;
+ if(drv.fuel<=0&&!CH.god){drv.outSp=drv.outSp==null?drv.sp:drv.outSp;drv.outSp=Math.max(0,drv.outSp-18*dt);drv.sp=Math.min(drv.sp,drv.outSp);if(drv.outSp<=0)cxFuelOut()}}
+function cxFuelOut(){if(drv.fuelOut)return;drv.fuelOut=true;drv.on=false;$('drive').style.display='none';const p=$('chase');p.style.display='block';
+ p.innerHTML='<h3 class="err" style="margin:4px">⛽ Tank leer!</h3><div class="dim">Du bist liegen geblieben.</div><button class="btn" id="re4">Weiter ab letzter Tankstelle</button>';$('re4').onclick=()=>{p.style.display='none';cxFuelRestart()}}
+function cxFuelRestart(){drv.obs.forEach(o=>road.remove(o.m));drv.obs=[];drv.dist=drv.lastSt||0;drv.fuel=100;drv.sp=0;drv.x=0;pcar.position.x=0;drv.nextD=drv.dist+60;drv.nextDec=drv.dist;drv.fuelOut=false;drv.outSp=null;drv.filling=0;drv.warnLow=0;
+ drv.stSpawn={};cxStations().forEach(sd=>{if(sd<=drv.lastSt)drv.stSpawn[sd]=1});drv.on=true;$('drive').style.display='flex'}
+{const _bd=beginDrive;beginDrive=function(){const r=_bd.apply(this,arguments);Object.assign(drv,{fuel:100,stSpawn:{},lastSt:0,fuelOut:false,outSp:null,filling:0,warnLow:0,passed:{},fedAt:{}});
+  try{toast('Fahre los! Weiche den Hindernissen aus. ⛽ Achte auf den Tank: Tankstellen kommen rechts, zum Tanken bremsen und rechts halten.')}catch(e){}return r}}
+
+/* ===================== 30 weitere Skins (jeder sieht anders aus) ===================== */
+const CXD=c=>'#'+(c>>>0).toString(16).padStart(6,'0');
+const CXH3={ /* Kopf */
+ tophat:(g,c,d)=>{const m=M(c);box(.33,.04,.33,0,1.67,0,m,g);box(.2,.2,.2,0,1.78,0,m,g);box(.206,.04,.206,0,1.71,0,M(d||0x222222),g)},
+ cap:(g,c,d)=>{box(.3,.09,.3,0,1.665,0,M(c),g);box(.26,.025,.16,0,1.635,.2,M(d||c),g)},
+ helmet:(g,c,d)=>{box(.325,.31,.325,0,1.52,0,M(c,0x101418),g);box(.22,.04,.02,0,1.535,.168,M(d||0x111111),g)},
+ horns:(g,c)=>{const m=M(c);[-1,1].forEach(sx=>{box(.06,.1,.06,sx*.11,1.72,0,m,g);box(.04,.1,.04,sx*.15,1.81,0,m,g)})},
+ halo:(g,c)=>{const m=M(c,c);box(.36,.02,.03,0,1.86,-.16,m,g);box(.36,.02,.03,0,1.86,.16,m,g);box(.03,.02,.36,-.16,1.86,0,m,g);box(.03,.02,.36,.16,1.86,0,m,g)},
+ antenna:(g,c,d)=>{box(.02,.14,.02,0,1.74,0,M(d||0x333333),g);box(.05,.05,.05,0,1.83,0,M(c,c),g)},
+ mohawk:(g,c)=>{const m=M(c,c);[[-.1,.1],[-.05,.14],[0,.17],[.05,.14],[.1,.1]].forEach(a=>box(.045,a[1],.045,0,1.67+a[1]/2,a[0],m,g))},
+ bunny:(g,c,d)=>{[-1,1].forEach(sx=>{box(.06,.3,.045,sx*.07,1.84,0,M(c),g);box(.03,.22,.01,sx*.07,1.84,.026,M(d||0xffb6c1),g)})},
+ cat:(g,c,d)=>{[-1,1].forEach(sx=>{box(.075,.08,.05,sx*.1,1.7,0,M(c),g);box(.03,.04,.01,sx*.1,1.7,.027,M(d||0xffb6c1),g)})},
+ hood:(g,c)=>{const m=M(c);box(.34,.1,.34,0,1.69,0,m,g);[-1,1].forEach(sx=>box(.04,.3,.32,sx*.165,1.52,-.01,m,g));box(.32,.3,.04,0,1.52,-.165,m,g)},
+ bandana:(g,c)=>{const m=M(c);box(.29,.06,.29,0,1.64,0,m,g);box(.06,.08,.06,.16,1.62,-.12,m,g)},
+ wizard:(g,c)=>{const m=M(c);box(.34,.03,.34,0,1.66,0,m,g);box(.22,.08,.22,0,1.71,0,m,g);box(.14,.1,.14,0,1.79,0,m,g);box(.08,.1,.08,0,1.89,0,m,g);box(.04,.08,.04,.02,1.97,0,m,g)},
+ cowboy:(g,c,d)=>{box(.46,.03,.46,0,1.645,0,M(c),g);box(.24,.1,.24,0,1.71,0,M(c),g);box(.245,.03,.245,0,1.68,0,M(d||0x3a2a1a),g)},
+ beanie:(g,c,d)=>{box(.3,.1,.3,0,1.66,0,M(c),g);box(.07,.07,.07,0,1.74,0,M(d||c),g)},
+ phones:(g,c,d)=>{box(.34,.03,.06,0,1.69,0,M(d||0x222222),g);[-1,1].forEach(sx=>box(.06,.11,.11,sx*.165,1.52,0,M(c),g))},
+ chef:(g,c)=>{const m=M(c);box(.28,.05,.28,0,1.66,0,m,g);box(.32,.15,.32,0,1.76,0,m,g)},
+ party:(g,c,d)=>{box(.2,.06,.2,0,1.67,0,M(c),g);box(.13,.1,.13,0,1.75,0,M(d||c),g);box(.07,.1,.07,0,1.84,0,M(c),g);box(.04,.04,.04,0,1.91,0,M(d||c),g)},
+ flowers:g=>{[[-.12,.12,0xff5a8a],[-.06,.14,0xffd60a],[0,.15,0xff5a8a],[.06,.14,0x6adf6a],[.12,.12,0xffd60a]].forEach(a=>box(.06,.06,.06,a[0],1.68,a[1],M(a[2]),g))},
+ straw:(g,c,d)=>{box(.46,.025,.46,0,1.645,0,M(c),g);box(.24,.1,.24,0,1.7,0,M(c),g);box(.245,.03,.245,0,1.675,0,M(d||0x2a8a3a),g)},
+ hardhat:(g,c)=>{const m=M(c);box(.32,.09,.32,0,1.67,0,m,g);box(.06,.04,.32,0,1.73,0,m,g);box(.34,.02,.2,0,1.63,.15,m,g)},
+ crown:(g,c)=>{const m=M(c,0x203040);box(.3,.05,.3,0,1.69,0,m,g);[[-.12,-.12],[.12,-.12],[-.12,.12],[.12,.12]].forEach(p=>box(.05,.1,.05,p[0],1.76,p[1],m,g));box(.05,.16,.05,0,1.78,0,m,g)}};
+const CXF3={ /* Gesicht */
+ shades:(g,c)=>box(.29,.05,.025,0,1.54,.147,M(c||0x111111),g),
+ goggles:(g,c,d)=>{[-1,1].forEach(sx=>box(.1,.08,.025,sx*.07,1.54,.148,M(c,c),g));box(.3,.015,.02,0,1.54,.148,M(d||0x222222),g)},
+ mustache:(g,c)=>box(.15,.035,.025,0,1.47,.147,M(c||0x222222),g),
+ beard:(g,c)=>box(.21,.1,.03,0,1.42,.147,M(c),g),
+ mask:(g,c)=>box(.27,.12,.025,0,1.45,.147,M(c),g),
+ visor:(g,c)=>box(.3,.07,.03,0,1.53,.15,M(c,c),g),
+ eyepatch:g=>{box(.07,.07,.025,.07,1.535,.148,M(0x0d0d0d),g);box(.29,.015,.02,0,1.58,.147,M(0x0d0d0d),g)},
+ nose:(g,c)=>box(.06,.06,.05,0,1.49,.16,M(c),g)};
+const CXB3={ /* Rücken / Körper */
+ cape:(g,c)=>{const m=M(c);box(.52,.9,.04,0,.95,-.17,m,g);box(.56,.08,.2,0,1.4,-.06,m,g)},
+ backpack:(g,c)=>{const m=M(c);box(.34,.42,.16,0,1.1,-.22,m,g);box(.3,.1,.14,0,1.34,-.22,m,g)},
+ wings:(g,c,d)=>{[-1,1].forEach(sx=>{box(.04,.5,.28,sx*.3,1.15,-.22,M(c),g);box(.04,.34,.4,sx*.3,.95,-.28,M(d||c),g)})},
+ tail:(g,c,d)=>{box(.07,.07,.3,0,.84,-.28,M(c),g);box(.07,.07,.25,0,.9,-.5,M(c),g);box(.1,.1,.1,0,.96,-.66,M(d||c),g)},
+ scarf:(g,c)=>{const m=M(c);box(.36,.08,.32,0,1.39,0,m,g);box(.1,.32,.02,.12,1.2,.165,m,g)},
+ armor:(g,c,d)=>{box(.46,.3,.03,0,1.18,.152,M(c),g);box(.5,.05,.3,0,.82,0,M(d||0x222222),g)},
+ pads:(g,c)=>{[-1,1].forEach(sx=>box(.2,.08,.22,sx*.33,1.41,0,M(c),g))},
+ jetpack:(g,c,d)=>{[-1,1].forEach(sx=>{box(.1,.4,.1,sx*.1,1.08,-.22,M(c),g);box(.06,.1,.06,sx*.1,.8,-.22,M(d||0xff7a00,d||0xff7a00),g)})}};
+const CXP3={ /* Muster auf dem Oberkörper */
+ hstripes:(g,c)=>[1.27,1.14,1.01].forEach(y=>box(.51,.045,.288,0,y,0,M(c),g)),
+ vstripes:(g,c)=>{box(.05,.62,.012,-.1,1.05,.146,M(c),g);box(.05,.62,.012,.1,1.05,.146,M(c),g)},
+ emblem:(g,c,d)=>{box(.14,.14,.012,0,1.2,.146,M(c),g);box(.07,.07,.014,0,1.2,.148,M(d||0xffffff),g)},
+ apron:(g,c,d)=>{box(.34,.4,.012,0,1.0,.146,M(c),g);box(.34,.04,.014,0,1.2,.147,M(d||c),g)},
+ vest:(g,c)=>[-1,1].forEach(sx=>box(.17,.5,.012,sx*.14,1.1,.146,M(c),g)),
+ cross:(g,c)=>{box(.04,.5,.012,0,1.1,.146,M(c),g);box(.4,.04,.012,0,1.2,.146,M(c),g)},
+ belt:(g,c,d)=>{box(.52,.05,.3,0,.8,0,M(c),g);box(.1,.06,.31,0,.8,0,M(d||0xffd60a),g)}};
+const CXARM3={gold:0,wings:0};
+function cxBuildGen(sp,root,armL,armR){const g=new THREE.Group();root.add(g);const limbs=[];
+ (sp.h||[]).forEach(a=>CXH3[a[0]]&&CXH3[a[0]](g,a[1],a[2]));if(sp.f&&CXF3[sp.f[0]])CXF3[sp.f[0]](g,sp.f[1],sp.f[2]);
+ if(sp.b&&CXB3[sp.b[0]])CXB3[sp.b[0]](g,sp.b[1],sp.b[2]);if(sp.p&&CXP3[sp.p[0]])CXP3[sp.p[0]](g,sp.p[1],sp.p[2]);
+ [armL,armR].forEach(arm=>{if(arm)limbs.push(box(.14,.1,.14,0,-.52,0,M(sp.c.sk),arm))});
+ return {g,limbs}}
+/* Vorschau-Bilder passend zu den 3D-Teilen */
+const CXHS={
+ tophat:(c,d)=>'<rect x="28" y="12" width="104" height="10" fill="'+c+'"/><rect x="48" y="-26" width="64" height="40" fill="'+c+'"/><rect x="48" y="2" width="64" height="8" fill="'+d+'"/>',
+ cap:(c,d)=>'<rect x="40" y="6" width="80" height="22" fill="'+c+'"/><rect x="36" y="24" width="88" height="8" fill="'+d+'"/>',
+ helmet:(c,d)=>'<rect x="38" y="12" width="84" height="88" fill="'+c+'" stroke="#0007" stroke-width="3"/><rect x="50" y="52" width="60" height="9" fill="'+d+'"/>',
+ horns:c=>'<polygon points="48,30 40,0 64,30" fill="'+c+'"/><polygon points="96,30 120,0 112,30" fill="'+c+'"/>',
+ halo:c=>'<ellipse cx="80" cy="6" rx="46" ry="10" fill="none" stroke="'+c+'" stroke-width="7"/>',
+ antenna:(c,d)=>'<rect x="78" y="-16" width="4" height="42" fill="'+d+'"/><circle cx="80" cy="-18" r="8" fill="'+c+'"/>',
+ mohawk:c=>'<polygon points="64,30 70,-6 76,20 80,-16 84,20 90,-6 96,30" fill="'+c+'"/>',
+ bunny:(c,d)=>'<rect x="50" y="-40" width="18" height="72" rx="8" fill="'+c+'"/><rect x="92" y="-40" width="18" height="72" rx="8" fill="'+c+'"/><rect x="55" y="-30" width="8" height="50" fill="'+d+'"/><rect x="97" y="-30" width="8" height="50" fill="'+d+'"/>',
+ cat:(c,d)=>'<polygon points="46,32 52,-4 74,28" fill="'+c+'"/><polygon points="114,32 108,-4 86,28" fill="'+c+'"/><polygon points="53,26 55,6 66,24" fill="'+d+'"/><polygon points="107,26 105,6 94,24" fill="'+d+'"/>',
+ hood:c=>'<rect x="34" y="6" width="92" height="24" fill="'+c+'"/><rect x="34" y="24" width="12" height="76" fill="'+c+'"/><rect x="114" y="24" width="12" height="76" fill="'+c+'"/>',
+ bandana:c=>'<rect x="40" y="22" width="80" height="14" fill="'+c+'"/><polygon points="118,24 144,14 144,46 118,36" fill="'+c+'"/>',
+ wizard:(c,d)=>'<polygon points="26,28 80,-48 134,28" fill="'+c+'"/><rect x="40" y="18" width="80" height="10" fill="'+d+'"/>',
+ cowboy:(c,d)=>'<rect x="10" y="20" width="140" height="9" fill="'+c+'"/><rect x="48" y="0" width="64" height="24" fill="'+c+'"/><rect x="48" y="14" width="64" height="7" fill="'+d+'"/>',
+ beanie:(c,d)=>'<rect x="40" y="4" width="80" height="26" fill="'+c+'"/><circle cx="80" cy="0" r="11" fill="'+d+'"/>',
+ phones:(c,d)=>'<path d="M40 40 Q40 -8 80 -8 Q120 -8 120 40" fill="none" stroke="'+d+'" stroke-width="8"/><rect x="30" y="36" width="16" height="36" rx="5" fill="'+c+'"/><rect x="114" y="36" width="16" height="36" rx="5" fill="'+c+'"/>',
+ chef:c=>'<rect x="42" y="14" width="76" height="14" fill="'+c+'"/><rect x="32" y="-26" width="96" height="44" rx="14" fill="'+c+'"/>',
+ party:(c,d)=>'<polygon points="54,28 80,-46 106,28" fill="'+c+'"/><polygon points="64,14 80,-40 90,-12" fill="'+d+'"/><circle cx="80" cy="-48" r="7" fill="'+d+'"/>',
+ flowers:()=>'<circle cx="48" cy="20" r="8" fill="#ff5a8a"/><circle cx="64" cy="14" r="8" fill="#ffd60a"/><circle cx="80" cy="12" r="8" fill="#ff5a8a"/><circle cx="96" cy="14" r="8" fill="#6adf6a"/><circle cx="112" cy="20" r="8" fill="#ffd60a"/>',
+ straw:(c,d)=>'<rect x="10" y="20" width="140" height="9" fill="'+c+'"/><rect x="48" y="0" width="64" height="24" fill="'+c+'"/><rect x="48" y="14" width="64" height="7" fill="'+d+'"/>',
+ hardhat:c=>'<rect x="38" y="6" width="84" height="24" rx="10" fill="'+c+'"/><rect x="72" y="0" width="16" height="12" fill="'+c+'"/><rect x="34" y="26" width="92" height="6" fill="'+c+'"/>',
+ crown:c=>'<rect x="40" y="14" width="80" height="14" fill="'+c+'"/><polygon points="40,14 48,-2 58,14" fill="'+c+'"/><polygon points="64,14 80,-12 96,14" fill="'+c+'"/><polygon points="102,14 112,-2 120,14" fill="'+c+'"/>'};
+const CXFS={
+ shades:c=>'<rect x="44" y="50" width="72" height="14" fill="'+c+'"/>',
+ goggles:(c,d)=>'<circle cx="64" cy="58" r="14" fill="'+c+'" stroke="'+d+'" stroke-width="4"/><circle cx="96" cy="58" r="14" fill="'+c+'" stroke="'+d+'" stroke-width="4"/>',
+ mustache:c=>'<rect x="60" y="76" width="40" height="8" fill="'+c+'"/>',
+ beard:c=>'<rect x="50" y="76" width="60" height="26" fill="'+c+'"/>',
+ mask:c=>'<rect x="44" y="70" width="72" height="26" fill="'+c+'"/>',
+ visor:c=>'<rect x="42" y="48" width="76" height="18" fill="'+c+'"/>',
+ eyepatch:()=>'<rect x="84" y="50" width="22" height="16" fill="#0d0d0d"/><rect x="44" y="46" width="72" height="4" fill="#0d0d0d"/>',
+ nose:c=>'<circle cx="80" cy="74" r="8" fill="'+c+'"/>'};
+const CXBS={ /* [Schicht, Zeichnung] – „back“ liegt hinter der Figur */
+ cape:c=>['back','<rect x="22" y="98" width="116" height="152" fill="'+c+'"/>'],
+ backpack:c=>['back','<rect x="30" y="108" width="100" height="84" rx="8" fill="'+c+'"/>'],
+ wings:(c,d)=>['back','<polygon points="40,104 -14,60 -4,150 34,178" fill="'+c+'"/><polygon points="120,104 174,60 164,150 126,178" fill="'+c+'"/><polygon points="34,150 -8,170 20,200" fill="'+d+'"/><polygon points="126,150 168,170 140,200" fill="'+d+'"/>'],
+ tail:(c,d)=>['back','<polygon points="118,196 150,228 158,270 140,262 132,234 118,214" fill="'+c+'"/><polygon points="158,270 148,288 138,262" fill="'+d+'"/>'],
+ jetpack:(c,d)=>['back','<rect x="26" y="108" width="22" height="86" fill="'+c+'"/><rect x="112" y="108" width="22" height="86" fill="'+c+'"/><polygon points="28,194 46,194 37,226" fill="'+d+'"/><polygon points="114,194 132,194 123,226" fill="'+d+'"/>'],
+ scarf:c=>['front','<rect x="38" y="96" width="84" height="16" fill="'+c+'"/><rect x="96" y="108" width="16" height="48" fill="'+c+'"/>'],
+ armor:(c,d)=>['front','<rect x="46" y="106" width="68" height="46" fill="'+c+'" stroke="#0006" stroke-width="3"/><rect x="40" y="184" width="80" height="10" fill="'+d+'"/>'],
+ pads:c=>['front','<rect x="0" y="98" width="46" height="16" fill="'+c+'"/><rect x="114" y="98" width="46" height="16" fill="'+c+'"/>']};
+const CXPS={
+ hstripes:c=>'<rect x="40" y="112" width="80" height="9" fill="'+c+'"/><rect x="40" y="134" width="80" height="9" fill="'+c+'"/><rect x="40" y="156" width="80" height="9" fill="'+c+'"/>',
+ vstripes:c=>'<rect x="54" y="100" width="7" height="92" fill="'+c+'"/><rect x="99" y="100" width="7" height="92" fill="'+c+'"/>',
+ emblem:(c,d)=>'<rect x="66" y="118" width="28" height="28" fill="'+c+'"/><rect x="74" y="126" width="12" height="12" fill="'+d+'"/>',
+ apron:(c,d)=>'<rect x="54" y="132" width="52" height="60" fill="'+c+'"/><rect x="54" y="128" width="52" height="6" fill="'+d+'"/>',
+ vest:c=>'<rect x="42" y="102" width="32" height="76" fill="'+c+'"/><rect x="86" y="102" width="32" height="76" fill="'+c+'"/>',
+ cross:c=>'<rect x="76" y="104" width="8" height="80" fill="'+c+'"/><rect x="48" y="122" width="64" height="8" fill="'+c+'"/>',
+ belt:(c,d)=>'<rect x="40" y="184" width="80" height="10" fill="'+c+'"/><rect x="72" y="184" width="16" height="10" fill="'+d+'"/>'};
+function cxGenSvg(sp){const D=(x,def)=>CXD(x==null?def:x);let back='',front='';
+ const base=csArt(sp.c).replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+ if(sp.b&&CXBS[sp.b[0]]){const r=CXBS[sp.b[0]](D(sp.b[1],0x888888),D(sp.b[2],sp.b[1]));if(r[0]==='back')back=r[1];else front+=r[1]}
+ if(sp.p&&CXPS[sp.p[0]])front+=CXPS[sp.p[0]](D(sp.p[1],0x888888),D(sp.p[2],0xffffff));
+ if(sp.f&&CXFS[sp.f[0]])front+=CXFS[sp.f[0]](D(sp.f[1],0x222222),D(sp.f[2],0x222222));
+ (sp.h||[]).forEach(a=>{if(CXHS[a[0]])front+=CXHS[a[0]](D(a[1],0x888888),D(a[2],a[1]))});
+ return '<svg viewBox="0 -54 160 346">'+back+base+front+'</svg>'}
+/* id, Name, Symbol, Seltenheit, Farben, Kopf, Gesicht, Rücken/Körper, Muster, Beschreibung */
+const CXGEN=[
+ ['g01','Der Koch','🧑‍🍳','Selten',{sh:0xf2f2f2,pa:0x2c2c34,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['chef',0xffffff]],['mustache',0x2a1a0a],null,['apron',0xe8e8e8,0xc0392b],'Weiße Kochmütze, Schnurrbart und eine rote Schürze.'],
+ ['g02','Der Cowboy','🤠','Selten',{sh:0xa0522d,pa:0x3a4a6a,sk:0xd8a67e,hr:0x3a2a1a,sb:0x4a2a10},[['cowboy',0x8b5a2b,0x3a2a1a]],['mask',0xc8102e],null,['vest',0x5a3a1a],'Breiter Hut, rotes Tuch vor dem Gesicht und eine Weste.'],
+ ['g03','Der Gärtner','🌻','Selten',{sh:0x3a8a3a,pa:0x6a4a2a,sk:0xd8a67e,hr:0x6a4a1a,sb:0x3a2a10},[['straw',0xe8c860,0x2a8a3a]],null,['backpack',0x8a6a3a],['vest',0x2a6a2a],'Strohhut, Rucksack mit Werkzeug und eine grüne Weste.'],
+ ['g04','Der Matrose','⚓','Selten',{sh:0xf2f2f2,pa:0x1a2a5a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x0a0a14},[['cap',0xffffff,0x1a2a5a]],null,['scarf',0x1a3a8a],['hstripes',0x1a3a8a],'Weiße Matrosenmütze, blaues Halstuch und Streifenhemd.'],
+ ['g05','Der Stürmer','⚽','Selten',{sh:0xd01030,pa:0xf2f2f2,sk:0xd8a67e,hr:0x2a1a0a,sb:0xffd60a},[['bandana',0xffffff]],null,null,['vstripes',0xffffff],'Rotes Trikot mit weißen Streifen und Stirnband.'],
+ ['g06','Der Hippie','🌼','Selten',{sh:0xe08a2a,pa:0x2a6a8a,sk:0xd8a67e,hr:0x6a3a1a,sb:0x6a3a1a},[['flowers']],['goggles',0xe86ad0,0x6a3a1a],['scarf',0x7ad06a],['hstripes',0xf2d04a],'Blumenkranz, runde bunte Brille und ein Halstuch.'],
+ ['g07','Der Bauarbeiter','👷','Selten',{sh:0xf08a1a,pa:0x3a3f4a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x2a2a2a},[['hardhat',0xffd60a]],null,null,['vest',0xd8f040],'Gelber Schutzhelm und eine Warnweste.'],
+ ['g08','Der Hase','🐰','Selten',{sh:0xffd1e0,pa:0xf2f2f2,sk:0xffe4ec,hr:0xffffff,sb:0xffb6c1},[['bunny',0xffffff,0xffb6c1]],['nose',0xff7aa0],['tail',0xffffff],null,'Lange Hasenohren, rosa Nase und ein Puschelschwanz.'],
+ ['g09','Die Katze','🐱','Selten',{sh:0xe08a3a,pa:0x8a4a1a,sk:0xf0c090,hr:0xe08a3a,sb:0x6a3a10},[['cat',0xe08a3a,0xffb6c1]],['mustache',0x4a2a10],['tail',0xe08a3a,0x4a2a10],['hstripes',0xb8641a],'Katzenohren, Schnurrhaare, Ringelschwanz und Fellstreifen.'],
+ ['g10','Der Pizzabote','🍕','Selten',{sh:0xc8102e,pa:0x2a2a30,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['cap',0xc8102e,0xffd60a]],null,['backpack',0xffd60a],['emblem',0xffd60a,0xffffff],'Rote Mütze, gelber Liefer-Rucksack und ein Pizza-Abzeichen.'],
+ ['g11','Der DJ','🎧','Selten',{sh:0x1a1a2a,pa:0x2a2a4a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x00e5ff},[['phones',0xff2bd6,0x222222]],['shades',0x111111],null,['emblem',0x00e5ff,0xff2bd6],'Pinke Kopfhörer, Sonnenbrille und ein Neon-Abzeichen.'],
+ ['g12','Der Taucher','🤿','Selten',{sh:0x1a6a8a,pa:0x0a2a3a,sk:0xd8a67e,hr:0x1a1a1a,sb:0x0a1a2a},[],['goggles',0x66e0ff,0x111111],['jetpack',0xcfd6dc,0x66e0ff],['hstripes',0xffd60a],'Tauchbrille und zwei Sauerstoffflaschen auf dem Rücken.'],
+ ['g13','Der Zauberer','🧙','Episch',{sh:0x5a2a8a,pa:0x2a1a4a,sk:0xd8a67e,hr:0xe8e8e8,sb:0x1a1030},[['wizard',0x5a2a8a,0xffd60a]],['beard',0xe8e8e8],['cape',0x3a1a6a],null,'Spitzer Hut, langer weißer Bart und ein dunkler Umhang.'],
+ ['g14','Der Ninja','🥷','Episch',{sh:0x15151a,pa:0x15151a,sk:0xd8a67e,hr:0x15151a,sb:0x0a0a0a},[['hood',0x15151a]],['mask',0x15151a],null,['cross',0xc8102e],'Kapuze, Gesichtsmaske und rote Kreuzbänder auf der Brust.'],
+ ['g15','Der Astronaut','🧑‍🚀','Episch',{sh:0xf2f2f2,pa:0xdcdcdc,sk:0xd8a67e,hr:0x2a1a0a,sb:0x8a8a8a},[['helmet',0xf2f2f2,0xff9f0a]],null,['jetpack',0xdcdcdc,0xff7a00],['emblem',0xff9f0a,0x1a4aa0],'Weißer Raumhelm, Düsenrucksack und ein Missions-Abzeichen.'],
+ ['g16','Der Samurai','⚔️','Episch',{sh:0x7a1a1a,pa:0x2a1a1a,sk:0xd8a67e,hr:0x15151a,sb:0x15151a},[['helmet',0x8a1a1a,0x111111],['horns',0xffd60a]],['mask',0x2a2a2a],['pads',0x8a1a1a],['cross',0xffd60a],'Roter Kriegerhelm mit goldenen Hörnern, Maske und Schulterpanzern.'],
+ ['g17','Der Held','🦸','Episch',{sh:0x1a4aa0,pa:0xc8102e,sk:0xd8a67e,hr:0x15151a,sb:0xc8102e},[],['shades',0xc8102e],['cape',0xc8102e],['emblem',0xffd60a,0xc8102e],'Roter Umhang, Augenmaske und ein goldenes Wappen.'],
+ ['g18','Der Clown','🤡','Episch',{sh:0xff5a5a,pa:0xffd60a,sk:0xf2e8e0,hr:0x4ad06a,sb:0x2a6ad0},[['party',0xffd60a,0x2a6ad0]],['nose',0xff2d2d],null,['vstripes',0x2a6ad0],'Grünes Haar, Partyhut, rote Nase und bunte Streifen.'],
+ ['g19','Der Vampir','🧛','Episch',{sh:0x15151a,pa:0x2a0a14,sk:0xe8e0e0,hr:0x15151a,sb:0x0a0a0a},[],['visor',0xc8102e],['cape',0x8a0a14],['vest',0x2a0a14],'Blasse Haut, rot glühende Augen und ein blutroter Umhang.'],
+ ['g20','Der Weihnachtsmann','🎅','Episch',{sh:0xd01030,pa:0xd01030,sk:0xe8c8b0,hr:0xf2f2f2,sb:0x15151a},[['beanie',0xd01030,0xf2f2f2]],['beard',0xf2f2f2],null,['belt',0x15151a,0xffd60a],'Rote Mütze mit Bommel, weißer Bart und ein dicker Gürtel.'],
+ ['g21','Der Alien','👽','Episch',{sh:0x2a5a3a,pa:0x1a3a2a,sk:0x7adf6a,hr:0x7adf6a,sb:0x1a2a1a},[['antenna',0xff2bd6,0x6adf6a]],['visor',0x15151a],null,['hstripes',0x7adf6a],'Grüne Haut, Antenne und riesige schwarze Augen.'],
+ ['g22','Der Zombie','🧟','Episch',{sh:0x5a6a4a,pa:0x3a3a2a,sk:0x8aab6a,hr:0x4a4a3a,sb:0x2a2a1a},[],['eyepatch'],['scarf',0x6a5a4a],['vest',0x4a3a2a],'Grüne Haut, zerrissene Kleidung und eine Augenklappe.'],
+ ['g23','Der Rennfahrer','🏎️','Episch',{sh:0xf2f2f2,pa:0x15151a,sk:0xd8a67e,hr:0x2a1a0a,sb:0xc8102e},[['helmet',0xc8102e,0x111111]],null,['pads',0xf2f2f2],['hstripes',0xc8102e],'Roter Rennhelm, weißer Overall und Rennstreifen.'],
+ ['g24','Der Zirkusdirektor','🎪','Episch',{sh:0xc8102e,pa:0x15151a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['tophat',0xc8102e,0xffd60a]],['mustache',0x15151a],['scarf',0xffd60a],['vest',0xffd60a],'Roter Zylinder, Schnurrbart und eine goldene Weste.'],
+ ['g25','Der Phönix','🔥','Legendär',{sh:0xe85a1a,pa:0x7a1a0a,sk:0xf0b080,hr:0xffd60a,sb:0xffd60a},[['mohawk',0xffd60a]],null,['wings',0xff7a1a,0xffd60a],['emblem',0xffd60a,0xff2d2d],'Flammenhaar, große Feuerflügel und ein glühendes Wappen.'],
+ ['g26','Der Frostkönig','❄️','Legendär',{sh:0x9ad8f0,pa:0x4a8ab0,sk:0xe8f4f8,hr:0xffffff,sb:0xcfeaf8},[['crown',0xcfeaf8]],['beard',0xffffff],['cape',0x5ab0e0],null,'Eiskrone, weißer Bart und ein eisblauer Umhang.'],
+ ['g27','Der Blitzgott','⚡','Legendär',{sh:0xffe066,pa:0x3a3a8a,sk:0xe8c9a0,hr:0xfff2a0,sb:0xffd60a},[['halo',0xfff060]],['visor',0xfff060],['armor',0xffd60a,0x3a3a8a],null,'Strahlender Heiligenschein, leuchtende Augen und eine goldene Rüstung.'],
+ ['g28','Der Cyborg','🦾','Legendär',{sh:0x2a2f3a,pa:0x1a1e26,sk:0x9aa3ad,hr:0x2a2f3a,sb:0x00e5ff},[['antenna',0x00e5ff,0x555a60]],['visor',0x00e5ff],['pads',0x555a60],['vstripes',0x00e5ff],'Stahlkörper, Antenne, Neon-Visier und leuchtende Streifen.'],
+ ['g29','Der Engel','😇','Legendär',{sh:0xf2f2f2,pa:0xf2f2f2,sk:0xf4e0d0,hr:0xffe9a0,sb:0xffd60a},[['halo',0xffd60a]],null,['wings',0xffffff,0xe8f0ff],['belt',0xffd60a,0xffffff],'Goldener Heiligenschein, weiße Flügel und ein goldener Gürtel.'],
+ ['g30','Der Teufel','😈','Legendär',{sh:0x8a0a14,pa:0x2a0508,sk:0xd04a3a,hr:0x15151a,sb:0x15151a},[['horns',0x15151a]],['mustache',0x15151a],['tail',0x8a0a14,0x15151a],['vest',0x15151a],'Rote Haut, schwarze Hörner, Teufelsschwanz und ein Spitzbart.']];
+const CSKG={};
+{const RC={'Selten':'#4da3ff','Episch':'#b86bff','Legendär':'#ffb020'};
+ CXGEN.forEach(a=>{const sp={id:a[0],n:a[1],ic:a[2],r:a[3],c:a[4],h:a[5],f:a[6],b:a[7],p:a[8],d:a[9]};CSKG[sp.id]=sp;
+  CSK[sp.id]={n:sp.n,ic:sp.ic,c:sp.c};MPSK[sp.id]=sp.c;CXRAR[sp.id]={r:sp.r,c:RC[sp.r],d:sp.d};CXSVG[sp.id]=cxGenSvg(sp);
+  CXSKINS.push({id:sp.id,n:sp.n,ic:sp.ic,get p(){return cxPrice(this.id)},own:()=>cxOwnsSk(sp.id),give(){const x=cxShop();if(!x.skins.includes(sp.id))x.skins.push(sp.id);cxWrite('dfShop',x)}})})}
+{const _bs=cxBuildSkin;cxBuildSkin=function(id,root,armL,armR){return CSKG[id]?cxBuildGen(CSKG[id],root,armL,armR):_bs.apply(this,arguments)}}
+/* kostenlose Skin-Aufgaben für die 30 neuen Skins */
+{const TPL=[['escapes','Fliehe {n}× im Einzelspieler.',[4,8,14]],['started','Starte {n} Spiele.',[25,45,80]],['online','Spiele {n} Online-Runden zu Ende.',[12,22,40]],['onlineEsc','Entkomme {n}× in Online-Runden.',[6,10,18]],['fast','Fliehe {n}× schneller als die Richtzeit.',[4,7,12]],['clean','Fliehe {n}× ohne Tod.',[7,12,20]],['p2','Schließe Teil 2 {n}× ab.',[3,5,8]],['hunterWins','Gewinne {n}× als Jäger.',[4,7,12]],['earned','Verdiene insgesamt {n} Coins.',[8000,15000,30000]],['hardClean','Schaffe „Schwer“ {n}× ohne Tod.',[4,6,10]]];
+ CXGEN.forEach((a,i)=>{const t=TPL[i%TPL.length],tier={'Selten':0,'Episch':1,'Legendär':2}[a[3]],n=t[2][tier];CXMIS.push({id:'s'+a[0].slice(1),t:'Sammler: '+a[1],d:t[1].replace('{n}',n.toLocaleString('de-DE')),r:0,g:n,p:s=>s[t[0]]||0,skin:a[0]})})}
 
 menuStart();
 requestAnimationFrame(frame);

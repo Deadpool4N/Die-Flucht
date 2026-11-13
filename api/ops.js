@@ -146,6 +146,21 @@ export default async function handler(req, res) {
         await db(cmds);
         return send({ ok: true, removed: kill.length });
       }
+      case "tag": {                                   // Account-Code-Anteil (Tag) für einen neuen Account reservieren: jeder Tag gehört genau einem Account
+        const tag = String(b.tag || "").toUpperCase();
+        const sec = str(b.sec, 40);
+        if (!/^[A-HJ-NP-Z2-9]{4}$/.test(tag) || sec.length < 8) return send({ error: "bad" }, 400);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlt:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 300) return send({ error: "limit" }, 429);
+        const h = hash(sec + "|" + tag) + hash(tag + "|" + sec);
+        const [won] = await db([["HSETNX", "df:tags", tag, h]]);   // atomar: nur der Erste bekommt den Tag
+        if (+won === 1) return send({ ok: true });
+        const [old] = await db([["HGET", "df:tags", tag]]);
+        return old === h ? send({ ok: true }) : send({ ok: false, taken: true });
+      }
       case "reg": {                                   // Spielername anmelden (damit Geschenke nur an echte Spieler gehen)
         const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim();
         if (nm.length < 2) return send({ error: "bad" }, 400);

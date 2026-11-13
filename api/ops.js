@@ -1,6 +1,7 @@
 // Zentrale für „Die Flucht 3D“ auf Vercel: Spielerzahlen, Spiele-Zähler und Postfach (Bug-Meldungen)
 // Pfad im GitHub-Projekt: api/ops.js   ·   Speicher: Upstash Redis (Vercel → Storage → Upstash, Gratis-Plan)
 // Vercel trägt KV_REST_API_URL und KV_REST_API_TOKEN automatisch ein. Optional: ADMIN_KEY (Standard: 1709).
+import { randomBytes } from "node:crypto";
 const DB_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const DB_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
 const ADMIN_KEY = process.env.ADMIN_KEY || "1709";
@@ -10,6 +11,8 @@ const MAX_REPORTS = 150;        // älteste Meldungen werden automatisch gelösc
 const CATS = ["bug", "wand", "lag", "sonst", "meinung"];
 const MODES = ["menu", "solo", "mp", "p2"];
 const ID_RE = /^r-\d{15}-[a-z0-9]+$/;
+const CODE_ABC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32 Zeichen ohne I, O, 0, 1
+const newCode = (n) => { const r = randomBytes(n); let c = ""; for (let i = 0; i < n; i++) c += CODE_ABC[r[i] & 31]; return c; };   // echte Zufallszeichen (32 teilt 256, also ohne Verzerrung)
 
 async function db(cmds) {       // mehrere Redis-Befehle in einem Aufruf
   const r = await fetch(DB_URL + "/pipeline", {
@@ -143,7 +146,18 @@ export default async function handler(req, res) {
         await db(cmds);
         return send({ ok: true, removed: kill.length });
       }
-      case "gift": {                                  // Skin verschenken (Empfänger holt ihn beim nächsten Start ab)
+      case "reg": {                                   // Spielername anmelden (damit Geschenke nur an echte Spieler gehen)
+        const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim();
+        if (nm.length < 2) return send({ error: "bad" }, 400);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlr:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 120) return send({ error: "limit" }, 429);
+        await db([["HSET", "df:names", nm.toLowerCase(), nm + "|" + now]]);
+        return send({ ok: true });
+      }
+      case "gift": {                                  // Skin verschenken: nur an Spielernamen, die es gibt. Der Schenker bekommt einen zufälligen Geschenk-Code
         const clean = (v, n) => str(v, n).replace(/[<>&"'\\]/g, "").trim();
         const to = clean(b.to, 14).toLowerCase(), from = clean(b.from, 14) || "Jemand", skin = String(b.skin || "");
         if (to.length < 2) return send({ error: "bad" }, 400);
@@ -154,9 +168,26 @@ export default async function handler(req, res) {
         const [cnt] = await db([["INCR", rk]]);
         if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
         if (cnt > 40) return send({ error: "limit" }, 429);
-        const id = "g-" + now + "-" + Math.random().toString(36).slice(2, 6), gk = "df:gift:" + to;
-        await db([["RPUSH", gk, JSON.stringify({ id, s: skin, f: from, t: now })], ["LTRIM", gk, -300, -1], ["EXPIRE", gk, 5184000]]);
-        return send({ ok: true, id });
+        const [known] = await db([["HGET", "df:names", to]]);
+        if (!known) return send({ error: "noname" }, 404);
+        const id = "g-" + now + "-" + Math.random().toString(36).slice(2, 6), gk = "df:gift:" + to, code = newCode(12);
+        await db([["RPUSH", gk, JSON.stringify({ id, s: skin, f: from, t: now })], ["LTRIM", gk, -300, -1], ["EXPIRE", gk, 5184000],
+                  ["SET", "df:gc:" + code, JSON.stringify({ s: skin, f: from, to, t: now })], ["EXPIRE", "df:gc:" + code, 5184000]]);
+        return send({ ok: true, id, code });
+      }
+      case "redeem": {                                // Geschenk-Code einlösen (einmalig)
+        const code = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+        if (code.length !== 12) return send({ error: "nocode" }, 404);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlc:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 600]]);
+        if (cnt > 20) return send({ error: "limit" }, 429);
+        const [v] = await db([["GET", "df:gc:" + code]]);
+        if (!v) return send({ error: "nocode" }, 404);
+        await db([["DEL", "df:gc:" + code]]);
+        let g = {}; try { g = JSON.parse(v); } catch (e) {}
+        return send({ ok: true, s: g.s, f: g.f || "Jemand" });
       }
       case "gifts": {                                 // Geschenke für einen Namen lesen (bleiben 60 Tage, das Spiel merkt sich, was schon angekommen ist)
         const to = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim().toLowerCase();

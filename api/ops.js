@@ -11,6 +11,9 @@ const MAX_REPORTS = 150;        // älteste Meldungen werden automatisch gelösc
 const CATS = ["bug", "wand", "lag", "sonst", "meinung"];
 const MODES = ["menu", "solo", "mp", "p2"];
 const ID_RE = /^r-\d{15}-[a-z0-9]+$/;
+const RES_NAMES = new Set(["entwickler (op)", "entwickler", "keshynr", "admin", "administrator", "moon games", "op"]);   // diese Namen gehören den Sonderkonten
+const nkeyL = (n, l) => String(n == null ? "" : n).replace(/[\u0000-\u001f<>&"'\\]/g, "").trim().replace(/\s+/g, " ").toLowerCase().slice(0, l);
+const nkey = (n) => nkeyL(n, 14);
 const CODE_ABC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32 Zeichen ohne I, O, 0, 1
 const newCode = (n) => { const r = randomBytes(n); let c = ""; for (let i = 0; i < n; i++) c += CODE_ABC[r[i] & 31]; return c; };   // echte Zufallszeichen (32 teilt 256, also ohne Verzerrung)
 
@@ -157,9 +160,39 @@ export default async function handler(req, res) {
         if (cnt > 300) return send({ error: "limit" }, 429);
         const h = hash(sec + "|" + tag) + hash(tag + "|" + sec);
         const [won] = await db([["HSETNX", "df:tags", tag, h]]);   // atomar: nur der Erste bekommt den Tag
-        if (+won === 1) return send({ ok: true });
+        const tnm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim();
+        if (+won === 1) { if (tnm.length >= 2) await db([["HSET", "df:tagn", tag, tnm]]); return send({ ok: true }); }
         const [old] = await db([["HGET", "df:tags", tag]]);
         return old === h ? send({ ok: true }) : send({ ok: false, taken: true });
+      }
+      case "tagq": {                                  // Wer gehört zu diesem Code-Anteil? (nur der Name; wer den Code hat, gehört zum selben Account)
+        const tag = String(b.tag || "").toUpperCase();
+        if (!/^[A-HJ-NP-Z2-9]{4}$/.test(tag)) return send({ error: "bad" }, 400);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlq:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 120) return send({ error: "limit" }, 429);
+        const [nm] = await db([["HGET", "df:tagn", tag]]);
+        return send({ ok: true, name: nm || "" });
+      }
+      case "name": {                                  // Spielernamen reservieren: jeder Name gehört genau einem Account (Groß-/Kleinschreibung egal)
+        const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim().replace(/\s+/g, " "), key = nkey(nm), sec = str(b.sec, 40);
+        if (key.length < 2 || sec.length < 8) return send({ error: "bad" }, 400);
+        if (RES_NAMES.has(key) || RES_NAMES.has(nkeyL(b.name, 30))) return send({ ok: false, taken: true });
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rln:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 300) return send({ error: "limit" }, 429);
+        const h = hash(sec + "|n|" + key) + hash(key + "|n|" + sec);
+        const [mine] = await db([["HGET", "df:nm", key]]);
+        if (mine) return mine === h ? send({ ok: true }) : send({ ok: false, taken: true });
+        if (!b.legacy) { const [seen] = await db([["HGET", "df:names", key]]); if (seen) return send({ ok: false, taken: true }); }   // alter Name ohne Besitzer: bleibt für den alten Account reserviert
+        const [won] = await db([["HSETNX", "df:nm", key, h]]);                 // atomar: nur der Erste bekommt den Namen
+        if (+won !== 1) { const [o] = await db([["HGET", "df:nm", key]]); return o === h ? send({ ok: true }) : send({ ok: false, taken: true }); }
+        await db([["HSET", "df:names", key, nm + "|" + now]]);
+        return send({ ok: true });
       }
       case "reg": {                                   // Spielername anmelden (damit Geschenke nur an echte Spieler gehen)
         const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim();
@@ -169,12 +202,12 @@ export default async function handler(req, res) {
         const [cnt] = await db([["INCR", rk]]);
         if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
         if (cnt > 120) return send({ error: "limit" }, 429);
-        await db([["HSET", "df:names", nm.toLowerCase(), nm + "|" + now]]);
+        await db([["HSET", "df:names", nkey(nm), nm + "|" + now]]);
         return send({ ok: true });
       }
       case "gift": {                                  // Skin verschenken: nur an Spielernamen, die es gibt. Der Schenker bekommt einen zufälligen Geschenk-Code
         const clean = (v, n) => str(v, n).replace(/[<>&"'\\]/g, "").trim();
-        const to = clean(b.to, 14).toLowerCase(), from = clean(b.from, 14) || "Jemand", skin = String(b.skin || "");
+        const to = nkey(b.to), from = clean(b.from, 14) || "Jemand", skin = String(b.skin || "");
         if (to.length < 2) return send({ error: "bad" }, 400);
         if (skin === "*") { if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401); }
         else if (!/^[a-z0-9]{2,12}$/.test(skin)) return send({ error: "bad" }, 400);
@@ -205,7 +238,7 @@ export default async function handler(req, res) {
         return send({ ok: true, s: g.s, f: g.f || "Jemand" });
       }
       case "gifts": {                                 // Geschenke für einen Namen lesen (bleiben 60 Tage, das Spiel merkt sich, was schon angekommen ist)
-        const to = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim().toLowerCase();
+        const to = nkey(b.name);
         if (to.length < 2) return send({ error: "bad" }, 400);
         const [arr] = await db([["LRANGE", "df:gift:" + to, -100, -1]]);
         const list = [];

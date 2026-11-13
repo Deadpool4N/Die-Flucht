@@ -2459,7 +2459,7 @@ function accUI(msg){try{accFix()}catch(e){}const others=Object.values(ACC.list).
   +'<p class="foot" id="acccl" style="margin-top:10px">Speicherort wird geprüft …</p></div>',true);
  const go=async(f)=>{const b=document.querySelectorAll('#accmk,#acclg');b.forEach(x=>x.disabled=true);try{await f()}finally{b.forEach(x=>x.disabled=false)}};
  $('accmk').onclick=()=>go(async()=>{let n=($('accn').value||'').trim().replace(/\s+/g,' ');if(n.length<2)return accUI('Der Name braucht mindestens 2 Zeichen.');
-  try{n=mpCensor(n)}catch(e){}const c=await accCreate(n);accShowCode(n,c)});
+  try{n=mpCensor(n)}catch(e){}const rr=await accCreateChecked(n);if(rr.err)return accUI(rr.err);accShowCode(n,rr.c)});
  $('acclg').onclick=()=>go(async()=>{const e=await accLogin($('accc').value||'');if(e)accUI(e)});
  $('accn').onkeydown=e=>{if(e.key==='Enter')$('accmk').click()};$('accc').onkeydown=e=>{if(e.key==='Enter')$('acclg').click()};
  document.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{if(b.dataset.acc===ACC.active){closeOv();menuStart()}else accSwitch(b.dataset.acc)});
@@ -2575,7 +2575,7 @@ accSave=function(force){if(!accReady())return;const a=accCur(),d=accSnap(),js=JS
 accSwitch=function(id){if(ACC.active!==id)accSave(true);ACC.active=id;const d=accCur().data||{};accApply(d);accStore();
  if(LS_OK)qReload();else{pcLive(d);closeOv();menuStart()}};
 accCreate=async function(name){const first=!Object.keys(ACC.list).length;accSave(true);const data=first?accSnap():{dfShotgun:'0',dfShotLoad:'0',dfSkinU:'0',dfSkinG:'0',dfDev:'0',dfHeard:'[]',dfSkin:'default'};
- data.dfName=name;const id='A'+Date.now().toString(36);{const rv=await accReserveTag();const a=Object.assign({id,name,data,ts:Date.now()},rv);a.code=accMake(a,data);ACC.list[id]=a}ACC.active=id;accApply(data);accStore();if(!LS_OK)pcLive(data);return ACC.list[id].code};
+ data.dfName=name;const id='A'+Date.now().toString(36);{const rv=await accReserveTag(name);const a=Object.assign({id,name,data,ts:Date.now()},rv);if(accPN){a.nsec=accPN.sec;a.nreg=accPN.reg;accPN=null}a.code=accMake(a,data);ACC.list[id]=a}ACC.active=id;accApply(data);accStore();if(!LS_OK)pcLive(data);return ACC.list[id].code};
 accLogin=async function(raw,nm){const code=String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
  if(code==='BBBB'){if(ACC.list.BB&&!ACC.list.BBBB){ACC.list.BBBB=ACC.list.BB;delete ACC.list.BB}
   if(!ACC.list.BBBB)ACC.list.BBBB={id:'BBBB',code:'BBBB',name:'Entwickler (OP)',op:true,data:{},ts:Date.now()};Object.assign(ACC.list.BBBB.data,OPDATA);ACC.list.BBBB.op=true;accSwitch('BBBB');return ''}
@@ -2602,7 +2602,7 @@ accUI=function(msg){const others=Object.values(ACC.list).sort((a,b)=>(b.ts||0)-(
   +(others.length?'<div class="cap">Accounts auf diesem Gerät</div><div class="grp">'+others.map(a=>{const k=Object.keys(ACC.list).find(x=>ACC.list[x]===a);return '<button class="row" data-acc="'+k+'"><span class="ic" style="background:'+(k===ACC.active?'#30d158':a.op?'#ff9f0a':'#5e5ce6')+'">'+(a.op?'⭐':a.str?'📺':'👤')+'</span><span class="tx"><b>'+esc(a.name)+(k===ACC.active?' (aktiv)':'')+'</b><small>Code '+(a.op?'BBBB':a.str?'JAU5':accFmt(a.code||accMake(a,a.data)))+'</small></span><i class="chev">›</i></button>'}).join('')+'</div>':'')
   +'<p class="foot" style="margin-top:10px">🔑 Der Code funktioniert auf jedem Gerät – Handy, iPad oder PC.'+(LS_OK?'':' Hier wird nichts dauerhaft gespeichert, merk dir also deinen Code.')+'</p></div>',true);
  const go=async f=>{const b=document.querySelectorAll('#accmk,#acclg');b.forEach(x=>x.disabled=true);try{await f()}finally{b.forEach(x=>x.disabled=false)}};
- $('accmk').onclick=()=>go(async()=>{let n=($('accn').value||'').trim().replace(/\s+/g,' ');if(n.length<2)return accUI('Der Name braucht mindestens 2 Zeichen.');try{n=mpCensor(n)}catch(e){}const c=await accCreate(n);accShowCode(n,c)});
+ $('accmk').onclick=()=>go(async()=>{let n=($('accn').value||'').trim().replace(/\s+/g,' ');if(n.length<2)return accUI('Der Name braucht mindestens 2 Zeichen.');try{n=mpCensor(n)}catch(e){}const rr=await accCreateChecked(n);if(rr.err)return accUI(rr.err);accShowCode(n,rr.c)});
  $('acclg').onclick=()=>go(async()=>{let n=($('accn').value||'').trim();try{if(n)n=mpCensor(n)}catch(e){}const e=await accLogin($('accc').value||'',n);if(e)accUI(e)});
  $('accn').onkeydown=e=>{if(e.key==='Enter')$('accmk').click()};$('accc').onkeydown=e=>{if(e.key==='Enter')$('acclg').click()};
  document.querySelectorAll('[data-acc]').forEach(b=>b.onclick=()=>{if(b.dataset.acc===ACC.active){closeOv();menuStart()}else accSwitch(b.dataset.acc)})};
@@ -3976,7 +3976,9 @@ function accImport(code,nm){const {tag,st}=accSplit(code);if(accN(tag)<0||accN(s
  const hit=Object.keys(ACC.list).find(k=>ACC.list[k].tag===tag&&!ACC.list[k].op&&!ACC.list[k].str);if(hit)return {id:hit,existing:true};
  const d=pcDec(accScr(st,tag,true));if(!d)return null;const name=String(nm||'').trim().replace(/\s+/g,' ').slice(0,14)||'Spieler';d.dfName=name;const id='A'+Date.now().toString(36)+Math.floor(Math.random()*1e4).toString(36);
  const a={id,name,data:d,ts:Date.now(),tag,imp:1};a.code=accMake(a,d);ACC.list[id]=a;return {id}}
-async function accLoginTag(code,nm){const r=accImport(code,nm);if(!r)return 'Diesen Code gibt es nicht. Prüfe die 8 Zeichen (es gibt kein 0, O, 1, I und L).';accSwitch(r.id);return ''}
+async function accLoginTag(code,nm){const r=accImport(code,nm);if(!r)return 'Diesen Code gibt es nicht. Prüfe die 8 Zeichen (es gibt kein 0, O, 1, I und L).';
+ if(!r.existing&&!nm){try{const a=ACC.list[r.id],q=await opsPost({a:'tagq',tag:a.tag});if(q&&q.ok&&q.name){a.name=q.name;a.data=Object.assign({},a.data,{dfName:q.name})}}catch(e){}}
+ accSwitch(r.id);return ''}
 function accFix(){let ch=0;const seen={};Object.keys(ACC.list).sort((x,y)=>(ACC.list[x].ts||0)-(ACC.list[y].ts||0)).forEach(k=>{const a=ACC.list[k];if(!a)return;if(!a.id&&a.code!==k)a.id=k;if(a.op||a.str)return;
   if(!a.tag||a.tag.length!==4||accN(a.tag)<0||seen[a.tag]){a.tag='';a.tag=accNewTag();ch++}seen[a.tag]=1;const c=accMake(a,a.data||{});if(a.code!==c){a.code=c;ch++}});
  if(ch)try{accStore()}catch(e){}return ch}
@@ -3987,16 +3989,39 @@ function accFix(){let ch=0;const seen={};Object.keys(ACC.list).sort((x,y)=>(ACC.
 /* ===================== Jeder Code nur einmal: Tags werden beim Server reserviert ===================== */
 /* Jeder neue Account reserviert seinen Zufalls-Tag bei der Zentrale. Ist er schon vergeben, wird sofort ein anderer gewürfelt. Dadurch gibt es jeden Code nur einmal, auch über alle Geräte. Accounts, die über einen Code auf ein neues Gerät geholt wurden, gehören zum selben Account und reservieren nichts. */
 function accSecret(){const r=accRand(3);let c='';for(let i=0;i<3;i++)c+=r[i].toString(36).padStart(7,'0').slice(-7);return c}
-async function accReserveTag(){const sec=accSecret();let last='';for(let i=0;i<16;i++){const tag=accNewTag();last=tag;let r=null;try{r=await opsPost({a:'tag',tag,sec})}catch(e){}if(r&&r.ok)return {tag,sec,reg:1};if(r&&r.taken){const dup=ACC.list;continue}return {tag,sec,pend:1}}return {tag:last||accNewTag(),sec,pend:1}}
+async function accReserveTag(name){const sec=accSecret();let last='';for(let i=0;i<16;i++){const tag=accNewTag();last=tag;let r=null;try{r=await opsPost({a:'tag',tag,sec,name:String(name||'')})}catch(e){}if(r&&r.ok)return {tag,sec,reg:1};if(r&&r.taken){const dup=ACC.list;continue}return {tag,sec,pend:1}}return {tag:last||accNewTag(),sec,pend:1}}
 let accSyncBusy=false;
 async function accTagSync(){if(accSyncBusy)return 0;accSyncBusy=true;let moved=0;try{
  for(const k of Object.keys(ACC.list)){const a=ACC.list[k];if(!a||a.op||a.str||a.imp||a.reg)continue;if(!a.tag||a.tag.length!==4)continue;if(!a.sec)a.sec=accSecret();
-  const r=await opsPost({a:'tag',tag:a.tag,sec:a.sec});
+  const r=await opsPost({a:'tag',tag:a.tag,sec:a.sec,name:a.name});
   if(r&&r.ok){a.reg=1;a.pend=0;continue}
-  if(r&&r.taken){const old=a.code;const rv=await accReserveTag();a.tag=rv.tag;a.sec=rv.sec;a.reg=rv.reg||0;a.pend=rv.pend||0;a.code=accMake(a,a.data||{});moved++;if(k===ACC.active)try{toast('🔑 Dein Code war schon vergeben und wurde geändert. Neuer Code: '+accFmt(a.code),'good')}catch(e){}}}
+  if(r&&r.taken){const old=a.code;const rv=await accReserveTag(a.name);a.tag=rv.tag;a.sec=rv.sec;a.reg=rv.reg||0;a.pend=rv.pend||0;a.code=accMake(a,a.data||{});moved++;if(k===ACC.active)try{toast('🔑 Dein Code war schon vergeben und wurde geändert. Neuer Code: '+accFmt(a.code),'good')}catch(e){}}}
  if(moved)try{accStore();if(accReady())accSave(true)}catch(e){}
  else try{accStore()}catch(e){}}finally{accSyncBusy=false}return moved}
 setTimeout(()=>{try{accTagSync()}catch(e){}},5200);setInterval(()=>{try{if(!document.hidden)accTagSync()}catch(e){}},300000);
+
+
+/* ===================== Jeder Spielername nur einmal ===================== */
+/* Beim Anlegen eines Accounts wird der Name bei der Zentrale reserviert (Groß-/Kleinschreibung egal). Vergebene Namen werden abgelehnt.
+   Alte Accounts melden ihren Namen beim nächsten Start an. Ist er schon vergeben, bekommt der Account automatisch eine Zahl angehängt (z. B. „Anna2“). */
+const accRes=['entwickler (op)','entwickler','keshynr','admin','administrator','moon games','op'];
+function accNKeyL(n,l){return String(n==null?'':n).replace(/[\u0000-\u001f<>&"'\\]/g,'').trim().replace(/\s+/g,' ').toLowerCase().slice(0,l)}
+function accNKey(n){return accNKeyL(n,14)}
+let accPN=null;
+async function accCreateChecked(n){const key=accNKey(n);if(accRes.includes(key)||accRes.includes(accNKeyL(n,30)))return {err:'Dieser Name ist schon vergeben. Such dir einen anderen Namen aus.'};
+ const sec=accSecret();let r=null;try{r=await opsPost({a:'name',name:n,sec})}catch(e){}
+ if(r&&r.taken)return {err:'Dieser Name ist schon vergeben. Such dir einen anderen Namen aus.'};
+ accPN={sec,reg:r&&r.ok?1:0};const c=await accCreate(n);accPN=null;return {c}}
+let accNameBusy=false;
+async function accNameSync(){if(accNameBusy)return 0;accNameBusy=true;let ren=0;try{
+ for(const k of Object.keys(ACC.list)){const a=ACC.list[k];if(!a||a.op||a.str||a.imp||a.nreg)continue;if(!a.nsec)a.nsec=accSecret();
+  let name=String(a.name||'Spieler'),r=await opsPost({a:'name',name,sec:a.nsec,legacy:!a.nlegacyDone});
+  if(r&&r.ok){a.nreg=1;continue}
+  if(r&&r.taken){let done=false;const base=name.replace(/\d+$/,'').slice(0,12)||'Spieler';
+   for(let i=2;i<100&&!done;i++){const cand=base.slice(0,14-String(i).length)+i;if(accRes.includes(accNKey(cand)))continue;const q=await opsPost({a:'name',name:cand,sec:a.nsec});if(q&&q.ok){a.name=cand;a.data=Object.assign({},a.data,{dfName:cand});a.nreg=1;done=true;ren++;
+     if(k===ACC.active){try{localStorage.setItem('dfName',cand)}catch(e){}try{toast('👤 Dein Name war schon vergeben und heißt jetzt „'+cand+'“.','good')}catch(e){}}}else if(!q)break}}}
+ if(ren)try{accStore();if(accReady())accSave(true)}catch(e){}else try{accStore()}catch(e){}}finally{accNameBusy=false}return ren}
+setTimeout(()=>{try{accNameSync()}catch(e){}},5600);setInterval(()=>{try{if(!document.hidden)accNameSync()}catch(e){}},300000);
 
 menuStart();
 requestAnimationFrame(frame);

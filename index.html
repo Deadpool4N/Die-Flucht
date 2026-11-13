@@ -1232,8 +1232,8 @@ function pauseUI(p2){const J=p2?['Zelle','Serverraum','Katakomben','Maschinenhal
  +(CHEATS?'<div class="cap">Admin-Panel</div><div class="grp">'+swr('god','Unverwundbar')+swr('fast','Turbo-Laufen')+swr('skip',p2?'Rätsel überspringen':'Schlösser überspringen')+swr('noclip','Durch Wände')+swr('infammo','Unendlich Schrot')+'</div>'
   +'<div class="cap">Ansicht</div>'+segH('data-view',[['auto','Auto'],['tp','3. Person'],['fp','Ego']],CH.view)
   +'<div class="cap">Steuerung testen (Dev)</div><div class="grp">'+swr('stickLock','Stick einrasten (Maus-Test)')+swr('touchViz','Touch-Punkte anzeigen')+'</div><div class="foot" style="text-align:left;margin:6px 12px 0">Oben unter „Steuerung“ wählst du PC, iPad oder Handy. Taste <b>F4</b> wechselt im laufenden Spiel. Das gilt im normalen Spiel, nicht nur im Entwicklerraum.</div>'
-  +'<div class="cap">Items</div><div class="grp">'+rowGo('id="mi" data-x','1','Alle Items erhalten')+rowGo('id="mgun" data-x','1','🔫 Shotgun erhalten')+rowGo('id="mtp" data-x','1','🚪 In den Skin-Raum teleportieren')+'</div>'
-  +'<div class="cap">Skins (Cheat)</div><div class="grp">'+rowGo('id="mskall" data-x','1','✨ Alle Skins sofort freischalten')+'</div>'
+  +'<div class="cap">Items</div><div class="grp">'+rowGo('id="mi" data-x','1','Alle Items erhalten')+rowGo('id="mgun" data-x','1','🔫 Shotgun erhalten')+rowGo('id="mgent" data-x','1','🎩 Skin „Gentleman“ erhalten')+rowGo('id="mtp" data-x','1','🚪 In den Skin-Raum teleportieren')+'</div>'
+  +'<div class="cap">Skins (Cheat)</div><div class="grp">'+rowGo('id="msk2" data-x','1','🎩 Gentleman holen (mit Animation)')+rowGo('id="mskall" data-x','1','✨ Alle Skins sofort freischalten')+'</div>'
   +'<div class="cap">Springe zu …</div><div class="grp">'+J.map((n,i)=>rowGo('data-j',i+1,n)).join('')+'</div>':'')
  +'<div class="grp" style="margin-top:16px"><button class="row red" id="mr"><span class="tx"><b>Neustart</b></span></button></div>'+(CHEATS?devSection():'')+'</div>');
  $('m0').onclick=closeOv;bindSeg('data-ct',v=>setCtrl(v));bindSeg('data-lvp',v=>{DF=LV[v];toast('Schwierigkeit: '+v)});bindPerf();
@@ -2391,7 +2391,7 @@ const skReopen=()=>{if(cr===0&&S.tied)menuStart()};
 function skinLine(){const o=[['default','Standard']];if(SKIN.unlocked)o.push(['mask','🎭 Maskierter']);if(SKIN.g)o.push(['gent','🎩 Gentleman']);if(SKIN.y)o.push(['ynr','😎 Ynr']);cxSkOpts().forEach(x=>o.push(x));
  let h='<div class="cap">Skin</div>';if(o.length>1)h+=segH('data-sk',o,SKIN.cur);const lk=[];
  if(false)lk.push('<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Der Maskierte</b><small>Gesperrt · irgendwo im Haus versteckt</small></span></div>'+(CHEATS?'<button class="row" id="skincheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Maskierten per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':''));
- if(false)lk.push('<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Der Gentleman</b><small>Höre Song 1–6 der Spotify-Playlist ('+HEARD.s.filter(i=>i<6).length+'/6)</small></span></div>'+(CHEATS?'<button class="row" id="gentcheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Gentleman per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':''));
+ if(!SKIN.g)lk.push('<div class="row"><span class="ic" style="background:#3a3a44">🔒</span><span class="tx"><b>Der Gentleman</b><small>Höre Song 1–6 der Spotify-Playlist ('+HEARD.s.filter(i=>i<6).length+'/6)</small></span></div>'+(CHEATS?'<button class="row" id="gentcheat"><span class="ic" style="background:#ff453a">⚡</span><span class="tx"><b>Gentleman per Cheat holen</b><small>Mit Ladebildschirm</small></span><i class="chev">›</i></button>':''));
  if(lk.length)h+='<div class="grp" style="margin-top:6px">'+lk.join('')+'</div>';return h}
 function bindSkin(){bindSeg('data-sk',v=>applySkin(v));
  const c=document.getElementById('skincheat');if(c)c.onclick=()=>{closeOv();skinReveal('Per Cheat erhalten.',skReopen)};
@@ -2402,11 +2402,11 @@ function bindSkin(){bindSeg('data-sk',v=>applySkin(v));
 function heardSave(){try{localStorage.setItem('dfHeard',JSON.stringify(HEARD.s))}catch(e){}}
 function heardTick(){const n=performance.now(),dt=Math.min(.25,(n-(HEARD.lt||n))/1e3);HEARD.lt=n;
  let idx=-1;if(SA.on&&SA.playing)idx=SA.cur;else if(!SA.on&&SP.playing&&!SP.list)idx=SP.idx;
- if(idx>=0&&idx<6&&!HEARD.s.includes(idx)){HEARD.t[idx]=(HEARD.t[idx]||0)+dt;if(HEARD.t[idx]>=40){HEARD.s.push(idx);heardSave();const c=HEARD.s.filter(i=>i<6).length;toast('🎵 Song '+(idx+1)+' gehört','good');auUI()}}
- if(false&&[0,1,2,3,4,5].every(i=>HEARD.s.includes(i))&&!ovOn&&!REV.open&&!lm&&!busy)gentReveal('Freigeschaltet: Du hast Song 1–6 der Playlist gehört!',()=>{})}
+ if(idx>=0&&idx<6&&!HEARD.s.includes(idx)){HEARD.t[idx]=(HEARD.t[idx]||0)+dt;if(HEARD.t[idx]>=40){HEARD.s.push(idx);heardSave();const c=HEARD.s.filter(i=>i<6).length;toast('🎵 Song '+(idx+1)+' gehört ('+c+'/6) – weiter so für den Gentleman-Skin!','good');auUI()}}
+ if(!SKIN.g&&[0,1,2,3,4,5].every(i=>HEARD.s.includes(i))&&!ovOn&&!REV.open&&!lm&&!busy)gentReveal('Freigeschaltet: Du hast Song 1–6 der Playlist gehört!',()=>{})}
 {const d=document.createElement('div');d.id='skprog';d.className='foot';d.style.textAlign='left';d.style.margin='8px 6px 0';$('musp').appendChild(d)}
 function heardUI(){const e=document.getElementById('skprog');if(!e)return;const c=HEARD.s.filter(i=>i<6).length;
- e.textContent='';
+ e.textContent=SKIN.g?'🎩 Skin „Gentleman“ freigeschaltet':'🎩 Belohnung: Höre Song 1–6 je mindestens 40 Sekunden für den Skin „Gentleman“ – '+c+'/6';
  document.querySelectorAll('#spl [data-pi]').forEach(b=>{const i=+b.dataset.pi;if(i<6&&HEARD.s.includes(i)){const bb=b.querySelector('b');if(bb&&!bb.textContent.includes('✓'))bb.textContent+=' ✓'}})}
 const _auUI2=auUI;auUI=function(){_auUI2();try{heardUI()}catch(e){}};
 const _srt=snkRspTick;snkRspTick=function(){_srt();try{heardTick()}catch(e){}};
@@ -2416,7 +2416,7 @@ const _srt=snkRspTick;snkRspTick=function(){_srt();try{heardTick()}catch(e){}};
 const _bs=bindSkin;bindSkin=function(){_bs();
  const a=document.getElementById('msk1');if(a)a.onclick=()=>{closeOv();skinReveal('Per Cheat erhalten.',()=>{})};
  const b=document.getElementById('msk2');if(b)b.onclick=()=>{closeOv();gentReveal('Per Cheat erhalten.',()=>{})};
- const c=document.getElementById('mskall');if(c)c.onclick=()=>{closeOv();toast('✨ Alle Skins freigeschaltet. Auswahl unter „Skin“ im Menü.','good')}};
+ const c=document.getElementById('mskall');if(c)c.onclick=()=>{SKIN.g=true;try{localStorage.setItem('dfSkinG','1')}catch(e){}closeOv();toast('✨ Alle Skins freigeschaltet. Auswahl unter „Skin“ im Menü.','good')}};
 
 /* ===================== Accounts: Name -> 4-stelliger Code, Fortschritt pro Account ===================== */
 const ACCK=['dfShotgun','dfShotLoad','dfSkinU','dfSkin','dfSkinS','dfSkinG','dfHeard','dfDev','dfFpsMode','dfPerf','dfPerfAuto','dfName','dfSpUsr','dfSpIds','dfSpList','dfSpCid','dfSpVer','dfSpRes','dfCoins','dfStats','dfShop','dfInv','dfMis','dfInf','dfCar','dfOnLv','dfCarMdl','dfGiftDone','dfGiven','dfGiftGot'];
@@ -2534,7 +2534,7 @@ if(ACCK.indexOf('dfSens')<0)ACCK.push('dfSens','dfZoom');
 /* --- Spind: alle Skins ansehen und anziehen --- */
 const DEFART='<svg class="rv-gun" viewBox="0 0 160 290"><rect x="40" y="6" width="80" height="22" fill="#3b2414"/><rect x="44" y="22" width="72" height="72" fill="#e0ac7e"/><rect x="40" y="18" width="10" height="26" fill="#3b2414"/><rect x="110" y="18" width="10" height="26" fill="#3b2414"/><rect x="58" y="54" width="12" height="9" fill="#1d1d1f"/><rect x="90" y="54" width="12" height="9" fill="#1d1d1f"/><rect x="72" y="80" width="16" height="3" fill="#9b5a3c"/><rect x="40" y="100" width="80" height="92" fill="#2f6fb0"/><rect x="4" y="104" width="36" height="86" fill="#2a64a0"/><rect x="120" y="104" width="36" height="86" fill="#2a64a0"/><rect x="4" y="190" width="36" height="10" fill="#e0ac7e"/><rect x="120" y="190" width="36" height="10" fill="#e0ac7e"/><rect x="42" y="192" width="36" height="78" fill="#1d2433"/><rect x="82" y="192" width="36" height="78" fill="#1d2433"/><rect x="42" y="270" width="36" height="14" fill="#111"/><rect x="82" y="270" width="36" height="14" fill="#111"/></svg>';
 function spindUI(back){const c=HEARD.s.filter(i=>i<6).length;
- const it=[{id:'default',n:'Standard',art:DEFART,ok:true,h:''},{id:'ynr',n:'Ynr',art:YNART,ok:!!SKIN.y,h:'Mit Passwort freischalten'}].concat(cxSpindSk());
+ const it=[{id:'default',n:'Standard',art:DEFART,ok:true,h:''},{id:'gent',n:'Der Gentleman',art:GENTART,ok:!!SKIN.g,h:'Höre Song 1–6 der Playlist ('+c+'/6)'},{id:'ynr',n:'Ynr',art:YNART,ok:!!SKIN.y,h:'Mit Passwort freischalten'}].concat(cxSpindSk());
  ov('<div class="ios"><h2 style="margin:4px 0 0">🧥 Spind</h2><div class="sub">'+it.filter(x=>x.ok).length+' von '+it.length+' Skins freigeschaltet · zum Ansehen wischen</div><div class="spg">'
   +it.map(x=>'<div class="spc'+(SKIN.cur===x.id?' on':'')+(x.ok?'':' lk')+'"><div class="spa">'+x.art.replace(/style="[^"]*"/,'')+'</div><b>'+(x.ok?x.n:'???')+'</b><small>'+(x.ok?(SKIN.cur===x.id?'✓ Angezogen':'Freigeschaltet'):'🔒 '+x.h)+'</small>'+(x.ok&&SKIN.cur!==x.id?'<button class="pill blue" data-wear="'+x.id+'" style="margin-top:4px">Anziehen</button>':'')+'</div>').join('')
   +'</div><p class="foot">Den Skin siehst du im Spiel in der 3.-Person-Ansicht (👁 oben).</p><button class="btn" id="spx" style="width:100%">Zurück</button></div>',true);
@@ -4200,17 +4200,27 @@ function cxAdmCardsHtml(){let op=false;try{op=!!cxIsOp()}catch(e){}if(!op)return
  for(let i=CXMIS.length-1;i>=0;i--)if(CXMIS[i].skin==='mask'||CXMIS[i].skin==='gent')CXMIS.splice(i,1)}
 
 
-/* ===================== Maskierter und Gentleman sind aus dem Spiel entfernt ===================== */
-/* Nicht mehr freischaltbar (Geheimraum, Playlist, Cheats, Shop, Geschenke), nicht mehr in Menü, Spind und Cheat-Liste. Wer sie hatte, trägt wieder „Standard“. */
-['unlocked','g','suit'].forEach(k=>{try{Object.defineProperty(SKIN,k,{get:()=>false,set:()=>{},configurable:true,enumerable:true})}catch(e){}});
-skinReveal=function(sub,onClose){try{onClose&&onClose()}catch(e){}};gentReveal=function(sub,onClose){try{onClose&&onClose()}catch(e){}};if(typeof suitReveal==='function')suitReveal=function(sub,onClose){try{onClose&&onClose()}catch(e){}};
-for(let i=CXSKINS.length-1;i>=0;i--)if(CXSKINS[i].id==='mask'||CXSKINS[i].id==='gent')CXSKINS.splice(i,1);
-function cxSkinClean(d){if(!d)return d;if('dfSkinU' in d)d.dfSkinU='0';if('dfSkinG' in d)d.dfSkinG='0';if('dfSkinS' in d)d.dfSkinS='0';if(d.dfSkin==='mask'||d.dfSkin==='gent'||d.dfSkin==='suit')d.dfSkin='default';return d}
-function cxSkinCleanLS(){try{['dfSkinU','dfSkinG','dfSkinS'].forEach(k=>{if(localStorage.getItem(k)==='1')localStorage.setItem(k,'0')});const c=localStorage.getItem('dfSkin');if(c==='mask'||c==='gent'||c==='suit')localStorage.setItem('dfSkin','default')}catch(e){}
- if(SKIN.cur==='mask'||SKIN.cur==='gent'||SKIN.cur==='suit'){SKIN.cur='default';try{applySkin('default')}catch(e){}}}
+/* ===================== Der Maskierte ist aus dem Spiel entfernt (der Gentleman gibt es wieder über die Playlist) ===================== */
+/* Der Maskierte: nicht mehr freischaltbar (Geheimraum, Cheats, Shop, Geschenke), nicht mehr in Menü, Spind und Cheat-Liste. Wer ihn hatte, trägt wieder „Standard“. */
+['unlocked','suit'].forEach(k=>{try{Object.defineProperty(SKIN,k,{get:()=>false,set:()=>{},configurable:true,enumerable:true})}catch(e){}});
+skinReveal=function(sub,onClose){try{onClose&&onClose()}catch(e){}};if(typeof suitReveal==='function')suitReveal=function(sub,onClose){try{onClose&&onClose()}catch(e){}};
+for(let i=CXSKINS.length-1;i>=0;i--)if(CXSKINS[i].id==='mask')CXSKINS.splice(i,1);
+function cxSkinClean(d){if(!d)return d;if('dfSkinU' in d)d.dfSkinU='0';if('dfSkinS' in d)d.dfSkinS='0';if(d.dfSkin==='mask'||d.dfSkin==='suit')d.dfSkin='default';return d}
+function cxSkinCleanLS(){try{['dfSkinU','dfSkinS'].forEach(k=>{if(localStorage.getItem(k)==='1')localStorage.setItem(k,'0')});const c=localStorage.getItem('dfSkin');if(c==='mask'||c==='suit')localStorage.setItem('dfSkin','default')}catch(e){}
+ if(SKIN.cur==='mask'||SKIN.cur==='suit'){SKIN.cur='default';try{applySkin('default')}catch(e){}}}
 {const _s=accSnap;accSnap=function(){return cxSkinClean(_s.apply(this,arguments))};const _a=accApply;accApply=function(d){const r=_a.apply(this,arguments);cxSkinCleanLS();return r}}
 cxSkinCleanLS();try{applySkin(SKIN.cur)}catch(e){}
 try{Object.values(ACC.list).forEach(a=>{if(a&&a.data)cxSkinClean(a.data)});accStore()}catch(e){}
+
+
+/* ===================== Gentleman: wieder kostenlos über die Playlist (Song 1–6) + Aufgabe „Feiner Herr“ im Shop ===================== */
+/* Nicht im Shop kaufbar, nicht verschenkbar. Freischalten: Song 1–6 der Spotify-Playlist je mindestens 40 Sekunden hören. */
+{const g=CXSKINS.find(x=>x.id==='gent');if(g)g.hidden=true;
+ if(!CXMIS.some(m=>m.id==='q2')){const m={id:'q2',t:'Feiner Herr',d:'Höre Song 1–6 der Spotify-Playlist je mindestens 40 Sekunden.',r:0,g:6,p:()=>{try{return HEARD.s.filter(i=>i<6).length}catch(e){return 0}},skin:'gent'};const k=CXMIS.findIndex(x=>x.id==='q3');if(k>=0)CXMIS.splice(k,0,m);else CXMIS.push(m)}}
+/* Wer den Gentleman schon hatte (Aufgabe erledigt oder alle 6 Songs gehört), bekommt ihn zurück */
+function cxGentRestore(){try{let had=false;try{had=cxRead('dfMis',[]).includes('q2')}catch(e){}let heard=[];try{heard=JSON.parse(localStorage.getItem('dfHeard')||'[]')}catch(e){}if(![0,1,2,3,4,5].every(i=>heard.includes(i))&&!had)return false;if(!SKIN.g){SKIN.g=true;try{localStorage.setItem('dfSkinG','1')}catch(e){}return true}}catch(e){}return false}
+{const _a=accApply;accApply=function(d){const r=_a.apply(this,arguments);try{cxGentRestore()}catch(e){}return r}}
+cxGentRestore();
 
 menuStart();
 requestAnimationFrame(frame);

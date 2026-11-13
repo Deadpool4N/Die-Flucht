@@ -70,8 +70,8 @@ export default async function handler(req, res) {
       case "score": {                                 // Siegerzeit einreichen (Bestenliste)
         const mode = String(b.mode || ""), diff = String(b.diff || "").toLowerCase();
         if (!["solo", "p2", "mp"].includes(mode) || !/^[a-zäöü]{3,10}$/.test(diff)) return send({ error: "bad" }, 400);
-        const t = Math.round(+b.t * 10) / 10;
-        if (!(t >= (mode === "mp" ? 20 : 90) && t <= 14400)) return send({ error: "time" }, 400);
+        const t = Math.round(+b.t * 10) / 10, ch = b.cheat ? 1 : 0;   // mit Cheat-Menü gespielt: zählt auch, wird mit ⚙ markiert
+        if (!(t >= (ch ? 3 : mode === "mp" ? 20 : 90) && t <= 14400)) return send({ error: "time" }, 400);
         const name = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim() || "Spieler";
         const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
         const rk = "df:rls:" + hash(ip || sid || "x");
@@ -86,7 +86,7 @@ export default async function handler(req, res) {
         const improved = oldT == null || t < oldT;
         let member = old;
         if (improved) {
-          member = JSON.stringify({ n: name, d: dayKey(now), i: Math.random().toString(36).slice(2, 6) });
+          member = JSON.stringify(Object.assign({ n: name, d: dayKey(now), i: Math.random().toString(36).slice(2, 6) }, ch ? { c: 1 } : {}));
           const cmds = [];
           if (old) cmds.push(["ZREM", key, old]);
           cmds.push(["ZADD", key, t, member], ["HSET", hk, who, member], ["ZREMRANGEBYRANK", key, 100, -1]);
@@ -109,6 +109,62 @@ export default async function handler(req, res) {
         const list = [];
         for (let i = 0; flat && i + 1 < flat.length; i += 2) { try { list.push(Object.assign(JSON.parse(flat[i]), { t: +flat[i + 1] })); } catch (e) {} }
         return send({ ok: true, list, count: +count });
+      }
+      case "recset": {                                // Admin: Rekordzeit eintragen (Cheat-Rekord, wird mit ⚙ markiert)
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const mode = String(b.mode || ""), diff = String(b.diff || "").toLowerCase();
+        if (!["solo", "p2", "mp"].includes(mode) || !/^[a-zäöü]{3,10}$/.test(diff)) return send({ error: "bad" }, 400);
+        const t = Math.round(+b.t * 10) / 10;
+        if (!(t >= 1 && t <= 14400)) return send({ error: "time" }, 400);
+        const name = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim() || "Spieler";
+        const key = "df:lb:" + mode + ":" + diff, hk = "df:lbv:" + mode + ":" + diff, who = "a:" + name.toLowerCase();
+        const [old] = await db([["HGET", hk, who]]);
+        const member = JSON.stringify({ n: name, d: dayKey(now), i: Math.random().toString(36).slice(2, 6), c: 1, a: 1 });
+        const cmds = [];
+        if (old) cmds.push(["ZREM", key, old]);
+        cmds.push(["ZADD", key, t, member], ["HSET", hk, who, member], ["ZREMRANGEBYRANK", key, 100, -1]);
+        await db(cmds);
+        const [rank, count] = await db([["ZRANK", key, member], ["ZCARD", key]]);
+        return send({ ok: true, rank: rank == null ? null : +rank + 1, count: +count, t });
+      }
+      case "recdel": {                                // Admin: eigenen Cheat-Rekord wieder löschen (nur Admin-/Cheat-Einträge dieses Namens)
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const mode = String(b.mode || ""), diff = String(b.diff || "").toLowerCase();
+        if (!["solo", "p2", "mp"].includes(mode) || !/^[a-zäöü]{3,10}$/.test(diff)) return send({ error: "bad" }, 400);
+        const name = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim().toLowerCase();
+        if (!name) return send({ error: "bad" }, 400);
+        const key = "df:lb:" + mode + ":" + diff, hk = "df:lbv:" + mode + ":" + diff;
+        const [all] = await db([["ZRANGE", key, 0, -1]]);
+        const kill = [];
+        for (const m of all || []) { try { const o = JSON.parse(m); if (String(o.n || "").toLowerCase() === name && (o.c || o.a)) kill.push(m); } catch (e) {} }
+        const cmds = [];
+        if (kill.length) cmds.push(["ZREM", key, ...kill]);
+        cmds.push(["HDEL", hk, "a:" + name]);
+        await db(cmds);
+        return send({ ok: true, removed: kill.length });
+      }
+      case "gift": {                                  // Skin verschenken (Empfänger holt ihn beim nächsten Start ab)
+        const clean = (v, n) => str(v, n).replace(/[<>&"'\\]/g, "").trim();
+        const to = clean(b.to, 14).toLowerCase(), from = clean(b.from, 14) || "Jemand", skin = String(b.skin || "");
+        if (to.length < 2) return send({ error: "bad" }, 400);
+        if (skin === "*") { if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401); }
+        else if (!/^[a-z0-9]{2,12}$/.test(skin)) return send({ error: "bad" }, 400);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlg:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 40) return send({ error: "limit" }, 429);
+        const id = "g-" + now + "-" + Math.random().toString(36).slice(2, 6), gk = "df:gift:" + to;
+        await db([["RPUSH", gk, JSON.stringify({ id, s: skin, f: from, t: now })], ["LTRIM", gk, -300, -1], ["EXPIRE", gk, 5184000]]);
+        return send({ ok: true, id });
+      }
+      case "gifts": {                                 // Geschenke für einen Namen lesen (bleiben 60 Tage, das Spiel merkt sich, was schon angekommen ist)
+        const to = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim().toLowerCase();
+        if (to.length < 2) return send({ error: "bad" }, 400);
+        const [arr] = await db([["LRANGE", "df:gift:" + to, -100, -1]]);
+        const list = [];
+        for (const m of arr || []) { try { list.push(JSON.parse(m)); } catch (e) {} }
+        return send({ ok: true, list });
       }
       case "game": {                                  // ein Spiel wurde gestartet
         const m = ["solo", "mp", "p2"].includes(b.m) ? b.m : "solo";

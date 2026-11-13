@@ -4023,6 +4023,141 @@ async function accNameSync(){if(accNameBusy)return 0;accNameBusy=true;let ren=0;
  if(ren)try{accStore();if(accReady())accSave(true)}catch(e){}else try{accStore()}catch(e){}}finally{accNameBusy=false}return ren}
 setTimeout(()=>{try{accNameSync()}catch(e){}},5600);setInterval(()=>{try{if(!document.hidden)accNameSync()}catch(e){}},300000);
 
+
+/* ===================== 50 weitere Skins (insgesamt 139) ===================== */
+Object.assign(CXH3,{
+ fez:(g,c,d)=>{box(.24,.15,.24,0,1.7,0,M(c),g);box(.25,.02,.25,0,1.78,0,M(d||0xffd60a),g);box(.02,.13,.02,.11,1.62,.1,M(d||0xffd60a),g)},
+ beret:(g,c,d)=>{box(.37,.05,.37,.03,1.665,0,M(c),g);box(.3,.04,.3,.03,1.71,0,M(c),g);box(.04,.05,.04,.03,1.75,0,M(d||c),g)},
+ pirate:(g,c,d)=>{const m=M(c);box(.42,.05,.32,0,1.665,0,m,g);[-1,1].forEach(sx=>box(.08,.09,.32,sx*.17,1.72,0,m,g));box(.16,.07,.3,0,1.7,0,m,g);box(.07,.07,.02,0,1.69,.17,M(d||0xffffff),g)},
+ flame:(g,c,d)=>{const a=M(c,c),b=M(d||0xffd60a,d||0xffd60a);[[-.12,.12,a],[-.06,.2,b],[0,.28,a],[.06,.18,b],[.12,.1,a]].forEach(v=>box(.06,v[1],.06,v[0],1.67+v[1]/2,0,v[2],g))},
+ afro:(g,c)=>{const m=M(c);box(.52,.3,.5,0,1.76,-.02,m,g);box(.4,.12,.4,0,1.93,-.02,m,g)},
+ pigtails:(g,c,d)=>{const m=M(c);box(.34,.06,.34,0,1.665,0,m,g);[-1,1].forEach(sx=>{box(.1,.22,.1,sx*.26,1.46,0,m,g);box(.06,.06,.06,sx*.2,1.62,0,M(d||0xff7ad0),g)})},
+ miner:(g,c,d)=>{CXH3.hardhat(g,c,0x111111);box(.08,.07,.05,0,1.7,.18,M(d||0xfff2a0,d||0xfff2a0),g)},
+ ears:(g,c,d)=>{[-1,1].forEach(sx=>{box(.1,.14,.06,sx*.15,1.72,0,M(c),g);box(.05,.08,.02,sx*.15,1.72,.035,M(d||0xffb6c1),g)})},
+ spikehelm:(g,c,d)=>{CXH3.helmet(g,c,0x111111);box(.04,.13,.04,0,1.76,0,M(d||0xffd60a),g)},
+ plume:(g,c,d)=>{CXH3.helmet(g,c,0x111111);[0,1,2,3].forEach(i=>box(.06,.06,.1,0,1.72+i*.035,-.02-i*.07,M(d||0xc8102e),g))},
+ antennae:(g,c,d)=>{[-1,1].forEach(sx=>{box(.02,.17,.02,sx*.08,1.76,0,M(c),g);box(.06,.06,.06,sx*.1,1.87,0,M(d||c,d||c),g)})},
+ capback:(g,c,d)=>{box(.3,.1,.3,0,1.67,0,M(c),g);box(.22,.025,.14,0,1.635,-.2,M(d||c),g)},
+ jester:(g,c,d)=>{box(.34,.1,.34,0,1.68,0,M(c),g);box(.13,.17,.13,-.12,1.79,0,M(d),g);box(.13,.17,.13,.12,1.79,0,M(c),g);[-1,1].forEach(sx=>box(.04,.04,.04,sx*.12,1.9,0,M(0xffd60a,0xffd60a),g))},
+ bowler:(g,c,d)=>{box(.4,.025,.4,0,1.655,0,M(c),g);box(.27,.14,.27,0,1.73,0,M(c),g);box(.275,.03,.275,0,1.69,0,M(d||0x222222),g)},
+ pot:(g,c,d)=>{box(.3,.13,.3,0,1.71,0,M(c),g);box(.34,.02,.34,0,1.65,0,M(d||c),g);box(.1,.03,.03,.2,1.72,0,M(d||c),g)}});
+Object.assign(CXF3,{
+ bigeyes:(g,c)=>{[-1,1].forEach(sx=>{box(.1,.1,.02,sx*.07,1.54,.148,M(0xffffff),g);box(.05,.05,.025,sx*.07,1.54,.152,M(c||0x111111),g)})},
+ fangs:(g,c)=>{[-1,1].forEach(sx=>box(.025,.055,.02,sx*.04,1.425,.148,M(c||0xffffff),g))},
+ blush:(g,c)=>{[-1,1].forEach(sx=>box(.07,.04,.02,sx*.105,1.47,.148,M(c||0xff7a9a),g))},
+ stitches:(g,c)=>{box(.012,.11,.02,0,1.5,.148,M(c||0x222222),g);[1.46,1.5,1.54].forEach(y=>box(.06,.012,.02,0,y,.148,M(c||0x222222),g))},
+ cyclops:(g,c)=>{box(.15,.11,.02,0,1.54,.148,M(0xffffff),g);box(.07,.07,.025,0,1.54,.152,M(c||0xc8102e,c||0xc8102e),g)},
+ snout:(g,c,d)=>{box(.13,.085,.07,0,1.46,.17,M(c),g);box(.05,.03,.02,0,1.485,.21,M(d||0x111111),g)},
+ handlebar:(g,c)=>{const m=M(c||0x2a1a0a);box(.22,.03,.03,0,1.445,.152,m,g);[-1,1].forEach(sx=>box(.04,.05,.03,sx*.12,1.465,.152,m,g))}});
+Object.assign(CXB3,{
+ bowtie:(g,c,d)=>{box(.12,.06,.04,0,1.28,.17,M(c),g);box(.04,.05,.05,0,1.28,.17,M(d||c),g)},
+ sword:(g,c,d)=>{box(.05,.5,.04,.15,1.2,-.2,M(c),g);box(.13,.04,.05,.15,1.46,-.2,M(d||0xffd60a),g)},
+ satchel:(g,c,d)=>{box(.2,.18,.1,-.3,1.0,0,M(c),g);box(.05,.5,.03,0,1.2,.13,M(d||c),g)},
+ chain:(g,c,d)=>{const m=M(c||0xffd60a,c||0xffd60a);[[-.1,1.31],[-.06,1.26],[-.03,1.22],[0,1.2],[.03,1.22],[.06,1.26],[.1,1.31]].forEach(a=>box(.035,.035,.02,a[0],a[1],.172,m,g));box(.06,.06,.025,0,1.15,.172,M(d||0xc8102e,d||0xc8102e),g)},
+ labcoat:(g,c,d)=>{box(.67,.52,.36,0,1.02,0,M(c),g);box(.04,.5,.37,0,1.02,0,M(d||0xaaaaaa),g)}});
+Object.assign(CXP3,{
+ stars:(g,c)=>[[-.12,1.3],[.1,1.25],[-.03,1.15],[.12,1.05],[-.1,.98]].forEach(a=>box(.06,.06,.012,a[0],a[1],.146,M(c,c),g)),
+ camo:(g,c,d)=>[[-.13,1.28,.12,.09],[.07,1.2,.14,.1],[-.08,1.08,.13,.09],[.12,1.02,.1,.1],[-.14,.96,.1,.08]].forEach((a,i)=>box(a[2],a[3],.012,a[0],a[1],.146,M(i%2?(d||0x3a4a2a):c),g)),
+ plaid:(g,c,d)=>{[-.15,0,.15].forEach(x=>box(.035,.4,.012,x,1.12,.146,M(c),g));[1.28,1.12,.96].forEach(y=>box(.4,.035,.012,0,y,.146,M(d||c),g))},
+ bolt:(g,c)=>{const m=M(c,c);box(.07,.14,.012,.04,1.28,.146,m,g);box(.12,.05,.012,0,1.19,.146,m,g);box(.07,.16,.012,-.04,1.09,.146,m,g)},
+ waves:(g,c,d)=>[1.28,1.16,1.04].forEach((y,i)=>[-.15,-.05,.05,.15].forEach((x,k)=>box(.09,.04,.012,x,y+(k%2?.025:0),.146,M(i%2?(d||c):c),g)))});
+Object.assign(CXHS,{
+ fez:(c,d)=>'<rect x="52" y="6" width="56" height="26" rx="4" fill="'+c+'"/><rect x="104" y="14" width="4" height="34" fill="'+d+'"/><circle cx="106" cy="50" r="5" fill="'+d+'"/>',
+ beret:(c,d)=>'<ellipse cx="84" cy="22" rx="44" ry="13" fill="'+c+'"/><circle cx="86" cy="8" r="5" fill="'+d+'"/>',
+ pirate:(c,d)=>'<polygon points="20,34 42,0 118,0 140,34" fill="'+c+'"/><circle cx="80" cy="18" r="8" fill="'+d+'"/><rect x="76" y="24" width="8" height="4" fill="'+c+'"/>',
+ flame:(c,d)=>'<polygon points="46,30 52,-10 64,14 72,-26 82,12 94,-20 102,12 112,-8 116,30" fill="'+c+'"/><polygon points="62,28 72,-6 82,26 92,-2 100,28" fill="'+d+'"/>',
+ afro:c=>'<ellipse cx="80" cy="16" rx="58" ry="42" fill="'+c+'"/>',
+ pigtails:(c,d)=>'<rect x="46" y="12" width="68" height="18" rx="6" fill="'+c+'"/><rect x="26" y="34" width="20" height="50" rx="8" fill="'+c+'"/><rect x="114" y="34" width="20" height="50" rx="8" fill="'+c+'"/><circle cx="36" cy="32" r="7" fill="'+d+'"/><circle cx="124" cy="32" r="7" fill="'+d+'"/>',
+ miner:(c,d)=>CXHS.hardhat(c,'#111111')+'<circle cx="80" cy="12" r="9" fill="'+d+'"/>',
+ ears:(c,d)=>'<circle cx="54" cy="16" r="17" fill="'+c+'"/><circle cx="106" cy="16" r="17" fill="'+c+'"/><circle cx="54" cy="16" r="8" fill="'+d+'"/><circle cx="106" cy="16" r="8" fill="'+d+'"/>',
+ spikehelm:(c,d)=>CXHS.helmet(c,'#111111')+'<polygon points="74,10 80,-22 86,10" fill="'+d+'"/>',
+ plume:(c,d)=>CXHS.helmet(c,'#111111')+'<path d="M80 6 C100 -30 130 -20 138 8 C118 -6 100 0 88 14 Z" fill="'+d+'"/>',
+ antennae:(c,d)=>'<path d="M62 28 L50 -12 M98 28 L110 -12" stroke="'+c+'" stroke-width="5" fill="none"/><circle cx="50" cy="-14" r="8" fill="'+d+'"/><circle cx="110" cy="-14" r="8" fill="'+d+'"/>',
+ capback:(c,d)=>'<rect x="44" y="6" width="72" height="26" rx="10" fill="'+c+'"/><rect x="62" y="28" width="36" height="7" fill="'+d+'"/>',
+ jester:(c,d)=>'<rect x="44" y="14" width="72" height="16" fill="'+c+'"/><polygon points="44,16 52,-24 80,16" fill="'+d+'"/><polygon points="80,16 108,-24 116,16" fill="'+c+'"/><circle cx="52" cy="-26" r="6" fill="#ffd60a"/><circle cx="108" cy="-26" r="6" fill="#ffd60a"/>',
+ bowler:(c,d)=>'<rect x="30" y="24" width="100" height="8" rx="3" fill="'+c+'"/><rect x="48" y="-2" width="64" height="28" rx="14" fill="'+c+'"/><rect x="48" y="16" width="64" height="7" fill="'+d+'"/>',
+ pot:(c,d)=>'<rect x="46" y="4" width="68" height="26" rx="6" fill="'+c+'"/><rect x="38" y="26" width="84" height="6" fill="'+d+'"/><rect x="112" y="10" width="24" height="7" fill="'+d+'"/>'});
+Object.assign(CXFS,{
+ bigeyes:c=>'<circle cx="62" cy="58" r="12" fill="#fff"/><circle cx="98" cy="58" r="12" fill="#fff"/><circle cx="64" cy="60" r="6" fill="'+c+'"/><circle cx="96" cy="60" r="6" fill="'+c+'"/>',
+ fangs:c=>'<polygon points="68,86 74,86 71,98" fill="'+c+'"/><polygon points="86,86 92,86 89,98" fill="'+c+'"/>',
+ blush:c=>'<ellipse cx="52" cy="76" rx="9" ry="5" fill="'+c+'"/><ellipse cx="108" cy="76" rx="9" ry="5" fill="'+c+'"/>',
+ stitches:c=>'<rect x="78" y="52" width="4" height="34" fill="'+c+'"/>'+[56,66,76].map(y=>'<rect x="70" y="'+y+'" width="20" height="3" fill="'+c+'"/>').join(''),
+ cyclops:c=>'<ellipse cx="80" cy="58" rx="20" ry="14" fill="#fff"/><circle cx="80" cy="58" r="8" fill="'+c+'"/>',
+ snout:(c,d)=>'<ellipse cx="80" cy="82" rx="18" ry="12" fill="'+c+'"/><ellipse cx="80" cy="76" rx="7" ry="5" fill="'+d+'"/>',
+ handlebar:c=>'<rect x="62" y="80" width="36" height="6" rx="3" fill="'+c+'"/><path d="M62 82 Q50 80 48 70 M98 82 Q110 80 112 70" stroke="'+c+'" stroke-width="5" fill="none"/>'});
+Object.assign(CXBS,{
+ bowtie:(c,d)=>['front','<polygon points="80,106 64,98 64,114" fill="'+c+'"/><polygon points="80,106 96,98 96,114" fill="'+c+'"/><rect x="76" y="102" width="8" height="8" fill="'+d+'"/>'],
+ sword:(c,d)=>['back','<rect x="116" y="70" width="8" height="110" rx="3" fill="'+c+'" transform="rotate(14 120 125)"/><rect x="108" y="108" width="24" height="7" fill="'+d+'" transform="rotate(14 120 125)"/>'],
+ satchel:(c,d)=>['front','<polygon points="40,98 50,98 116,186 106,186" fill="'+d+'"/><rect x="108" y="160" width="40" height="34" rx="6" fill="'+c+'"/>'],
+ chain:(c,d)=>['front',[[60,104],[66,114],[72,120],[80,122],[88,120],[94,114],[100,104]].map(a=>'<circle cx="'+a[0]+'" cy="'+a[1]+'" r="3.5" fill="'+c+'"/>').join('')+'<circle cx="80" cy="132" r="7" fill="'+d+'"/>'],
+ labcoat:(c,d)=>['front','<rect x="12" y="104" width="136" height="84" rx="4" fill="'+c+'"/><rect x="78" y="104" width="4" height="84" fill="'+d+'"/>']});
+Object.assign(CXPS,{
+ stars:c=>[[62,118],[100,112],[78,140],[104,158],[60,166]].map(a=>'<polygon points="'+a[0]+','+(a[1]-8)+' '+(a[0]+3)+','+(a[1]-2)+' '+(a[0]+9)+','+(a[1]-2)+' '+(a[0]+4)+','+(a[1]+2)+' '+(a[0]+6)+','+(a[1]+9)+' '+a[0]+','+(a[1]+5)+' '+(a[0]-6)+','+(a[1]+9)+' '+(a[0]-4)+','+(a[1]+2)+' '+(a[0]-9)+','+(a[1]-2)+' '+(a[0]-3)+','+(a[1]-2)+'" fill="'+c+'"/>').join(''),
+ camo:(c,d)=>[[48,112,26,18],[84,124,30,20],[56,144,28,18],[96,152,22,20],[46,168,22,16]].map((a,i)=>'<rect x="'+a[0]+'" y="'+a[1]+'" width="'+a[2]+'" height="'+a[3]+'" rx="6" fill="'+(i%2?d:c)+'"/>').join(''),
+ plaid:(c,d)=>[50,80,110].map(x=>'<rect x="'+x+'" y="102" width="8" height="84" fill="'+c+'"/>').join('')+[116,140,164].map(y=>'<rect x="38" y="'+y+'" width="84" height="8" fill="'+d+'"/>').join(''),
+ bolt:c=>'<polygon points="86,108 66,142 80,142 72,176 98,134 84,134" fill="'+c+'"/>',
+ waves:(c,d)=>[120,142,164].map((y,i)=>'<path d="M44 '+y+' q9 -10 18 0 t18 0 t18 0 t18 0" stroke="'+(i%2?d:c)+'" stroke-width="6" fill="none"/>').join('')});
+const CXGEN3=[
+/* ---- 20 × Selten ---- */
+ ['g81','Der Kellner','🍽️','Selten',{sh:0xf4f4f4,pa:0x15151a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['bowler',0x15151a]],['handlebar',0x2a1a0a],['bowtie',0xc8102e,0x15151a],['vest',0x15151a],'Schwarze Melone, Schnurrbart, Fliege und eine feine Weste.'],
+ ['g82','Der Bergmann','⛏️','Selten',{sh:0x6a5a3a,pa:0x3a3a40,sk:0xd8a67e,hr:0x2a1a0a,sb:0x2a2a2a},[['miner',0xe8a020,0xfff2a0]],null,['satchel',0x6a4a2a,0x3a2a1a],['belt',0x2a2a2a],'Helm mit Grubenlampe, Werkzeugtasche und breiter Gürtel.'],
+ ['g83','Der Page','🛎️','Selten',{sh:0xb01030,pa:0x3a1a1a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['fez',0xb01030,0xffd60a]],null,null,['dots',0xffd60a],'Rotes Käppi mit Goldquaste und goldene Knöpfe.'],
+ ['g84','Der Bohemien','🎨','Selten',{sh:0xf2f2f2,pa:0x2a2a30,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['beret',0xc8102e,0x8a0a14]],['handlebar',0x2a1a0a],['scarf',0xc8102e],['hstripes',0x15151a],'Rote Baskenmütze, Zwirbelbart und Ringelshirt.'],
+ ['g85','Der Freibeuter','🏴‍☠️','Selten',{sh:0xe8e0c8,pa:0x4a3a2a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x2a1a0a},[['pirate',0x15151a,0xffffff]],['eyepatch',0x15151a],['sword',0xc0c6cc,0xc8a030],['vest',0x6a1a1a],'Dreispitz mit Totenkopf, Augenklappe und ein Säbel.'],
+ ['g86','Der Feuerwehrmann','🚒','Selten',{sh:0x1a2a4a,pa:0x1a2a4a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['hardhat',0xd01030]],['mustache',0x2a1a0a],null,['hstripes',0xffd60a],'Roter Helm, Schnauzer und Uniform mit Reflexstreifen.'],
+ ['g87','Der Postbote','📮','Selten',{sh:0xffd60a,pa:0x2a3a6a,sk:0xd8a67e,hr:0x3a2a1a,sb:0x2a2a2a},[['cap',0x2a3a6a,0xffd60a]],null,['satchel',0x2a3a6a,0x1a2a4a],['vest',0x2a3a6a],'Blaue Mütze, gelbe Jacke und eine große Posttasche.'],
+ ['g88','Der Barista','☕','Selten',{sh:0xf2f2f2,pa:0x2a2a30,sk:0xd8a67e,hr:0x3a2a1a,sb:0x2a1a0a},[['beanie',0x3a2a1a]],['glasses',0xcfe4ff,0x3a2a1a],null,['apron',0x5a3a1a,0x3a2a1a],'Braune Mütze, Brille und eine Kaffeeschürze.'],
+ ['g89','Der Schaffner','🚂','Selten',{sh:0x1a3a5a,pa:0x1a2a3a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['cap',0x1a3a5a,0xffd60a]],['mustache',0x2a1a0a],['chain',0xffd60a,0x1a3a5a],['vstripes',0xffd60a],'Mütze mit Goldrand, Taschenuhrkette und Streifen.'],
+ ['g90','Der Jogger','🏃','Selten',{sh:0x30c0ff,pa:0x1a1a22,sk:0xd8a67e,hr:0x2a1a0a,sb:0xffffff},[['bandana',0xff3030]],['shades',0x111111],null,['vstripes',0xffffff],'Stirnband, Sonnenbrille und Laufshirt mit Streifen.'],
+ ['g91','Der Biologe','🔬','Selten',{sh:0x8ad0a0,pa:0x2a3a3a,sk:0xd8a67e,hr:0x3a2a1a,sb:0x2a2a2a},[],['glasses',0xcfe4ff,0x222222],['labcoat',0xf4f4f4,0xaaaaaa],['dots',0x30c060],'Weißer Kittel, Schutzbrille und grüne Probenflecken.'],
+ ['g92','Der Gamer','🎮','Selten',{sh:0x2a2a4a,pa:0x15151a,sk:0xd8a67e,hr:0x2a1a0a,sb:0x30ff60},[['phones',0x15151a,0x30ff60]],['glasses',0x88ccff,0x15151a],null,['checker',0x30ff60,0x15151a],'Headset, Brille und ein grün kariertes Zockershirt.'],
+ ['g93','Der Fotograf','📷','Selten',{sh:0x6a7a5a,pa:0x3a3a30,sk:0xd8a67e,hr:0x3a2a1a,sb:0x2a2a2a},[['capback',0x2a2a30,0x2a2a30]],null,['satchel',0x2a2a30,0x15151a],['vest',0x3a4a2a],'Mütze nach hinten, Fototasche und Weste mit Taschen.'],
+ ['g94','Der Camper','⛺','Selten',{sh:0xc8501a,pa:0x3a4a2a,sk:0xd8a67e,hr:0x3a2a1a,sb:0x3a2a1a},[['beanie',0xe8a020]],null,['backpack',0x3a6a3a],['plaid',0x15151a,0x8a2a1a],'Orange Mütze, Wanderrucksack und kariertes Hemd.'],
+ ['g95','Der Erstklässler','🎒','Selten',{sh:0x4aa0ff,pa:0x3a3a5a,sk:0xf0c090,hr:0x6a3a1a,sb:0xffffff},[],['bigeyes',0x111111],['backpack',0xe8302a],['stars',0xffd60a],'Riesiger roter Schulranzen und Sternchen auf dem Pulli.'],
+ ['g96','Der Schneemann','⛄','Selten',{sh:0xffffff,pa:0xe8f0ff,sk:0xffffff,hr:0xffffff,sb:0x8aa0c0},[['bucket',0x2a2a30]],['snout',0xff8a1a,0xff8a1a],['scarf',0xc8102e],['dots',0x15151a],'Eimerhut, Karottennase und roter Schal.'],
+ ['g97','Der Kürbiskopf','🎃','Selten',{sh:0x3a2a4a,pa:0x1a1a22,sk:0xe8801a,hr:0xe8801a,sb:0x15151a},[['afro',0xe8801a]],['stitches',0x15151a],null,['stars',0xffd60a],'Riesiger Kürbis-Schopf mit Nähten und Sternen.'],
+ ['g98','Der Tennisspieler','🎾','Selten',{sh:0xffffff,pa:0xffffff,sk:0xd8a67e,hr:0x2a1a0a,sb:0xf2f2f2},[['bandana',0xffffff]],['shades',0x2a2a30],null,['vstripes',0x30c060],'Weißes Outfit, Stirnband und grüne Streifen.'],
+ ['g99','Der Skater','🛹','Selten',{sh:0x15151a,pa:0x3a4a6a,sk:0xd8a67e,hr:0x2a1a0a,sb:0xe8302a},[['capback',0xe8302a,0x15151a]],['glasses',0x222222,0x222222],null,['checker',0xffffff,0x15151a],'Mütze verkehrt herum und kariertes Shirt.'],
+ ['g100','Der Golfer','⛳','Selten',{sh:0xf2f2f2,pa:0x8ad060,sk:0xd8a67e,hr:0x3a2a1a,sb:0xf2f2f2},[['beret',0xf2f2f2,0xe8302a]],['shades',0x2a2a30],null,['plaid',0xe8302a,0x4a9a2a],'Weiße Kappe und karierte Golfhose in Grün.'],
+/* ---- 20 × Episch ---- */
+ ['g101','Der Piratenkapitän','🦜','Episch',{sh:0x8a1a1a,pa:0x1a1a22,sk:0xd8a67e,hr:0x15151a,sb:0x2a1a0a},[['pirate',0x1a1a22,0xffd60a]],['eyepatch',0x15151a],['chain',0xffd60a,0xc8102e],['vest',0xffd60a],'Goldener Dreispitz, Augenklappe und eine dicke Goldkette.'],
+ ['g102','Der Löwenbändiger','🎪','Episch',{sh:0xc8102e,pa:0xf2f2f2,sk:0xd8a67e,hr:0x2a1a0a,sb:0x15151a},[['tophat',0xc8102e,0xffd60a]],['handlebar',0x15151a],['bowtie',0xffd60a,0xc8102e],['vstripes',0xffd60a],'Roter Zylinder, Zwirbelbart und goldene Zirkus-Streifen.'],
+ ['g103','Der Maschinenmensch','🤖','Episch',{sh:0x8a929c,pa:0x4a525c,sk:0xb0b8c2,hr:0x30e0ff,sb:0x2a2f38},[['antennae',0xc0c6cc,0x30e0ff]],['visor',0x30e0ff],['jetpack',0x6a727c,0x30e0ff],['checker',0x30e0ff,0x4a525c],'Fühler, Visier und Antrieb aus blankem Metall.'],
+ ['g104','Der Feuermagier','🔥','Episch',{sh:0xc8302a,pa:0x4a1a10,sk:0xd8a67e,hr:0xe8801a,sb:0x2a1005},[['flame',0xe8601a,0xffd60a]],['beard',0xe8801a],['cape',0xb0200a],['bolt',0xffd60a],'Haare aus Flammen, Feuerbart und ein glühender Umhang.'],
+ ['g105','Der Eismagier','❄️','Episch',{sh:0x8ad0ff,pa:0x2a4a7a,sk:0xe8eef8,hr:0xffffff,sb:0x1a2a4a},[['wizard',0x8ad0ff,0xe8f6ff]],['beard',0xffffff],['cape',0x4a90d0],['stars',0xffffff],'Eisblauer Hut, weißer Bart und ein funkelnder Umhang.'],
+ ['g106','Der Wolf','🐺','Episch',{sh:0x6a6f78,pa:0x3a3f48,sk:0x8a8f98,hr:0x6a6f78,sb:0x2a2a30},[['ears',0x6a6f78,0xffb6c1]],['snout',0x8a8f98,0x111111],['tail',0x6a6f78,0xc8ccd2],['hstripes',0x8a8f98],'Wolfsohren, graue Schnauze und ein buschiger Schwanz.'],
+ ['g107','Der Waschbär','🦝','Episch',{sh:0x7a7f88,pa:0x4a4f58,sk:0x9a9fa8,hr:0x6a6f78,sb:0x2a2a30},[['ears',0x7a7f88,0x2a2a30]],['bandit',0x15151a],['tail',0x7a7f88,0x15151a],['hstripes',0x15151a],'Räubermaske, Rundohren und ein geringelter Schwanz.'],
+ ['g108','Der Löwe','🦁','Episch',{sh:0xd8a040,pa:0xb88030,sk:0xe8b860,hr:0xa05a1a,sb:0x6a3a10},[['afro',0xa05a1a]],['snout',0xe8c080,0x3a2a1a],['tail',0xd8a040,0x6a3a10],['dots',0xb88030],'Riesige Mähne, helle Schnauze und eine Quaste am Schwanz.'],
+ ['g109','Der Frosch','🐸','Episch',{sh:0x4aa84a,pa:0x2a7a2a,sk:0x6ad06a,hr:0x4aa84a,sb:0x1a5a1a},[['antennae',0x4aa84a,0x6ad06a]],['bigeyes',0x111111],null,['dots',0x2a7a2a],'Glubschaugen, grüne Haut und gepunktete Weste.'],
+ ['g110','Der Dino','🦖','Episch',{sh:0x6ab04a,pa:0x4a8a3a,sk:0x8ad060,hr:0x6ab04a,sb:0x2a5a1a},[['punk',0x4a8a3a]],['fangs',0xffffff],['tail',0x6ab04a,0x4a8a3a],['dots',0x4a8a3a],'Stachelkamm, spitze Zähne und ein dicker Dino-Schwanz.'],
+ ['g111','Der Tiger','🐯','Episch',{sh:0xe8801a,pa:0xc86010,sk:0xf0a040,hr:0xe8801a,sb:0x4a2a0a},[['ears',0xe8801a,0xffffff]],['snout',0xffe0b0,0x3a2a1a],['tail',0xe8801a,0x15151a],['hstripes',0x15151a],'Tigerohren, weiße Schnauze und schwarze Streifen.'],
+ ['g112','Das Gespenst','👻','Episch',{sh:0xf2f2ff,pa:0xe0e0f0,sk:0xf8f8ff,hr:0xf2f2ff,sb:0xc8c8e0},[['hood',0xf2f2ff]],['bigeyes',0x111111],['cape',0xe8e8f8],['waves',0xc8c8e8,0xf8f8ff],'Weißes Gespensterlaken mit Wellenrand und riesigen Augen.'],
+ ['g113','Der Kobold','🍀','Episch',{sh:0x2a8a3a,pa:0x1a5a2a,sk:0xe8b090,hr:0xe8501a,sb:0x2a1a0a},[['tophat',0x2a8a3a,0xffd60a]],['beard',0xe8501a],null,['checker',0xffd60a,0x2a8a3a],'Grüner Zylinder, roter Bart und goldene Kleeblatt-Karos.'],
+ ['g114','Der Berserker','🪓','Episch',{sh:0x6a4a2a,pa:0x3a2a1a,sk:0xd8a67e,hr:0xc87a1a,sb:0x2a1a0a},[['horns',0xe8e0c0],['bandana',0x8a5a2a]],['warpaint',0x30a0ff,0xffffff],['shield',0x8a5a2a,0xc0c6cc],['bolt',0x30a0ff],'Hörner, Stirnband, blaue Kriegsbemalung und ein Holzschild.'],
+ ['g115','Der Blitzläufer','⚡','Episch',{sh:0xffd60a,pa:0xc8102e,sk:0xd8a67e,hr:0x2a1a0a,sb:0xc8102e},[['bandana',0xc8102e]],['bandit',0xc8102e],['cape',0xffd60a],['bolt',0xc8102e],'Rote Maske, gelber Umhang und ein Blitz auf der Brust.'],
+ ['g116','Der Waldgeist','🌿','Episch',{sh:0x4a7a3a,pa:0x2a4a2a,sk:0x9ac07a,hr:0x4a7a3a,sb:0x2a3a1a},[['antlers',0x8a6a3a],['laurel',0x4aa84a]],['beard',0x4aa84a],['poncho',0x3a6a2a,0x6aa84a],['waves',0x6aa84a,0x2a4a2a],'Geweih mit Blätterkranz, Moosbart und Waldumhang.'],
+ ['g117','Der Skelettpirat','💀','Episch',{sh:0xe8e8e0,pa:0xd0d0c8,sk:0xf2f2e8,hr:0xf2f2e8,sb:0xb0b0a8},[['pirate',0x2a2a30,0xffffff]],['stitches',0x2a2a30],['sword',0xc0c6cc,0x8a8f98],['cross',0x2a2a30],'Knochenweiß mit Piratenhut, Säbel und Knochenkreuz.'],
+ ['g118','Der Cyberpunk','🌃','Episch',{sh:0x2a1a4a,pa:0x15151a,sk:0xd8a67e,hr:0xff30d0,sb:0x30e0ff},[['punk',0xff30d0]],['visor',0x30e0ff],['jetpack',0x2a2a40,0xff30d0],['bolt',0x30e0ff],'Neon-Irokese, Cyan-Visier und ein leuchtender Blitz.'],
+ ['g119','Der Verrückte Forscher','🧪','Episch',{sh:0x8ad0a0,pa:0x2a3a3a,sk:0xd8a67e,hr:0xf2f2f2,sb:0x2a2a2a},[['afro',0xf2f2f2]],['goggles',0x30ff60,0x333333],['labcoat',0xf4f4f4,0x30c060],['dots',0x30ff60],'Wilde weiße Haare, Schutzbrille und grün bekleckster Kittel.'],
+ ['g120','Der General','🎖️','Episch',{sh:0x4a5a3a,pa:0x3a4a2a,sk:0xd8a67e,hr:0x3a2a1a,sb:0x15151a},[['cap',0x3a4a2a,0xffd60a]],['handlebar',0x3a2a1a],['chain',0xffd60a,0xc8102e],['camo',0x2a3a1a,0x6a7a4a],'Mütze mit Goldrand, Orden und Tarnmuster.'],
+/* ---- 10 × Legendär ---- */
+ ['g121','Der Drachenkönig','🐉','Legendär',{sh:0x8a0a14,pa:0x3a0508,sk:0xd04a3a,hr:0x2a0a0a,sb:0x15151a},[['crown',0xffd60a],['horns',0xffd60a]],['fangs',0xffffff],['wings',0xc8102e,0x4a0508],['checker',0xffd60a,0x8a0a14],'Goldkrone mit Hörnern, rote Drachenflügel und Schuppen.'],
+ ['g122','Der Galaxie-Wanderer','🌌','Legendär',{sh:0x2a1a5a,pa:0x15103a,sk:0xc8b0ff,hr:0x8a60ff,sb:0x30e0ff},[['halo',0x8a60ff]],['visor',0xff30d0],['cape',0x2a1a6a],['stars',0xffffff],'Leuchtender Ring, Sternen-Umhang und ein Violett-Visier.'],
+ ['g123','Der Kristallritter','💎','Legendär',{sh:0x6ad0f0,pa:0x2a6a9a,sk:0xd8a67e,hr:0xe8f6ff,sb:0x1a4a7a},[['plume',0x8ae0ff,0xe8f6ff]],['visor',0xe8f6ff],['shield',0x6ad0f0,0xe8f6ff],['checker',0xe8f6ff,0x6ad0f0],'Kristallhelm mit Federbusch, Schild und glitzerndem Panzer.'],
+ ['g124','Der Schattenfürst','🌑','Legendär',{sh:0x15151a,pa:0x0a0a0e,sk:0x4a4a56,hr:0x15151a,sb:0x000000},[['hood',0x15151a]],['visor',0xff1030],['cape',0x15151a],['bolt',0x8a30ff],'Kapuze aus Finsternis, rotes Visier und violette Blitze.'],
+ ['g125','Der Lavagolem','🌋','Legendär',{sh:0x3a3a40,pa:0x2a2a30,sk:0x4a4a52,hr:0xe8601a,sb:0x15151a},[['flame',0xe8601a,0xffd60a]],['cyclops',0xff3010],['armor',0x4a4a52,0xe8601a],['checker',0xe8601a,0x2a2a30],'Flammenkopf, glühendes Auge und ein Panzer aus Lavagestein.'],
+ ['g126','Der Neon-Ninja','🥷','Legendär',{sh:0x15151a,pa:0x15151a,sk:0xd8a67e,hr:0x15151a,sb:0x15151a},[['bandana',0xff30d0]],['goggles',0x30ff60,0x15151a],['sword',0x30e0ff,0xff30d0],['bolt',0x30ff60],'Neonfarbenes Stirnband, leuchtende Brille und ein Lichtschwert.'],
+ ['g127','Der Himmelskönig','🌤️','Legendär',{sh:0xfff4d0,pa:0xf2e0a0,sk:0xf0c898,hr:0xffe08a,sb:0xe8c860},[['crown',0xffd60a],['halo',0xffffff]],['bigeyes',0x4a90e0],['wings',0xffffff,0xfff4d0],['stars',0xffd60a],'Goldkrone mit Heiligenschein, weiße Flügel und goldene Sterne.'],
+ ['g128','Der Höllenhund','🐕','Legendär',{sh:0x2a1a1a,pa:0x1a0a0a,sk:0x4a2a2a,hr:0x15151a,sb:0x000000},[['ears',0x15151a,0xc8102e],['flame',0xe8301a,0xffd60a]],['fangs',0xffffff],['tail',0x15151a,0xe8301a],['bolt',0xe8301a],'Schwarze Ohren, Flammenmähne, Reißzähne und ein Feuerschwanz.'],
+ ['g129','Der Weltenbaum','🌳','Legendär',{sh:0x5a3a1a,pa:0x3a2a10,sk:0x8a6a3a,hr:0x3aa84a,sb:0x2a1a0a},[['antlers',0x8a6a3a],['laurel',0x4ad060]],['beard',0x3aa84a],['poncho',0x2a7a2a,0x5ad060],['camo',0x2a6a2a,0x6a4a1a],'Geweih voller Blätter, Moosbart und ein Umhang aus Laub.'],
+ ['g130','Der Kosmos-Gott','✨','Legendär',{sh:0x1a1a3a,pa:0x0a0a22,sk:0xc0b0ff,hr:0xffffff,sb:0xffd60a},[['halo',0xffd60a],['crown',0x8a60ff]],['cyclops',0x30e0ff],['cape',0x2a1a6a],['stars',0xffd60a],'Strahlenkranz, kosmische Krone, ein Auge voller Sterne und Umhang.']];
+{const RC={'Selten':'#4da3ff','Episch':'#b86bff','Legendär':'#ffb020'};
+ CXGEN3.forEach(a=>{const sp={id:a[0],n:a[1],ic:a[2],r:a[3],c:a[4],h:a[5],f:a[6],b:a[7],p:a[8],d:a[9]};CSKG[sp.id]=sp;
+  CSK[sp.id]={n:sp.n,ic:sp.ic,c:sp.c};MPSK[sp.id]=sp.c;CXRAR[sp.id]={r:sp.r,c:RC[sp.r],d:sp.d};CXSVG[sp.id]=cxGenSvg(sp);
+  CXSKINS.push({id:sp.id,n:sp.n,ic:sp.ic,get p(){return cxPrice(this.id)},own:()=>cxOwnsSk(sp.id),give(){const x=cxShop();if(!x.skins.includes(sp.id))x.skins.push(sp.id);cxWrite('dfShop',x)}})});
+ const TPL=[['escapes','Fliehe {n}× im Einzelspieler.',[6,12,20]],['started','Starte {n} Spiele.',[35,65,120]],['online','Spiele {n} Online-Runden zu Ende.',[18,32,60]],['onlineEsc','Entkomme {n}× in Online-Runden.',[9,16,28]],['fast','Fliehe {n}× schneller als die Richtzeit.',[6,11,18]],['clean','Fliehe {n}× ohne Tod.',[11,18,30]],['p2','Schließe Teil 2 {n}× ab.',[5,8,13]],['hunterWins','Gewinne {n}× als Jäger.',[6,11,18]],['earned','Verdiene insgesamt {n} Coins.',[15000,30000,55000]],['hardClean','Schaffe „Schwer“ {n}× ohne Tod.',[6,10,15]]];
+ CXGEN3.forEach((a,i)=>{const t=TPL[(i*3+1)%TPL.length],tier={'Selten':0,'Episch':1,'Legendär':2}[a[3]],n=t[2][tier];CXMIS.push({id:'s'+a[0].slice(1),t:'Sammler: '+a[1],d:t[1].replace('{n}',n.toLocaleString('de-DE')),r:0,g:n,p:s=>s[t[0]]||0,skin:a[0]})})}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

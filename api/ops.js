@@ -219,8 +219,10 @@ export default async function handler(req, res) {
         const [known] = await db([["HGET", "df:names", to]]);
         if (!known) return send({ error: "noname" }, 404);
         const id = "g-" + now + "-" + Math.random().toString(36).slice(2, 6), gk = "df:gift:" + to, code = newCode(12);
+        const gsec = str(b.gsec, 60), gh = gsec.length >= 8 ? hash(gsec + "|g|" + id) + hash(id + "|g|" + gsec) : "";   // Geheimnis des Schenkers: nur er (oder der Admin) kann das Geschenk zurücknehmen
         await db([["RPUSH", gk, JSON.stringify({ id, s: skin, f: from, t: now })], ["LTRIM", gk, -300, -1], ["EXPIRE", gk, 5184000],
-                  ["SET", "df:gc:" + code, JSON.stringify({ s: skin, f: from, to, t: now })], ["EXPIRE", "df:gc:" + code, 5184000]]);
+                  ["SET", "df:gc:" + code, JSON.stringify({ s: skin, f: from, to, t: now, id })], ["EXPIRE", "df:gc:" + code, 5184000],
+                  ["SET", "df:gm:" + id, JSON.stringify({ to, s: skin, gh, code, t: now })], ["EXPIRE", "df:gm:" + id, 5184000]]);
         return send({ ok: true, id, code });
       }
       case "redeem": {                                // Geschenk-Code einlösen (einmalig)
@@ -235,15 +237,46 @@ export default async function handler(req, res) {
         if (!v) return send({ error: "nocode" }, 404);
         await db([["DEL", "df:gc:" + code]]);
         let g = {}; try { g = JSON.parse(v); } catch (e) {}
-        return send({ ok: true, s: g.s, f: g.f || "Jemand" });
+        return send({ ok: true, s: g.s, f: g.f || "Jemand", id: g.id || "" });
       }
-      case "gifts": {                                 // Geschenke für einen Namen lesen (bleiben 60 Tage, das Spiel merkt sich, was schon angekommen ist)
+      case "gifts": {                                 // Geschenke für einen Namen lesen (bleiben 60 Tage); zurückgenommene fehlen, die Antwort nennt außerdem, welche der angegebenen IDs zurückgenommen wurden
         const to = nkey(b.name);
         if (to.length < 2) return send({ error: "bad" }, 400);
         const [arr] = await db([["LRANGE", "df:gift:" + to, -100, -1]]);
-        const list = [];
+        let list = [];
         for (const m of arr || []) { try { list.push(JSON.parse(m)); } catch (e) {} }
-        return send({ ok: true, list });
+        const chk = Array.isArray(b.ids) ? b.ids.map((x) => str(x, 40)).filter((x) => /^g-\d+-[a-z0-9]+$/.test(x)).slice(0, 200) : [];
+        const all = Array.from(new Set(list.map((g) => g.id).concat(chk)));
+        const rv = [];
+        if (all.length) { const [vals] = await db([["MGET", ...all.map((i) => "df:gr:" + i)]]); (vals || []).forEach((v, i) => { if (v) rv.push(all[i]); }); }
+        list = list.filter((g) => !rv.includes(g.id));
+        return send({ ok: true, list, rv: rv.filter((i) => chk.includes(i)) });
+      }
+      case "giftrev": {                               // Geschenk zurücknehmen: der Schenker mit seinem Geheimnis oder der Admin
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlv:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 60) return send({ error: "limit" }, 429);
+        const revoke = async (id, meta) => { await db([["SET", "df:gr:" + id, String(now)], ["EXPIRE", "df:gr:" + id, 5184000]]); if (meta && meta.code) await db([["DEL", "df:gc:" + meta.code]]); };
+        if (b.key !== undefined) {                      // Admin: alle Geschenke eines Spielers (einzelner Skin oder „*“ = alle)
+          if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+          const to = nkey(b.to), skin = String(b.skin || "*");
+          if (to.length < 2) return send({ error: "bad" }, 400);
+          const [arr] = await db([["LRANGE", "df:gift:" + to, 0, -1]]);
+          let n = 0;
+          for (const m of arr || []) { try { const g = JSON.parse(m); if (skin !== "*" && g.s !== skin) continue; const [done] = await db([["GET", "df:gr:" + g.id]]); if (done) continue; const [mm] = await db([["GET", "df:gm:" + g.id]]); let meta = null; try { meta = mm ? JSON.parse(mm) : null; } catch (e) {} await revoke(g.id, meta); n++; } catch (e) {} }
+          return send({ ok: true, n });
+        }
+        const id = str(b.id, 40), gsec = str(b.gsec, 60);
+        if (!/^g-\d+-[a-z0-9]+$/.test(id) || gsec.length < 8) return send({ error: "bad" }, 400);
+        const [mm, done] = await db([["GET", "df:gm:" + id], ["GET", "df:gr:" + id]]);
+        if (!mm) return send({ error: "nogift" }, 404);
+        let meta = {}; try { meta = JSON.parse(mm); } catch (e) {}
+        if (!meta.gh || meta.gh !== hash(gsec + "|g|" + id) + hash(id + "|g|" + gsec)) return send({ error: "auth" }, 401);
+        if (done) return send({ ok: true, already: true });
+        await revoke(id, meta);
+        return send({ ok: true });
       }
       case "game": {                                  // ein Spiel wurde gestartet
         const m = ["solo", "mp", "p2"].includes(b.m) ? b.m : "solo";

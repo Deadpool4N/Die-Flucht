@@ -680,7 +680,7 @@ function updWorld(dt,t,now){if(ovOn)return;
  if(miniOn){$('mini').style.display=cr===3?'block':'none';if(cr===3&&((mT+=dt)>.08)){mT=0;drawMini()}}
  runK+=(mvRun-runK)*Math.min(1,dt*6);mvRun=0;if(!drv.view){cam.fov=FOVB()+8*runK;cam.updateProjectionMatrix()}
  let v=0;
- if(ch.on&&cr===5){const dx=pos.x-(100+hunter.position.x),dz=pos.z-hunter.position.z,L=Math.hypot(dx,dz),sp=now<(ch.stun||0)?0:DF.hunter*dt;
+ if(ch.on&&cr===5){const dx=pos.x-(100+hunter.position.x),dz=pos.z-hunter.position.z,L=Math.hypot(dx,dz),sp=now<(ch.stun||0)?0:cxChSp(now)*dt;
   if(L>.01){hunter.position.x+=dx/L*sp;hunter.position.z+=dz/L*sp}hunter.rotation.y=Math.atan2(dx,dz);hunter.rotation.z=Math.sin(t*7)*.06;hunter.position.y=Math.abs(Math.sin(t*8))*.06;
   v=1-Math.min(1,(L-1)/7);if(L<.9&&!CH.god&&now>=(ch.stun||0))caught('Der Jäger hat dich!')}
  if(gd.on&&!gd.climb)dogs.forEach(d=>{const L=Math.hypot(pos.x-(120+d.position.x),pos.z-d.position.z);v=Math.max(v,1-Math.min(1,(L-1)/7))});
@@ -3901,6 +3901,13 @@ function cxMdlHTML(){const ov=cxMdlOv();return '<div class="cap" style="margin-t
   if(g('mdlreset'))g('mdlreset').onclick=()=>{const id=cur(),o=cxMdlOv();delete o[id];cxMdlSetOv(o);CXMDL[id]=null;cxApplyCar(cxCarSel());fill();msg('Zurückgesetzt: eingebautes Auto')};
   if(g('mdljson'))g('mdljson').onclick=()=>{const o={};CXCARS.forEach(c=>{const x=cxMdlCfg(c.id);if(x.url)o[c.id]=x});msg(Object.keys(o).length?JSON.stringify(o):'Noch keine Modelle eingetragen.')}}}
 cxMdlInit();
+
+
+/* ===================== Verfolgungsjagd im Haus: faire Jäger-Geschwindigkeit ===================== */
+/* Vorher: Der Jäger stand nur 2,9 m hinter dir und rannte sofort mit 3,4 m/s (Mittel) los, noch bevor man sich umgesehen hatte. Jetzt: kurzer Vorsprung, dann Anlaufen, und etwas langsamer. */
+const CXCH={Leicht:{sp:2.2,delay:3.2},Mittel:{sp:3,delay:2.2},Schwer:{sp:3.4,delay:1.8}};
+function cxChSp(now){const k=Object.keys(LV).find(n=>LV[n]===DF)||'Mittel',c=CXCH[k]||CXCH.Mittel,e=(now-(ch.t0||now))/1000,r=Math.max(0,Math.min(1,(e-c.delay)/1.5));return c.sp*r}
+{const _c=chStep;chStep=function(){const r=_c.apply(this,arguments);ch.t0=performance.now();try{toast('Der Jäger braucht einen Moment, um loszurennen. Los, zur richtigen Tür!','err')}catch(e){}return r}}
 
 menuStart();
 requestAnimationFrame(frame);

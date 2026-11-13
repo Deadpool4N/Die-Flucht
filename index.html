@@ -4320,6 +4320,21 @@ function mpX(){const d=document.getElementById('mpx');if(!d)return;let h='';
 {const _c=mpChatUI;mpChatUI=function(){const r=_c.apply(this,arguments);try{const a=MP.sd||[],first=document.querySelector('[data-ph]');if(first&&a.some(x=>x!==undefined)){const grp=first.parentNode;
    a.forEach((dg,i)=>{if(dg===undefined)return;const b=document.createElement('button');b.className='row';b.innerHTML='<span class="tx"><b>🔐 Zettel '+(i+1)+' teilen: Ziffer '+dg+'</b></span>';b.onclick=()=>{mpSend({t:'chat',m:'Geheimcode, Ziffer '+(i+1)+': '+dg});closeOv()};grp.appendChild(b)})}}catch(e){}return r}}
 
+
+/* ===================== Cheat-Menü: Geheimtresor-Teleport + Powertrank ===================== */
+{const P=MPHost.prototype,o=P.adm;P.adm=function(p,m){
+  if(m&&m.pw==='1709'&&(m.k==='svault'||m.k==='pwr')&&this.phase==='play'&&this.W&&this.lv!==2){
+   const say=t=>this.bcast({t:'e',k:'txt',m:'⚙ Admin: '+t});this.cheat=1;
+   if(m.k==='svault'&&this.W.sv){const sv=this.W.sv;sv.o=1;sv.who=p.id;p.x=5.4;p.z=-13.2;this.send(p.id,{t:'e',k:'tp',x:p.x,z:p.z});say(p.name+' ist im Geheimtresor.')}
+   if(m.k==='pwr'){if(p.role!=='p')return;if(p.inv.length>=3)p.inv.pop();p.inv.push('pwr');this.send(p.id,{t:'e',k:'txt',m:'⚙ Powertrank im Inventar.'})}
+   return}
+  return o.apply(this,arguments)}}
+{const _e=mpEvent;mpEvent=function(e){if(e&&e.k==='tp'){try{pos.x=300+e.x;pos.z=e.z}catch(x){}return}return _e.apply(this,arguments)}}
+{const _ah=cxAdminHTML;cxAdminHTML=function(online){let h=_ah.apply(this,arguments);if(online)h+='<div class="cap" style="margin-top:14px">🧪 Extras (nur diese Runde)</div><div class="grp"><button class="row" id="admo6"><span class="tx"><b>🔐 In den Geheimtresor teleportieren</b><small>Öffnet ihn für dich und setzt dich hinein</small></span></button><button class="row" id="admo7"><span class="tx"><b>🧪 Powertrank nehmen</b><small>Legt einen Powertrank in dein Inventar (nicht als Jäger)</small></span></button></div>';return h};
+ const _ab=cxAdminBind;cxAdminBind=function(online){_ab.apply(this,arguments);const g=id=>document.getElementById(id),T=m=>{try{toast(m,'good')}catch(e){}};
+  if(online&&g('admo6'))g('admo6').onclick=()=>{try{mpSend({t:'adm',pw:'1709',k:'svault'})}catch(e){}try{closeOv()}catch(e){}T('Teleport in den Geheimtresor')};
+  if(online&&g('admo7'))g('admo7').onclick=()=>{try{mpSend({t:'adm',pw:'1709',k:'pwr'})}catch(e){}T('Powertrank angefordert')}}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

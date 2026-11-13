@@ -1857,7 +1857,7 @@ function mpLayout(){const T=.3,walls=[],add=(x0,z0,x1,z1)=>{const cx=(x0+x1)/2,c
  hw(-15,-20,20,[]);hw(15,-20,20,[[-2,2]]);vw(-20,-15,15,[]);vw(20,-15,15,[]);
  [-7,7].forEach(x=>vw(x,-15,15,[[-11.5,-8.5],[-1.5,1.5],[8.5,11.5]]));
  [-5,5].forEach(z=>{hw(z,-20,-7,[[-15,-12]]);hw(z,7,20,[[12,15]]);hw(z,-7,7,[[-1.5,1.5]])});
- hw(-3.5,14,20,[]);hw(3.5,14,20,[]);vw(14,-3.5,3.5,[[-1.5,1.5]]);
+ hw(-3.5,14,20,[]);hw(3.5,14,20,[]);vw(14,-3.5,3.5,[[-1.5,1.5]]);vw(3.8,-15,-12.2,[]);hw(-12.2,3.8,7,[[4.6,6.2]]);
  const fur=[[-12,-10,3,1.4,.9,0x5a3d22],[-9.5,-14.3,4,.8,1,0x4a4a52],[-18.2,-2,.9,3,.8,0x3a2a50],[13,-9,.6,4,2,0x4a3524],[14,9,4,1,.9,0x4a4f58],[0,0,2,2,.8,0x5a3d22],[-17,11,2,3,.5,0x6a2a2a]];
  return {walls,fur,vault:[14,0,.3,3],gate:[0,14.9,4,.3]}}
 const mpBox=a=>[a[0]-a[2]/2,a[0]+a[2]/2,a[1]-a[3]/2,a[1]+a[3]/2];
@@ -1904,7 +1904,7 @@ class MPHost{
   if(sm)nm='keshynr';
   if(this.nameTaken(nm,id,sm)){if(id==='h0'){nm=this.cleanName(nm==='keshynr'?'Spieler':nm,id)}else{this.lastErr='Der Name „'+nm+'“ ist schon vergeben. Wähle einen anderen Namen.';return false}}
   const used=this.order.map(i=>this.P[i].ci);let ci=0;while(used.includes(ci))ci++;
-  this.P[id]={id,name:nm,sm:sm?1:0,sk:['mask','gent','ynr'].concat(typeof CSK==='object'?Object.keys(CSK):[]).includes(sk)?sk:'default',bn:(Array.isArray(bn)?bn:[]).filter((t,i,a)=>['rev','tas','med','nrg'].includes(t)&&a.indexOf(t)===i).slice(0,3),ci,x:0,z:0,ry:0,m:0,hp:MPM.HP,st:'ok',role:'p',inv:[],boost:0,stun:0,sh:0,cd:0,rl:0,rb:null,rp:0,left:0};
+  this.P[id]={id,name:nm,sm:sm?1:0,sk:['mask','gent','ynr'].concat(typeof CSK==='object'?Object.keys(CSK):[]).includes(sk)?sk:'default',bn:(Array.isArray(bn)?bn:[]).filter((t,i,a)=>['rev','pwr','tas','med','nrg'].includes(t)&&a.indexOf(t)===i).slice(0,3),ci,x:0,z:0,ry:0,m:0,hp:MPM.HP,st:'ok',role:'p',inv:[],boost:0,stun:0,sh:0,cd:0,rl:0,rb:null,rp:0,left:0};
   this.order.push(id);this.lobby();return true}
  remove(id){const p=this.P[id];if(!p)return;
   if(this.phase==='lobby'||this.phase==='end'){delete this.P[id];this.order=this.order.filter(i=>i!==id);this.lobby();return}
@@ -1919,7 +1919,7 @@ class MPHost{
   this.order.forEach(i=>{const p=this.P[i];Object.assign(p,{hp:MPM.HP,st:'ok',inv:[],boost:0,stun:0,cd:0,rl:0,rb:null,rp:0,left:0,m:0});
    if(i===this.hid){p.role='h';p.hp=D.hh;p.sh=4;p.x=MPM.HS[0];p.z=MPM.HS[1];p.ry=0}
    else{p.role='p';p.sh=0;const s=spawns[(k++)%spawns.length];p.x=s[0];p.z=s[1];p.ry=0;if(p.bn)p.bn.forEach(t=>{if(p.inv.length<3)p.inv.push(t)})}});
-  const types=['med','med','med','med','nrg','nrg','nrg','nrg','tas','tas','tas','trp','trp','trp','loot','loot','loot','loot'],it=new Array(MPM.SP.length).fill('');
+  const types=['med','med','med','pwr','nrg','nrg','nrg','pwr','tas','tas','tas','trp','trp','trp','loot','loot','loot','loot'],it=new Array(MPM.SP.length).fill('');
   const idx=this.shuf([...Array(MPM.SP.length).keys()]);types.forEach((t,j)=>{it[idx[j]]=t});
   let code='';for(let j=0;j<4;j++)code+=this.rnd(10);
   this.W={pow:0,fu:0,fa:[1,1,1],pl:[0,0,0],pt:[0,0,0],hold:0,vault:0,key:0,kp:null,kh:'',exit:0,it,tr:[],code,pts:0,tp:D.pts};
@@ -1997,7 +1997,7 @@ class MPHost{
    if(p.st==='down'){p.hp-=dt;if(p.hp<=0){this.kill(p);return}
     if(p.rb){const r=this.P[p.rb];if(!r||r.st!=='ok'||mpDist(r.x,r.z,p.x,p.z)>3.2){p.rb=null;p.rp=0}else{p.rp+=dt;if(p.rp>=MPM.REV){p.st='ok';p.hp=40;p.rb=null;p.rp=0;this.bcast({t:'e',k:'txt',m:p.name+' wurde wiederbelebt!'})}}}}});
   const pr=[0,0,0];for(let k=0;k<3;k++)W.pt[k]=Math.max(0,(W.pt[k]||0)-dt);if(W.pow)MPM.PL.forEach((c,k)=>{const stand=this.order.some(i=>{const q=this.P[i];return q.role==='p'&&q.st==='ok'&&mpDist(q.x,q.z,c[0],c[1])<1.3});pr[k]=(stand||W.pt[k]>0)?1:0});
-  if(this.hs<=0){this.spT+=dt;const D=MPD[this.diff];if(this.spT>=D.iv){this.spT=0;const em=[];W.it.forEach((t,i)=>{if(!t)em.push(i)});if(em.length)W.it[em[this.rnd(em.length)]]=['med','nrg','tas','trp','loot','loot','loot'][this.rnd(7)]}}
+  if(this.hs<=0){this.spT+=dt;const D=MPD[this.diff];if(this.spT>=D.iv){this.spT=0;const em=[];W.it.forEach((t,i)=>{if(!t)em.push(i)});if(em.length)W.it[em[this.rnd(em.length)]]=['med','nrg','tas','trp','pwr','loot','loot','loot'][this.rnd(8)]}}
   W.pl=pr;if(pr[0]&&pr[1]&&pr[2])W.hold+=dt;else W.hold=Math.max(0,W.hold-dt*2);
   if(!W.vault&&W.hold>=2){W.vault=1;this.bcast({t:'e',k:'txt',m:'🔓 Die Tresortür öffnet sich!'})}
   if(h&&h.st==='ok'&&!(h.ko>0))W.tr=W.tr.filter(t=>{if(mpDist(h.x,h.z,t.x,t.z)<1.1){h.stun=Math.max(h.stun,4);this.bcast({t:'e',k:'txt',m:'🪤 Der Jäger ist in eine Falle getappt!'});this.hurtHunter(120,4);return false}return true});
@@ -2270,7 +2270,7 @@ function mpHud(){if(!MP.snap)return;const s=MP.snap,me=mpMe(),st=me?me[4]:'ok',m
 function mpFrame(){if(!MP.on)return;const now=performance.now(),dt=Math.min(.1,(now-(MP.ft||now))/1e3);MP.ft=now;if(cr!==15)return;
  lamp.position.set(pos.x,2.8,pos.z);lamp.distance=19;lamp.intensity=MP.W&&MP.W.pow?1.6:1.15;sc.fog.near=4;sc.fog.far=MP.W&&MP.W.pow?32:22;
  const me=mpMe(),st=me?me[4]:'ok';MPSPD=1;
- if(MP.role==='h'){MPSPD=MP.hf||.78;if(me&&me[8])MPSPD=0}else{if(st==='down')MPSPD=.3;if(me&&me[7])MPSPD*=1.35}
+ if(MP.role==='h'){MPSPD=MP.hf||.78;if(me&&me[8])MPSPD=0}else{if(st==='down')MPSPD=.3;if(me&&me[7])MPSPD*=(me[12]?1.55:1.35)}
  const _sp0=MP.role==='p'&&(st==='dead'||st==='esc');H+=((_sp0?(MP.specH||1.6):(st==='down'||st==='dead'?.6:1.6))-H)*Math.min(1,dt*6);
  const spec=MP.role==='p'&&(st==='dead'||st==='esc'),frozen=MP.role==='h'&&MP.hs>0,want=frozen||spec||MP.ph==='end';if(frozen)MPSPD=0;if(MP.ph==='play'||MP.ph==='end'){lm=want;MP._lm=want}
  if(spec&&MP.snap){let t=MP.snap.ps.find(p=>p[0]===MP.spec&&p[0]!==MP.myId&&(p[4]==='ok'||p[4]==='down'));if(!t){t=MP.snap.ps.find(p=>p[0]!==MP.myId&&p[4]==='ok');MP.spec=t?t[0]:''}if(t){pos.set(300+t[1],0,t[2]);Y=t[3];Pt+=((t[11]||0)-Pt)*Math.min(1,dt*12);MP.specH=t[4]==='down'?.6:1.6;MP.specN=MP.names[t[0]]||''}}
@@ -3015,7 +3015,7 @@ const cxCoins=()=>{if(cxInfOn())return Infinity;try{return Math.max(0,Math.floor
 function cxSet(v){if(cxInfOn())return;try{localStorage.setItem('dfCoins',String(Math.max(0,Math.floor(v))))}catch(e){}try{accSave()}catch(e){}}
 function cxAdd(n){n=Math.floor(+n||0);if(!n)return 0;cxSet(cxCoins()+n);if(n>0){const st=cxRead('dfStats',{});st.earned=(st.earned||0)+n;cxWrite('dfStats',st)}return n}
 const cxInv=()=>cxRead('dfInv',{});
-const cxBn=()=>['rev','tas','med','nrg'].filter(t=>(cxInv()[t]||0)>0);
+const cxBn=()=>['rev','pwr','tas','med','nrg'].filter(t=>(cxInv()[t]||0)>0);
 const cxShop=()=>{const x=cxRead('dfShop',{skins:[]});if(!Array.isArray(x.skins))x.skins=[];if(!Array.isArray(x.cars))x.cars=[];return x};
 const CSK={gold:{n:'Der Goldene',ic:'👑',c:{sh:0xd4a017,pa:0x3a2a0a,sk:0xe8c9a0,hr:0xffd60a,sb:0x6b4a10}},neon:{n:'Neon',ic:'⚡',c:{sh:0x0a0f2a,pa:0x2a0b5a,sk:0xf1c7a8,hr:0xff2bd6,sb:0x00ff9d}},ghost:{n:'Der Geist',ic:'👻',c:{sh:0xeaf3ff,pa:0xcfe4ff,sk:0xf4f9ff,hr:0xffffff,sb:0xbcd6f2}},
  pirate:{n:'Der Pirat',ic:'🏴‍☠️',c:{sh:0x2b4a7a,pa:0x3a2a1a,sk:0xd8a67e,hr:0x1a120c,sb:0x2a1a0a}},knight:{n:'Der Ritter',ic:'🛡️',c:{sh:0x9aa3ad,pa:0x5a6470,sk:0xd8a67e,hr:0x9aa3ad,sb:0x3a3f46}},robot:{n:'Der Roboter',ic:'🤖',c:{sh:0x6b7480,pa:0x3b4048,sk:0x8a939e,hr:0x8a939e,sb:0x23262b}},dragon:{n:'Der Drache',ic:'🐉',c:{sh:0x7a1018,pa:0x2a0a0c,sk:0xa84a2a,hr:0x1a0808,sb:0x000000}}};
@@ -3467,7 +3467,7 @@ Object.assign(MPHost.prototype,{
  startLevel2(){const players=this.order.map(i=>this.P[i]).filter(p=>p.role==='p'&&!p.left),h=this.P[this.hid];if(!players.length||!h)return false;
   this.lv=2;if(!this.wallsH)this.wallsH=this.walls;this.walls=mpArenaBoxes();
   const hm=1500+500*players.length;this.hm=hm;Object.assign(h,{hp:hm,sh:6,rl:0,cd:1.5,stun:0,ko:0,st:'ok',x:L2.HS[0],z:L2.HS[1],ry:0,m:0});
-  players.forEach((p,k)=>{const sp=L2.PS[k%L2.PS.length];Object.assign(p,{x:sp[0],z:sp[1],ry:Math.PI,st:'ok',hp:MPM.HP,rb:null,rp:0,boost:0,stun:0,cd:0,wcd:0,wp:0,am:0,m:0});p.inv=p.inv.filter(t=>t==='med'||t==='nrg'||t==='rev')});
+  players.forEach((p,k)=>{const sp=L2.PS[k%L2.PS.length];Object.assign(p,{x:sp[0],z:sp[1],ry:Math.PI,st:'ok',hp:MPM.HP,rb:null,rp:0,boost:0,stun:0,cd:0,wcd:0,wp:0,am:0,m:0});p.inv=p.inv.filter(t=>t==='med'||t==='nrg'||t==='rev'||t==='pwr')});
   this.l2={dogs:[],dr:[],nid:0,spT:3,wave:1,wT:0,rage:0};this.tm=L2.TIME;this.tt=L2.TIME;this.hs=6;
   this.order.forEach(i=>{const p=this.P[i];this.send(i,{t:'l2',x:p.x,z:p.z,ry:p.ry,hs:this.hs,hm,hf:.95,tm:this.tm})});
   this.bcast({t:'e',k:'txt',m:'🐕 Level 2: Der Garten! Der Jäger ist stärker und ruft Hunde. Schießt auf Hunde (Items!) und besiegt den Jäger.'});return true},
@@ -4221,6 +4221,104 @@ try{Object.values(ACC.list).forEach(a=>{if(a&&a.data)cxSkinClean(a.data)});accSt
 function cxGentRestore(){try{let had=false;try{had=cxRead('dfMis',[]).includes('q2')}catch(e){}let heard=[];try{heard=JSON.parse(localStorage.getItem('dfHeard')||'[]')}catch(e){}if(![0,1,2,3,4,5].every(i=>heard.includes(i))&&!had)return false;if(!SKIN.g){SKIN.g=true;try{localStorage.setItem('dfSkinG','1')}catch(e){}return true}}catch(e){}return false}
 {const _a=accApply;accApply=function(d){const r=_a.apply(this,arguments);try{cxGentRestore()}catch(e){}return r}}
 cxGentRestore();
+
+
+/* ===================== Powertrank + Geheimtresor (Online) ===================== */
+const POTIMG='data:image/jpeg;base64,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';
+CXIT.push({id:'pwr',n:'Powertrank',ic:'🧪',p:350,img:POTIMG,d:'Wird zu Beginn jeder Online-Runde mitgenommen (nicht als Jäger). 20 Sekunden lang: viel schneller, stärker (Taser +60 %, doppelt so schnelles Wiederbeleben) und zäher (40 % weniger Schaden) – dazu sofort +25 Leben. Liegt auch manchmal im Haus und im Geheimtresor.'});
+MPM.NM.pwr='Powertrank';MPM.AC.pwr='Trinken';MPM.PV.pwr=4;MPM.HT.pwr=' → Knopf unten oder Taste 1–3: 20 s schneller, stärker und zäher (+25 Leben).';MPEM.pwr='🧪';MPIC.pwr=0xb040ff;
+{const _mm=mpModel;mpModel=function(ty){if(ty!=='pwr')return _mm.apply(this,arguments);
+ const g=new THREE.Group(),add=(geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x||0,y||0,z||0);g.add(m);return m};
+ add(new THREE.SphereGeometry(.17,14,12),mpM({color:0x8a2be2,emissive:0x4a0f9a,roughness:.25,metalness:.1}),0,0,0);
+ add(new THREE.CylinderGeometry(.06,.07,.14,10),mpM({color:0xb8b0ff,emissive:0x2a2a55,roughness:.2}),0,.2,0);
+ add(new THREE.CylinderGeometry(.065,.055,.07,8),mpM({color:0xb8702d,emissive:0x2a1608}),0,.3,0);
+ return g}}
+
+/* ---- Geheimtresor: Daten ---- */
+const SVN=[[-8.5,-6.5],[-19,-7],[0,-6.5],[-5.5,-9.5],[8.5,-6.5],[19,-13.5],[-12,3],[-9,.5],[6,.5],[-6,-3],[10,-1],[-8.5,13],[-19,7],[8.5,13],[8,6.5],[-4,7]];
+const SVK=[5.4,-11.3],SVC=[[4.5,-14.2],[5.4,-14.2],[6.3,-14.2]];
+/* ---- Host-Logik ---- */
+{const P=MPHost.prototype,W=(n,f)=>{const o=P[n];P[n]=function(){return f.call(this,o,...arguments)}};
+ W('start',function(o,force){const r=o.apply(this,[force]);if(r==='ok'&&this.W){let c='';for(let j=0;j<5;j++)c+=this.rnd(10);
+   this.W.sv={c,o:0,who:'',sp:this.shuf([...Array(SVN.length).keys()]).slice(0,5),ch:[0,0,0],tr:{}};this.order.forEach(i=>{this.P[i].pw=0})}return r});
+ W('toLobby',function(o){const r=o.apply(this,[]);this.order.forEach(i=>{if(this.P[i])this.P[i].pw=0});return r});
+ W('msg',function(o,id,m){if(m&&m.t==='p'&&this.phase==='play'&&this.W&&this.W.sv&&this.lv!==2){const p=this.P[id];
+   if(p&&this.W.sv.who!==id&&+m.x>3.8&&+m.x<7&&+m.z<-12.35&&+m.z>-15)return}return o.apply(this,[id,m])});
+ W('act',function(o,p,m){
+  if(m&&(m.a==='sdig'||m.a==='svault'||m.a==='chest')){
+   const Wd=this.W,sv=Wd&&Wd.sv;if(this.phase!=='play'||this.lv===2||!sv||p.st!=='ok'||p.role!=='p')return;
+   const T=t=>this.send(p.id,{t:'e',k:'txt',m:t}),near=(x,z,r)=>mpDist(p.x,p.z,x,z)<r;
+   if(m.a==='sdig'){const j=m.i|0;if(j<0||j>4)return;const c=SVN[sv.sp[j]];if(!c||!near(c[0],c[1],3))return;this.send(p.id,{t:'e',k:'sdig',i:j,d:+sv.c[j]});return}
+   if(m.a==='svault'){if(!near(SVK[0],SVK[1],3.4))return;
+    if(sv.o)return T(sv.who===p.id?'Du bist schon im Geheimtresor.':'Der Geheimtresor wurde in dieser Runde schon von jemandem geöffnet.');
+    const tr=sv.tr[p.id]||(sv.tr[p.id]={n:0,t:0}),now=Date.now();if(now<tr.t)return T('Gesperrt: warte noch '+Math.ceil((tr.t-now)/1000)+' s.');
+    if(String(m.c)===sv.c){sv.o=1;sv.who=p.id;this.bcast({t:'e',k:'txt',m:'🔐 '+p.name+' hat den Geheimtresor geöffnet! In dieser Runde kommt nur '+p.name+' hinein.'});return}
+    tr.n++;if(tr.n>=3){tr.n=0;tr.t=now+20000;return T('Falscher Code. 20 Sekunden gesperrt.')}return T('Falscher Code. Such die 5 Zettel im ganzen Haus.')}
+   if(m.a==='chest'){const i=m.i|0;if(i<0||i>2||!sv.o||sv.who!==p.id)return;const c=SVC[i];if(!near(c[0],c[1],2.2))return;if(sv.ch[i])return T('Diese Kiste ist schon leer.');
+    const skin=this.rnd(100)<20;let ty='';
+    if(!skin){if(p.inv.length>=3)return T('Inventar voll (max. 3) – benutze oder gib erst ein Item ab.');ty=['med','nrg','tas','trp','pwr','loot'][this.rnd(6)];p.inv.push(ty)}
+    sv.ch[i]=1;this.send(p.id,{t:'e',k:'chest',i,kind:skin?'skin':'item',ty});this.bcast({t:'e',k:'txt',m:'✨ '+p.name+' hat goldene Kiste '+(i+1)+' geöffnet.'});return}}
+  return o.apply(this,[p,m])});
+ W('use',function(o,p,s){const ty=p&&p.inv?p.inv[s]:'';
+  if(ty==='pwr'&&this.phase==='play'&&p.st==='ok'&&p.role==='p'){p.inv.splice(s,1);p.pw=20;p.boost=Math.max(p.boost||0,20);p.hp=Math.min(MPM.HP,p.hp+25);p.stun=0;
+   this.bcast({t:'e',k:'txt',m:'🧪 '+p.name+' trinkt den Powertrank!'});this.send(p.id,{t:'e',k:'txt',m:'Powertrank: 20 s schneller, stärker und zäher (+25 Leben).'});return}
+  if(ty==='tas'&&p.pw>0){this._tx=1;try{return o.apply(this,[p,s])}finally{this._tx=0}}
+  return o.apply(this,[p,s])});
+ W('hurtHunter',function(o,d,stun){if(this._tx){d=Math.round(d*1.6);stun=(stun||0)+1}return o.apply(this,[d,stun])});
+ W('hurt',function(o,p,d){if(p&&p.pw>0)d=Math.max(1,Math.round(d*.6));return o.apply(this,[p,d])});
+ W('tick',function(o,dt){if(this.phase==='play')this.order.forEach(i=>{const q=this.P[i];if(q&&q.pw>0)q.pw=Math.max(0,q.pw-dt)});
+  const r=o.apply(this,[dt]);
+  if(this.phase==='play')this.order.forEach(i=>{const t=this.P[i];if(t&&t.st==='down'&&t.rb){const rv=this.P[t.rb];if(rv&&rv.pw>0&&rv.st==='ok')t.rp+=dt}});return r});
+ W('snapFor',function(o,id){const s=o.apply(this,[id]);if(!s)return s;
+  s.ps.forEach(e=>{const q=this.P[e[0]];e[12]=q&&q.pw>0?1:0});
+  if(this.W&&this.W.sv&&this.lv!==2){const v=this.W.sv;s.w.sv={o:v.o,who:v.who,ch:v.ch,sp:v.sp}}
+  s.me.pw=Math.ceil((this.P[id]&&this.P[id].pw)||0);return s})}
+
+/* ---- Client: Tresor-Raum, Zettel, Kisten ---- */
+function mpKeypadN(n,title,cb){let v='';ov('<div class="dim">'+title+'</div><div id="disp"></div><div class="keys">'+[1,2,3,4,5,6,7,8,9,'C',0,'OK'].map(k=>'<button class="btn" data-k="'+k+'">'+k+'</button>').join('')+'</div><button class="btn" id="cx">Abbrechen</button>');
+ const d=$('disp');document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==='C')v='';else if(k==='OK'){closeOv();cb(v);return}else if(v.length<n)v+=k;d.textContent=v});$('cx').onclick=closeOv}
+(function(){const V=MP.v,g=RM[15]&&RM[15].g;if(!g||!V)return;
+ const gm=M(0xe8b400,0x6a4a00),dk=M(0x2a2218),dm=M(0x7a5a10,0x2a1c00);
+ box(3.1,.04,2.7,5.4,.02,-13.6,M(0x3a2c10,0x140c00),g);
+ V.svD=box(1.6,3.2,.3,5.4,1.6,-12.2,dm,g);V.svC=[300+4.6,300+6.2,-12.35,-12.05];COL[15].push(V.svC);
+ {const l=mkLabel();l.position.set(5.4,2.7,-11.9);l.scale.set(1.8,.45,1);setLabel(l,'GEHEIMTRESOR');g.add(l)}
+ box(.5,.9,.25,SVK[0],.45,SVK[1]-.05,M(0x3a3f48),g);box(.36,.2,.04,SVK[0],.8,SVK[1]+.08,M(0x30ff60,0x30ff60),g);
+ V.svCh=SVC.map(c=>{const cg=new THREE.Group();cg.position.set(c[0],0,c[1]);g.add(cg);box(.6,.32,.4,0,.16,0,gm,cg);box(.1,.12,.05,0,.3,.2,dk,cg);
+  const lid=new THREE.Group();lid.position.set(0,.32,-.2);cg.add(lid);box(.6,.14,.4,0,.07,.2,gm,lid);return lid});
+ V.svN=SVN.map(c=>{const ng=new THREE.Group();ng.position.set(c[0],0,c[1]);g.add(ng);box(.34,.02,.24,0,.03,0,M(0xf6f0c8,0x5a5430),ng);box(.1,.5,.1,0,.3,0,M(0xffd60a,0x806a00),ng);ng.visible=false;ng.userData.k=-1;
+  const l=mkLabel();l.position.set(0,1.05,0);l.scale.set(1.3,.34,1);ng.add(l);ng.userData.l=l;return ng})})();
+function mpSvWorld(w){const V=MP.v,sv=w&&w.sv;if(!V||!V.svD)return;
+ const open=!!(sv&&sv.o&&sv.who===MP.myId);V.svD.visible=!open;mpCol(V.svC,!open);
+ V.svCh.forEach((lid,i)=>{lid.rotation.x=sv&&sv.ch[i]?-1.3:0});
+ V.svN.forEach((ng,k)=>{const j=sv?sv.sp.indexOf(k):-1;ng.visible=j>=0;if(j>=0&&ng.userData.k!==j){ng.userData.k=j;setLabel(ng.userData.l,'ZETTEL '+(j+1))}})}
+{const _w=mpWorld;mpWorld=function(w){try{mpSvWorld(w)}catch(e){}return _w.apply(this,arguments)}}
+{const R=(x,z,lab,run)=>IA.push({r:15,x,z,lab,run});
+ SVN.forEach((c,k)=>R(c[0],c[1],()=>{const sv=MP.W&&MP.W.sv;if(!mpCanAct()||!sv)return false;const j=sv.sp.indexOf(k);return j>=0&&('Zettel lesen (Ziffer '+(j+1)+' vom Geheimcode)')},()=>{const j=MP.W.sv.sp.indexOf(k);if(j>=0)mpAct('sdig',j)}));
+ R(SVK[0],SVK[1],()=>{const sv=MP.W&&MP.W.sv;if(!mpCanAct()||!sv)return false;return sv.o?(sv.who===MP.myId?'Du bist im Geheimtresor':'Geheimtresor (schon geöffnet)'):'Geheimtresor: 5-stelligen Code eingeben'},
+  ()=>{const sv=MP.W.sv;if(sv.o)return toast(sv.who===MP.myId?'Die Tür ist für dich offen.':'Der Geheimtresor wurde in dieser Runde schon geöffnet.','err');mpKeypadN(5,'Geheimtresor: 5-stelligen Code eingeben',c=>mpAct('svault',0,{c}))});
+ SVC.forEach((c,i)=>R(c[0],c[1],()=>{const sv=MP.W&&MP.W.sv;return mpCanAct()&&sv&&sv.o&&sv.who===MP.myId&&!sv.ch[i]&&('Goldene Kiste '+(i+1)+' öffnen')},()=>mpAct('chest',i)))}
+function mpChestReveal(e){
+ if(e.kind==='skin'){let it=null;try{const pool=CXSKINS.filter(x=>!x.hidden&&x.id!=='mask'&&!x.own());it=pool.length?pool[Math.floor(Math.random()*pool.length)]:null}catch(x){}
+  if(it){try{it.give();accSave(true);cxMis()}catch(x){}mpLog('✨ Kiste '+(e.i+1)+': SKIN „'+it.n+'“ – jetzt in deinem Spind!');toast('✨ Neuer Skin: '+it.n+'! Du findest ihn im Spind.','good');try{sfx('good')}catch(x){}}
+  else{try{cxAdd(3000)}catch(x){}mpLog('✨ Kiste '+(e.i+1)+': Du hast schon alle Skins – dafür 3.000 Coins!');toast('Du hast schon alle Skins: +3.000 Coins','good')}}
+ else{const n=MPM.NM[e.ty]||e.ty;mpLog('📦 Kiste '+(e.i+1)+': '+n+'!');toast('📦 Kiste '+(e.i+1)+': '+n,'good');try{sfx('good')}catch(x){}}}
+{const _e=mpEvent;mpEvent=function(e){
+  if(e&&e.k==='sdig'){MP.sd=MP.sd||[];MP.sd[e.i]=e.d;const s=mpSdTxt();mpLog('🔢 Zettel '+(e.i+1)+': Ziffer '+e.d+'  ('+s+')');toast('Zettel '+(e.i+1)+': Die Ziffer ist '+e.d+'   Code: '+s,'good');return}
+  if(e&&e.k==='chest'){mpChestReveal(e);return}
+  return _e.apply(this,arguments)}}
+function mpSdTxt(){const a=MP.sd||[];let s=[];for(let i=0;i<5;i++)s.push(a[i]===undefined?'_':a[i]);return s.join(' ')}
+{const _b=mpBegin;mpBegin=function(m){MP.sd=[];return _b.apply(this,arguments)}}
+/* Anzeige rechts oben: Powertrank-Zeit + bekannter Geheimcode */
+{const st=document.createElement('style');st.textContent='#mpx{position:fixed;z-index:44;right:calc(env(safe-area-inset-right,0px) + 12px);top:calc(env(safe-area-inset-top,0px) + 74px);display:none;flex-direction:column;gap:6px;align-items:flex-end;pointer-events:none;font-family:var(--ios);color:#fff;font-size:13px}body.mpon #mpx{display:flex}#mpx div{background:rgba(0,0,0,.58);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:5px 10px}#mpx .pw{border-color:#b040ff;background:rgba(80,20,140,.7)}body.phone #mpx{top:calc(env(safe-area-inset-top,0px) + 60px);font-size:11px}';document.head.appendChild(st);
+ const d=document.createElement('div');d.id='mpx';document.body.appendChild(d)}
+function mpX(){const d=document.getElementById('mpx');if(!d)return;let h='';
+ if(MP.me&&MP.me.pw>0)h+='<div class="pw">🧪 Powertrank: '+MP.me.pw+' s</div>';
+ if(MP.role==='p'&&MP.sd&&MP.sd.some(x=>x!==undefined)){const sv=MP.W&&MP.W.sv;h+='<div>🔐 Geheimcode: <b>'+mpSdTxt()+'</b>'+(sv&&sv.o?(sv.who===MP.myId?' · offen (du)':' · schon geöffnet'):'')+'</div>'}
+ if(d._h!==h){d._h=h;d.innerHTML=h}}
+{const _h=mpHud;mpHud=function(){const r=_h.apply(this,arguments);try{mpX()}catch(e){}return r}}
+/* Chat: gefundene Zettel-Ziffern teilen */
+{const _c=mpChatUI;mpChatUI=function(){const r=_c.apply(this,arguments);try{const a=MP.sd||[],first=document.querySelector('[data-ph]');if(first&&a.some(x=>x!==undefined)){const grp=first.parentNode;
+   a.forEach((dg,i)=>{if(dg===undefined)return;const b=document.createElement('button');b.className='row';b.innerHTML='<span class="tx"><b>🔐 Zettel '+(i+1)+' teilen: Ziffer '+dg+'</b></span>';b.onclick=()=>{mpSend({t:'chat',m:'Geheimcode, Ziffer '+(i+1)+': '+dg});closeOv()};grp.appendChild(b)})}}catch(e){}return r}}
 
 menuStart();
 requestAnimationFrame(frame);

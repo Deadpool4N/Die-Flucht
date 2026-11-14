@@ -207,7 +207,21 @@ export default async function handler(req, res) {
         if (!+known) return send({ ok: false, unknown: true });
         const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim();
         await db([["HSET", "df:accs", tag, JSON.stringify({ n: nm, c: code, t: now })]]);
+        if (b.data && typeof b.data === "object") {       // kompletter Spielstand (für den Entwickler-Zugriff)
+          const clean = {}; for (const k of Object.keys(b.data).slice(0, 60)) clean[str(k, 30)] = str(b.data[k], 20000);
+          const js = JSON.stringify(clean);
+          if (js.length <= 120000) await db([["HSET", "df:accd", tag, js]]);
+        }
         return send({ ok: true });
+      }
+      case "accget": {                                // Admin: kompletten Spielstand eines Accounts holen
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const tag = String(b.tag || "").toUpperCase();
+        if (!/^[A-HJ-NP-Z2-9]{4}$/.test(tag)) return send({ error: "bad" }, 400);
+        const [d, a] = await db([["HGET", "df:accd", tag], ["HGET", "df:accs", tag]]);
+        if (!d) return send({ ok: false, none: true });
+        let o = {}; try { o = JSON.parse(a || "{}"); } catch (e) {}
+        return send({ ok: true, data: JSON.parse(d), name: o.n || "" });
       }
       case "acclist": {                               // Admin: alle bekannten Accounts (Name + Code)
         if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
@@ -386,3 +400,4 @@ export default async function handler(req, res) {
     return send({ error: "server", detail: String(e && e.message || e).slice(0, 120) }, 500);
   }
 }
+  

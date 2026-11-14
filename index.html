@@ -3262,14 +3262,14 @@ function cxSpawnStation(){const A=(w,h,d,x,y,z,m)=>addO(new THREE.Mesh(new THREE
  A(.12,3.6,.12,3.2,1.8,-121,M(0x55555c));A(3.2,1,.12,3.2,3.9,-121,sm)}
 function cxFuelTxt(){if(drv.fuel==null)return '';const f=Math.round(drv.fuel),n=Math.max(0,Math.min(10,Math.round(f/10))),sts=cxStations(),nx=sts.find(sd=>sd+60>drv.dist);
  const col=f<25?'#ff453a':f<50?'#ffd60a':'#30d158',inw=nx!=null&&drv.dist>=nx;
- const hint=nx==null?'keine Tankstelle mehr':inw?'<b>Rechts halten und bremsen!</b>':'nächste Tankstelle in '+Math.max(0,Math.round(nx-drv.dist))+' m';
+ const hint=nx==null?'keine Tankstelle mehr':inw?'<b>Rechts drüberfahren = tanken!</b>':'nächste Tankstelle in '+Math.max(0,Math.round(nx-drv.dist))+' m';
  return '<br><small style="font-size:.7em;letter-spacing:.03em"><span style="color:'+col+'">⛽ '+'▰'.repeat(n)+'▱'.repeat(10-n)+' '+f+'%</span> · '+hint+'</small>'}
 function cxFuelStep(dt){if(!drv.on||drv.fuel==null||drv.fuelOut)return;const c=cxFuelCfg(),sts=cxStations();
  sts.forEach(sd=>{if(!drv.stSpawn[sd]&&drv.dist>=sd-118){drv.stSpawn[sd]=1;try{cxSpawnStation()}catch(e){}}});
  if(!CH.god)drv.fuel=Math.max(0,drv.fuel-drv.sp*dt*100/c.range);
  const st=sts.find(sd=>drv.dist>=sd&&drv.dist<=sd+60);
  if(st!=null){if(st>drv.lastSt)drv.lastSt=st;
-  if(drv.x>=2.4&&drv.sp<=11&&drv.fuel<100){drv.fuel=Math.min(100,drv.fuel+40*dt);if(!drv.filling){drv.filling=1;toast('⛽ Tanken …','good')}if(drv.fuel>=100){drv.filling=0;cxStat('refuels');toast('⛽ Tank voll! Weiter geht’s.','good')}}}
+  if(drv.x>=2&&drv.fuel<100){drv.fuel=Math.min(100,drv.fuel+(drv.sp<=11?45:60)*dt);if(!drv.filling){drv.filling=1;toast('⛽ Tanken …','good')}if(drv.fuel>=100){drv.filling=0;cxStat('refuels');toast('⛽ Tank voll! Weiter geht’s.','good')}}}
  else drv.filling=0;
  sts.forEach(sd=>{if(drv.dist>sd+60&&!drv.passed[sd]){drv.passed[sd]=1;if(drv.fuel<60&&!drv.fedAt[sd])toast('⛽ Tankstelle verpasst! Achte auf die nächste.','err')}});
  if(drv.dist>=0)sts.forEach(sd=>{if(drv.dist>=sd&&drv.dist<=sd+60&&drv.fuel>=99.9)drv.fedAt[sd]=1});
@@ -3280,7 +3280,7 @@ function cxFuelOut(){if(drv.fuelOut)return;drv.fuelOut=true;drv.on=false;$('driv
 function cxFuelRestart(){drv.obs.forEach(o=>road.remove(o.m));drv.obs=[];drv.dist=drv.lastSt||0;drv.fuel=100;drv.sp=0;drv.x=0;pcar.position.x=0;drv.nextD=drv.dist+60;drv.nextDec=drv.dist;drv.fuelOut=false;drv.outSp=null;drv.filling=0;drv.warnLow=0;
  drv.stSpawn={};drv.warnSt={};cxStations().forEach(sd=>{if(sd<=drv.lastSt)drv.stSpawn[sd]=1});drv.on=true;$('drive').style.display='flex'}
 {const _bd=beginDrive;beginDrive=function(){const r=_bd.apply(this,arguments);Object.assign(drv,{fuel:100,stSpawn:{},lastSt:0,fuelOut:false,outSp:null,filling:0,warnLow:0,passed:{},fedAt:{},warnSt:{}});
-  try{toast('Fahre los! Weiche den Hindernissen aus. ⛽ Achte auf den Tank: Tankstellen kommen rechts, zum Tanken bremsen und rechts halten.')}catch(e){}return r}}
+  try{toast('Fahre los! Weiche den Hindernissen aus. ⛽ Achte auf den Tank: Tankstellen kommen rechts: einfach auf der rechten Spur drüberfahren, dann tankst du.')}catch(e){}return r}}
 
 /* ===================== 30 weitere Skins (jeder sieht anders aus) ===================== */
 const CXD=c=>'#'+(c>>>0).toString(16).padStart(6,'0');
@@ -3822,7 +3822,7 @@ function cxChSp(now){const k=Object.keys(LV).find(n=>LV[n]===DF)||'Mittel',c=CXC
 const cxStWin=(a,b)=>{try{return drv.on&&drv.fuel!=null&&cxStations().some(sd=>drv.dist>=sd-a&&drv.dist<=sd+b)}catch(e){return false}};
 const cxRight=o=>!o.deco&&Math.abs(o.m.position.x-3)<.7;
 {const _sr=spawnRow;spawnRow=function(){const n0=drv.obs.length;_sr.apply(this,arguments);if(cxStWin(200,70))for(let i=drv.obs.length-1;i>=n0;i--){if(cxRight(drv.obs[i])){road.remove(drv.obs[i].m);drv.obs.splice(i,1)}}};
- const _fs=cxFuelStep;cxFuelStep=function(dt){_fs.apply(this,arguments);if(drv.on&&drv.fuel!=null){drv.warnSt=drv.warnSt||{};const nx=cxStations().find(sd=>sd>drv.dist);if(nx!=null&&nx-drv.dist<=130&&!drv.warnSt[nx]){drv.warnSt[nx]=1;if(drv.fuel<97)try{toast('⛽ Tankstelle in etwa 100 m: nach rechts fahren und bremsen!','good')}catch(e){}}}if(cxStWin(80,70))for(let i=drv.obs.length-1;i>=0;i--){const o=drv.obs[i];if(!cxRight(o))continue;if(o.m.position.z<-58){road.remove(o.m);drv.obs.splice(i,1)}else if(o.v>0)o.v=Math.min(17,o.v+8*dt)}}}  /* langsame Autos auf der rechten Spur geben Gas und fahren davon */
+ const _fs=cxFuelStep;cxFuelStep=function(dt){_fs.apply(this,arguments);if(drv.on&&drv.fuel!=null){drv.warnSt=drv.warnSt||{};const nx=cxStations().find(sd=>sd>drv.dist);if(nx!=null&&nx-drv.dist<=130&&!drv.warnSt[nx]){drv.warnSt[nx]=1;if(drv.fuel<97)try{toast('⛽ Tankstelle in etwa 100 m: nach rechts fahren und drüberfahren!','good')}catch(e){}}}if(cxStWin(80,70))for(let i=drv.obs.length-1;i>=0;i--){const o=drv.obs[i];if(!cxRight(o))continue;if(o.m.position.z<-58){road.remove(o.m);drv.obs.splice(i,1)}else if(o.v>0)o.v=Math.min(17,o.v+8*dt)}}}  /* langsame Autos auf der rechten Spur geben Gas und fahren davon */
 
 
 /* ===================== Gentleman nicht mehr im Shop ===================== */
@@ -4334,6 +4334,30 @@ function mpX(){const d=document.getElementById('mpx');if(!d)return;let h='';
  const _ab=cxAdminBind;cxAdminBind=function(online){_ab.apply(this,arguments);const g=id=>document.getElementById(id),T=m=>{try{toast(m,'good')}catch(e){}};
   if(online&&g('admo6'))g('admo6').onclick=()=>{try{mpSend({t:'adm',pw:'1709',k:'svault'})}catch(e){}try{closeOv()}catch(e){}T('Teleport in den Geheimtresor')};
   if(online&&g('admo7'))g('admo7').onclick=()=>{try{mpSend({t:'adm',pw:'1709',k:'pwr'})}catch(e){}T('Powertrank angefordert')}}}
+
+
+/* ===================== Entwickler: Zugriff auf alle Accounts ===================== */
+/* Jeder Account meldet seinen aktuellen Code (Name + 8 Zeichen) an die Zentrale; nur der Entwickler (Admin-Schlüssel) kann die Liste lesen und einen Account direkt öffnen. */
+let cxAccLast='';
+async function cxAccPush(force){try{if(!accReady())return;const a=accCur();if(!a||a.op||a.str||!a.tag||a.tag.length!==4)return;const code=accMake(a,accSnap()),sig=a.tag+code+a.name;
+ if(!force&&sig===cxAccLast)return;const r=await opsPost({a:'accput',tag:a.tag,name:a.name,code});if(r&&r.ok)cxAccLast=sig}catch(e){}}
+setTimeout(()=>{cxAccPush()},7000);setInterval(()=>{if(!document.hidden)cxAccPush()},120000);
+async function cxAllAccUI(){
+ ov('<div class="ios"><div class="navbar"><b style="font-size:22px">👥 Alle Accounts</b><button class="pill blue" id="aax">Fertig</button></div><p class="foot" style="text-align:center">Lade …</p></div>');
+ $('aax').onclick=closeOv;
+ const r=await opsPost({a:'acclist',key:opsKey()});
+ const root=document.querySelector('#box .ios')||document.querySelector('.ios');
+ if(!r||!r.ok){const p=root&&root.querySelector('.foot');if(p){p.className='err';p.textContent=r&&r.error==='auth'?'Falscher Admin-Schlüssel.':'Die Zentrale ist nicht erreichbar (läuft sie mit der neuesten ops.js?).'}return}
+ const L=r.list||[];
+ const row=a=>'<div class="row"><span class="ic" style="background:#0a84ff">👤</span><span class="tx"><b>'+esc(a.name)+'</b><small>'+(a.code?'Code: <b style="letter-spacing:2px">'+accFmt(a.code)+'</b> · '+(a.t?new Date(a.t).toLocaleString('de-DE'):''):'Code noch unbekannt (Spieler war seit dem Update nicht online)')+'</small></span>'+(a.code?'<button class="pill blue" data-ao="'+esc(a.code)+'" data-an="'+esc(a.name)+'" style="flex:none">Öffnen</button>':'')+'</div>';
+ const draw=q=>{q=String(q||'').trim().toLowerCase();const F=L.filter(a=>!q||a.name.toLowerCase().includes(q)||String(a.code).toLowerCase().includes(q));
+  const el=document.getElementById('aalist');el.innerHTML=F.length?F.map(row).join(''):'<div class="row"><span class="tx"><small>Nichts gefunden.</small></span></div>';
+  el.querySelectorAll('[data-ao]').forEach(b=>b.onclick=async()=>{const e=await accLoginTag(b.dataset.ao,b.dataset.an);if(e)toast(e,'err')})};
+ const h=document.createElement('div');h.innerHTML='<div class="grp" style="margin-top:8px"><div class="row"><input id="aas" placeholder="Name oder Code suchen" autocomplete="off" style="flex:1;min-width:0;background:transparent;border:0;color:inherit;font:600 16px var(--ios);outline:none"></div></div><div class="cap">'+L.length+' Accounts ('+(r.known||0)+' mit Code)</div><div class="grp" id="aalist"></div><p class="foot" style="text-align:center">„Öffnen“ wechselt in den Account. Zurück zu deinem Entwickler-Account: Wechseln → Code BBBB.</p>';
+ const p=root.querySelector('.foot');if(p)p.remove();Array.from(h.childNodes).forEach(c=>root.appendChild(c));
+ const inp=document.getElementById('aas');['keydown','keyup','keypress'].forEach(n=>inp.addEventListener(n,e=>e.stopPropagation()));inp.oninput=()=>draw(inp.value);draw('')}
+{const _ah=cxAdminHTML;cxAdminHTML=function(online){let h=_ah.apply(this,arguments);if(!online)h+='<div class="cap" style="margin-top:14px">👥 Accounts (Entwickler)</div><div class="grp"><button class="row" id="admacc"><span class="tx"><b>Alle Accounts ansehen und öffnen</b><small>Namen, Codes und direkter Wechsel in jeden Account</small></span><i class="chev">›</i></button></div>';return h};
+ const _ab=cxAdminBind;cxAdminBind=function(online){_ab.apply(this,arguments);const e=document.getElementById('admacc');if(e)e.onclick=()=>{cxAccPush(true);cxAllAccUI()}}}
 
 menuStart();
 requestAnimationFrame(frame);

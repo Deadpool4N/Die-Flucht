@@ -4349,15 +4349,30 @@ async function cxAllAccUI(){
  const root=document.querySelector('#box .ios')||document.querySelector('.ios');
  if(!r||!r.ok){const p=root&&root.querySelector('.foot');if(p){p.className='err';p.textContent=r&&r.error==='auth'?'Falscher Admin-Schlüssel.':'Die Zentrale ist nicht erreichbar (läuft sie mit der neuesten ops.js?).'}return}
  const L=r.list||[];
- const row=a=>'<div class="row"><span class="ic" style="background:#0a84ff">👤</span><span class="tx"><b>'+esc(a.name)+'</b><small>'+(a.code?'Code: <b style="letter-spacing:2px">'+accFmt(a.code)+'</b> · '+(a.t?new Date(a.t).toLocaleString('de-DE'):''):'Code noch unbekannt (Spieler war seit dem Update nicht online)')+'</small></span>'+(a.code?'<button class="pill blue" data-ao="'+esc(a.code)+'" data-an="'+esc(a.name)+'" style="flex:none">Öffnen</button>':'')+'</div>';
+ const row=a=>'<div class="row"><span class="ic" style="background:#0a84ff">👤</span><span class="tx"><b>'+esc(a.name)+'</b><small>'+(a.code?'Code: <b style="letter-spacing:2px">'+accFmt(a.code)+'</b> · '+(a.t?new Date(a.t).toLocaleString('de-DE'):''):'Code noch unbekannt (Spieler war seit dem Update nicht online)')+'</small></span>'+(a.code?'<button class="pill blue" data-ao="'+esc(a.code)+'" data-at="'+esc(a.tag)+'" data-an="'+esc(a.name)+'" style="flex:none">Öffnen</button>':'')+'</div>';
  const draw=q=>{q=String(q||'').trim().toLowerCase();const F=L.filter(a=>!q||a.name.toLowerCase().includes(q)||String(a.code).toLowerCase().includes(q));
   const el=document.getElementById('aalist');el.innerHTML=F.length?F.map(row).join(''):'<div class="row"><span class="tx"><small>Nichts gefunden.</small></span></div>';
-  el.querySelectorAll('[data-ao]').forEach(b=>b.onclick=async()=>{const e=await accLoginTag(b.dataset.ao,b.dataset.an);if(e)toast(e,'err')})};
+  el.querySelectorAll('[data-ao]').forEach(b=>b.onclick=async()=>{b.textContent='…';const e=await cxAccOpen(b.dataset.at,b.dataset.ao,b.dataset.an);if(e){toast(e,'err');b.textContent='Öffnen'}})};
  const h=document.createElement('div');h.innerHTML='<div class="grp" style="margin-top:8px"><div class="row"><input id="aas" placeholder="Name oder Code suchen" autocomplete="off" style="flex:1;min-width:0;background:transparent;border:0;color:inherit;font:600 16px var(--ios);outline:none"></div></div><div class="cap">'+L.length+' Accounts ('+(r.known||0)+' mit Code)</div><div class="grp" id="aalist"></div><p class="foot" style="text-align:center">„Öffnen“ wechselt in den Account. Zurück zu deinem Entwickler-Account: Wechseln → Code BBBB.</p>';
  const p=root.querySelector('.foot');if(p)p.remove();Array.from(h.childNodes).forEach(c=>root.appendChild(c));
  const inp=document.getElementById('aas');['keydown','keyup','keypress'].forEach(n=>inp.addEventListener(n,e=>e.stopPropagation()));inp.oninput=()=>draw(inp.value);draw('')}
 {const _ah=cxAdminHTML;cxAdminHTML=function(online){let h=_ah.apply(this,arguments);if(!online)h+='<div class="cap" style="margin-top:14px">👥 Accounts (Entwickler)</div><div class="grp"><button class="row" id="admacc"><span class="tx"><b>Alle Accounts ansehen und öffnen</b><small>Namen, Codes und direkter Wechsel in jeden Account</small></span><i class="chev">›</i></button></div>';return h};
  const _ab=cxAdminBind;cxAdminBind=function(online){_ab.apply(this,arguments);const e=document.getElementById('admacc');if(e)e.onclick=()=>{cxAccPush(true);cxAllAccUI()}}}
+
+
+/* ===================== Entwickler: Accounts mit komplettem Spielstand öffnen ===================== */
+/* Der Code enthält nur einen kleinen Teil des Fortschritts. Darum meldet jeder Account zusätzlich seinen kompletten Spielstand; der Entwickler öffnet ihn als Kopie (Änderungen daran landen nicht beim Spieler). */
+cxAccPush=async function(force){try{if(!accReady())return;const a=accCur();if(!a||a.op||a.str||a.view||!a.tag||a.tag.length!==4)return;const data=accSnap(),code=accMake(a,data),sig=a.tag+code+a.name+JSON.stringify(data);
+ if(!force&&sig===cxAccLast)return;const r=await opsPost({a:'accput',tag:a.tag,name:a.name,code,data});if(r&&r.ok)cxAccLast=sig}catch(e){}};
+async function cxAccOpen(tag,code,name){
+ const r=await opsPost({a:'accget',key:opsKey(),tag});
+ if(r&&r.ok&&r.data){const d=Object.assign({},r.data);d.dfName=name||r.name||d.dfName||'Spieler';
+  Object.keys(ACC.list).forEach(k=>{if(ACC.list[k]&&ACC.list[k].view&&ACC.list[k].tag===tag)delete ACC.list[k]});
+  const id='V'+tag+Date.now().toString(36);ACC.list[id]={id,name:d.dfName,data:d,ts:Date.now(),tag,view:1,imp:1,code:code||''};
+  try{accSwitch(id)}catch(e){return 'Wechsel fehlgeschlagen.'}return ''}
+ if(r&&r.error==='auth')return 'Falscher Admin-Schlüssel.';
+ if(code)return await accLoginTag(code,name)||'';
+ return 'Für diesen Account gibt es noch keinen Spielstand (Spieler war seit dem Update nicht online).'}
 
 menuStart();
 requestAnimationFrame(frame);

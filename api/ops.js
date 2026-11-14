@@ -194,6 +194,30 @@ export default async function handler(req, res) {
         await db([["HSET", "df:names", key, nm + "|" + now]]);
         return send({ ok: true });
       }
+      case "accput": {                                // Account-Code melden (damit der Entwickler alle Accounts sehen und öffnen kann)
+        const tag = String(b.tag || "").toUpperCase(), code = String(b.code || "").toUpperCase();
+        if (!/^[A-HJ-NP-Z2-9]{4}$/.test(tag) || !/^[A-HJ-NP-Z2-9]{8}$/.test(code)) return send({ error: "bad" }, 400);
+        if (code.split("").filter((_, i) => i % 2 === 0).join("") !== tag) return send({ error: "bad" }, 400);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlap:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 200) return send({ error: "limit" }, 429);
+        const [known] = await db([["HEXISTS", "df:tags", tag]]);
+        if (!+known) return send({ ok: false, unknown: true });
+        const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim();
+        await db([["HSET", "df:accs", tag, JSON.stringify({ n: nm, c: code, t: now })]]);
+        return send({ ok: true });
+      }
+      case "acclist": {                               // Admin: alle bekannten Accounts (Name + Code)
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const [acc, tn] = await db([["HGETALL", "df:accs"], ["HGETALL", "df:tagn"]]);
+        const A = pairs(acc), N = pairs(tn), list = [];
+        for (const tag of Object.keys(A)) { try { const o = JSON.parse(A[tag]); list.push({ tag, name: o.n || N[tag] || "?", code: o.c, t: o.t }); } catch (e) {} }
+        for (const tag of Object.keys(N)) if (!A[tag]) list.push({ tag, name: N[tag], code: "", t: 0 });
+        list.sort((x, y) => y.t - x.t);
+        return send({ ok: true, list: list.slice(0, 2000), known: Object.keys(A).length });
+      }
       case "reg": {                                   // Spielername anmelden (damit Geschenke nur an echte Spieler gehen)
         const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim();
         if (nm.length < 2) return send({ error: "bad" }, 400);

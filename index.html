@@ -3933,7 +3933,7 @@ function cxGivenUI(msg){const L=cxGivenList().slice().reverse();
   if(r.ok)cxGivenUI(r.already?'↩ Das Geschenk war schon zurückgenommen.':'↩ Zurückgenommen.'+(r.back?' Du bekommst '+r.back.toLocaleString('de-DE')+' Coins zurück.':''));else{cxGivenUI(r.err)}})}
 let cxGiftBusy=false;
 const cxRegDone={};
-async function cxGiftPoll(){if(cxGiftBusy||!accReady())return 0;cxGiftBusy=true;try{const nm=cxClean(myName());if(nm.length<2)return 0;if(!cxRegDone[nm.toLowerCase()]){const q=await opsPost({a:'reg',name:nm});if(q&&q.ok)cxRegDone[nm.toLowerCase()]=1}const gotM=cxRead('dfGiftGot',{}),ids=Object.keys(gotM).filter(k=>!gotM[k].rev&&/^g-/.test(k)).slice(-150);const r=await opsPost({a:'gifts',name:nm,ids});if(r&&r.ok){cxGiftTake(r.rv);return cxGiftApply(r.list)}return 0}catch(e){return 0}finally{cxGiftBusy=false}}
+async function cxGiftPoll(){if(cxGiftBusy||!accReady())return 0;cxGiftBusy=true;try{const nm=cxClean(myName());if(nm.length<2)return 0;if(!cxRegDone[nm.toLowerCase()]){const q=await opsPost({a:'reg',name:nm});if(q&&q.ok)cxRegDone[nm.toLowerCase()]=1}const gotM=cxRead('dfGiftGot',{}),ids=Object.keys(gotM).filter(k=>!gotM[k].rev&&/^g-/.test(k)).slice(-150);const r=await opsPost({a:'gifts',name:nm,ids});if(r&&r.ok){cxGiftTake(r.rv);const n=cxGiftApply(r.list);try{cxStripApply(+r.strip||0)}catch(e){}return n}return 0}catch(e){return 0}finally{cxGiftBusy=false}}
 setTimeout(()=>{try{cxGiftPoll()}catch(e){}},4500);setInterval(()=>{try{if(!document.hidden)cxGiftPoll()}catch(e){}},90000);
 /* Admin: Rekord + „Alle Skins verschenken“ im Admin-Panel (Startseite) */
 function cxGiftAdminHTML(){return '<div class="cap" style="margin-top:14px">🎁 Alle Skins verschenken (Admin)</div><div class="grp" style="padding:10px;text-align:left"><input id="gfan" placeholder="Name des Spielers" maxlength="14" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:100%;box-sizing:border-box;padding:9px;border-radius:10px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:14px"><div id="gfam" class="foot" style="margin:6px 2px;min-height:16px"></div></div><div class="grp" style="margin-top:6px"><button class="row" id="gfago"><span class="tx"><b>🎁 Alle Skins schenken</b><small>Der Spieler bekommt alle Skins kostenlos beim nächsten Start</small></span></button></div>'}
@@ -4399,6 +4399,27 @@ CXIT.push({id:'dtr',n:'OP-Dietrich',ic:'🗝️',p:12500,d:'Knackt ein Schloss s
 var cxLockOv=false;
 {const _pk=pick;pick=function(){const r=_pk.apply(this,arguments);cxLockOv=true;return r};
  const _kp=keypad;keypad=function(){const r=_kp.apply(this,arguments);cxLockOv=true;return r}}
+
+
+/* ===================== Admin: einem Spieler alle Skins entfernen (außer selbst gekaufte) ===================== */
+ACCK.push('dfBought','dfStrip');
+const cxBoughtGet=()=>{const v=cxRead('dfBought',null);return Array.isArray(v)?v:null};
+/* Einmalig: was der Spieler jetzt besitzt, abzüglich geschenkter Skins, gilt als selbst gekauft. Danach zählt jeder Kauf im Shop. */
+function cxBoughtInit(){if(cxBoughtGet())return;try{const got=cxRead('dfGiftGot',{}),gifted=new Set();Object.keys(got).forEach(k=>{if(!got[k].rev)(got[k].s||[]).forEach(s=>gifted.add(s))});
+ cxWrite('dfBought',CXSKINS.filter(it=>it.own()&&!gifted.has(it.id)).map(it=>it.id));try{accSave(true)}catch(e){}}catch(e){}}
+setTimeout(()=>{try{if(accReady())cxBoughtInit()}catch(e){}},2500);
+{const _b=cxBuySkin;cxBuySkin=function(id){cxBoughtInit();const r=_b.apply(this,arguments);if(r==='ok'){const L=cxBoughtGet()||[];if(!L.includes(id)){L.push(id);cxWrite('dfBought',L)}}return r}}
+function cxStripApply(ts){if(!(ts>0))return 0;let done=0;try{done=+localStorage.getItem('dfStrip')||0}catch(e){}if(ts<=done)return 0;
+ cxBoughtInit();const keep=new Set(cxBoughtGet()||[]);let n=0;CXSKINS.forEach(it=>{if(it.own()&&!keep.has(it.id)){cxTakeSkin(it.id);n++}});
+ try{localStorage.setItem('dfStrip',String(ts))}catch(e){}try{accSave(true)}catch(e){}
+ if(n)try{toast('🧹 '+n+' Skin'+(n===1?'':'s')+' wurde'+(n===1?'':'n')+' entfernt. Nur selbst gekaufte bleiben.','err')}catch(e){}return n}
+function cxStripCard(){return '<div class="grp" style="margin-top:6px"><button class="row" id="gfastrip"><span class="tx"><b style="color:#ff453a">🧹 Alle Skins entfernen</b><small>Nimmt dem Spieler alle Skins weg, außer die er selbst im Shop gekauft hat (beim nächsten Start)</small></span></button></div>'}
+{const _ah=cxAdminHTML;cxAdminHTML=function(online){return _ah.apply(this,arguments)+(online?'':cxStripCard())};
+ const _ab=cxAdminBind;cxAdminBind=function(online){_ab.apply(this,arguments);if(online)return;const g=id=>document.getElementById(id),b=g('gfastrip');if(!b)return;let armed=0;
+  b.onclick=async()=>{const to=cxClean((g('gfan')||{}).value),m=t=>{const e=g('gfam');if(e)e.textContent=t};if(to.length<2)return m('Bitte oben den Namen des Spielers eingeben.');
+   if(!armed){armed=1;m('Nochmal tippen, um „'+to+'“ alle nicht gekauften Skins zu entfernen.');setTimeout(()=>{armed=0},6000);return}
+   armed=0;m('Sende …');const r=await opsPost({a:'strip',key:CXRECK,to});
+   if(r&&r.ok)m('✅ '+to+' verliert beim nächsten Start alle Skins, die er nicht selbst gekauft hat.');else if(r&&r.error==='noname')m('Diesen Spieler gibt es nicht (Name muss genau stimmen).');else m(r&&r.error==='auth'?'Admin-Schlüssel stimmt nicht.':'Das hat nicht geklappt. Läuft die Zentrale mit der neuesten ops.js?')}}}
 
 menuStart();
 requestAnimationFrame(frame);

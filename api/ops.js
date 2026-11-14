@@ -288,7 +288,17 @@ export default async function handler(req, res) {
         const rv = [];
         if (all.length) { const [vals] = await db([["MGET", ...all.map((i) => "df:gr:" + i)]]); (vals || []).forEach((v, i) => { if (v) rv.push(all[i]); }); }
         list = list.filter((g) => !rv.includes(g.id));
-        return send({ ok: true, list, rv: rv.filter((i) => chk.includes(i)) });
+        const [stv] = await db([["GET", "df:strip:" + to]]);
+        return send({ ok: true, list, rv: rv.filter((i) => chk.includes(i)), strip: +stv || 0 });
+      }
+      case "strip": {                                 // Admin: alle Skins eines Spielers entfernen, außer den selbst gekauften (der Spieler führt es beim nächsten Abruf aus)
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const to = nkey(b.to);
+        if (to.length < 2) return send({ error: "bad" }, 400);
+        const [seen] = await db([["HGET", "df:names", to]]);
+        if (!seen) return send({ error: "noname" }, 404);
+        await db([["SET", "df:strip:" + to, String(now)]]);
+        return send({ ok: true });
       }
       case "giftrev": {                               // Geschenk zurücknehmen: der Schenker mit seinem Geheimnis oder der Admin
         const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
@@ -400,4 +410,3 @@ export default async function handler(req, res) {
     return send({ error: "server", detail: String(e && e.message || e).slice(0, 120) }, 500);
   }
 }
-  

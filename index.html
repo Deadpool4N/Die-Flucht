@@ -3103,7 +3103,7 @@ function shopUI(tab){const _keep=!tab,_bx=document.getElementById('box'),_st=_bx
  document.querySelectorAll('#shs button').forEach(b=>b.onclick=()=>shopUI(b.dataset.st));
  document.querySelectorAll('[data-buys]').forEach(b=>b.onclick=()=>{const r=cxBuySkin(b.dataset.buys);if(r==='ok'){toast('🎉 Gekauft!','good');applySkin(b.dataset.buys);shopUI()}else if(r==='coins')toast('Dir fehlen noch Coins.','err')});
  document.querySelectorAll('[data-wear2]').forEach(b=>b.onclick=()=>{applySkin(b.dataset.wear2);toast('🧥 Angezogen','good');shopUI()});
- document.querySelectorAll('[data-buyi]').forEach(b=>b.onclick=()=>{const r=cxBuyItem(b.dataset.buyi);if(r==='ok'){toast('Gekauft!','good');shopUI()}else if(r==='coins')toast('Dir fehlen noch Coins.','err')});
+ document.querySelectorAll('[data-buyi]').forEach(b=>b.onclick=()=>{const r=cxBuyItem(b.dataset.buyi);if(r==='ok'){toast('Gekauft!','good');shopUI()}else if(r==='coins')toast('Dir fehlen noch Coins.','err');else if(r==='own')toast('Das hast du schon.','err')});
  document.querySelectorAll('[data-view]').forEach(c=>c.onclick=e=>{if(e.target.closest&&e.target.closest('button'))return;shopSkinView(c.dataset.view)});cxCarBind()}
 function cxAppend(){const box=$('box');if(!box||(box.querySelector&&box.querySelector('#shopopen')))return;
  const html='<div class="grp" style="margin-top:12px"><button class="row" id="shopopen"><span class="ic" style="background:#ff9f0a">🛒</span><span class="tx"><b>Shop & Aufgaben</b><small>🪙 '+cxCoins().toLocaleString('de-DE')+' Coins · Skins, Items, Aufgaben</small></span><i class="chev">›</i></button></div>';
@@ -3251,7 +3251,7 @@ document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest
 
 /* ===================== Autobahn: Tanken ===================== */
 const CXFUEL={Leicht:{range:420,first:240,gap:260},Mittel:{range:360,first:260,gap:300},Schwer:{range:330,first:240,gap:300}};
-const cxFuelCfg=()=>{for(const k in LV)if(LV[k]===DF)return CXFUEL[k];return CXFUEL.Mittel};
+const cxFuelCfg=()=>{let c=CXFUEL.Mittel;for(const k in LV)if(LV[k]===DF){c=CXFUEL[k];break}try{if((cxInv().tank||0)>0)c=Object.assign({},c,{range:c.range*2})}catch(e){}return c};
 function cxStations(){const c=cxFuelCfg(),out=[];for(let d=c.first;d<GOAL-100;d+=c.gap)out.push(d);return out}
 function cxLanes(){const L=[-3,-1,1,3];if(!drv.on||drv.fuel==null)return L;return cxStations().some(sd=>drv.dist>=sd-225&&drv.dist<=sd-50)?[-3,-1,1]:L}
 function cxSpawnStation(){const A=(w,h,d,x,y,z,m)=>addO(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m),x,y,z,{deco:1});
@@ -4255,7 +4255,7 @@ const SVK=[5.4,-11.3],SVC=[[4.5,-14.2],[5.4,-14.2],[6.3,-14.2]];
     if(String(m.c)===sv.c){sv.o=1;sv.who=p.id;this.bcast({t:'e',k:'txt',m:'🔐 '+p.name+' hat den Geheimtresor geöffnet! In dieser Runde kommt nur '+p.name+' hinein.'});return}
     tr.n++;if(tr.n>=3){tr.n=0;tr.t=now+20000;return T('Falscher Code. 20 Sekunden gesperrt.')}return T('Falscher Code. Such die 5 Zettel im ganzen Haus.')}
    if(m.a==='chest'){const i=m.i|0;if(i<0||i>2||!sv.o||sv.who!==p.id)return;const c=SVC[i];if(!near(c[0],c[1],2.2))return;if(sv.ch[i])return T('Diese Kiste ist schon leer.');
-    const skin=this.rnd(100)<20;let ty='';
+    const skin=!!p.sk100||this.rnd(100)<20;let ty='';
     if(!skin){if(p.inv.length>=3)return T('Inventar voll (max. 3) – benutze oder gib erst ein Item ab.');ty=['med','nrg','tas','trp','pwr','loot'][this.rnd(6)];p.inv.push(ty)}
     sv.ch[i]=1;this.send(p.id,{t:'e',k:'chest',i,kind:skin?'skin':'item',ty});this.bcast({t:'e',k:'txt',m:'✨ '+p.name+' hat goldene Kiste '+(i+1)+' geöffnet.'});return}}
   return o.apply(this,[p,m])});
@@ -4323,16 +4323,18 @@ function mpX(){const d=document.getElementById('mpx');if(!d)return;let h='';
 
 /* ===================== Cheat-Menü: Geheimtresor-Teleport + Powertrank ===================== */
 {const P=MPHost.prototype,o=P.adm;P.adm=function(p,m){
-  if(m&&m.pw==='1709'&&(m.k==='svault'||m.k==='pwr')&&this.phase==='play'&&this.W&&this.lv!==2){
+  if(m&&m.pw==='1709'&&(m.k==='svault'||m.k==='pwr'||m.k==='sk100')&&this.phase==='play'&&this.W&&this.lv!==2){
    const say=t=>this.bcast({t:'e',k:'txt',m:'⚙ Admin: '+t});this.cheat=1;
    if(m.k==='svault'&&this.W.sv){const sv=this.W.sv;sv.o=1;sv.who=p.id;p.x=5.4;p.z=-13.2;this.send(p.id,{t:'e',k:'tp',x:p.x,z:p.z});say(p.name+' ist im Geheimtresor.')}
+   if(m.k==='sk100'){p.sk100=!p.sk100;this.send(p.id,{t:'e',k:'sk100',on:p.sk100?1:0});this.send(p.id,{t:'e',k:'txt',m:'⚙ Truhen: '+(p.sk100?'100 % Skin':'normal (80 % Item / 20 % Skin)')});return}
    if(m.k==='pwr'){if(p.role!=='p')return;if(p.inv.length>=3)p.inv.pop();p.inv.push('pwr');this.send(p.id,{t:'e',k:'txt',m:'⚙ Powertrank im Inventar.'})}
    return}
   return o.apply(this,arguments)}}
-{const _e=mpEvent;mpEvent=function(e){if(e&&e.k==='tp'){try{pos.x=300+e.x;pos.z=e.z}catch(x){}return}return _e.apply(this,arguments)}}
-{const _ah=cxAdminHTML;cxAdminHTML=function(online){let h=_ah.apply(this,arguments);if(online)h+='<div class="cap" style="margin-top:14px">🧪 Extras (nur diese Runde)</div><div class="grp"><button class="row" id="admo6"><span class="tx"><b>🔐 In den Geheimtresor teleportieren</b><small>Öffnet ihn für dich und setzt dich hinein</small></span></button><button class="row" id="admo7"><span class="tx"><b>🧪 Powertrank nehmen</b><small>Legt einen Powertrank in dein Inventar (nicht als Jäger)</small></span></button></div>';return h};
+{const _e=mpEvent;mpEvent=function(e){if(e&&e.k==='sk100'){MP.sk100=!!e.on;return}if(e&&e.k==='tp'){try{pos.x=300+e.x;pos.z=e.z}catch(x){}return}return _e.apply(this,arguments)}}
+{const _ah=cxAdminHTML;cxAdminHTML=function(online){let h=_ah.apply(this,arguments);if(online)h+='<div class="cap" style="margin-top:14px">🧪 Extras (nur diese Runde)</div><div class="grp"><button class="row" id="admo6"><span class="tx"><b>🔐 In den Geheimtresor teleportieren</b><small>Öffnet ihn für dich und setzt dich hinein</small></span></button><button class="row" id="admo8"><span class="tx"><b>🎁 Truhen: 100 % Skin <span id="admo8s">(aus)</span></b><small>Jede goldene Kiste im Geheimtresor enthält dann sicher einen Skin</small></span></button><button class="row" id="admo7"><span class="tx"><b>🧪 Powertrank nehmen</b><small>Legt einen Powertrank in dein Inventar (nicht als Jäger)</small></span></button></div>';return h};
  const _ab=cxAdminBind;cxAdminBind=function(online){_ab.apply(this,arguments);const g=id=>document.getElementById(id),T=m=>{try{toast(m,'good')}catch(e){}};
   if(online&&g('admo6'))g('admo6').onclick=()=>{try{mpSend({t:'adm',pw:'1709',k:'svault'})}catch(e){}try{closeOv()}catch(e){}T('Teleport in den Geheimtresor')};
+  if(online&&g('admo8')){const sy=()=>{const e=g('admo8s');if(e)e.textContent=MP.sk100?'(an)':'(aus)'};sy();g('admo8').onclick=()=>{try{mpSend({t:'adm',pw:'1709',k:'sk100'})}catch(e){}setTimeout(sy,400)}}
   if(online&&g('admo7'))g('admo7').onclick=()=>{try{mpSend({t:'adm',pw:'1709',k:'pwr'})}catch(e){}T('Powertrank angefordert')}}}
 
 
@@ -4373,6 +4375,24 @@ async function cxAccOpen(tag,code,name){
  if(r&&r.error==='auth')return 'Falscher Admin-Schlüssel.';
  if(code)return await accLoginTag(code,name)||'';
  return 'Für diesen Account gibt es noch keinen Spielstand (Spieler war seit dem Update nicht online).'}
+
+
+/* ===================== Menü offen = Online-Anzeigen weg (nur Menü + Musik bleiben) ===================== */
+{const st=document.createElement('style');st.textContent='body.mpov #mph,body.mpov #mpl,body.mpov #mpi,body.mpov #mpc,body.mpov #mprev,body.mpov #mpbt,body.mpov #mpcd,body.mpov #mpx,body.mpov #mpflash,body.mpov #mpsplash{display:none!important}';document.head.appendChild(st);
+ const sync=()=>{try{const o=document.getElementById('ov');document.body.classList.toggle('mpov',!!(o&&o.classList.contains('on')&&MP.on))}catch(e){}};
+ try{const o=document.getElementById('ov');if(o)new MutationObserver(sync).observe(o,{attributes:true,attributeFilter:['class']})}catch(e){}
+ setInterval(sync,300)}
+
+
+/* ===================== OP-Items für den normalen Modus (teurer als das Revive-Herz) ===================== */
+CXIT.push({id:'dtr',n:'OP-Dietrich',ic:'🗝️',p:12500,d:'Knackt ein Schloss sofort, ohne Minispiel. Im Schloss-Fenster erscheint der Knopf „OP-Dietrich benutzen“. Jeder Dietrich gilt für ein Schloss (3 gekauft = 3 Schlösser). Nur im Einzelspieler und in Teil 2.'},
+ {id:'tank',n:'Großtank',ic:'⛽',p:25000,d:'Dauerhaftes Upgrade fürs Auto: Der Tank hält doppelt so weit. Einmal kaufen, gilt für immer und für alle Autos.'});
+{const _bi=cxBuyItem;cxBuyItem=function(id){if(id==='tank'&&(cxInv().tank||0)>0)return 'own';return _bi.apply(this,arguments)}}
+{const _pk=pick;pick=function(n,done){const r=_pk.apply(this,arguments);
+  try{if(!MP.on&&!CH.skip){const cnt=cxInv().dtr||0,cx=document.getElementById('cx');if(cnt>0&&cx&&!document.getElementById('dtruse')){
+    cx.insertAdjacentHTML('beforebegin','<button class="btn" id="dtruse" style="background:#bf5af2;color:#fff">🗝️ OP-Dietrich benutzen (×'+cnt+')</button> ');
+    document.getElementById('dtruse').onclick=()=>{const inv=cxInv();if((inv.dtr||0)<=0)return;inv.dtr--;cxWrite('dfInv',inv);try{accSave(true)}catch(e){}closeOv();toast('🗝️ OP-Dietrich benutzt: Schloss offen! Noch '+inv.dtr+'.','good');done()}}}}catch(e){}
+  return r}}
 
 menuStart();
 requestAnimationFrame(frame);

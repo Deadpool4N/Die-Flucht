@@ -5115,14 +5115,17 @@ const phFr=()=>{try{const v=JSON.parse(localStorage.getItem('dfFr')||'[]');retur
 const phFrSet=a=>{try{localStorage.setItem('dfFr',JSON.stringify(a))}catch(e){}try{accSave()}catch(e){}};
 const phOff=()=>{try{return localStorage.getItem('dfPhOff')==='1'}catch(e){return false}};
 const phDnd=()=>{try{return localStorage.getItem('dfPhDnd')==='1'}catch(e){return false}};
-const phMe=()=>cxClean(myName());
+const phMe=()=>{let n='';try{n=accReady()?cxClean(accCur().name):cxClean(localStorage.getItem('dfPhName')||(MP.name&&MP.name!=='Spieler'?MP.name:''))}catch(e){}return n.length>1?n:''};
 const phLow=s=>String(s).toLowerCase();
-function phInit(){if(PH.peer||phOff())return;const nm=phMe();if(nm.length<2)return;
- mpLib(err=>{if(err||PH.peer||typeof Peer==='undefined')return;let p;try{p=new Peer(phId(nm),MPCFG)}catch(e){return}PH.peer=p;PH.name=nm;
-  p.on('open',()=>{PH.on=true;PH.err='';phRender(1)});
+function phInit(force){if(PH.peer||phOff())return;if(!force&&PH.rt&&Date.now()<PH.rt)return;const nm=phMe();if(nm.length<2)return;PH.rt=0;
+ mpLib(err=>{if(err||typeof Peer==='undefined'){PH.err='Telefon-Bibliothek nicht erreichbar (Internet?). Neuer Versuch …';PH.rt=Date.now()+6000;phRender(1);return}if(PH.peer)return;let p;try{p=new Peer(phId(nm),MPCFG)}catch(e){return}PH.peer=p;PH.name=nm;
+  p.on('open',()=>{PH.on=true;PH.err='';PH.rt=0;phRender(1)});
   p.on('connection',c=>{c.on('data',d=>phData(c,d));c.on('close',()=>phClosed(c))});
   p.on('call',phCall);
-  p.on('error',e=>{if(e&&e.type==='unavailable-id'){PH.err='Dieser Name ist schon auf einem anderen Gerät erreichbar.';try{p.destroy()}catch(x){}PH.peer=null;PH.on=false;phRender(1)}});
+  p.on('error',e=>{const t=e&&e.type;
+   if(t==='unavailable-id'){PH.err='Dieser Name ist schon auf einem anderen Gerät oder Tab erreichbar (zwei Geräte mit demselben Namen gehen nicht).';try{p.destroy()}catch(x){}PH.peer=null;PH.on=false;PH.rt=Date.now()+30000;phRender(1)}
+   else if(t==='peer-unavailable'){const m=String((e&&e.message)||'');if(PH.s)Object.keys(PH.s.pend).forEach(n=>{if(m.indexOf(phId(n))>=0){const c=PH.s.pend[n];clearTimeout(c._tm);delete PH.s.pend[n];try{c.close()}catch(x){}try{toast(n+' ist nicht erreichbar (nicht im Spiel, kein Konto oder Name falsch).','err')}catch(x){}phStopIfNoPend();phAutoEnd();phRender(1)}})}
+   else{PH.err='Keine Verbindung zum Telefon-Server ('+(t||'Fehler')+'). Neuer Versuch …';try{p.destroy()}catch(x){}PH.peer=null;PH.on=false;PH.rt=Date.now()+6000;phRender(1)}});
   p.on('disconnected',()=>{try{p.reconnect()}catch(e){}})})}
 function phDestroy(){try{PH.peer&&PH.peer.destroy()}catch(e){}PH.peer=null;PH.on=false}
 /* ---- Töne ---- */
@@ -5166,15 +5169,14 @@ function phAttach(c,n){PH.calls[n]=c;c.on('stream',s=>{if(PH.aud[n])return;try{c
  c.on('close',()=>phDropCall(n));c.on('error',()=>phDropCall(n))}
 function phDropCall(n){const c=PH.calls[n];delete PH.calls[n];try{c&&c.close()}catch(e){}const a=PH.aud[n];if(a){try{a.el.pause();a.el.srcObject=null}catch(e){}delete PH.aud[n]}}
 /* ---- Anrufe starten / annehmen / beenden ---- */
-async function phCallFriend(n){n=cxClean(n);if(n.length<2||phLow(n)===phLow(phMe()))return;if(!PH.peer){phInit();try{toast('Verbinde … gleich nochmal tippen.')}catch(e){}return}
- if(!PH.on){try{toast('Noch nicht verbunden. Gleich nochmal tippen.')}catch(e){}return}
+async function phCallFriend(n){n=cxClean(n);if(n.length<2||phLow(n)===phLow(phMe()))return;if(!PH.on){phInit(true);try{toast('Verbinde …')}catch(e){}for(let i=0;i<50&&!PH.on;i++)await new Promise(r=>setTimeout(r,150));if(!PH.on){try{toast(PH.err||'Keine Verbindung zum Telefon-Server. Prüfe das Internet.','err')}catch(e){}return}}
  if(PH.s&&!PH.s.host){try{toast('Nur wer den Anruf gestartet hat, kann Leute dazuholen.','err')}catch(e){}return}
  if(PH.inc)return;if(PH.s&&(PH.s.list.includes(n)||PH.s.pend[n]))return;
  PH.busy=true;await phMicGet();PH.busy=false;
  if(!PH.s)PH.s={host:true,list:[phMe()],mem:{},pend:{},t0:0,hc:null};
  const c=PH.peer.connect(phId(n),{reliable:true});c._n=n;PH.s.pend[n]=c;
  c.on('open',()=>{phSend(c,{t:'ring',from:phMe(),mem:PH.s?PH.s.list:[]})});c.on('data',d=>phData(c,d));c.on('close',()=>phClosed(c));
- c._tm=setTimeout(()=>{if(PH.s&&PH.s.pend[n]===c){delete PH.s.pend[n];phSend(c,{t:'cancel'});setTimeout(()=>{try{c.close()}catch(e){}},200);try{toast(n+(c.open?' antwortet nicht.':' ist gerade nicht erreichbar.'),'err')}catch(e){}phStopIfNoPend();phAutoEnd();phRender(1)}},c.open?40000:9000);
+ c._tm=setTimeout(()=>{if(PH.s&&PH.s.pend[n]===c){delete PH.s.pend[n];phSend(c,{t:'cancel'});setTimeout(()=>{try{c.close()}catch(e){}},200);try{toast(n+(c.open?' antwortet nicht.':' ist gerade nicht erreichbar.'),'err')}catch(e){}phStopIfNoPend();phAutoEnd();phRender(1)}},40000);
  phTone('rb');phRender(1);phCheckOpen(c,n)}
 function phCheckOpen(c,n){setTimeout(()=>{if(PH.s&&PH.s.pend[n]===c&&!c.open){clearTimeout(c._tm);delete PH.s.pend[n];try{c.close()}catch(e){}try{toast(n+' ist gerade nicht erreichbar.','err')}catch(e){}phStopIfNoPend();phAutoEnd();phRender(1)}},8000)}
 async function phAccept(){const q=PH.inc;if(!q)return;clearTimeout(q.tm);phStopTone();const from=q.from,c=q.c,mem=q.mem;PH.inc=null;PH.inc_last=from;phIncHide();PH.busy=true;await phMicGet();PH.busy=false;
@@ -5211,14 +5213,15 @@ function phRender(force){try{const p=document.getElementById('php');phChip();if(
  if(!force&&sig===PH.sig){b.querySelectorAll('[data-av]').forEach(e=>{e.style.boxShadow=sp(e.getAttribute('data-av'))?'0 0 0 3px #30d158':'none'});const t=b.querySelector('#pht');if(t)t.textContent=phTime();return}
  PH.sig=sig;const online=n=>PH.seen[n]&&Date.now()-PH.seen[n]<9000;
  let h='';const sw=(id,on,lab,sub)=>'<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #333"><div style="flex:1"><div style="font-size:15px">'+lab+'</div><div style="font-size:12px;opacity:.55">'+sub+'</div></div><button id="'+id+'" style="width:52px;height:30px;border-radius:15px;border:0;background:'+(on?'#34c759':'#555')+';position:relative;padding:0"><i style="position:absolute;top:3px;'+(on?'right:3px':'left:3px')+';width:24px;height:24px;border-radius:50%;background:#fff"></i></button></div>';
- const st=PH.err?'<b style="color:#ff453a">'+vcEsc(PH.err)+'</b>':phOff()?'Du bist <b>nicht erreichbar</b> (Schalter unten).':PH.on?'Du bist erreichbar als <b style="color:#30d158">'+vcEsc(PH.name)+'</b>':'Verbinde …';
+ const noName=!phMe();const st=noName?'Gib erst deinen Namen ein, damit Freunde dich anrufen können:':PH.err?'<b style="color:#ff453a">'+vcEsc(PH.err)+'</b>':phOff()?'Du bist <b>nicht erreichbar</b> (Schalter unten).':PH.on?'Du bist erreichbar als <b style="color:#30d158">'+vcEsc(PH.name)+'</b>':'Verbinde …';
  h+='<div style="margin:8px 0 10px;font-size:14px;opacity:.9">'+st+'</div>';
+ if(noName){h+='<div style="display:flex;gap:8px;margin:6px 0 12px"><input id="phnm" placeholder="Dein Name" maxlength="14" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px"><button id="phnmb" style="padding:0 16px;border:0;border-radius:12px;background:#0a84ff;color:#fff;font-size:15px">Speichern</button></div>'}
  if(s){h+='<div style="text-align:center;font-size:15px;opacity:.7" id="pht">'+phTime()+'</div><div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:14px 0">'
   +s.list.map(n=>'<div style="text-align:center;width:84px">'+phAv(n,62,sp(n))+'<div style="font-size:13px;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vcEsc(n)+(phLow(n)===phLow(me)?' (du)':'')+'</div>'+(phLow(n)!==phLow(me)&&!fr.some(x=>phLow(x)===phLow(n))?'<button data-addf="'+vcEsc(n)+'" style="font-size:11px;background:#3a3d49;color:#fff;border:0;border-radius:8px;padding:2px 7px;margin-top:3px">＋ Freund</button>':'')+'</div>').join('')
   +Object.keys(s.pend).map(n=>'<div style="text-align:center;width:84px;opacity:.55">'+phAv(n,62,0)+'<div style="font-size:13px;margin-top:5px">'+vcEsc(n)+'</div><div style="font-size:11px">ruft an …</div></div>').join('')+'</div>'
   +'<div style="display:flex;gap:18px;justify-content:center;margin:6px 0 12px"><div style="text-align:center"><button id="phmute" style="width:64px;height:64px;border-radius:50%;border:0;background:'+(PH.mute?'#fff':'#3a3d49')+';font-size:26px;padding:0">'+(PH.mute?'🔇':'🎤')+'</button><div style="font-size:12px;margin-top:4px">Stumm</div></div><div style="text-align:center"><button id="phend" style="width:64px;height:64px;border-radius:50%;border:0;background:#ff3b30;display:flex;align-items:center;justify-content:center;padding:0"><span style="display:flex;transform:rotate(135deg)">'+PHI+'</span></button><div style="font-size:12px;margin-top:4px">Auflegen</div></div></div>'
   +(s.host?'':'<div style="text-align:center;font-size:12px;opacity:.55">Nur '+vcEsc(s.from||'der Anrufer')+' kann weitere Freunde dazuholen.</div>')}
- if(!s||s.host){h+='<div style="font-size:13px;opacity:.7;margin:10px 0 4px">'+(s?'Freunde dazuholen':'Freunde')+'</div>'
+ if(phMe()&&(!s||s.host)){h+='<div style="font-size:13px;opacity:.7;margin:10px 0 4px">'+(s?'Freunde dazuholen':'Freunde')+'</div>'
   +(fr.length?fr.filter(n=>!s||(!s.list.includes(n)&&!s.pend[n])).map(n=>'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #333">'+phAv(n,38,0)+'<div style="flex:1;min-width:0"><div style="font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vcEsc(n)+'</div><div style="font-size:12px;opacity:.55">'+(online(n)?'<span style="color:#30d158">● online</span>':'unbekannt / offline')+'</div></div><button data-call="'+vcEsc(n)+'" style="width:42px;height:42px;border-radius:50%;border:0;background:#34c759;display:flex;align-items:center;justify-content:center;padding:0"><span style="display:flex;transform:scale(.8)">'+PHI+'</span></button><button data-del="'+vcEsc(n)+'" style="background:none;color:#888;border:0;font-size:20px;padding:0 4px">×</button></div>').join(''):'<div style="font-size:13px;opacity:.55;padding:6px 0">Noch keine Freunde. Gib unten den genauen Spielernamen ein.</div>')
   +'<div style="display:flex;gap:8px;margin:10px 0"><input id="phin2" placeholder="Name des Freundes" maxlength="14" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px"><button id="phadd" style="padding:0 16px;border:0;border-radius:12px;background:#0a84ff;color:#fff;font-size:15px">Hinzufügen</button></div>'}
  h+=sw('phoff',!phOff(),'Erreichbar sein','Freunde können dich anrufen, solange das Spiel offen ist.')+sw('phdnd',phDnd(),'Nicht stören','Anrufe werden automatisch abgelehnt.')
@@ -5229,6 +5232,7 @@ function phRender(force){try{const p=document.getElementById('php');phChip();if(
  on('[data-del]',e=>e.onclick=()=>{const n=e.getAttribute('data-del');phFrSet(phFr().filter(x=>x!==n));phRender(1)});
  on('[data-addf]',e=>e.onclick=()=>{const n=e.getAttribute('data-addf'),a=phFr();if(!a.includes(n))a.push(n);phFrSet(a);phRender(1)});
  const add=b.querySelector('#phadd');if(add)add.onclick=()=>{const n=cxClean(b.querySelector('#phin2').value);if(n.length<2||phLow(n)===phLow(me))return;const a=phFr();if(!a.some(x=>phLow(x)===phLow(n)))a.push(n);phFrSet(a);b.querySelector('#phin2').value='';phRender(1);phPing(n)};
+ const nb=b.querySelector('#phnmb');if(nb)nb.onclick=()=>{const n=cxClean(b.querySelector('#phnm').value);if(n.length<2)return;try{localStorage.setItem('dfPhName',n)}catch(e){}PH.err='';PH.rt=0;phInit(true);phRender(1)};
  const m=b.querySelector('#phmute');if(m)m.onclick=()=>{PH.mute=!PH.mute;try{PH.mic&&PH.mic.getAudioTracks().forEach(t=>t.enabled=!PH.mute)}catch(e){}phRender(1)};
  const en=b.querySelector('#phend');if(en)en.onclick=()=>phHangup();
  b.querySelector('#phoff').onclick=()=>{const o=!phOff();try{localStorage.setItem('dfPhOff',o?'1':'0')}catch(e){}if(o){if(PH.s)phHangup();phDestroy()}else phInit();phRender(1)};
@@ -5237,7 +5241,7 @@ function phTime(){if(!PH.s||!PH.s.t0)return PH.s&&Object.keys(PH.s.pend).length?
 function phChip(){let c=document.getElementById('phchip');if(!c){c=document.createElement('button');c.id='phchip';c.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 6px);z-index:99991;border:0;border-radius:999px;background:#30d158;color:#fff;font-size:14px;font-weight:600;padding:6px 14px;display:none;font-family:-apple-system,system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.5)';c.onclick=()=>phPanel(true);document.body.appendChild(c)}
  const on=!!PH.s&&!PH.open;c.style.display=on?'block':'none';if(on)c.textContent='📞 '+(phTime()||'Anruf')+' · '+PH.s.list.length+' Pers.'}
 function phWatch(){try{phChip();const p=document.getElementById('php');if(p&&p.style.display!=='none')phRender();
- if(!PH.peer&&!phOff()&&phMe().length>1&&accReady())phInit();
+ if(!PH.peer&&!phOff()&&phMe().length>1)phInit();
  if(PH.peer&&!PH.s&&PH.name&&PH.name!==phMe()&&phMe().length>1){phDestroy()}}catch(e){}}
 setInterval(phWatch,1000);setTimeout(phWatch,3000);
 document.addEventListener('visibilitychange',()=>{try{if(!document.hidden&&PH.peer&&PH.peer.disconnected)PH.peer.reconnect()}catch(e){}});

@@ -5107,6 +5107,146 @@ function vcPaint(){try{const p=document.getElementById('vcp');if(!p||p.style.dis
  const _a=mpMenu;mpMenu=function(){const r=_a.apply(this,arguments);btn();return r};
  const _b=mpLobbyUI;mpLobbyUI=function(){const r=_b.apply(this,arguments);btn();return r}}
 
+/* ===================== TELEFONSITZUNG: Freunde anrufen (auch ohne Spiel), iOS-Anrufbildschirm, Klingelton, Gruppen-Sprachanruf ===================== */
+ACCK.push('dfFr');
+const PH={peer:null,name:'',on:false,err:'',s:null,inc:null,mic:null,aud:{},calls:{},seen:{},tone:null,ptm:null,sig:'',open:false,busy:false,mute:false,t0:0};
+const phId=n=>'dfp-'+Array.from(String(n).toLowerCase()).map(c=>/[a-z0-9]/.test(c)?c:'_'+c.charCodeAt(0).toString(36)).join('');
+const phFr=()=>{try{const v=JSON.parse(localStorage.getItem('dfFr')||'[]');return Array.isArray(v)?v.filter(x=>typeof x==='string').slice(0,60):[]}catch(e){return[]}};
+const phFrSet=a=>{try{localStorage.setItem('dfFr',JSON.stringify(a))}catch(e){}try{accSave()}catch(e){}};
+const phOff=()=>{try{return localStorage.getItem('dfPhOff')==='1'}catch(e){return false}};
+const phDnd=()=>{try{return localStorage.getItem('dfPhDnd')==='1'}catch(e){return false}};
+const phMe=()=>cxClean(myName());
+const phLow=s=>String(s).toLowerCase();
+function phInit(){if(PH.peer||phOff())return;const nm=phMe();if(nm.length<2)return;
+ mpLib(err=>{if(err||PH.peer||typeof Peer==='undefined')return;let p;try{p=new Peer(phId(nm),MPCFG)}catch(e){return}PH.peer=p;PH.name=nm;
+  p.on('open',()=>{PH.on=true;PH.err='';phRender(1)});
+  p.on('connection',c=>{c.on('data',d=>phData(c,d));c.on('close',()=>phClosed(c))});
+  p.on('call',phCall);
+  p.on('error',e=>{if(e&&e.type==='unavailable-id'){PH.err='Dieser Name ist schon auf einem anderen Gerät erreichbar.';try{p.destroy()}catch(x){}PH.peer=null;PH.on=false;phRender(1)}});
+  p.on('disconnected',()=>{try{p.reconnect()}catch(e){}})})}
+function phDestroy(){try{PH.peer&&PH.peer.destroy()}catch(e){}PH.peer=null;PH.on=false}
+/* ---- Töne ---- */
+function phStopTone(){if(PH.tone){clearInterval(PH.tone);PH.tone=null}try{navigator.vibrate&&navigator.vibrate(0)}catch(e){}}
+function phNote(f,t,g,len){const c=vcCtx(),o=c.createOscillator(),o2=c.createOscillator(),a=c.createGain();o.type='sine';o2.type='triangle';o.frequency.value=f;o2.frequency.value=f*2;a.gain.setValueAtTime(0,t);a.gain.linearRampToValueAtTime(g,t+.006);a.gain.exponentialRampToValueAtTime(.0008,t+len);o.connect(a);o2.connect(a);a.connect(c.destination);o.start(t);o2.start(t);o.stop(t+len+.05);o2.stop(t+len+.05)}
+function phTone(kind){phStopTone();const play=()=>{try{const c=vcCtx(),t=c.currentTime+.03;
+  if(kind==='ring'){[659,784,988,784,659,880,1047,880,1319].forEach((f,i)=>phNote(f,t+i*.15,.22,.7));try{navigator.vibrate&&navigator.vibrate([350,150,350])}catch(e){}}
+  else{phNote(440,t,.12,.9);phNote(480,t,.12,.9)}}catch(e){}};play();PH.tone=setInterval(play,kind==='ring'?3000:3500)}
+/* ---- Protokoll ---- */
+function phSend(c,m){try{if(c&&c.open)c.send(m)}catch(e){}}
+function phMembers(){return PH.s?PH.s.list.slice():[]}
+function phData(c,d){if(!d)return;try{switch(d.t){
+ case 'ping':phSend(c,{t:'pong',dnd:phDnd()?1:0});break;
+ case 'pong':PH.seen[c._n]=Date.now();if(c._ping){try{c.close()}catch(e){}}phRender();break;
+ case 'ring':{const from=cxClean(d.from);if(from.length<2||from.toLowerCase()===phLow(phMe())){phSend(c,{t:'dec'});break}
+  if(phDnd()||PH.s||PH.inc||PH.busy){phSend(c,{t:'dec',why:phDnd()?'dnd':'busy'});setTimeout(()=>{try{c.close()}catch(e){}},300);break}
+  PH.inc={c,from,mem:Array.isArray(d.mem)?d.mem.map(cxClean).filter(x=>x.length>1).slice(0,24):[from]};phIncUI();phTone('ring');
+  PH.inc.tm=setTimeout(()=>{if(PH.inc&&PH.inc.c===c)phDecline(true)},45000);break}
+ case 'cancel':if(PH.inc&&PH.inc.c===c){phIncClear();try{toast('Verpasster Anruf von '+PH.inc_last,'err')}catch(e){}}break;
+ case 'acc':{if(!PH.s||!c._n)break;const n=c._n;clearTimeout(c._tm);if(PH.s.pend[n]){delete PH.s.pend[n];if(!PH.s.list.includes(n))PH.s.list.push(n);PH.s.mem[n]=c;if(!PH.s.t0)PH.s.t0=Date.now();phStopIfNoPend();phBroadcast();phMesh();phRender(1)}break}
+ case 'dec':{if(PH.s&&c._n&&PH.s.pend[c._n]){clearTimeout(c._tm);delete PH.s.pend[c._n];try{toast(c._n+(d.why==='dnd'?' möchte nicht gestört werden.':d.why==='busy'?' ist gerade im Gespräch.':' hat den Anruf abgelehnt.'),'err')}catch(e){}phStopIfNoPend();phAutoEnd();phRender(1)}break}
+ case 'mem':if(PH.s&&!PH.s.host&&Array.isArray(d.list)){PH.s.list=d.list.map(cxClean).filter(x=>x.length>1).slice(0,24);phMesh();phRender(1)}break;
+ case 'end':phHangup(true);break;
+ case 'bye':if(PH.s&&PH.s.host&&c._n){phRemove(c._n)}break}}catch(e){console.error('ph',e)}}
+function phClosed(c){if(PH.inc&&PH.inc.c===c){phIncClear();return}
+ if(PH.s){if(PH.s.host){if(c._n&&(PH.s.mem[c._n]===c))phRemove(c._n);else if(c._n&&PH.s.pend[c._n]===c){delete PH.s.pend[c._n];phStopIfNoPend();phAutoEnd();phRender(1)}}else if(PH.s.hc===c)phHangup(true)}}
+function phStopIfNoPend(){if(PH.s&&!Object.keys(PH.s.pend).length)phStopTone()}
+function phAutoEnd(){if(PH.s&&PH.s.host&&PH.s.list.length<2&&!Object.keys(PH.s.pend).length)phHangup()}
+function phRemove(n){if(!PH.s)return;const i=PH.s.list.indexOf(n);if(i>=0)PH.s.list.splice(i,1);try{PH.s.mem[n]&&PH.s.mem[n].close()}catch(e){}delete PH.s.mem[n];phDropCall(n);try{toast(n+' hat aufgelegt.')}catch(e){}if(PH.s.list.length<2&&!Object.keys(PH.s.pend).length)phHangup();else{phBroadcast();phRender(1)}}
+function phBroadcast(){if(!PH.s||!PH.s.host)return;Object.keys(PH.s.mem).forEach(n=>phSend(PH.s.mem[n],{t:'mem',list:PH.s.list}))}
+/* ---- Mikro + Sprachverbindungen ---- */
+async function phMicGet(){if(PH.mic)return PH.mic;const m=await vcMic();let s=null;try{if(m)s=m.clone()}catch(e){}
+ if(!s){try{s=vcCtx().createMediaStreamDestination().stream}catch(e){}try{toast((VC.err||'Kein Mikrofon')+' Du kannst nur zuhören.','err')}catch(e){}}
+ PH.mic=s;try{s.getAudioTracks().forEach(t=>t.enabled=!PH.mute)}catch(e){}return s}
+function phMesh(){if(!PH.s||!PH.peer||!PH.mic)return;const me=phMe();
+ PH.s.list.forEach(n=>{if(phLow(n)===phLow(me)||PH.calls[n])return;if(phLow(me)<phLow(n)){try{const c=PH.peer.call(phId(n),PH.mic);phAttach(c,n)}catch(e){}}});
+ Object.keys(PH.calls).forEach(n=>{if(!PH.s.list.includes(n))phDropCall(n)})}
+function phCall(c){if(!PH.s||!PH.mic){try{c.close()}catch(e){}return}const n=PH.s.list.find(x=>phId(x)===c.peer);if(!n&&PH.s.list.length>=24){try{c.close()}catch(e){}return}
+ try{c.answer(PH.mic);phAttach(c,n||c.peer)}catch(e){}}
+function phAttach(c,n){PH.calls[n]=c;c.on('stream',s=>{if(PH.aud[n])return;try{const el=new Audio();el.autoplay=true;el.setAttribute('playsinline','');el.srcObject=s;const p=el.play();if(p&&p.catch)p.catch(()=>{});let an=null;try{an=vcCtx().createAnalyser();an.fftSize=512;vcCtx().createMediaStreamSource(s).connect(an)}catch(e){}PH.aud[n]={el,an}}catch(e){}phRender(1)});
+ c.on('close',()=>phDropCall(n));c.on('error',()=>phDropCall(n))}
+function phDropCall(n){const c=PH.calls[n];delete PH.calls[n];try{c&&c.close()}catch(e){}const a=PH.aud[n];if(a){try{a.el.pause();a.el.srcObject=null}catch(e){}delete PH.aud[n]}}
+/* ---- Anrufe starten / annehmen / beenden ---- */
+async function phCallFriend(n){n=cxClean(n);if(n.length<2||phLow(n)===phLow(phMe()))return;if(!PH.peer){phInit();try{toast('Verbinde … gleich nochmal tippen.')}catch(e){}return}
+ if(!PH.on){try{toast('Noch nicht verbunden. Gleich nochmal tippen.')}catch(e){}return}
+ if(PH.s&&!PH.s.host){try{toast('Nur wer den Anruf gestartet hat, kann Leute dazuholen.','err')}catch(e){}return}
+ if(PH.inc)return;if(PH.s&&(PH.s.list.includes(n)||PH.s.pend[n]))return;
+ PH.busy=true;await phMicGet();PH.busy=false;
+ if(!PH.s)PH.s={host:true,list:[phMe()],mem:{},pend:{},t0:0,hc:null};
+ const c=PH.peer.connect(phId(n),{reliable:true});c._n=n;PH.s.pend[n]=c;
+ c.on('open',()=>{phSend(c,{t:'ring',from:phMe(),mem:PH.s?PH.s.list:[]})});c.on('data',d=>phData(c,d));c.on('close',()=>phClosed(c));
+ c._tm=setTimeout(()=>{if(PH.s&&PH.s.pend[n]===c){delete PH.s.pend[n];phSend(c,{t:'cancel'});setTimeout(()=>{try{c.close()}catch(e){}},200);try{toast(n+(c.open?' antwortet nicht.':' ist gerade nicht erreichbar.'),'err')}catch(e){}phStopIfNoPend();phAutoEnd();phRender(1)}},c.open?40000:9000);
+ phTone('rb');phRender(1);phCheckOpen(c,n)}
+function phCheckOpen(c,n){setTimeout(()=>{if(PH.s&&PH.s.pend[n]===c&&!c.open){clearTimeout(c._tm);delete PH.s.pend[n];try{c.close()}catch(e){}try{toast(n+' ist gerade nicht erreichbar.','err')}catch(e){}phStopIfNoPend();phAutoEnd();phRender(1)}},8000)}
+async function phAccept(){const q=PH.inc;if(!q)return;clearTimeout(q.tm);phStopTone();const from=q.from,c=q.c,mem=q.mem;PH.inc=null;PH.inc_last=from;phIncHide();PH.busy=true;await phMicGet();PH.busy=false;
+ PH.s={host:false,hc:c,list:mem.includes(phMe())?mem:mem.concat([phMe()]),mem:{},pend:{},t0:Date.now(),from};c._n=from;phSend(c,{t:'acc'});phMesh();phPanel(true);phRender(1)}
+function phDecline(missed){const q=PH.inc;if(!q)return;clearTimeout(q.tm);phSend(q.c,{t:'dec'});PH.inc_last=q.from;setTimeout(()=>{try{q.c.close()}catch(e){}},300);PH.inc=null;phStopTone();phIncHide();if(missed)try{toast('Verpasster Anruf von '+q.from,'err')}catch(e){}}
+function phIncClear(){const q=PH.inc;if(q){clearTimeout(q.tm);PH.inc_last=q.from}PH.inc=null;phStopTone();phIncHide()}
+function phHangup(remote){const s=PH.s;PH.s=null;phStopTone();if(s){if(s.host){Object.keys(s.mem).forEach(n=>phSend(s.mem[n],{t:'end'}));Object.keys(s.pend).forEach(n=>{clearTimeout(s.pend[n]._tm);phSend(s.pend[n],{t:'cancel'})});setTimeout(()=>{Object.keys(s.mem).forEach(n=>{try{s.mem[n].close()}catch(e){}});Object.keys(s.pend).forEach(n=>{try{s.pend[n].close()}catch(e){}})},300)}
+  else{phSend(s.hc,{t:'bye'});setTimeout(()=>{try{s.hc.close()}catch(e){}},300)}}
+ Object.keys(PH.calls).forEach(phDropCall);try{PH.mic&&PH.mic.getTracks().forEach(t=>t.stop())}catch(e){}PH.mic=null;
+ if(remote&&s)try{toast('Anruf beendet.')}catch(e){}phRender(1);phWatch()}
+function phPing(n){if(!PH.on||!PH.peer)return;try{const c=PH.peer.connect(phId(n),{reliable:true});c._n=n;c._ping=1;c.on('open',()=>phSend(c,{t:'ping'}));c.on('data',d=>phData(c,d));setTimeout(()=>{try{c.close()}catch(e){}},5000)}catch(e){}}
+/* ---- Oberfläche ---- */
+const PHI='<svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>';
+const phCol=n=>{let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))%360;return 'hsl('+h+',55%,48%)'};
+const phAv=(n,sz,ring)=>'<span data-av="'+vcEsc(n)+'" style="display:inline-flex;align-items:center;justify-content:center;width:'+sz+'px;height:'+sz+'px;border-radius:50%;background:'+phCol(n)+';color:#fff;font-weight:600;font-size:'+Math.round(sz*.45)+'px;flex:none;box-shadow:'+(ring?'0 0 0 3px #30d158':'none')+'">'+vcEsc(String(n).charAt(0).toUpperCase())+'</span>';
+function phIncUI(){let e=document.getElementById('phin');if(!e){e=document.createElement('div');e.id='phin';document.body.appendChild(e)}const q=PH.inc;if(!q)return;
+ const full=(typeof ovOn!=='undefined')&&ovOn,grp=q.mem.length>1&&q.mem.filter(x=>x!==q.from).length>0?'Gruppenanruf · '+q.mem.length+' Personen':'Die Flucht · Audio';
+ const btn=(id,bg,rot,lab,sz)=>'<div style="text-align:center"><button id="'+id+'" style="width:'+sz+'px;height:'+sz+'px;border-radius:50%;border:0;background:'+bg+';display:flex;align-items:center;justify-content:center;padding:0;margin:0 auto"><span style="display:flex;transform:rotate('+rot+'deg)">'+PHI+'</span></button>'+(lab?'<div style="margin-top:8px;font-size:14px">'+lab+'</div>':'')+'</div>';
+ if(full){e.style.cssText='position:fixed;inset:0;z-index:100003;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 12vh) 24px 12vh;background:radial-gradient(ellipse at 50% 20%,#4a4f66,#14151c 70%);color:#fff;font-family:-apple-system,system-ui,sans-serif;-webkit-backdrop-filter:blur(30px);backdrop-filter:blur(30px)';
+  e.innerHTML='<div style="text-align:center">'+phAv(q.from,110,0)+'<div style="font-size:36px;font-weight:600;margin-top:18px;letter-spacing:-.5px">'+vcEsc(q.from)+'</div><div style="font-size:18px;opacity:.7;margin-top:6px">'+grp+'</div><div style="font-size:15px;opacity:.5;margin-top:4px">ruft an …</div></div><div style="display:flex;gap:min(34vw,150px)">'+btn('phdec','#ff3b30',135,'Ablehnen',78)+btn('phacc','#34c759',0,'Annehmen',78)+'</div>'}
+ else{e.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 8px);width:min(94vw,420px);z-index:100003;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:30px;background:rgba(40,42,52,.82);color:#fff;font-family:-apple-system,system-ui,sans-serif;-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);box-shadow:0 8px 30px rgba(0,0,0,.55)';
+  e.innerHTML=phAv(q.from,46,0)+'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+vcEsc(q.from)+'</div><div style="font-size:13px;opacity:.65">'+grp+'</div></div>'+btn('phdec','#ff3b30',135,'',46)+btn('phacc','#34c759',0,'',46)}
+ e.style.display=full?'flex':'flex';document.getElementById('phdec').onclick=()=>phDecline();document.getElementById('phacc').onclick=()=>phAccept()}
+function phIncHide(){const e=document.getElementById('phin');if(e){e.style.display='none';e.innerHTML=''}}
+function phPanel(open){PH.open=open;let p=document.getElementById('php');
+ if(!open){if(p)p.style.display='none';return}
+ if(!p){p=document.createElement('div');p.id='php';p.style.cssText='position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-family:-apple-system,system-ui,sans-serif;color:#fff';
+  p.innerHTML='<div style="width:min(94vw,440px);max-height:88vh;overflow:auto;background:rgba(32,34,44,.96);border-radius:30px;padding:18px;box-shadow:0 14px 50px #000"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:22px">📞 Telefonsitzung</b><button id="phx" style="background:#3a3d49;color:#fff;border:0;border-radius:999px;padding:7px 16px;font-size:15px">Schließen</button></div><div id="phb"></div></div>';
+  document.body.appendChild(p);p.querySelector('#phx').onclick=()=>phPanel(false)}
+ p.style.display='flex';PH.sig='';phInit();phRender(1);phFr().slice(0,20).forEach(phPing)}
+function phRender(force){try{const p=document.getElementById('php');phChip();if(!p||p.style.display==='none')return;const b=p.querySelector('#phb');const s=PH.s,me=phMe(),fr=phFr();
+ const sp=n=>{const a=PH.aud[n];return a&&a.an&&vcLevel(a.an)>.02};
+ const sig=JSON.stringify([!!s,s&&s.list,s&&Object.keys(s.pend),s&&s.host,PH.on,PH.err,PH.mute,fr,Object.keys(PH.seen).map(k=>PH.seen[k]>Date.now()-9000?k:''),phOff(),phDnd(),Object.keys(PH.aud)]);
+ if(!force&&sig===PH.sig){b.querySelectorAll('[data-av]').forEach(e=>{e.style.boxShadow=sp(e.getAttribute('data-av'))?'0 0 0 3px #30d158':'none'});const t=b.querySelector('#pht');if(t)t.textContent=phTime();return}
+ PH.sig=sig;const online=n=>PH.seen[n]&&Date.now()-PH.seen[n]<9000;
+ let h='';const sw=(id,on,lab,sub)=>'<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #333"><div style="flex:1"><div style="font-size:15px">'+lab+'</div><div style="font-size:12px;opacity:.55">'+sub+'</div></div><button id="'+id+'" style="width:52px;height:30px;border-radius:15px;border:0;background:'+(on?'#34c759':'#555')+';position:relative;padding:0"><i style="position:absolute;top:3px;'+(on?'right:3px':'left:3px')+';width:24px;height:24px;border-radius:50%;background:#fff"></i></button></div>';
+ const st=PH.err?'<b style="color:#ff453a">'+vcEsc(PH.err)+'</b>':phOff()?'Du bist <b>nicht erreichbar</b> (Schalter unten).':PH.on?'Du bist erreichbar als <b style="color:#30d158">'+vcEsc(PH.name)+'</b>':'Verbinde …';
+ h+='<div style="margin:8px 0 10px;font-size:14px;opacity:.9">'+st+'</div>';
+ if(s){h+='<div style="text-align:center;font-size:15px;opacity:.7" id="pht">'+phTime()+'</div><div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:14px 0">'
+  +s.list.map(n=>'<div style="text-align:center;width:84px">'+phAv(n,62,sp(n))+'<div style="font-size:13px;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vcEsc(n)+(phLow(n)===phLow(me)?' (du)':'')+'</div>'+(phLow(n)!==phLow(me)&&!fr.some(x=>phLow(x)===phLow(n))?'<button data-addf="'+vcEsc(n)+'" style="font-size:11px;background:#3a3d49;color:#fff;border:0;border-radius:8px;padding:2px 7px;margin-top:3px">＋ Freund</button>':'')+'</div>').join('')
+  +Object.keys(s.pend).map(n=>'<div style="text-align:center;width:84px;opacity:.55">'+phAv(n,62,0)+'<div style="font-size:13px;margin-top:5px">'+vcEsc(n)+'</div><div style="font-size:11px">ruft an …</div></div>').join('')+'</div>'
+  +'<div style="display:flex;gap:18px;justify-content:center;margin:6px 0 12px"><div style="text-align:center"><button id="phmute" style="width:64px;height:64px;border-radius:50%;border:0;background:'+(PH.mute?'#fff':'#3a3d49')+';font-size:26px;padding:0">'+(PH.mute?'🔇':'🎤')+'</button><div style="font-size:12px;margin-top:4px">Stumm</div></div><div style="text-align:center"><button id="phend" style="width:64px;height:64px;border-radius:50%;border:0;background:#ff3b30;display:flex;align-items:center;justify-content:center;padding:0"><span style="display:flex;transform:rotate(135deg)">'+PHI+'</span></button><div style="font-size:12px;margin-top:4px">Auflegen</div></div></div>'
+  +(s.host?'':'<div style="text-align:center;font-size:12px;opacity:.55">Nur '+vcEsc(s.from||'der Anrufer')+' kann weitere Freunde dazuholen.</div>')}
+ if(!s||s.host){h+='<div style="font-size:13px;opacity:.7;margin:10px 0 4px">'+(s?'Freunde dazuholen':'Freunde')+'</div>'
+  +(fr.length?fr.filter(n=>!s||(!s.list.includes(n)&&!s.pend[n])).map(n=>'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #333">'+phAv(n,38,0)+'<div style="flex:1;min-width:0"><div style="font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vcEsc(n)+'</div><div style="font-size:12px;opacity:.55">'+(online(n)?'<span style="color:#30d158">● online</span>':'unbekannt / offline')+'</div></div><button data-call="'+vcEsc(n)+'" style="width:42px;height:42px;border-radius:50%;border:0;background:#34c759;display:flex;align-items:center;justify-content:center;padding:0"><span style="display:flex;transform:scale(.8)">'+PHI+'</span></button><button data-del="'+vcEsc(n)+'" style="background:none;color:#888;border:0;font-size:20px;padding:0 4px">×</button></div>').join(''):'<div style="font-size:13px;opacity:.55;padding:6px 0">Noch keine Freunde. Gib unten den genauen Spielernamen ein.</div>')
+  +'<div style="display:flex;gap:8px;margin:10px 0"><input id="phin2" placeholder="Name des Freundes" maxlength="14" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px"><button id="phadd" style="padding:0 16px;border:0;border-radius:12px;background:#0a84ff;color:#fff;font-size:15px">Hinzufügen</button></div>'}
+ h+=sw('phoff',!phOff(),'Erreichbar sein','Freunde können dich anrufen, solange das Spiel offen ist.')+sw('phdnd',phDnd(),'Nicht stören','Anrufe werden automatisch abgelehnt.')
+  +'<div style="font-size:12px;opacity:.5;margin-top:8px;line-height:1.35">Das Telefon läuft in jedem Spiel und im Menü. Im Online-Modus kannst du zusätzlich den Spiel-Sprachchat (🎙️) nutzen, entweder oder.</div>';
+ const keep=(b.querySelector('#phin2')||{}).value||'';b.innerHTML=h;const inp=b.querySelector('#phin2');if(inp)inp.value=keep;
+ const on=(sel,f)=>b.querySelectorAll(sel).forEach(f);
+ on('[data-call]',e=>e.onclick=()=>phCallFriend(e.getAttribute('data-call')));
+ on('[data-del]',e=>e.onclick=()=>{const n=e.getAttribute('data-del');phFrSet(phFr().filter(x=>x!==n));phRender(1)});
+ on('[data-addf]',e=>e.onclick=()=>{const n=e.getAttribute('data-addf'),a=phFr();if(!a.includes(n))a.push(n);phFrSet(a);phRender(1)});
+ const add=b.querySelector('#phadd');if(add)add.onclick=()=>{const n=cxClean(b.querySelector('#phin2').value);if(n.length<2||phLow(n)===phLow(me))return;const a=phFr();if(!a.some(x=>phLow(x)===phLow(n)))a.push(n);phFrSet(a);b.querySelector('#phin2').value='';phRender(1);phPing(n)};
+ const m=b.querySelector('#phmute');if(m)m.onclick=()=>{PH.mute=!PH.mute;try{PH.mic&&PH.mic.getAudioTracks().forEach(t=>t.enabled=!PH.mute)}catch(e){}phRender(1)};
+ const en=b.querySelector('#phend');if(en)en.onclick=()=>phHangup();
+ b.querySelector('#phoff').onclick=()=>{const o=!phOff();try{localStorage.setItem('dfPhOff',o?'1':'0')}catch(e){}if(o){if(PH.s)phHangup();phDestroy()}else phInit();phRender(1)};
+ b.querySelector('#phdnd').onclick=()=>{try{localStorage.setItem('dfPhDnd',phDnd()?'0':'1')}catch(e){}phRender(1)}}catch(e){console.error('phr',e)}}
+function phTime(){if(!PH.s||!PH.s.t0)return PH.s&&Object.keys(PH.s.pend).length?'ruft an …':'';const t=Math.floor((Date.now()-PH.s.t0)/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')}
+function phChip(){let c=document.getElementById('phchip');if(!c){c=document.createElement('button');c.id='phchip';c.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 6px);z-index:99991;border:0;border-radius:999px;background:#30d158;color:#fff;font-size:14px;font-weight:600;padding:6px 14px;display:none;font-family:-apple-system,system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.5)';c.onclick=()=>phPanel(true);document.body.appendChild(c)}
+ const on=!!PH.s&&!PH.open;c.style.display=on?'block':'none';if(on)c.textContent='📞 '+(phTime()||'Anruf')+' · '+PH.s.list.length+' Pers.'}
+function phWatch(){try{phChip();const p=document.getElementById('php');if(p&&p.style.display!=='none')phRender();
+ if(!PH.peer&&!phOff()&&phMe().length>1&&accReady())phInit();
+ if(PH.peer&&!PH.s&&PH.name&&PH.name!==phMe()&&phMe().length>1){phDestroy()}}catch(e){}}
+setInterval(phWatch,1000);setTimeout(phWatch,3000);
+document.addEventListener('visibilitychange',()=>{try{if(!document.hidden&&PH.peer&&PH.peer.disconnected)PH.peer.reconnect()}catch(e){}});
+/* Knopf unten im Startmenü */
+function phMenuBtn(){const box=$('box');if(!box||!box.querySelector||box.querySelector('#phopen')||!box.querySelector('#shopopen'))return;
+ const html='<div class="grp" style="margin-top:12px"><button class="row" id="phopen"><span class="ic" style="background:#34c759">📞</span><span class="tx"><b>Telefonsitzung</b><small>Sprich mit Freunden, ohne ein Spiel zu starten</small></span><i class="chev">›</i></button></div>';
+ box.insertAdjacentHTML('beforeend',html);const o=box.querySelector('#phopen');if(o)o.onclick=()=>phPanel(true)}
+{const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);try{phMenuBtn()}catch(e){}return r}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

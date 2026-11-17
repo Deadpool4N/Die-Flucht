@@ -5446,6 +5446,15 @@ function bpAdminBind(){const g=id=>document.getElementById(id),T=m=>{try{toast(m
 {const _h=cxAdminHTML;cxAdminHTML=function(){return _h.apply(this,arguments)+bpAdminHTML()}
  const _b=cxAdminBind;cxAdminBind=function(){_b.apply(this,arguments);bpAdminBind()}}
 
+/* ===== Shop → Skins (ganz unten): Flucht-Pass-Level eintippen, nur mit Admin-Account ===== */
+{const _su=shopUI;shopUI=function(tab){const r=_su.apply(this,arguments);
+ try{if(!cxIsOp()||CXTAB.tab!=='skins')return r;const box=$('box'),grid=box&&box.querySelector&&box.querySelector('.cxg');if(!grid||box.querySelector('#shplv'))return r;
+  grid.insertAdjacentHTML('afterend','<div class="grp" id="shplv" style="margin-top:14px;padding:12px;text-align:left"><b>🏆 Flucht-Pass-Level (Admin)</b><div class="dim" style="font-size:12px;margin:4px 0 8px">Aktuell: Level <span id="shplc">'+bpLevel()+'</span> / '+BP.N+'. Tippe das Level ein, das du haben willst.</div>'
+   +'<div style="display:flex;gap:8px"><input id="shpln" type="number" inputmode="numeric" min="0" max="'+BP.N+'" placeholder="Level (0–'+BP.N+')" autocomplete="off" style="flex:1;min-width:0;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px"><button class="pill blue" id="shplb" style="padding:0 18px">Setzen</button></div></div>');
+  const inp=document.getElementById('shpln');['keydown','keyup','keypress'].forEach(n=>inp.addEventListener(n,e=>e.stopPropagation()));
+  document.getElementById('shplb').onclick=()=>{const v=inp.value;if(v===''){try{toast('Gib ein Level ein.','err')}catch(e){}return}const l=bpAdminSet(v);document.getElementById('shplc').textContent=l;try{toast('🏆 Pass-Level '+l+' (unten auf die Leiste tippen zum Abholen)','good')}catch(e){}}}catch(e){}
+ return r}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

@@ -5119,11 +5119,11 @@ const phMe=()=>{let n='';try{n=accReady()?cxClean(accCur().name):cxClean(localSt
 const phLow=s=>String(s).toLowerCase();
 function phInit(force){if(PH.peer||phOff())return;if(!force&&PH.rt&&Date.now()<PH.rt)return;const nm=phMe();if(nm.length<2)return;PH.rt=0;
  mpLib(err=>{if(err||typeof Peer==='undefined'){PH.err='Telefon-Bibliothek nicht erreichbar (Internet?). Neuer Versuch …';PH.rt=Date.now()+6000;phRender(1);return}if(PH.peer)return;let p;try{p=new Peer(phId(nm),MPCFG)}catch(e){return}PH.peer=p;PH.name=nm;
-  p.on('open',()=>{PH.on=true;PH.err='';PH.rt=0;phRender(1)});
+  p.on('open',()=>{PH.on=true;PH.err='';PH.rt=0;PH.ut=0;phRender(1)});
   p.on('connection',c=>{c.on('data',d=>phData(c,d));c.on('close',()=>phClosed(c))});
   p.on('call',phCall);
   p.on('error',e=>{const t=e&&e.type;
-   if(t==='unavailable-id'){PH.err='Dieser Name ist schon auf einem anderen Gerät oder Tab erreichbar (zwei Geräte mit demselben Namen gehen nicht).';try{p.destroy()}catch(x){}PH.peer=null;PH.on=false;PH.rt=Date.now()+30000;phRender(1)}
+   if(t==='unavailable-id'){PH.ut=(PH.ut||0)+1;PH.err=PH.ut<8?'Name ist noch belegt (alte Sitzung?). Neuer Versuch …':'Dieser Name ist auf einem anderen Gerät oder Tab erreichbar. Zwei Geräte mit demselben Namen gehen nicht.';try{p.destroy()}catch(x){}PH.peer=null;PH.on=false;PH.rt=Date.now()+(PH.ut<8?5000:30000);phRender(1)}
    else if(t==='peer-unavailable'){const m=String((e&&e.message)||'');if(PH.s)Object.keys(PH.s.pend).forEach(n=>{if(m.indexOf(phId(n))>=0){const c=PH.s.pend[n];clearTimeout(c._tm);delete PH.s.pend[n];try{c.close()}catch(x){}try{toast(n+' ist nicht erreichbar (nicht im Spiel, kein Konto oder Name falsch).','err')}catch(x){}phStopIfNoPend();phAutoEnd();phRender(1)}})}
    else{PH.err='Keine Verbindung zum Telefon-Server ('+(t||'Fehler')+'). Neuer Versuch …';try{p.destroy()}catch(x){}PH.peer=null;PH.on=false;PH.rt=Date.now()+6000;phRender(1)}});
   p.on('disconnected',()=>{try{p.reconnect()}catch(e){}})})}
@@ -5165,11 +5165,12 @@ function phMesh(){if(!PH.s||!PH.peer||!PH.mic)return;const me=phMe();
  Object.keys(PH.calls).forEach(n=>{if(!PH.s.list.includes(n))phDropCall(n)})}
 function phCall(c){if(!PH.s||!PH.mic){try{c.close()}catch(e){}return}const n=PH.s.list.find(x=>phId(x)===c.peer);if(!n&&PH.s.list.length>=24){try{c.close()}catch(e){}return}
  try{c.answer(PH.mic);phAttach(c,n||c.peer)}catch(e){}}
-function phAttach(c,n){PH.calls[n]=c;c.on('stream',s=>{if(PH.aud[n])return;try{const el=new Audio();el.autoplay=true;el.setAttribute('playsinline','');el.srcObject=s;const p=el.play();if(p&&p.catch)p.catch(()=>{});let an=null;try{an=vcCtx().createAnalyser();an.fftSize=512;vcCtx().createMediaStreamSource(s).connect(an)}catch(e){}PH.aud[n]={el,an}}catch(e){}phRender(1)});
+function phAttach(c,n){PH.calls[n]=c;c.on('stream',s=>{if(PH.aud[n])return;try{const el=new Audio();el.autoplay=true;el.setAttribute('playsinline','');el.srcObject=s;const p=el.play();if(p&&p.catch)p.catch(()=>{PH.np=1;try{toast('🔊 Tippe kurz auf den Bildschirm, damit du den Anruf hörst.','err')}catch(x){}});let an=null;try{an=vcCtx().createAnalyser();an.fftSize=512;vcCtx().createMediaStreamSource(s).connect(an)}catch(e){}PH.aud[n]={el,an}}catch(e){}phRender(1)});
  c.on('close',()=>phDropCall(n));c.on('error',()=>phDropCall(n))}
 function phDropCall(n){const c=PH.calls[n];delete PH.calls[n];try{c&&c.close()}catch(e){}const a=PH.aud[n];if(a){try{a.el.pause();a.el.srcObject=null}catch(e){}delete PH.aud[n]}}
 /* ---- Anrufe starten / annehmen / beenden ---- */
-async function phCallFriend(n){n=cxClean(n);if(n.length<2||phLow(n)===phLow(phMe()))return;if(!PH.on){phInit(true);try{toast('Verbinde …')}catch(e){}for(let i=0;i<50&&!PH.on;i++)await new Promise(r=>setTimeout(r,150));if(!PH.on){try{toast(PH.err||'Keine Verbindung zum Telefon-Server. Prüfe das Internet.','err')}catch(e){}return}}
+async function phCallFriend(n){try{await phCallFriend2(n)}catch(e){PH.busy=false;try{toast('Anruf-Fehler: '+(e&&e.message||e),'err')}catch(x){}}}
+async function phCallFriend2(n){n=cxClean(n);if(n.length<2||phLow(n)===phLow(phMe()))return;if(!PH.on){phInit(true);try{toast('Verbinde …')}catch(e){}for(let i=0;i<50&&!PH.on;i++)await new Promise(r=>setTimeout(r,150));if(!PH.on){try{toast(PH.err||'Keine Verbindung zum Telefon-Server. Prüfe das Internet.','err')}catch(e){}return}}
  if(PH.s&&!PH.s.host){try{toast('Nur wer den Anruf gestartet hat, kann Leute dazuholen.','err')}catch(e){}return}
  if(PH.inc)return;if(PH.s&&(PH.s.list.includes(n)||PH.s.pend[n]))return;
  PH.busy=true;await phMicGet();PH.busy=false;
@@ -5179,7 +5180,8 @@ async function phCallFriend(n){n=cxClean(n);if(n.length<2||phLow(n)===phLow(phMe
  c._tm=setTimeout(()=>{if(PH.s&&PH.s.pend[n]===c){delete PH.s.pend[n];phSend(c,{t:'cancel'});setTimeout(()=>{try{c.close()}catch(e){}},200);try{toast(n+(c.open?' antwortet nicht.':' ist gerade nicht erreichbar.'),'err')}catch(e){}phStopIfNoPend();phAutoEnd();phRender(1)}},40000);
  phTone('rb');phRender(1);phCheckOpen(c,n)}
 function phCheckOpen(c,n){setTimeout(()=>{if(PH.s&&PH.s.pend[n]===c&&!c.open){clearTimeout(c._tm);delete PH.s.pend[n];try{c.close()}catch(e){}try{toast(n+' ist gerade nicht erreichbar.','err')}catch(e){}phStopIfNoPend();phAutoEnd();phRender(1)}},8000)}
-async function phAccept(){const q=PH.inc;if(!q)return;clearTimeout(q.tm);phStopTone();const from=q.from,c=q.c,mem=q.mem;PH.inc=null;PH.inc_last=from;phIncHide();PH.busy=true;await phMicGet();PH.busy=false;
+async function phAccept(){try{await phAccept2()}catch(e){PH.busy=false;try{toast('Annehmen-Fehler: '+(e&&e.message||e),'err')}catch(x){}}}
+async function phAccept2(){const q=PH.inc;if(!q)return;clearTimeout(q.tm);phStopTone();const from=q.from,c=q.c,mem=q.mem;PH.inc=null;PH.inc_last=from;phIncHide();PH.busy=true;await phMicGet();PH.busy=false;
  PH.s={host:false,hc:c,list:mem.includes(phMe())?mem:mem.concat([phMe()]),mem:{},pend:{},t0:Date.now(),from};c._n=from;phSend(c,{t:'acc'});phMesh();phPanel(true);phRender(1)}
 function phDecline(missed){const q=PH.inc;if(!q)return;clearTimeout(q.tm);phSend(q.c,{t:'dec'});PH.inc_last=q.from;setTimeout(()=>{try{q.c.close()}catch(e){}},300);PH.inc=null;phStopTone();phIncHide();if(missed)try{toast('Verpasster Anruf von '+q.from,'err')}catch(e){}}
 function phIncClear(){const q=PH.inc;if(q){clearTimeout(q.tm);PH.inc_last=q.from}PH.inc=null;phStopTone();phIncHide()}
@@ -5214,7 +5216,7 @@ function phRender(force){try{const p=document.getElementById('php');phChip();if(
  PH.sig=sig;const online=n=>PH.seen[n]&&Date.now()-PH.seen[n]<9000;
  let h='';const sw=(id,on,lab,sub)=>'<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #333"><div style="flex:1"><div style="font-size:15px">'+lab+'</div><div style="font-size:12px;opacity:.55">'+sub+'</div></div><button id="'+id+'" style="width:52px;height:30px;border-radius:15px;border:0;background:'+(on?'#34c759':'#555')+';position:relative;padding:0"><i style="position:absolute;top:3px;'+(on?'right:3px':'left:3px')+';width:24px;height:24px;border-radius:50%;background:#fff"></i></button></div>';
  const noName=!phMe();const st=noName?'Gib erst deinen Namen ein, damit Freunde dich anrufen können:':PH.err?'<b style="color:#ff453a">'+vcEsc(PH.err)+'</b>':phOff()?'Du bist <b>nicht erreichbar</b> (Schalter unten).':PH.on?'Du bist erreichbar als <b style="color:#30d158">'+vcEsc(PH.name)+'</b>':'Verbinde …';
- h+='<div style="margin:8px 0 10px;font-size:14px;opacity:.9">'+st+'</div>';
+ h+='<div style="margin:8px 0 4px;font-size:14px;opacity:.9">'+st+'</div><div style="font-size:12px;opacity:.55;margin-bottom:8px">Telefon-Server: '+(PH.on?'<span style="color:#30d158">verbunden ✓</span>':'<span style="color:#ff9f0a">nicht verbunden</span> <button id="phre" style="background:#3a3d49;color:#fff;border:0;border-radius:8px;padding:2px 9px;font-size:12px">Neu verbinden</button>')+' · Mikrofon: '+(PH.mic?'an ✓':'wird beim Anruf abgefragt')+'</div>';
  if(noName){h+='<div style="display:flex;gap:8px;margin:6px 0 12px"><input id="phnm" placeholder="Dein Name" maxlength="14" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1;min-width:0;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px"><button id="phnmb" style="padding:0 16px;border:0;border-radius:12px;background:#0a84ff;color:#fff;font-size:15px">Speichern</button></div>'}
  if(s){h+='<div style="text-align:center;font-size:15px;opacity:.7" id="pht">'+phTime()+'</div><div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:14px 0">'
   +s.list.map(n=>'<div style="text-align:center;width:84px">'+phAv(n,62,sp(n))+'<div style="font-size:13px;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vcEsc(n)+(phLow(n)===phLow(me)?' (du)':'')+'</div>'+(phLow(n)!==phLow(me)&&!fr.some(x=>phLow(x)===phLow(n))?'<button data-addf="'+vcEsc(n)+'" style="font-size:11px;background:#3a3d49;color:#fff;border:0;border-radius:8px;padding:2px 7px;margin-top:3px">＋ Freund</button>':'')+'</div>').join('')
@@ -5232,6 +5234,7 @@ function phRender(force){try{const p=document.getElementById('php');phChip();if(
  on('[data-del]',e=>e.onclick=()=>{const n=e.getAttribute('data-del');phFrSet(phFr().filter(x=>x!==n));phRender(1)});
  on('[data-addf]',e=>e.onclick=()=>{const n=e.getAttribute('data-addf'),a=phFr();if(!a.includes(n))a.push(n);phFrSet(a);phRender(1)});
  const add=b.querySelector('#phadd');if(add)add.onclick=()=>{const n=cxClean(b.querySelector('#phin2').value);if(n.length<2||phLow(n)===phLow(me))return;const a=phFr();if(!a.some(x=>phLow(x)===phLow(n)))a.push(n);phFrSet(a);b.querySelector('#phin2').value='';phRender(1);phPing(n)};
+ const re=b.querySelector('#phre');if(re)re.onclick=()=>{PH.err='';PH.rt=0;PH.ut=0;phDestroy();phInit(true);phRender(1)};
  const nb=b.querySelector('#phnmb');if(nb)nb.onclick=()=>{const n=cxClean(b.querySelector('#phnm').value);if(n.length<2)return;try{localStorage.setItem('dfPhName',n)}catch(e){}PH.err='';PH.rt=0;phInit(true);phRender(1)};
  const m=b.querySelector('#phmute');if(m)m.onclick=()=>{PH.mute=!PH.mute;try{PH.mic&&PH.mic.getAudioTracks().forEach(t=>t.enabled=!PH.mute)}catch(e){}phRender(1)};
  const en=b.querySelector('#phend');if(en)en.onclick=()=>phHangup();
@@ -5250,6 +5253,10 @@ function phMenuBtn(){const box=$('box');if(!box||!box.querySelector||box.querySe
  const html='<div class="grp" style="margin-top:12px"><button class="row" id="phopen"><span class="ic" style="background:#34c759">📞</span><span class="tx"><b>Telefonsitzung</b><small>Sprich mit Freunden, ohne ein Spiel zu starten</small></span><i class="chev">›</i></button></div>';
  box.insertAdjacentHTML('beforeend',html);const o=box.querySelector('#phopen');if(o)o.onclick=()=>phPanel(true)}
 {const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);try{phMenuBtn()}catch(e){}return r}}
+
+/* iPad/Safari: Audio erst nach einer Berührung erlaubt → Kontext freischalten, blockierte Streams neu starten */
+['pointerdown','touchend','click'].forEach(ev=>document.addEventListener(ev,()=>{try{vcCtx()}catch(e){}if(PH.np){PH.np=0;Object.keys(PH.aud).forEach(n=>{try{const p=PH.aud[n].el.play();if(p&&p.catch)p.catch(()=>{PH.np=1})}catch(e){}})}
+ if(typeof VC!=='undefined')Object.keys(VC.aud).forEach(q=>{try{const e=VC.aud[q].el;if(e.paused){const p=e.play();if(p&&p.catch)p.catch(()=>{})}}catch(x){}})},{passive:true}));
 
 menuStart();
 requestAnimationFrame(frame);

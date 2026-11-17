@@ -5478,6 +5478,69 @@ function spOther(back){const e=bpEq(),s=bpS();let it=[],cur='';
  if(SPTAB==='skins'){const r=_sp.call(this,back);try{const b=$('box'),sub=b.querySelector('.sub');if(sub)sub.insertAdjacentHTML('beforebegin',spBar());document.querySelectorAll('[data-spt]').forEach(x=>x.onclick=()=>spindUI(back,x.dataset.spt))}catch(e){}return r}
  return spOther(back)}}
 
+/* ===================== TÄGLICH WECHSELNDER SHOP: 24-h-Timer, „Neu“, „Nicht gekauft“ ===================== */
+const SHCH={'Gratis':1,'Selten':.3,'Episch':.25,'Legendär':.15};
+const shopDay=off=>Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5)+(off||0);
+const shopH=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}h^=h>>>13;h=Math.imul(h,0x5bd1e995);h^=h>>>15;return(h>>>0)/4294967296};
+const shopRar=(k,id)=>k==='s'?(CXRAR[id]||{r:'Selten'}).r:((CXCARS.find(c=>c.id===id)||{}).r||'Gratis');
+const shopPerm=(k,id)=>{const r=shopRar(k,id),c=SHCH[r];if(c==null||c>=1)return true;return k==='c'?r==='Selten':(r==='Selten'&&shopH('perm'+id)<.2)};
+const shopAvailD=(k,id,day)=>shopPerm(k,id)||shopH(k+id+':'+day)<SHCH[shopRar(k,id)];
+const shopAvail=(k,id)=>shopAvailD(k,id,shopDay(0));
+const shopNew=(k,id)=>!shopPerm(k,id)&&shopAvail(k,id)&&!shopAvailD(k,id,shopDay(-1));
+const shopNext=(k,id)=>{for(let o=1;o<=60;o++)if(shopAvailD(k,id,shopDay(o)))return o===1?'morgen':'in '+o+' Tagen';return 'erst in über 2 Monaten'};
+const shopLeft=()=>{const d=new Date(),n=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1);let s=Math.max(0,Math.floor((n-d)/1000));const p=x=>String(x).padStart(2,'0');return p(Math.floor(s/3600))+':'+p(Math.floor(s%3600/60))+':'+p(s%60)};
+const shopF=()=>{try{const v=localStorage.getItem('dfShF');return v==='new'||v==='missing'?v:'today'}catch(e){return 'today'}};
+/* Kaufen nur, wenn der Gegenstand heute im Shop ist (Admins immer) */
+{const _b=cxBuySkin;cxBuySkin=function(id){const it=CXSKINS.find(x=>x.id===id);if(it&&!it.own()&&!(typeof cxIsOp==='function'&&cxIsOp())&&!shopAvail('s',id)){try{toast('Heute nicht im Shop – kommt '+shopNext('s',id)+' wieder.','err')}catch(e){}return 'closed'}return _b.apply(this,arguments)}
+ const _c=cxBuyCar;cxBuyCar=function(id){if(!cxCarOwn(id)&&!(typeof cxIsOp==='function'&&cxIsOp())&&!shopAvail('c',id)){try{toast('Heute nicht im Shop – kommt '+shopNext('c',id)+' wieder.','err')}catch(e){}return 'closed'}return _c.apply(this,arguments)}
+ const _cc=cxCarCards;cxCarCards=function(){const list=CXCARS.filter(c=>!c.bp||cxCarOwn(c.id));let i=0;return _cc.apply(this,arguments).replace(/<div class="cxc" /g,()=>'<div class="cxc" data-cid="'+(list[i++]||{id:''}).id+'" ')}}
+let SHDAY=0;
+{const _s=shopUI;shopUI=function(tab){const r=_s.apply(this,arguments);
+ try{const t=CXTAB.tab;if(t!=='skins'&&t!=='cars')return r;const k=t==='skins'?'s':'c',box=$('box'),grid=box&&box.querySelector&&box.querySelector('.cxg');if(!grid)return r;SHDAY=shopDay(0);
+  const op=typeof cxIsOp==='function'&&cxIsOp(),F=shopF();let nToday=0,nNew=0,nMiss=0;
+  const cards=Array.from(grid.children).filter(c=>c.classList&&c.classList.contains('cxc'));
+  cards.forEach(c=>{const id=k==='s'?c.getAttribute('data-view'):c.getAttribute('data-cid');if(!id||id==='adm'||id==='adm2'||id==='c0')return;
+   const own=k==='s'?(CXSKINS.find(x=>x.id===id)||{own:()=>true}).own():cxCarOwn(id),av=shopAvail(k,id),nw=shopNew(k,id),perm=shopPerm(k,id);
+   c.style.position='relative';c._own=own;
+   if(!own){nMiss++;if(av)nToday++}if(nw&&!own)nNew++;
+   const note=document.createElement('div');note.style.cssText='font-size:11px;margin-top:4px;opacity:.85';
+   if(!own){if(av){note.innerHTML=perm?'♾ Immer im Shop':'⏳ Heute im Shop';note.style.color='#30d158'}else{note.innerHTML='🚫 Heute nicht im Shop<br>kommt '+shopNext(k,id)+' wieder';note.style.color='#ff9f0a';c.style.opacity='.6';c.querySelectorAll('[data-buys],[data-buyc],[data-gift]').forEach(b=>b.remove())}c.appendChild(note)}
+   if(nw&&!own){const rb=document.createElement('div');rb.textContent='🆕 NEU';rb.style.cssText='position:absolute;top:6px;right:6px;background:#ff3b30;color:#fff;font-size:11px;font-weight:800;padding:2px 7px;border-radius:8px;z-index:2';c.appendChild(rb)}
+   const show=F==='today'?(own||av):F==='new'?(nw&&!own):!own;c.style.display=show?'':'none'});
+  const pill=(f,l)=>'<button class="pill'+(F===f?' blue':'')+'" data-shf="'+f+'" style="font-size:13px;padding:6px 12px">'+l+'</button>';
+  grid.insertAdjacentHTML('beforebegin','<div class="grp" id="shdaily" style="padding:10px 12px;margin:10px 0;text-align:center"><div style="font-size:14px">⏱ Der Shop wechselt in <b id="shtm" style="color:#ffd60a;font-variant-numeric:tabular-nums">'+shopLeft()+'</b></div><div class="dim" style="font-size:12px;margin:3px 0 8px">Jeden Tag gibt es andere Items. Manche sind immer da, andere kommen und gehen.</div>'
+   +'<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">'+pill('today','Heute im Shop ('+nToday+')')+pill('new','🆕 Neu ('+nNew+')')+pill('missing','Nicht gekauft ('+nMiss+')')+'</div></div>');
+  document.querySelectorAll('[data-shf]').forEach(b=>b.onclick=()=>{try{localStorage.setItem('dfShF',b.dataset.shf)}catch(e){}shopUI()});
+  if(!cards.some(c=>c.style.display!=='none')){grid.insertAdjacentHTML('beforeend','<div class="dim" style="grid-column:1/-1;text-align:center;padding:18px">'+(F==='new'?'Heute ist nichts Neues dabei.':F==='missing'?'Du hast schon alles! 🎉':'Hier ist heute nichts zu kaufen.')+'</div>')}
+ }catch(e){console.error('shop',e)}
+ return r}}
+setInterval(()=>{try{const e=document.getElementById('shtm');if(!e)return;e.textContent=shopLeft();if(shopDay(0)!==SHDAY&&typeof shopUI==='function'&&document.getElementById('shdaily')){shopUI();try{toast('🛒 Der Shop hat sich erneuert!','good')}catch(x){}}}catch(e){}},1000);
+
+/* ===== Entwickler-Account hat alles · „Skins entfernen“ mit Spielerauswahl · „nur Geschenkte“ ===== */
+{const _u=cxAdminUnlockAll;cxAdminUnlockAll=function(){const r=_u.apply(this,arguments);
+ try{const x=cxShop();Object.keys(CSK).forEach(id=>{if(!x.skins.includes(id))x.skins.push(id)});CXCARS.forEach(c=>{if(c.id!=='c0'&&!x.cars.includes(c.id))x.cars.push(c.id)});cxWrite('dfShop',x);
+  const s=bpS();s.prem=1;Object.keys(BPW).forEach(id=>{if(!s.o.includes('w:'+id))s.o.push('w:'+id)});Object.keys(BPP).forEach(id=>{if(!s.o.includes('p:'+id))s.o.push('p:'+id)});cxWrite('dfBP2',s);try{accSave(true)}catch(e){}}catch(e){}
+ return r}}
+setInterval(()=>{try{if(!cxIsOp())return;const k='dfOpAll',tag=String(ACC.active)+':v3';if(localStorage.getItem(k)===tag)return;cxAdminUnlockAll();localStorage.setItem(k,tag)}catch(e){}},4000);
+function cxStripApply(ts,sm){if(!(ts>0))return 0;let done=0;try{done=+localStorage.getItem('dfStrip')||0}catch(e){}if(ts<=done)return 0;
+ let nn=cxRead('dfBoughtN',[]);if(!Array.isArray(nn))nn=[];const earned=id=>/^[fp]\d{2,3}$/.test(id)||/^bp\d$/.test(id)||id==='rainbow'||id==='pk100'||id==='adm'||id==='adm2';const bought=new Set(nn);let n=0;
+ if(true){CXSKINS.forEach(it=>{if(it.own()&&!bought.has(it.id)&&!earned(it.id)){cxTakeSkin(it.id);n++}});
+  try{const x=cxShop();x.skins=x.skins.filter(k=>bought.has(k)||earned(k));cxWrite('dfShop',x)}catch(e){}}
+ else{const got=cxRead('dfGiftGot',{}),gift=new Set();Object.keys(got).forEach(k=>{if(!got[k].rev)(got[k].s||[]).forEach(s=>gift.add(s))});
+  gift.forEach(id=>{if(!bought.has(id)&&!earned(id)){const it=CXSKINS.find(x=>x.id===id);if(it&&it.own()){cxTakeSkin(id);n++}}});
+  try{const x=cxShop();x.skins=x.skins.filter(k=>!(gift.has(k)&&!bought.has(k)&&!earned(k)));cxWrite('dfShop',x)}catch(e){}}
+ try{cxWrite('dfBought',nn.slice())}catch(e){}try{localStorage.setItem('dfStrip',String(ts))}catch(e){}try{accSave(true)}catch(e){}
+ try{if(typeof SKIN!=='undefined'&&SKIN.cur&&SKIN.cur!=='default'&&!/^adm/.test(SKIN.cur)&&!cxOwnsSk(SKIN.cur))applySkin('default')}catch(e){}
+ if(n)try{toast('🧹 '+n+' Skin'+(n===1?'':'s')+' wurde'+(n===1?'':'n')+' entfernt.','err')}catch(e){}return n}
+function cxStripCard(){return '<div class="cap" style="margin-top:14px">🧹 Skins eines Spielers entfernen</div><div class="grp" style="margin-top:6px"><div class="row"><button class="pill blue" id="gfpick">👥 Spieler aus Liste auswählen</button></div><div id="gfpl" style="padding:0 14px 8px"></div>'
+ +'<button class="row" id="gfastrip"><span class="tx"><b style="color:#ff9f0a">🎁 Nur geschenkte Skins entfernen</b><small>Der Spieler verliert die Skins, die er geschenkt bekommen hat. Gekaufte und erspielte bleiben.</small></span></button>'
+ +'<button class="row" id="gfastrip2"><span class="tx"><b style="color:#ff453a">🧹 Alle Skins entfernen</b><small>Es bleiben nur Skins, die der Spieler selbst im Shop gekauft hat (und erspielte aus Parkour und Pass).</small></span></button></div>'}
+{const _ab=cxAdminBind;cxAdminBind=function(online){_ab.apply(this,arguments);if(online)return;const g=id=>document.getElementById(id);const b=g('gfpick');if(!b)return;
+ b.onclick=async()=>{const box=g('gfpl');box.textContent='Lade Spielerliste …';const r=await opsPost({a:'acclist',key:CXRECK});if(!r||!r.ok){box.textContent=(r&&r.error==='auth')?'Admin-Schlüssel stimmt nicht.':'Konnte die Liste nicht laden (ops.js auf dem Server aktuell?).';return}
+  const names=[];const seen=new Set();(r.list||[]).forEach(o=>{const n=cxClean(o.name||'');if(n.length>1&&n!=='?'&&!seen.has(n.toLowerCase())){seen.add(n.toLowerCase());names.push(n)}});
+  box.innerHTML='<select id="gfsel" style="width:100%;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px"><option value="">– Spieler wählen ('+names.length+') –</option>'+names.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join('')+'</select>';
+  g('gfsel').onchange=e=>{const v=e.target.value,i=g('gfan');if(i&&v){i.value=v;const m=g('gfam');if(m)m.textContent='Gewählt: '+v}}}}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

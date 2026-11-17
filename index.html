@@ -5429,6 +5429,23 @@ function cxStripApply(ts,sm){if(!(ts>0))return 0;let done=0;try{done=+localStora
  try{if(typeof SKIN!=='undefined'&&SKIN.cur&&SKIN.cur!=='default'&&!/^adm/.test(SKIN.cur)&&!cxOwnsSk(SKIN.cur))applySkin('default')}catch(e){}
  if(n)try{toast('🧹 '+n+' Skin'+(n===1?'':'s')+' wurde'+(n===1?'':'n')+' entfernt. Nur selbst gekaufte bleiben.','err')}catch(e){}return n}
 
+/* ===== Admin: Flucht-Pass-Level geben ===== */
+function bpAdminSet(lv){lv=Math.max(0,Math.min(BP.N,Math.floor(+lv||0)));const s=bpS();s.xp=lv*BP.XP;cxWrite('dfBP2',s);try{accSave(true)}catch(e){}try{bpBarUpd()}catch(e){}return lv}
+function bpAdminHTML(){const s=bpS(),row=(id,t,c)=>'<button class="row" id="'+id+'"><span class="tx"><b'+(c?' style="color:'+c+'"':'')+'>'+t+'</b></span></button>';
+ return '<div class="cap" style="margin-top:14px">🏆 Flucht-Pass (Admin)</div><div class="grp" id="admpass"><div class="row"><span class="tx"><b>Level: <span id="admpl">'+bpLevel()+'</span> / '+BP.N+'</b></span></div>'
+  +'<div class="row"><input id="admpn" type="number" inputmode="numeric" placeholder="Level (0–'+BP.N+')" autocomplete="off" style="flex:1;min-width:0"><button class="pill blue" id="admpa">Setzen</button></div>'
+  +row('admp1','+ 1 Level')+row('admp10','+ 10 Level')+row('admp100','Level 100')+row('admp0','Level 0','#ff453a')
+  +'<button class="row" id="admpp"><span class="tx"><b>⭐ Premium-Pass</b><small>Ohne Coins an- oder ausschalten</small></span><i class="sw'+(s.prem?' on':'')+'"></i></button></div>'}
+function bpAdminBind(){const g=id=>document.getElementById(id),T=m=>{try{toast(m,'good')}catch(e){}},up=()=>{const e=g('admpl');if(e)e.textContent=bpLevel()};
+ const inp=g('admpn');if(inp)['keydown','keyup','keypress'].forEach(n=>inp.addEventListener(n,e=>e.stopPropagation()));
+ const on=(id,f)=>{const e=g(id);if(e)e.onclick=f};
+ on('admpa',()=>{const v=(g('admpn')||{}).value;if(v===''||v==null)return T('Gib ein Level ein.');const l=bpAdminSet(v);up();T('🏆 Pass-Level '+l)});
+ on('admp1',()=>{const l=bpAdminSet(bpLevel()+1);up();T('🏆 Pass-Level '+l)});on('admp10',()=>{const l=bpAdminSet(bpLevel()+10);up();T('🏆 Pass-Level '+l)});
+ on('admp100',()=>{bpAdminSet(100);up();T('🏆 Pass-Level 100')});on('admp0',()=>{bpAdminSet(0);up();T('Pass-Level 0')});
+ on('admpp',()=>{const s=bpS();s.prem=s.prem?0:1;cxWrite('dfBP2',s);try{accSave(true)}catch(e){}const e=g('admpp');if(e){const sw=e.querySelector('.sw');if(sw)sw.classList.toggle('on',!!s.prem)}T(s.prem?'⭐ Premium an':'Premium aus')})}
+{const _h=cxAdminHTML;cxAdminHTML=function(){return _h.apply(this,arguments)+bpAdminHTML()}
+ const _b=cxAdminBind;cxAdminBind=function(){_b.apply(this,arguments);bpAdminBind()}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

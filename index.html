@@ -4843,7 +4843,7 @@ function arnLobbyPatch(){const L=MP.lobby;if(!L||MP.on)return;const md=L.mode||'
  addEventListener('keydown',e=>{if(!MP.on||MP.lv!==3||ovOn||!MP.me)return;if(e.code==='KeyQ'||e.code==='KeyE'){const ws=['fi'].concat(MP.me.ws||[]),k=ws.indexOf(MP.me.cw||'fi');mpSend({t:'wsel',w:ws[(k+(e.code==='KeyE'?1:ws.length-1))%ws.length]})}else if(e.code==='Digit4')mpSend({t:'use',s:3})})}
 
 
-/* ===================== PARKOUR (offline): 100 Level, Rainbow-Skin bei Level 100 ===================== */
+/* ===================== PARKOUR (offline): 100 Level, Rainbow- und Level-100-Skin bei Level 100 ===================== */
 /* Rainbow-Skin (mythisch, nicht im Shop, nur über Level 100) */
 {const sp={id:'rainbow',n:'Rainbow',ic:'🌈',r:'Mythisch',c:{sh:0xff3b30,pa:0x0a84ff,sk:0xffd0a0,hr:0xaf52de,sb:0x30d158},h:[['crown',0xffffff],['halo',0xffffff]],f:['visor',0xffffff],b:['wings',0xffffff,0xdddddd],p:['emblem',0xffffff,0xdddddd],d:'Mythisch: wechselt ständig seine Farbe. Nur durch Level 100 im Parkour zu bekommen – nicht im Shop.'};
  CSKG.rainbow=sp;CSK.rainbow={n:sp.n,ic:sp.ic,c:sp.c};MPSK.rainbow=sp.c;CXRAR.rainbow={r:'Mythisch',c:'#ff3df0',d:sp.d};CXSVG.rainbow=cxGenSvg(sp).replace('<svg','<svg class="rbsvg"');
@@ -4989,14 +4989,14 @@ function pkWin(){PK.done=true;const n=PK.lvl,sv=pkSave(),first=n>(sv.b|0)&&!CHEA
 function pkMenu(){const b=CHEATS?100:pkBest(),sv=pkSave(),t=sv.t||{},cur=Math.min(100,b+1);
  let g='';for(let i=1;i<=100;i++){const ok=i<=b+1||CHEATS,dn=i<=pkBest();g+='<button class="btn" data-pk="'+i+'" style="width:17.5%;margin:1%;padding:9px 0;'+(ok?'':'opacity:.3;')+(dn?'border-color:#30d158;color:#30d158;':'')+'" '+(ok?'':'disabled')+'>'+(dn?'✓':'')+i+'</button>'}
  ov('<div class="ios"><div class="navbar"><b>Parkour</b><button class="pill" id="pkbk">Zurück</button></div>'
-  +'<div class="cap">100 Level · immer schwerer · ohne Internet spielbar</div><div class="grp"><div class="row"><span class="tx"><b>Fortschritt: '+pkBest()+' / 100</b><small>5 🪙 pro neuem Level · +50 🪙 alle 10 Level · Level 100: 🌈 Rainbow-Skin (mythisch)</small></span></div></div>'
+  +'<div class="cap">100 Level · immer schwerer · ohne Internet spielbar</div><div class="grp"><div class="row"><span class="tx"><b>Fortschritt: '+pkBest()+' / 100</b><small>5 🪙 pro neuem Level · +50 🪙 alle 10 Level · Level 100: 🌈 Rainbow-Skin + 👑 Level-100-Skin</small></span></div></div>'
   +'<div style="margin-top:12px"><button class="pill blue" id="pkgo" style="width:100%;padding:14px">'+(pkBest()>=100?'Level 100 nochmal':'Weiter mit Level '+cur)+'</button></div>'
   +'<div class="cap" style="margin-top:14px">Level wählen</div><div style="text-align:center">'+g+'</div>'
   +'<div class="foot">Steuerung: Stick/WASD laufen · SPRUNG-Taste/Leertaste springen · ↺ zurück zum Checkpoint. '+(CHEATS?'Admin-Modus: alle Level frei, keine Belohnung.':'')+'</div></div>');
  document.getElementById('pkbk').onclick=()=>PK.on?pkExit():menuStart();document.getElementById('pkgo').onclick=()=>pkStart(pkBest()>=100?100:cur);
  document.querySelectorAll('[data-pk]').forEach(e=>e.onclick=()=>pkStart(+e.dataset.pk))}
 function pkAppend(){const box=$('box');if(!box||!box.querySelector||box.querySelector('#pkopen')||!box.querySelector('#shopopen'))return;
- const html='<div class="grp" style="margin-top:12px"><button class="row" id="pkopen"><span class="ic" style="background:#30d158">🏃</span><span class="tx"><b>Parkour · 100 Level</b><small>Offline spielbar · Level '+Math.min(100,pkBest()+1)+' · Rainbow-Skin bei Level 100</small></span><i class="chev">›</i></button></div>';
+ const html='<div class="grp" style="margin-top:12px"><button class="row" id="pkopen"><span class="ic" style="background:#30d158">🏃</span><span class="tx"><b>Parkour · 100 Level</b><small>Offline spielbar · Level '+Math.min(100,pkBest()+1)+' · Rainbow- und Level-100-Skin bei Level 100</small></span><i class="chev">›</i></button></div>';
  const sg=box.querySelector('#shopopen').closest('.grp');if(sg)sg.insertAdjacentHTML('beforebegin',html)}
 {const _tl=tele;tele=function(r){if(PK.on&&r!==16)pkLeave();return _tl.apply(this,arguments)};
  const _ng=newGame;newGame=function(){if(PK.on){pkLeave();cr=0}return _ng.apply(this,arguments)};
@@ -5257,6 +5257,177 @@ function phMenuBtn(){const box=$('box');if(!box||!box.querySelector||box.querySe
 /* iPad/Safari: Audio erst nach einer Berührung erlaubt → Kontext freischalten, blockierte Streams neu starten */
 ['pointerdown','touchend','click'].forEach(ev=>document.addEventListener(ev,()=>{try{vcCtx()}catch(e){}if(PH.np){PH.np=0;Object.keys(PH.aud).forEach(n=>{try{const p=PH.aud[n].el.play();if(p&&p.catch)p.catch(()=>{PH.np=1})}catch(e){}})}
  if(typeof VC!=='undefined')Object.keys(VC.aud).forEach(q=>{try{const e=VC.aud[q].el;if(e.paused){const p=e.play();if(p&&p.catch)p.catch(()=>{})}}catch(x){}})},{passive:true}));
+
+/* ===================== LEVEL-100-SKIN (Parkour) + FLUCHT-PASS (Battle Pass, 15.000 Coins) ===================== */
+const PKANG=[];
+/* ---- neue 3D-Teile ---- */
+CXH3.crown100=(g,c,d)=>{const m=M(c,0x6b4a00),r=M(d||0xff2d55,d||0xff2d55);box(.37,.07,.37,0,1.7,0,m,g);
+ [[-.15,-.15,.16],[.15,-.15,.16],[-.15,.15,.16],[.15,.15,.16],[0,-.15,.24],[0,.15,.24],[-.15,0,.24],[.15,0,.24],[0,0,.34]].forEach(p=>{box(.06,p[2],.06,p[0],1.735+p[2]/2,p[1],m,g);box(.045,.05,.045,p[0],1.735+p[2]+.02,p[1],r,g)});
+ box(.08,.05,.02,0,1.7,.19,r,g);box(.08,.05,.02,0,1.7,-.19,r,g)};
+CXP3.lvl100=(g,c)=>{try{const cv=document.createElement('canvas');cv.width=256;cv.height=128;const x=cv.getContext('2d');x.textAlign='center';x.fillStyle=CXD(c);x.shadowColor='#000';x.shadowBlur=6;
+ x.font='900 50px Impact,"Arial Black",sans-serif';x.fillText('LEVEL',128,52);x.font='900 74px Impact,"Arial Black",sans-serif';x.fillText('100',128,118);
+ const tex=new THREE.CanvasTexture(cv);const mk=()=>new THREE.Mesh(new THREE.PlaneGeometry(.38,.19),new THREE.MeshBasicMaterial({map:tex,transparent:true}));
+ const f=mk();f.position.set(0,1.1,.154);g.add(f);const b=mk();b.position.set(0,1.1,-.154);b.rotation.y=Math.PI;g.add(b)}catch(e){}};
+CXB3.angel100=(g,c,d)=>{const ag=new THREE.Group();ag.position.set(0,2.3,-.95);ag.scale.set(.85,.85,.85);g.add(ag);
+ const gm=M(c,0x7a5200),lt=M(d||0xfff3b0,0x8a7a30),sk=M(0xffe08a,0x8a6a10),hl=M(0xffe066,0xffd24a);
+ box(.3,.46,.2,0,0,0,gm,ag);box(.34,.2,.24,0,-.3,0,lt,ag);box(.24,.24,.24,0,.38,0,sk,ag);
+ [-1,1].forEach(sx=>{box(.08,.3,.08,sx*.2,.02,.04,sk,ag);box(.07,.2,.07,sx*.09,-.5,0,sk,ag)});
+ box(.34,.02,.04,0,.62,0,hl,ag);box(.34,.02,.04,0,.62,.17,hl,ag);box(.04,.02,.2,-.17,.62,.08,hl,ag);box(.04,.02,.2,.17,.62,.08,hl,ag);
+ [-1,1].forEach(sx=>{const w=new THREE.Group();w.position.set(sx*.14,.12,-.12);w.userData.wing=sx;ag.add(w);
+  box(.55,.1,.03,sx*.28,.14,0,lt,w);box(.46,.1,.03,sx*.23,.02,0,gm,w);box(.38,.1,.03,sx*.19,-.1,0,lt,w);box(.28,.08,.03,sx*.14,-.2,0,gm,w)});
+ ag.userData.ang=1;PKANG.push(ag)};
+function angAnim(t){for(let i=PKANG.length-1;i>=0;i--){const a=PKANG[i];if(!a.parent&&!a.userData.keep){continue}
+  a.position.y=2.3+Math.sin(t*2.2)*.12;a.position.x=Math.sin(t*1.1)*.1;a.rotation.z=Math.sin(t*1.1)*.05;a.children.forEach(ch=>{if(ch.userData.wing)ch.rotation.z=ch.userData.wing*(.2+Math.sin(t*7)*.5)})}}
+{const _r=pkRainbow;pkRainbow=function(t){try{angAnim(t)}catch(e){}return _r.apply(this,arguments)}}
+/* ---- Vorschau-Bilder ---- */
+CXHS.crown100=(c,d)=>'<polygon points="38,16 38,2 50,-18 60,2 70,-30 80,-6 90,-30 100,2 110,-18 122,2 122,16" fill="'+c+'" stroke="#7a5200" stroke-width="2"/><rect x="38" y="14" width="84" height="14" fill="'+c+'"/><circle cx="80" cy="21" r="5" fill="'+(d||'#ff2d55')+'"/><circle cx="52" cy="21" r="3" fill="'+(d||'#ff2d55')+'"/><circle cx="108" cy="21" r="3" fill="'+(d||'#ff2d55')+'"/>';
+CXBS.angel100=(c,d)=>['back','<ellipse cx="80" cy="140" rx="118" ry="140" fill="'+c+'" opacity=".16"/><polygon points="38,104 -34,34 -22,130 26,170" fill="'+c+'"/><polygon points="122,104 194,34 182,130 134,170" fill="'+c+'"/><polygon points="30,126 -18,100 -6,160 24,176" fill="'+d+'"/><polygon points="130,126 178,100 166,160 136,176" fill="'+d+'"/><circle cx="136" cy="-30" r="9" fill="'+c+'"/><ellipse cx="136" cy="-46" rx="12" ry="3" fill="none" stroke="'+c+'" stroke-width="3"/>'];
+CXPS.lvl100=c=>'<text x="80" y="139" text-anchor="middle" font-size="22" font-weight="900" fill="'+c+'" font-family="Impact,Arial Black,sans-serif">LEVEL</text><text x="80" y="176" text-anchor="middle" font-size="40" font-weight="900" fill="'+c+'" font-family="Impact,Arial Black,sans-serif">100</text>';
+function bpRegSkin(sp,rc){CSKG[sp.id]=sp;CSK[sp.id]={n:sp.n,ic:sp.ic,c:sp.c};MPSK[sp.id]=sp.c;CXRAR[sp.id]={r:sp.r,c:rc,d:sp.d};CXSVG[sp.id]=cxGenSvg(sp)}
+bpRegSkin({id:'pk100',n:'Level 100 · Jump & Run',ic:'👑',r:'Mythisch',c:{sh:0x15151c,pa:0x1d1d26,sk:0xf1c7a8,hr:0xffd60a,sb:0xffd60a},h:[['crown100',0xffd60a,0xff2d55]],f:['visor',0xffd60a],b:['angel100',0xffd60a,0xfff3b0],p:['lvl100',0xffd60a],d:'Mythisch: Level-100-Krone, „LEVEL 100“ auf Brust und Rücken und ein goldener Engel, der hinter dir fliegt. Nur durch Level 100 im Parkour zu bekommen.'},'#ffd60a');
+/* ---- Belohnung bei Level 100 ---- */
+{const _w=pkWin;pkWin=function(){const n=PK.lvl,first=n>(pkSave().b|0)&&!CHEATS;const r=_w.apply(this,arguments);
+ try{if(!CHEATS)bpXp(first?80:20)}catch(e){}
+ try{if(n===100&&first){const x=cxShop();if(!x.skins.includes('pk100')){x.skins.push('pk100');cxWrite('dfShop',x);try{accSave(true)}catch(e){}
+  setTimeout(()=>{const b=document.getElementById('box'),s=b&&b.querySelector('.sub');if(s)s.insertAdjacentHTML('afterend','<div class="grp" style="margin-top:10px;padding:14px"><div style="width:120px;margin:0 auto">'+CXSVG.pk100+'</div><b>👑 Level-100-Skin freigeschaltet!</b><div class="dim">Mythisch · Krone, goldener Engel hinter dir. Wähle ihn im Hauptmenü unter „Skin“.</div></div>')},1000)}}}catch(e){}return r}}
+function bpPk100Check(){try{if(pkBest()>=100){const x=cxShop();if(!x.skins.includes('pk100')){x.skins.push('pk100');cxWrite('dfShop',x);try{accSave(true)}catch(e){}}}}catch(e){}}
+/* ---- FLUCHT-PASS 2.0: Gratis-Pass (50 Skins) + Premium-Pass (250 Skins, 15.000 Coins), XP durch Spielen ---- */
+ACCK.push('dfBP2','dfBPe');
+const BP={N:100,XP:300,PRICE:15000};
+/* Waffenlackierungen: [Name, Lauf/Metall, Holz/Schaft, Leuchten] */
+const BPWL=[['Gold-Rush',0xffc400,0x7a3b00,0x4a3000],['Neon-Blitz',0x00e5ff,0xff2bd6,0x0a4a55],['Lava',0x2a0a00,0xff4500,0x7a1a00],['Eis-Kristall',0x9ad8f0,0xffffff,0x1a3a4a],['Galaxie',0x2a0b5a,0x00ff9d,0x12053a],['Diamant',0xb9f2ff,0xe0ffff,0x3a6a7a],
+ ['Blutrot',0x8a0a14,0x2a0508,0x3a0005],['Giftgrün',0x39ff14,0x1a3a0a,0x0a4a00],['Mitternacht',0x0a0a1a,0x3a3a6a,0x05052a],['Roségold',0xe8a0a0,0xc47a5a,0x5a2a2a],['Camo',0x4a5a2a,0x2a2a1a,0x1a2a0a],['Zuckerwatte',0xff9ad8,0x9ae8ff,0x5a2a4a],
+ ['Schwefel',0xe8e020,0x3a3a0a,0x4a4a00],['Ozean',0x0a5aaa,0x0a2a4a,0x052a5a],['Phantom',0x2a2a3a,0x9a9aff,0x1a1a5a],['Kupfer',0xb87333,0x4a2a10,0x4a2000],['Vulkan',0x1a0a0a,0xff2a00,0x6a1000],['Aurora',0x00ff9d,0x6a00ff,0x0a5a3a],
+ ['Chrom',0xd8dce2,0x5a6470,0x3a3f46],['Sakura',0xffb7d5,0x5a2a3a,0x5a2a3a],['Toxic',0xb8ff00,0x2a0a3a,0x3a5a00],['Piratengold',0xd4a017,0x3a1a0a,0x5a4000],['Eisenfaust',0x5a6470,0x2a2a2e,0x0a0a0a],['Candy',0xff3b7a,0xffffff,0x5a0a2a],
+ ['Sonnenuntergang',0xff7a1a,0x6a1aff,0x6a2a00],['Nebula',0x6a1aff,0xff2bd6,0x2a0a5a],['Weißgold',0xfff3b0,0xffd60a,0x6a5a20],['Obsidian',0x05050a,0x3a0a6a,0x0a0020],['Himmelblau',0x5ac8ff,0xffffff,0x0a3a5a],['Mythic-Weiß',0xffffff,0xffd60a,0x8a8a8a]];
+const BPW={};BPWL.forEach((a,i)=>BPW['w'+(i+1)]={n:a[0],m:a[1],w:a[2],e:a[3]});
+const BPPL=[['Eispickel',0x9ad8f0,0x6a4a2a,0x1a3a4a],['Goldhacke',0xffd60a,0x5a3a1a,0x6b4a00],['Lava-Spitzhacke',0xff4500,0x2a1a14,0x8a2000],['Diamant-Spitzhacke',0x00e5ff,0x1a1a2a,0x0a6a7a],['Holzfäller',0xc8a060,0x6a4a2a,0],['Neon-Pink',0xff2bd6,0x1a1a2a,0x6a0a5a],['Rost-Hacke',0x8a4a2a,0x4a3a2a,0],['Obsidian',0x15151a,0x3a0a6a,0x2a0a5a],['Smaragd',0x30d158,0x2a3a2a,0x0a4a1a],['Königs-Hacke',0xffd60a,0x6a1aff,0x6b4a00]];
+const BPP={};BPPL.forEach((a,i)=>BPP['p'+(i+1)]={n:a[0],h:a[1],s:a[2],e:a[3]});
+/* Autolackierungen */
+const BPCP={cor_bp1:{body:'#0b0b10',accent:'#6a00ff',hood:'#0b0b10',roof:'#0b0b10',rim:'#6a00ff',ring:'#6a00ff',base:'cor_rot'},cor_bp2:{body:'#e0b020',accent:'#f5d060',hood:'#e0b020',roof:'#1a1408',rim:'#f5d060',ring:'#f5d060',base:'cor_rot'},rev_bp3:{body:'#39ff14',accent:'#39ff14',hood:'#39ff14',roof:'#0a0a0e',rim:'#14141a',ring:'#39ff14',base:'rev_silber'},rev_bp4:{body:'#3a0a6a',accent:'#b86bff',hood:'#3a0a6a',roof:'#0a0510',rim:'#b86bff',ring:'#b86bff',base:'rev_silber'},
+ cor_bp5:{body:'#f4f4f4',accent:'#d1121c',hood:'#d1121c',roof:'#f4f4f4',rim:'#d1121c',ring:'#d1121c',base:'cor_rot'},cor_bp6:{body:'#ff7a00',accent:'#ffd60a',hood:'#ff7a00',roof:'#1a0a00',rim:'#ffd60a',ring:'#ffd60a',base:'cor_rot'},rev_bp7:{body:'#1a8aff',accent:'#d8dce2',hood:'#1a8aff',roof:'#d8dce2',rim:'#d8dce2',ring:'#1a8aff',base:'rev_silber'},rev_bp8:{body:'#ff5ab4',accent:'#ffffff',hood:'#ff5ab4',roof:'#2a0a1a',rim:'#ffffff',ring:'#ff5ab4',base:'rev_silber'}};
+Object.keys(BPCP).forEach(k=>{const o=Object.assign({},CXPAL[BPCP[k].base],BPCP[k]);delete o.base;CXPAL[k]=o});
+const bpCarImg=(a,b)=>'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 110"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+a+'"/><stop offset="1" stop-color="'+b+'"/></linearGradient></defs><path d="M14 74 L34 52 Q60 34 100 34 L136 34 Q168 38 188 56 L208 66 L208 80 L14 80 Z" fill="url(#g)"/><path d="M62 54 Q80 40 104 40 L132 40 Q150 44 164 56 Z" fill="#0b1118"/><circle cx="58" cy="82" r="15" fill="#0a0a0a"/><circle cx="58" cy="82" r="7" fill="'+b+'"/><circle cx="162" cy="82" r="15" fill="#0a0a0a"/><circle cx="162" cy="82" r="7" fill="'+b+'"/></svg>');
+CXRARC['Flucht-Pass']='#ffd60a';CXCARP['Flucht-Pass']=0;
+[['bpc1','Corvette C8 – Midnight-Violett','cor','cor_bp1','#0b0b10','#6a00ff'],['bpc2','Corvette C8 – Gold-Chrom','cor','cor_bp2','#e0b020','#f5d060'],['bpc3','Revuelto – Giftgrün','rev','rev_bp3','#39ff14','#0a0a0e'],['bpc4','Revuelto – Nacht-Lila','rev','rev_bp4','#3a0a6a','#b86bff'],
+ ['bpc5','Corvette C8 – Racing Weiß-Rot','cor','cor_bp5','#f4f4f4','#d1121c'],['bpc6','Corvette C8 – Flammen-Orange','cor','cor_bp6','#ff7a00','#ffd60a'],['bpc7','Revuelto – Chrom-Blau','rev','rev_bp7','#1a8aff','#d8dce2'],['bpc8','Revuelto – Candy-Pink','rev','rev_bp8','#ff5ab4','#ffffff']].forEach(a=>CXCARS.push({id:a[0],n:a[1],r:'Flucht-Pass',model:a[2],pal:a[3],d:'Autolackierung aus dem Flucht-Pass.',credit:'',img:bpCarImg(a[4],a[5]),bp:1}));
+{const _cc=cxCarCards;cxCarCards=function(){const hid=CXCARS.filter(c=>c.bp&&!cxCarOwn(c.id));hid.forEach(c=>CXCARS.splice(CXCARS.indexOf(c),1));try{return _cc.apply(this,arguments)}finally{hid.forEach(c=>CXCARS.push(c))}}}
+/* Handgemachte Pass-Skins (aus der ersten Version) */
+function bpRegSkin(sp,rc,lazy){CSKG[sp.id]=sp;CSK[sp.id]={n:sp.n,ic:sp.ic,c:sp.c};MPSK[sp.id]=sp.c;CXRAR[sp.id]={r:sp.r,c:rc,d:sp.d};
+ if(lazy)Object.defineProperty(CXSVG,sp.id,{configurable:true,enumerable:true,get(){const v=cxGenSvg(sp);Object.defineProperty(CXSVG,sp.id,{value:v,configurable:true,enumerable:true});return v}});else CXSVG[sp.id]=cxGenSvg(sp)}
+bpRegSkin({id:'bp1',n:'Der Pfadfinder',ic:'🧭',r:'Episch',c:{sh:0x4a7a3a,pa:0x5a4a2a,sk:0xd8a67e,hr:0x3a2a1a,sb:0x2a3a1a},h:[['cap',0x3a5a2a,0x222222]],f:null,b:['backpack',0x6a4a2a],p:['vest',0x2a4a1a],d:'Kappe, Rucksack und eine Weste. Aus dem Flucht-Pass.'},'#b86bff');
+bpRegSkin({id:'bp2',n:'Der Schatten',ic:'🥷',r:'Episch',c:{sh:0x15151c,pa:0x0e0e14,sk:0xc79a76,hr:0x0a0a0e,sb:0x6a00ff},h:[['hood',0x15151c]],f:['mask',0x2a2a3a],b:['cape',0x3a1a6a],p:['belt',0x6a00ff,0xffffff],d:'Kapuze, Maske und ein violetter Umhang. Aus dem Flucht-Pass.'},'#b86bff');
+bpRegSkin({id:'bp3',n:'Der Lavakrieger',ic:'🌋',r:'Legendär',c:{sh:0x3a0e08,pa:0x1a0804,sk:0xc8946a,hr:0x15151a,sb:0xff4500},h:[['helmet',0x2a0a06,0xff4500],['horns',0xff7a1a]],f:['visor',0xff4500],b:['wings',0x8a1a1a,0xff7a1a],p:['armor',0xff4500,0x2a0a06],d:'Helm mit Hörnern, Feuerflügel und Glutrüstung. Aus dem Flucht-Pass.'},'#ffb020');
+bpRegSkin({id:'bp4',n:'Flucht-Champion',ic:'🏆',r:'Mythisch',c:{sh:0xf5c518,pa:0x2a2a34,sk:0xf1c7a8,hr:0xffd60a,sb:0xffd60a},h:[['crown',0xffd60a],['halo',0xfff3b0]],f:['visor',0xffd60a],b:['cape',0xc8102e],p:['emblem',0xffd60a,0xffffff],d:'Gold, Krone, Heiligenschein und roter Umhang. Der Hauptpreis des Flucht-Passes.'},'#ff3df0');
+/* ---- Belohnungstabelle: 100 Level, je Gratis- und Premium-Spur ---- */
+const BPT=[null];for(let L=1;L<=100;L++)BPT.push({f:[],p:[]});
+for(let k=1;k<=50;k++)BPT[2*k].f.push(['s','f'+String(k).padStart(2,'0')]);
+for(let L=5;L<=100;L+=5)BPT[L].f.push(['c',L===50?500:L===100?1000:150]);
+[7,22,37,52,67,82].forEach((L,i)=>BPT[L].f.push(['w','w'+(i+1)]));
+[12,60].forEach((L,i)=>BPT[L].f.push(['p','p'+(i+1)]));
+{let pi=0;const sp={5:'bp1',15:'bp2',30:'bp3',100:'bp4'};
+ for(let L=1;L<=100;L++){const n=2+(L%2===0?1:0);for(let j=0;j<n;j++)BPT[L].p.push(['s',(j===0&&sp[L])?sp[L]:'p'+String(++pi).padStart(3,'0')])}
+ for(let L=5;L<=100;L+=5)BPT[L].p.push(['c',L===100?2000:500]);
+ for(let i=0;i<24;i++)BPT[4+i*4].p.push(['w','w'+(7+i)]);
+ [11,24,37,50,63,76,89,98].forEach((L,i)=>BPT[L].p.push(['p','p'+(3+i)]));
+ [[6,'bpc1'],[18,'bpc2'],[34,'bpc3'],[70,'bpc4'],[45,'bpc5'],[58,'bpc6'],[82,'bpc7'],[92,'bpc8']].forEach(a=>BPT[a[0]].p.push(['a',a[1]]))}
+/* ---- 296 Skins automatisch erzeugen (immer gleich, damit alle Spieler dasselbe sehen) ---- */
+{const NOUN=['Gentleman','Läufer','Ritter','Wikinger','Engel','Alien','Punk','Hase','Kater','Schatten','Pirat','Zauberer','Cowboy','Surfer','DJ','Koch','Partylöwe','Farmer','Bauarbeiter','König','Wanderer'],
+  IC=['🎩','🏃','🛡️','⚔️','😇','👽','🎸','🐰','🐱','🥷','🏴‍☠️','🧙','🤠','🏄','🎧','🧑‍🍳','🥳','🌾','👷','👑','🧭'],
+  HD=['tophat','cap','helmet','horns','halo','antenna','mohawk','bunny','cat','hood','bandana','wizard','cowboy','beanie','phones','chef','party','straw','hardhat','crown',null],
+  ADJ=['Rot','Glut','Koralle','Orange','Bernstein','Gold','Zitrus','Limette','Wald','Smaragd','Mint','Türkis','Eis','Himmel','Azur','Kobalt','Indigo','Violett','Orchidee','Magenta','Rosa','Rubin','Nacht','Schiefer','Silber','Perl','Sand','Kupfer','Rost','Neon'],
+  FC=[null,'shades','goggles','mustache','beard','mask','visor'],BK=[null,'cape','backpack','wings','tail','scarf','armor','pads','jetpack'],PT=[null,'hstripes','vstripes','emblem','apron','vest','cross','belt'],
+  SK=[0xf1c7a8,0xd8a67e,0xc79a76,0xa87a5a,0x8a5a3a,0xf4e0d0],HR=[0x15151a,0x3a2a1a,0xffd60a,0xd8d8d8,0x6a3a1a,0xc8102e];
+ const rng=s=>{let a=s>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}};
+ const hsl=(h,s,l)=>{h=((h%360)+360)%360/360;const f=n=>{const k=(n+h*12)%12,a=s*Math.min(l,1-l);return Math.round(255*(l-a*Math.max(-1,Math.min(k-3,9-k,1))))};return (f(0)<<16)|(f(8)<<8)|f(4)};
+ const RC={'Selten':'#4da3ff','Episch':'#b86bff','Legendär':'#ffb020','Mythisch':'#ff3df0'};
+ const gen=(gi,id,lvl,r)=>{const R=rng(gi*7919+13),a=gi%30,q=Math.floor(gi/30),ni=(2*q+a)%21,hue=a*12+R()*8,ac=hsl(hue+180,.85,.55),ad=hsl(hue+180,.6,.3);
+  const fcn=FC[Math.floor(R()*FC.length)],bkn=BK[Math.floor(R()*BK.length)],ptn=PT[Math.floor(R()*PT.length)];
+  const sp={id,n:ADJ[a]+'-'+NOUN[ni],ic:IC[ni],r,c:{sh:hsl(hue,.55+R()*.25,.38+R()*.2),pa:hsl(hue+(R()<.5?0:30),.4+R()*.3,.18+R()*.12),sk:SK[Math.floor(R()*SK.length)],hr:HR[Math.floor(R()*HR.length)],sb:ac},
+   h:HD[ni]?[[HD[ni],ac,ad]]:[],f:fcn?[fcn,ac,ad]:null,b:bkn?[bkn,ac,ad]:null,p:ptn?[ptn,ac,ad]:null,d:(r==='Selten'||r==='Episch'?'':'')+'Aus dem Flucht-Pass (Level '+lvl+').'};
+  bpRegSkin(sp,RC[r],true)};
+ for(let k=1;k<=50;k++)gen(k-1,'f'+String(k).padStart(2,'0'),2*k,k<=25?'Selten':'Episch');
+ for(let L=1;L<=100;L++)BPT[L].p.forEach(it=>{if(it[0]==='s'&&/^p\d{3}$/.test(it[1]))gen(49+parseInt(it[1].slice(1),10),it[1],L,L<=30?'Episch':L<=80?'Legendär':'Mythisch')})}
+/* ---- Zustand ---- */
+const BPOLD=[['c',500],['w','w1'],['p','p1'],['c',600],['s','bp1'],['a','bpc1'],['c',700],['w','w2'],['p','p2'],['c',1000],['a','bpc2'],['w','w3'],['c',800],['p','p3'],['s','bp2'],['c',900],['w','w4'],['a','bpc3'],['c',1000],['p','p4'],['w','w5'],['c',1000],['a','bpc4'],['w','w6'],['c',1500],['s','bp3'],['c',1500],['c',1500],['c',1500],['s','bp4']];
+function bpS(){let s=cxRead('dfBP2',null);if(s&&typeof s==='object'&&Array.isArray(s.fc))return s;
+ s={xp:0,fc:[],pc:[],prem:0,o:[]};const old=cxRead('dfBP',null);
+ if(old&&old.on){s.prem=1;s.xp=Math.max(0,((cxRead('dfStats',{}).earned)||0)-(old.x0||0));(old.cl||[]).forEach(t=>{const r=BPOLD[t-1];if(r&&(r[0]==='w'||r[0]==='p'))s.o.push(r[0]+':'+r[1])})}
+ cxWrite('dfBP2',s);return s}
+const bpLevel=()=>Math.min(BP.N,Math.floor(bpS().xp/BP.XP));
+function bpXp(n,why){n=Math.floor(+n||0);if(n<=0)return;const s=bpS(),l0=Math.min(BP.N,Math.floor(s.xp/BP.XP));if(l0>=BP.N&&s.xp>=BP.N*BP.XP)return;s.xp=Math.min(BP.N*BP.XP,s.xp+n);cxWrite('dfBP2',s);const l1=Math.min(BP.N,Math.floor(s.xp/BP.XP));
+ try{bpFlash('+'+n+' XP')}catch(e){}if(l1>l0)try{toast('🏆 Pass-Level '+l1+'! Tippe unten auf die Leiste zum Abholen.','good')}catch(e){}try{bpBarUpd()}catch(e){}}
+function bpPend(){const s=bpS(),lv=Math.min(BP.N,Math.floor(s.xp/BP.XP));let n=0;for(let L=1;L<=lv;L++){if(!s.fc.includes(L)&&BPT[L].f.length)n++;else if(s.prem&&!s.pc.includes(L)&&BPT[L].p.length)n++}return n}
+const bpEq=()=>{const e=cxRead('dfBPe',{});return {w:e.w||'',p:e.p||''}};
+const bpHas=(k,id)=>bpS().o.includes(k+':'+id);
+function bpClaim(levels){const s=bpS(),lv=Math.min(BP.N,Math.floor(s.xp/BP.XP)),x=cxShop();let coins=0,got=0;const eq=bpEq();let eqCh=false;
+ levels.forEach(L=>{if(L<1||L>lv)return;const take=(its,list)=>{its.forEach(r=>{got++;if(r[0]==='c')coins+=r[1];else if(r[0]==='s'){if(!x.skins.includes(r[1]))x.skins.push(r[1])}else if(r[0]==='a'){if(!x.cars.includes(r[1]))x.cars.push(r[1])}else{const k=r[0]+':'+r[1];if(!s.o.includes(k))s.o.push(k);if(r[0]==='w'&&!eq.w){eq.w=r[1];eqCh=true}if(r[0]==='p'&&!eq.p){eq.p=r[1];eqCh=true}}});list.push(L)};
+  if(!s.fc.includes(L)&&BPT[L].f.length)take(BPT[L].f,s.fc);else if(!s.fc.includes(L))s.fc.push(L);
+  if(s.prem&&!s.pc.includes(L)){if(BPT[L].p.length)take(BPT[L].p,s.pc);else s.pc.push(L)}});
+ if(!got&&!coins)return 0;cxWrite('dfShop',x);if(coins)cxSet(cxCoins()+coins);if(eqCh)cxWrite('dfBPe',eq);cxWrite('dfBP2',s);try{accSave(true)}catch(e){}bpApply();return {got,coins}}
+function bpBuyPrem(){const s=bpS();if(s.prem)return 'own';if(cxCoins()<BP.PRICE)return 'coins';cxSet(cxCoins()-BP.PRICE);s.prem=1;cxWrite('dfBP2',s);try{accSave(true)}catch(e){}return 'ok'}
+function bpEquip(k,id){const e=bpEq();if(id&&!bpHas(k,id))return;e[k]=id||'';cxWrite('dfBPe',e);bpApply()}
+/* ---- Anwenden: Waffenlackierung (Ego-Modell) + Spitzhacke ---- */
+let BPPX=null;const BPG0=[gunM.color.getHex(),gunW.color.getHex()];
+function bpApply(){try{const e=bpEq(),w=BPW[e.w];
+  gunM.color.setHex(w?w.m:BPG0[0]);gunW.color.setHex(w?w.w:BPG0[1]);if(gunM.emissive)gunM.emissive.setHex(w?w.e:0);if(gunW.emissive)gunW.emissive.setHex(w?w.e:0);
+  if(BPPX&&BPPX.parent)BPPX.parent.remove(BPPX);BPPX=null;const p=BPP[e.p];
+  if(p&&typeof av!=='undefined'){const g=new THREE.Group();box(.05,.95,.05,0,0,0,M(p.s),g);box(.5,.07,.07,0,.46,0,M(p.h,p.e),g);box(.07,.18,.07,-.27,.39,0,M(p.h,p.e),g);box(.07,.18,.07,.27,.39,0,M(p.h,p.e),g);box(.09,.09,.09,0,-.5,0,M(p.h,p.e),g);
+   g.position.set(.06,1.0,-.3);g.rotation.z=.75;av.add(g);BPPX=g}}catch(e){}}
+setTimeout(bpApply,1500);
+/* ---- Beschreibung der Belohnungen ---- */
+const bpItem=r=>r[0]==='c'?'🪙 '+r[1].toLocaleString('de-DE'):r[0]==='w'?'🔫 '+BPW[r[1]].n:r[0]==='p'?'⛏️ '+BPP[r[1]].n:r[0]==='a'?'🚗 '+((CXCARS.find(c=>c.id===r[1])||{}).n||'Auto').replace(/^.*– /,''):(CSK[r[1]]?CSK[r[1]].ic+' '+CSK[r[1]].n:r[1]);
+const bpDesc=its=>its.length?its.map(r=>esc(bpItem(r))).join('<br>'):'–';
+/* ---- Menü ---- */
+function bpMenu(fromBar){const s=bpS(),lv=bpLevel(),coins=cxCoins(),pend=bpPend(),menu=!!($('box')&&$('box').querySelector&&$('box').querySelector('#shopopen'));
+ let h='<div class="ios"><div class="navbar"><b>🏆 Flucht-Pass</b><button class="pill" id="bpbk">'+(fromBar&&!menu?'Schließen':'Zurück')+'</button></div>';
+ const xin=s.xp-lv*BP.XP;
+ h+='<div class="grp" style="padding:14px"><div style="display:flex;justify-content:space-between"><b>Level '+lv+' / '+BP.N+'</b><span class="dim">🪙 '+(coins===Infinity?'∞':coins.toLocaleString('de-DE'))+'</span></div><div style="height:12px;background:#2a2d38;border-radius:6px;overflow:hidden;margin:8px 0"><i style="display:block;height:100%;width:'+(lv>=BP.N?100:Math.round(xin/BP.XP*100))+'%;background:#ffd60a"></i></div><div class="dim" style="font-size:13px">'+(lv>=BP.N?'Alle Level geschafft!':xin+' / '+BP.XP+' XP bis Level '+(lv+1))+'</div>'
+  +'<div class="dim" style="font-size:12px;margin-top:6px">XP gibt es für Kills (Arena +40), Spiele beenden, Fluchten, Autofahrt, Online-Runden und Parkour-Level.</div></div>';
+ if(!s.prem)h+='<div class="grp" style="padding:14px;text-align:center;margin-top:10px;background:linear-gradient(160deg,rgba(255,214,10,.28),rgba(20,22,30,.9))"><b style="font-size:19px">⭐ Premium-Pass</b><div style="text-align:left;font-size:14px;line-height:1.6;margin-top:8px">🧑 250 Skins (der Gratis-Pass hat 50)<br>🔫 24 weitere Waffenlackierungen<br>🚗 8 Autolackierungen · ⛏️ 8 Spitzhacken<br>🪙 11.500 Coins</div><button class="pill blue" id="bpprem" style="width:100%;padding:14px;margin-top:10px;font-size:17px">'+(coins<BP.PRICE?'Noch '+(BP.PRICE-coins).toLocaleString('de-DE')+' 🪙 fehlen':BP.PRICE.toLocaleString('de-DE')+' 🪙 · Premium kaufen')+'</button></div>';
+ else h+='<div class="grp" style="padding:10px;text-align:center;margin-top:10px"><b style="color:#ffd60a">⭐ Premium-Pass aktiv</b></div>';
+ if(pend)h+='<button class="pill blue" id="bpall" style="width:100%;padding:13px;margin-top:10px">🎁 Alles abholen ('+pend+')</button>';
+ const e=bpEq(),ow=k=>s.o.filter(x=>x.startsWith(k+':')).map(x=>x.slice(2)),eqb=(k,L,none)=>'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"><button class="pill'+(e[k]?'':' blue')+'" data-eq="'+k+':">'+none+'</button>'+ow(k).filter(id=>L[id]).map(id=>'<button class="pill'+(e[k]===id?' blue':'')+'" data-eq="'+k+':'+id+'">'+esc(L[id].n)+'</button>').join('')+'</div>';
+ h+='<div class="cap" style="margin-top:14px">Ausrüstung</div><div class="grp" style="padding:12px"><b>🔫 Waffenlackierung</b> <span class="dim" style="font-size:12px">(gilt für alle Waffen)</span>'+eqb('w',BPW,'Standard')+'<div style="margin-top:12px"><b>⛏️ Spitzhacke</b> <span class="dim" style="font-size:12px">(auf deinem Rücken)</span></div>'+eqb('p',BPP,'Keine')+'<div class="dim" style="font-size:12px;margin-top:10px">Skins wählst du im Hauptmenü unter „Skin“, Autos im Shop unter „Autos“.</div></div>';
+ h+='<div class="cap" style="margin-top:14px;display:grid;grid-template-columns:34px 1fr 1fr 62px;gap:6px"><span></span><span>Gratis</span><span>⭐ Premium</span><span></span></div><div class="grp" style="padding:4px 6px">';
+ for(let L=1;L<=BP.N;L++){const T=BPT[L],ok=L<=lv,fd=s.fc.includes(L),pd=s.pc.includes(L),canF=ok&&!fd&&T.f.length,canP=ok&&s.prem&&!pd&&T.p.length;
+  const cell=(its,done,can,lock)=>'<div style="font-size:12px;line-height:1.3;opacity:'+(done?'.5':ok?'1':'.55')+';'+(done?'text-decoration:line-through;':'')+'overflow:hidden">'+(lock?'🔒 ':'')+bpDesc(its)+'</div>';
+  h+='<div style="display:grid;grid-template-columns:34px 1fr 1fr 62px;gap:6px;align-items:center;padding:8px 2px;border-top:1px solid #333"><span style="background:'+((canF||canP)?'#ffd60a':ok?'#30d158':'#3a3d49')+';color:'+((canF||canP)?'#000':'#fff')+';border-radius:8px;text-align:center;font-weight:700;padding:5px 0;font-size:13px">'+L+'</span>'+cell(T.f,fd,canF,false)+cell(T.p,pd,canP,!s.prem)+'<span>'+((canF||canP)?'<button class="pill blue" data-cl="'+L+'" style="padding:5px 8px;font-size:13px">Hol</button>':'')+'</span></div>'}
+ h+='</div><div class="foot">Gratis-Pass: 50 Skins. Premium: 250 Skins. Der Premium-Pass gehört dir dauerhaft.</div></div>';
+ ov(h);const q=i=>document.getElementById(i);q('bpbk').onclick=()=>{if(fromBar&&!menu)closeOv();else menuStart()};
+ if(q('bpprem'))q('bpprem').onclick=()=>{const b=q('bpprem');if(coins<BP.PRICE)return toast('Dir fehlen noch Coins.','err');if(b.dataset.s!=='1'){b.dataset.s='1';b.textContent='Nochmal tippen: '+BP.PRICE.toLocaleString('de-DE')+' 🪙 ausgeben';return}if(bpBuyPrem()==='ok'){toast('⭐ Premium-Pass gekauft!','good');bpMenu(fromBar)}};
+ if(q('bpall'))q('bpall').onclick=()=>{const L=[];for(let i=1;i<=lv;i++)L.push(i);const r=bpClaim(L);toast(r?'🎁 '+r.got+' Belohnungen'+(r.coins?' · +'+r.coins.toLocaleString('de-DE')+' 🪙':''):'Nichts zum Abholen','good');bpMenu(fromBar)};
+ document.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>{const r=bpClaim([+b.dataset.cl]);if(r)toast('🎁 '+r.got+' Belohnung'+(r.got===1?'':'en')+(r.coins?' · +'+r.coins+' 🪙':''),'good');bpMenu(fromBar)});
+ document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{const a=b.dataset.eq.split(':');bpEquip(a[0],a[1]);bpMenu(fromBar)})}
+function bpAppend(){const box=$('box');if(!box||!box.querySelector||!box.querySelector('#shopopen'))return;const old=box.querySelector('#bpopen');if(old){const g=old.closest('.grp');if(g)g.remove()}if(box.querySelector('#bp2open'))return;const s=bpS(),p=bpPend();
+ const html='<div class="grp" style="margin-top:12px"><button class="row" id="bp2open"><span class="ic" style="background:#ffd60a;color:#000">🏆</span><span class="tx"><b>Flucht-Pass</b><small>Level '+bpLevel()+' / '+BP.N+(s.prem?' · ⭐ Premium':' · Gratis · Premium '+BP.PRICE.toLocaleString('de-DE')+' 🪙')+(p?' · 🎁 '+p+' bereit':'')+'</small></span><i class="chev">›</i></button></div>';
+ const sg=box.querySelector('#shopopen').closest('.grp');if(sg)sg.insertAdjacentHTML('beforebegin',html);const o=box.querySelector('#bp2open');if(o)o.onclick=()=>bpMenu(false)}
+{const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);try{bpPk100Check()}catch(e){}try{bpAppend()}catch(e){}return r}}
+/* ---- XP-Leiste unten im Spiel ---- */
+{const st=document.createElement('style');st.textContent='#bpbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 6px);width:min(240px,52vw);height:24px;border-radius:12px;background:rgba(20,22,30,.8);border:1px solid rgba(255,255,255,.22);overflow:hidden;z-index:9980;display:none;font:700 12px/22px -apple-system,system-ui,sans-serif;color:#fff;text-align:center;padding:0;-webkit-tap-highlight-color:transparent}#bpbar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ff9f0a,#ffd60a);opacity:.85}#bpbar span{position:relative;text-shadow:0 1px 3px #000}#bpbar.pend{box-shadow:0 0 0 2px #30d158}#bpfl{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 36px);z-index:9981;color:#ffd60a;font:700 14px -apple-system,system-ui,sans-serif;text-shadow:0 1px 4px #000;pointer-events:none;opacity:0;transition:opacity .3s,bottom .8s}#bpfl.on{opacity:1;bottom:calc(env(safe-area-inset-bottom,0px) + 56px)}';document.head.appendChild(st);
+ const b=document.createElement('button');b.id='bpbar';b.innerHTML='<i></i><span></span>';b.onclick=()=>bpMenu(true);document.body.appendChild(b);const f=document.createElement('div');f.id='bpfl';document.body.appendChild(f)}
+let BPFT=0;function bpFlash(t){const f=document.getElementById('bpfl');if(!f)return;f.textContent=t;f.classList.add('on');clearTimeout(BPFT);BPFT=setTimeout(()=>f.classList.remove('on'),1400)}
+function bpBarUpd(){try{const b=document.getElementById('bpbar');if(!b)return;const hide=(typeof ovOn!=='undefined'&&ovOn)||(typeof drv!=='undefined'&&drv.on);b.style.display=hide?'none':'block';if(hide)return;
+ const s=bpS(),lv=Math.min(BP.N,Math.floor(s.xp/BP.XP)),xin=s.xp-lv*BP.XP,p=bpPend();b.querySelector('i').style.width=(lv>=BP.N?100:Math.round(xin/BP.XP*100))+'%';b.querySelector('span').textContent='🏆 Level '+lv+(lv>=BP.N?'':' · '+xin+'/'+BP.XP)+(p?' · 🎁':'');b.classList.toggle('pend',!!p)}catch(e){}}
+setInterval(bpBarUpd,600);setTimeout(bpBarUpd,800);
+/* ---- XP-Quellen ---- */
+{const _cs=cxStat;const XPM={started:10,online:30,onlineEsc:150,driveWins:100,hunterWins:150,clean:40,hardClean:60,fast:40,low:40,refuels:15};
+ cxStat=function(k,n){try{if(XPM[k])bpXp(XPM[k]*(n==null?1:Math.max(1,n)))}catch(e){}return _cs.apply(this,arguments)}}
+{const _w=win;win=function(){try{bpXp(200)}catch(e){}return _w.apply(this,arguments)}}
+const BPK={last:0};
+{const _s=arnSnap;arnSnap=function(s){try{const k=(s&&s.me&&s.me.k)|0;if(k>BPK.last)bpXp(40*(k-BPK.last));BPK.last=k}catch(e){}return _s.apply(this,arguments)}
+ const _b=arnBegin;arnBegin=function(){BPK.last=0;return _b.apply(this,arguments)}
+ const _u=arnEndUI;arnEndUI=function(m){try{if(m&&!m._xp&&MP.ended){m._xp=1;const me=MP.names[MP.myId],pl=(m.pl||{})[me];if((m.tm||0)>=40)bpXp(pl===1?300:pl&&pl<=3?150:60)}}catch(e){}return _u.apply(this,arguments)}}
+{const _e=mpEnd;mpEnd=function(m){try{if(MP.lv!==3&&m&&!m._xp){m._xp=1;bpXp(m.win==='p'?150:50)}}catch(e){}return _e.apply(this,arguments)}}
+/* Admin „Skins entfernen“ lässt verdiente Skins stehen */
+function cxStripApply(ts,sm){if(!(ts>0))return 0;let done=0;try{done=+localStorage.getItem('dfStrip')||0}catch(e){}if(ts<=done)return 0;
+ let nn=cxRead('dfBoughtN',[]);if(!Array.isArray(nn))nn=[];const earned=id=>/^[fp]\d{2,3}$/.test(id)||/^bp\d$/.test(id)||id==='rainbow'||id==='pk100';let n=0;const keep=new Set(nn);
+ CXSKINS.forEach(it=>{if(it.id==='adm'||it.id==='adm2')return;if(it.own()&&!keep.has(it.id)&&!earned(it.id)){cxTakeSkin(it.id);n++}});
+ try{const x=cxShop();x.skins=x.skins.filter(k=>k==='adm'||k==='adm2'||keep.has(k)||earned(k));cxWrite('dfShop',x)}catch(e){}
+ try{cxWrite('dfBought',nn.slice())}catch(e){}
+ try{localStorage.setItem('dfStrip',String(ts))}catch(e){}try{accSave(true)}catch(e){}
+ try{if(typeof SKIN!=='undefined'&&SKIN.cur&&SKIN.cur!=='default'&&!/^adm/.test(SKIN.cur)&&!cxOwnsSk(SKIN.cur))applySkin('default')}catch(e){}
+ if(n)try{toast('🧹 '+n+' Skin'+(n===1?'':'s')+' wurde'+(n===1?'':'n')+' entfernt. Nur selbst gekaufte bleiben.','err')}catch(e){}return n}
 
 menuStart();
 requestAnimationFrame(frame);

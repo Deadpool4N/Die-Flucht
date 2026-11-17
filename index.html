@@ -3023,7 +3023,7 @@ Object.keys(CSK).forEach(k=>{MPSK[k]=CSK[k].c});
 const cxOwnsSk=id=>(id==='adm'||id==='adm2')?(()=>{try{return !!cxIsOp()}catch(e){return false}})():cxShop().skins.includes(id);
 const cxSkOpts=()=>Object.keys(CSK).filter(cxOwnsSk).map(k=>[k,CSK[k].ic+' '+CSK[k].n]);
 const csArt=c=>{const h=x=>'#'+x.toString(16).padStart(6,'0');return '<svg class="rv-gun" viewBox="0 0 160 290"><rect x="44" y="28" width="72" height="66" fill="'+h(c.sk)+'"/><rect x="38" y="14" width="84" height="16" fill="'+h(c.hr)+'"/><rect x="58" y="54" width="14" height="8" fill="#111"/><rect x="88" y="54" width="14" height="8" fill="#111"/><rect x="40" y="100" width="80" height="92" fill="'+h(c.sh)+'"/><rect x="4" y="104" width="36" height="86" fill="'+h(c.sh)+'"/><rect x="120" y="104" width="36" height="86" fill="'+h(c.sh)+'"/><rect x="42" y="192" width="36" height="78" fill="'+h(c.pa)+'"/><rect x="82" y="192" width="36" height="78" fill="'+h(c.pa)+'"/><rect x="42" y="270" width="36" height="14" fill="'+h(c.sb)+'"/><rect x="82" y="270" width="36" height="14" fill="'+h(c.sb)+'"/></svg>'};
-const cxSpindSk=()=>Object.keys(CSK).map(k=>({id:k,n:CSK[k].n,art:cxArt(k),ok:cxOwnsSk(k),h:(k==='adm'||k==='adm2')?'Nur für Admin-Accounts':'Im Shop für '+cxPrice(k).toLocaleString('de-DE')+' Coins'}));
+const cxSpindSk=()=>Object.keys(CSK).filter(k=>cxOwnsSk(k)||!BPLOC2['s:'+k]).map(k=>({id:k,n:CSK[k].n,art:cxArt(k),ok:cxOwnsSk(k),h:(k==='adm'||k==='adm2')?'Nur für Admin-Accounts':BPLOC2['s:'+k]?bpLocTxt('s',k):'Im Shop für '+cxPrice(k).toLocaleString('de-DE')+' Coins'}));
 {const _a=applySkin;applySkin=function(name){const C=CSK[name];if(C&&cxOwnsSk(name)){_a('default');SKIN.cur=name;const A=AM,c=C.c;A.sh.color.setHex(c.sh);A.pa.color.setHex(c.pa);A.sk.color.setHex(c.sk);A.hr.color.setHex(c.hr);A.sb.color.setHex(c.sb);try{localStorage.setItem('dfSkin',name)}catch(e){}return}return _a.apply(this,arguments)};
  let sv='';try{sv=localStorage.getItem('dfSkin')||''}catch(e){}if(CSK[sv]&&cxOwnsSk(sv))applySkin(sv)}
 /* Aufgaben */
@@ -5454,6 +5454,29 @@ function bpAdminBind(){const g=id=>document.getElementById(id),T=m=>{try{toast(m
   const inp=document.getElementById('shpln');['keydown','keyup','keypress'].forEach(n=>inp.addEventListener(n,e=>e.stopPropagation()));
   document.getElementById('shplb').onclick=()=>{const v=inp.value;if(v===''){try{toast('Gib ein Level ein.','err')}catch(e){}return}const l=bpAdminSet(v);document.getElementById('shplc').textContent=l;try{toast('🏆 Pass-Level '+l+' (unten auf die Leiste tippen zum Abholen)','good')}catch(e){}}}catch(e){}
  return r}}
+
+/* ===================== SPIND mit Kategorien: Skins · Autos · Spitzhacken · Waffenlackierungen ===================== */
+const BPLOC2={};for(let L=1;L<=100;L++)['f','p'].forEach(tr=>BPT[L][tr].forEach(r=>{BPLOC2[r[0]+':'+r[1]]=BPLOC2[r[0]+':'+r[1]]||{L,tr}}));
+const bpLocTxt=(k,id)=>{const o=BPLOC2[k+':'+id];return o?'Flucht-Pass Level '+o.L+(o.tr==='p'?' (Premium)':' (Gratis)'):'Gesperrt'};
+let SPTAB='skins';
+const spBar=()=>'<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0">'+[['skins','🧑 Skins'],['cars','🚗 Autos'],['picks','⛏️ Spitzhacken'],['paints','🔫 Waffen']].map(a=>'<button class="pill'+(SPTAB===a[0]?' blue':'')+'" data-spt="'+a[0]+'">'+a[1]+'</button>').join('')+'</div>';
+const spHx=n=>CXD(n);
+const spPickArt=p=>'<svg viewBox="0 0 120 160"><g transform="rotate(35 60 80)"><rect x="56" y="20" width="8" height="132" rx="3" fill="'+(p?spHx(p.s):'#555')+'"/>'+(p?'<path d="M10 40 Q60 -6 110 40 L100 46 Q60 14 20 46 Z" fill="'+spHx(p.h)+'"/><rect x="54" y="150" width="12" height="8" fill="'+spHx(p.h)+'"/>':'<text x="60" y="30" text-anchor="middle" font-size="20" fill="#aaa">–</text>')+'</g></svg>';
+const spGunArt=w=>{const m=w?spHx(w.m):'#2a2a2e',s=w?spHx(w.w):'#5a3a1c';return '<svg viewBox="0 0 160 100"><rect x="8" y="38" width="108" height="12" rx="2" fill="'+m+'"/><rect x="34" y="50" width="44" height="10" fill="'+m+'"/><rect x="100" y="44" width="52" height="24" rx="5" fill="'+s+'"/><rect x="4" y="35" width="10" height="18" fill="'+m+'"/></svg>'};
+function spOther(back){const e=bpEq(),s=bpS();let it=[],cur='';
+ if(SPTAB==='cars'){const sel=cxCarSel();it=CXCARS.map(c=>({k:'car',id:c.id,n:c.n,art:'<div class="spa" style="perspective:none">'+cxCarPrev(c).replace('class="cxcar"','style="width:140px;height:auto;border-radius:10px"')+'</div>',ok:cxCarOwn(c.id),h:c.bp?bpLocTxt('a',c.id):'Im Shop kaufen',on:sel===c.id}))}
+ else if(SPTAB==='picks'){it=[{k:'p',id:'',n:'Keine',art:spPickArt(null),ok:true,on:!e.p}].concat(Object.keys(BPP).map(id=>({k:'p',id,n:BPP[id].n,art:spPickArt(BPP[id]),ok:bpHas('p',id),h:bpLocTxt('p',id),on:e.p===id})))}
+ else{it=[{k:'w',id:'',n:'Standard',art:spGunArt(null),ok:true,on:!e.w}].concat(Object.keys(BPW).map(id=>({k:'w',id,n:BPW[id].n,art:spGunArt(BPW[id]),ok:bpHas('w',id),h:bpLocTxt('w',id),on:e.w===id})))}
+ const okc=it.filter(x=>x.ok).length,lab=SPTAB==='cars'?'Autos':SPTAB==='picks'?'Spitzhacken':'Waffenlackierungen',hint=SPTAB==='cars'?'Das Auto fährst du bei der Autofahrt.':SPTAB==='picks'?'Die Spitzhacke trägst du auf dem Rücken (3.-Person-Ansicht).':'Die Lackierung gilt für alle Waffen (Ego-Ansicht).';
+ ov('<div class="ios"><h2 style="margin:4px 0 0">🧥 Spind</h2>'+spBar()+'<div class="sub">'+okc+' von '+it.length+' '+lab+' freigeschaltet · zum Ansehen wischen</div><div class="spg">'
+  +it.map(x=>'<div class="spc'+(x.on?' on':'')+(x.ok?'':' lk')+'">'+(x.art.indexOf('class="spa"')>=0?x.art:'<div class="spa">'+x.art+'</div>')+'<b>'+(x.ok?x.n:'???')+'</b><small>'+(x.ok?(x.on?'✓ Ausgewählt':'Freigeschaltet'):'🔒 '+x.h)+'</small>'+(x.ok&&!x.on?'<button class="pill blue" data-spe="'+x.k+':'+x.id+'" style="margin-top:4px">'+(x.k==='car'?'Fahren':'Auswählen')+'</button>':'')+'</div>').join('')
+  +'</div><p class="foot">'+hint+'</p><button class="btn" id="spx" style="width:100%">Zurück</button></div>',true);
+ document.querySelectorAll('[data-spt]').forEach(b=>b.onclick=()=>spindUI(back,b.dataset.spt));
+ document.querySelectorAll('[data-spe]').forEach(b=>b.onclick=()=>{const a=b.dataset.spe.split(':'),k=a[0],id=a[1];if(k==='car')cxApplyCar(id,true);else bpEquip(k,id);try{toast('✓ Ausgewählt','good')}catch(x){}spindUI(back)});
+ $('spx').onclick=()=>{closeOv();if(back)back()}}
+{const _sp=spindUI;spindUI=function(back,tab){if(tab)SPTAB=tab;
+ if(SPTAB==='skins'){const r=_sp.call(this,back);try{const b=$('box'),sub=b.querySelector('.sub');if(sub)sub.insertAdjacentHTML('beforebegin',spBar());document.querySelectorAll('[data-spt]').forEach(x=>x.onclick=()=>spindUI(back,x.dataset.spt))}catch(e){}return r}
+ return spOther(back)}}
 
 menuStart();
 requestAnimationFrame(frame);

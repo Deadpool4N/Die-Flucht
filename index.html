@@ -5565,6 +5565,26 @@ function tgDesk(){try{let el=document.getElementById('tgdesk');if(!el){el=docume
  el.innerHTML='<b>🖥 Schreibtisch</b><i>Skin „Timgioh“'+(own?' ✓':'')+'</i>'+L(s.okD,'Tode L1 offline '+Math.min(s.d,TG.D)+'/'+TG.D)+L(s.okT,'Rekord L1 '+(s.b?fmtT(s.b):'–')+' / 10:00')+L(s.okQ,'Quests '+s.q+'/155 (0 nötig)')}catch(e){}}
 setInterval(tgDesk,5000);tgDesk();
 
+/* ===== Timgioh v2: grauer Zip-Pullover, Kopfhörer, Unterkörper + Beine · Aufgaben unsichtbar · Cheat-Menü / Verschenken ===== */
+CXP3.tghbody=(g,c)=>{const sw=M(0x3d4147),sw2=M(0x2c2f34),pn=M(0x16171b),pn2=M(0x0f1013),so=M(0x8a8c93),dk=M(0x0b0b0d),zp=M(0x9a9ba3);
+ box(.34,.09,.3,0,1.36,0,sw2,g);                          /* hoher Kragen */
+ box(.52,.12,.3,0,.84,0,sw2,g);box(.53,.03,.31,0,.78,0,dk,g);   /* Pullover-Saum (Unterkörper) */
+ box(.03,.34,.012,0,1.12,.156,zp,g);box(.05,.07,.014,0,1.3,.157,zp,g);   /* Reißverschluss */
+ [-1,1].forEach(sx=>{box(.235,.62,.275,sx*.125,.4,0,pn,g);box(.245,.09,.285,sx*.125,.08,0,pn2,g);box(.25,.04,.29,sx*.125,.015,0,so,g);box(.25,.05,.31,sx*.125,.04,.01,dk,g)});   /* Beine, Hosensaum, helle Sohle */
+ box(.04,.6,.28,0,.4,0,dk,g)};
+CXB3.tghcuff=(g,c,d,armL,armR,limbs)=>{[armL,armR].forEach(a=>{if(a){limbs.push(box(.16,.06,.16,0,-.42,0,M(0x1c1e22),a));limbs.push(box(.155,.04,.155,0,-.33,0,M(0x2c2f34),a))}})};
+CXPS.tghbody=c=>'<rect x="46" y="100" width="68" height="14" fill="#2c2f34"/><rect x="48" y="114" width="30" height="62" fill="#16171b"/><rect x="82" y="114" width="30" height="62" fill="#16171b"/><rect x="48" y="170" width="30" height="8" fill="#8a8c93"/><rect x="82" y="170" width="30" height="8" fill="#8a8c93"/><rect x="77" y="60" width="6" height="40" fill="#9a9ba3"/>';
+bpRegSkin({id:'tgh',n:'Timgioh',ic:'🎧',r:'Legendär',c:{sh:0x3d4147,pa:0x16171b,sk:0xf0c4a4,hr:0x2e221a,sb:0x0f1013},h:[['phones',0x0c0c0e,0x1a1a1e]],f:null,b:['tghcuff',0x2c2f34],p:['tghbody',0x9a9ba3],d:'Legendär: grauer Zip-Pullover mit hohem Kragen, dunkle Haare, schwarze Kopfhörer, Hose und helle Schuhsohlen. Ein geheimer Skin.'},'#9a9ba3');
+try{CXSVG.tgh=cxGenSvg(CSKG.tgh)}catch(e){}
+/* Aufgaben nicht mehr sichtbar: Leiste entfernt, Prüfung läuft still weiter */
+function tgDesk(){try{const el=document.getElementById('tgdesk');if(el&&el.parentNode)el.parentNode.removeChild(el)}catch(e){}}
+tgDesk();
+/* Cheat-Menü: Timgioh geben / verschenken */
+{const _h=cxAdminHTML;cxAdminHTML=function(o){let h=_h.apply(this,arguments);if(o)return h;return h+'<div class="cap" style="margin-top:14px">🎧 Timgioh-Skin</div><div class="grp"><button class="row" id="tggive"><span class="tx"><b>🎧 Timgioh-Skin mir geben</b><small id="tggm">'+(cxOwnsSk('tgh')?'Du hast ihn schon ✓':'Gibt dir den geheimen Skin sofort')+'</small></span></button><button class="row" id="tggift"><span class="tx"><b>🎁 Timgioh verschenken</b><small>An einen Spieler senden</small></span></button></div>'}}
+{const _b=cxAdminBind;cxAdminBind=function(online){_b.apply(this,arguments);if(online)return;const g=document.getElementById('tggive'),f=document.getElementById('tggift');
+ if(g)g.onclick=()=>{CXSKINS.find(x=>x.id==='tgh').give();try{accSave(true)}catch(e){}const m=document.getElementById('tggm');if(m)m.textContent='Du hast ihn jetzt ✓';try{toast('🎧 Timgioh-Skin erhalten','good')}catch(e){}};
+ if(f)f.onclick=()=>{const it=CXSKINS.find(x=>x.id==='tgh');it.hidden=false;try{cxGiftUI('tgh')}finally{it.hidden=true}}}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

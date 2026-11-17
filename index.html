@@ -5523,7 +5523,7 @@ setInterval(()=>{try{const e=document.getElementById('shtm');if(!e)return;e.text
  return r}}
 setInterval(()=>{try{if(!cxIsOp())return;const k='dfOpAll',tag=String(ACC.active)+':v3';if(localStorage.getItem(k)===tag)return;cxAdminUnlockAll();localStorage.setItem(k,tag)}catch(e){}},4000);
 function cxStripApply(ts,sm){if(!(ts>0))return 0;let done=0;try{done=+localStorage.getItem('dfStrip')||0}catch(e){}if(ts<=done)return 0;
- let nn=cxRead('dfBoughtN',[]);if(!Array.isArray(nn))nn=[];const earned=id=>/^[fp]\d{2,3}$/.test(id)||/^bp\d$/.test(id)||id==='rainbow'||id==='pk100'||id==='adm'||id==='adm2';const bought=new Set(nn);let n=0;
+ let nn=cxRead('dfBoughtN',[]);if(!Array.isArray(nn))nn=[];const earned=id=>/^[fp]\d{2,3}$/.test(id)||/^bp\d$/.test(id)||id==='rainbow'||id==='pk100'||id==='tgh'||id==='adm'||id==='adm2';const bought=new Set(nn);let n=0;
  if(true){CXSKINS.forEach(it=>{if(it.own()&&!bought.has(it.id)&&!earned(it.id)){cxTakeSkin(it.id);n++}});
   try{const x=cxShop();x.skins=x.skins.filter(k=>bought.has(k)||earned(k));cxWrite('dfShop',x)}catch(e){}}
  else{const got=cxRead('dfGiftGot',{}),gift=new Set();Object.keys(got).forEach(k=>{if(!got[k].rev)(got[k].s||[]).forEach(s=>gift.add(s))});
@@ -5540,6 +5540,30 @@ function cxStripCard(){return '<div class="cap" style="margin-top:14px">🧹 Ski
   const names=[];const seen=new Set();(r.list||[]).forEach(o=>{const n=cxClean(o.name||'');if(n.length>1&&n!=='?'&&!seen.has(n.toLowerCase())){seen.add(n.toLowerCase());names.push(n)}});
   box.innerHTML='<select id="gfsel" style="width:100%;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px"><option value="">– Spieler wählen ('+names.length+') –</option>'+names.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'</option>').join('')+'</select>';
   g('gfsel').onchange=e=>{const v=e.target.value,i=g('gfan');if(i&&v){i.value=v;const m=g('gfam');if(m)m.textContent='Gewählt: '+v}}}}}
+
+/* ===== Timgioh-Skin (Kopfhörer + schwarzer Hoodie) · Passwort · Bedingungen · Seiten-Schreibtisch ===== */
+bpRegSkin({id:'tgh',n:'Timgioh',ic:'🎧',r:'Legendär',c:{sh:0x15161a,pa:0x101114,sk:0xf2c9ab,hr:0x3a2a20,sb:0x2a2b30},h:[['hood',0x15161a],['phones',0x0c0c0e,0x1a1a1e]],f:null,b:null,p:['zip',0x9a9ba3],d:'Legendär: schwarzer Hoodie, dunkle Haare und Kopfhörer. Freischalten: Level 1 offline 1000 Mal sterben, Rekordzeit in Level 1 höchstens 10 Minuten und 0/155 Quests gemacht – oder das Passwort auf dem Startbildschirm eingeben.'},'#9a9ba3');
+CXP3.zip=(g,c)=>{try{box(.03,.2,.01,0,1.15,.155,M(c),g);box(.05,.05,.012,0,1.04,.156,M(c),g)}catch(e){}};
+CXPS.zip=c=>'<rect x="76" y="86" width="8" height="46" fill="'+c+'"/><rect x="73" y="124" width="14" height="12" fill="'+c+'"/>';
+try{CXSVG.tgh=cxGenSvg(CSKG.tgh)}catch(e){}
+if(!CXSKINS.some(x=>x.id==='tgh'))CXSKINS.push({id:'tgh',n:'Timgioh',ic:'🎧',hidden:true,p:0,own:()=>cxOwnsSk('tgh'),give(){const x=cxShop();if(!x.skins.includes('tgh'))x.skins.push('tgh');cxWrite('dfShop',x)}});
+const TG={D:1000,T:600};
+const tgNum=k=>{try{return +localStorage.getItem(k)||0}catch(e){return 0}};
+function tgStat(){const d=tgNum('dfTgD'),b=lbBest('solo','leicht'),q=cxRead('dfMis',[]).length;return{d,b,q,okD:d>=TG.D,okT:b>0&&b<=TG.T,okQ:q===0}}
+function tgUnlock(why){if(cxOwnsSk('tgh'))return false;CXSKINS.find(x=>x.id==='tgh').give();try{accSave(true)}catch(e){}try{toast('🎧 Skin „Timgioh“ freigeschaltet!'+(why?' ('+why+')':''),'good')}catch(e){}tgDesk();return true}
+function tgCheck(){try{const s=tgStat();if(s.okD&&s.okT&&s.okQ)tgUnlock('Bedingungen erfüllt')}catch(e){}}
+function tgCode(v){if(String(v||'').trim().toUpperCase()==='MONTE!MAN!YES'){tgUnlock('Passwort');return true}return false}
+{const _c=caught;caught=function(){try{if(!MP.on&&diffKey()==='Leicht'){localStorage.setItem('dfTgD',String(tgNum('dfTgD')+1));tgCheck();tgDesk()}}catch(e){}return _c.apply(this,arguments)}}
+/* Passwort im Startbildschirm (Admin-Code-Feld) */
+try{document.addEventListener('click',e=>{try{const t=e.target&&e.target.closest&&e.target.closest('#cgo');if(!t)return;const i=document.getElementById('cin');if(i&&tgCode(i.value)){e.stopImmediatePropagation();const m=document.getElementById('cmsg');if(m){m.textContent='🎧 Skin „Timgioh“ freigeschaltet!';m.style.color='#30d158'}i.value=''}}catch(x){}},true)}catch(e){}
+/* Schreibtisch: feste Leiste links */
+function tgDesk(){try{let el=document.getElementById('tgdesk');if(!el){el=document.createElement('div');el.id='tgdesk';document.body.appendChild(el);
+ const st=document.createElement('style');st.textContent='#tgdesk{position:fixed;left:6px;top:50%;transform:translateY(-50%);z-index:45;width:118px;padding:8px 9px;border-radius:14px;background:rgba(24,26,34,.72);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.12);color:#e6e1d4;font:600 11px/1.35 -apple-system,system-ui,sans-serif}#tgdesk b{display:block;font-size:12px;margin-bottom:3px}#tgdesk i{font-style:normal;opacity:.7;display:block}#tgdesk .y{color:#30d158}';document.head.appendChild(st);
+ el.onclick=()=>{el.classList.toggle('c');el.style.width=el.classList.contains('c')?'34px':'118px';tgDesk()}}
+ if(el.classList.contains('c')){el.innerHTML='<b>🎧</b>';return}
+ const s=tgStat(),own=cxOwnsSk('tgh'),L=(ok,t)=>'<i class="'+(ok?'y':'')+'">'+(ok?'✓ ':'• ')+t+'</i>';
+ el.innerHTML='<b>🖥 Schreibtisch</b><i>Skin „Timgioh“'+(own?' ✓':'')+'</i>'+L(s.okD,'Tode L1 offline '+Math.min(s.d,TG.D)+'/'+TG.D)+L(s.okT,'Rekord L1 '+(s.b?fmtT(s.b):'–')+' / 10:00')+L(s.okQ,'Quests '+s.q+'/155 (0 nötig)')}catch(e){}}
+setInterval(tgDesk,5000);tgDesk();
 
 menuStart();
 requestAnimationFrame(frame);

@@ -5483,8 +5483,8 @@ const SHCH={'Gratis':1,'Selten':.3,'Episch':.25,'Legendär':.15};
 const shopDay=off=>Math.floor((Date.now()-new Date().getTimezoneOffset()*60000)/864e5)+(off||0);
 const shopH=s=>{let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}h^=h>>>13;h=Math.imul(h,0x5bd1e995);h^=h>>>15;return(h>>>0)/4294967296};
 const shopRar=(k,id)=>k==='s'?(CXRAR[id]||{r:'Selten'}).r:((CXCARS.find(c=>c.id===id)||{}).r||'Gratis');
-const shopPerm=(k,id)=>{const r=shopRar(k,id),c=SHCH[r];if(c==null||c>=1)return true;return k==='c'?r==='Selten':(r==='Selten'&&shopH('perm'+id)<.2)};
-const shopAvailD=(k,id,day)=>shopPerm(k,id)||shopH(k+id+':'+day)<SHCH[shopRar(k,id)];
+const shopPerm=(k,id)=>{if(k==='s')return false;const r=shopRar(k,id),c=SHCH[r];if(c==null||c>=1)return true;return k==='c'?r==='Selten':(r==='Selten'&&shopH('perm'+id)<.2)};
+const shopTopC={};const shopTop=day=>{if(shopTopC[day])return shopTopC[day];const pool=CXSKINS.filter(x=>!x.hidden&&x.id!=='adm'&&x.id!=='adm2').map(x=>x.id).sort((x,y)=>shopH('s'+x+':'+day)-shopH('s'+y+':'+day));return shopTopC[day]=new Set(pool.slice(0,50))};const shopAvailD=(k,id,day)=>k==='s'?shopTop(day).has(id):shopPerm(k,id)||shopH(k+id+':'+day)<SHCH[shopRar(k,id)];
 const shopAvail=(k,id)=>shopAvailD(k,id,shopDay(0));
 const shopNew=(k,id)=>!shopPerm(k,id)&&shopAvail(k,id)&&!shopAvailD(k,id,shopDay(-1));
 const shopNext=(k,id)=>{for(let o=1;o<=60;o++)if(shopAvailD(k,id,shopDay(o)))return o===1?'morgen':'in '+o+' Tagen';return 'erst in über 2 Monaten'};
@@ -5584,6 +5584,107 @@ tgDesk();
 {const _b=cxAdminBind;cxAdminBind=function(online){_b.apply(this,arguments);if(online)return;const g=document.getElementById('tggive'),f=document.getElementById('tggift');
  if(g)g.onclick=()=>{CXSKINS.find(x=>x.id==='tgh').give();try{accSave(true)}catch(e){}const m=document.getElementById('tggm');if(m)m.textContent='Du hast ihn jetzt ✓';try{toast('🎧 Timgioh-Skin erhalten','good')}catch(e){}};
  if(f)f.onclick=()=>{const it=CXSKINS.find(x=>x.id==='tgh');it.hidden=false;try{cxGiftUI('tgh')}finally{it.hidden=true}}}}
+
+/* ===== Timgioh v3: Haare mit Pony, Kopfhörer, Mikrofon vor dem Gesicht ===== */
+CXH3.tghair=(g,c)=>{const m=M(c);box(.325,.09,.325,0,1.665,0,m,g);box(.31,.06,.05,0,1.615,.155,m,g);box(.05,.1,.05,-.13,1.6,.15,m,g);box(.05,.12,.3,-.16,1.58,0,m,g);box(.05,.12,.3,.16,1.58,0,m,g)};
+CXF3.tghmic=(g,c)=>{const d=M(0x141416),m=M(0x2a2b30),s=M(0x9a9ba3);box(.02,.02,.26,.17,1.45,.18,d,g);box(.025,.16,.025,.17,1.38,.3,d,g);box(.11,.15,.11,.12,1.4,.34,m,g);box(.12,.02,.12,.12,1.4,.34,s,g);box(.1,.05,.1,.12,1.485,.34,d,g)};
+CXHS.tghair=c=>'<rect x="38" y="6" width="84" height="22" fill="'+c+'"/><rect x="40" y="26" width="64" height="9" fill="'+c+'"/><rect x="34" y="20" width="10" height="46" fill="'+c+'"/><rect x="116" y="20" width="10" height="46" fill="'+c+'"/>';
+CXFS.tghmic=c=>'<rect x="108" y="58" width="22" height="30" fill="#2a2b30"/><rect x="108" y="58" width="22" height="6" fill="#9a9ba3"/><rect x="96" y="56" width="14" height="4" fill="#141416"/>';
+bpRegSkin({id:'tgh',n:'Timgioh',ic:'🎧',r:'Legendär',c:{sh:0x3d4147,pa:0x16171b,sk:0xf0c4a4,hr:0x2e221a,sb:0x0f1013},h:[['tghair',0x2e221a],['phones',0x0c0c0e,0x1a1a1e]],f:['tghmic',0x141416],b:['tghcuff',0x2c2f34],p:['tghbody',0x9a9ba3],d:'Legendär: dunkle Haare mit Pony, schwarze Kopfhörer, Studio-Mikrofon vor dem Gesicht, grauer Zip-Pullover mit hohem Kragen, Hose und helle Schuhsohlen. Ein geheimer Skin.'},'#9a9ba3');
+try{CXSVG.tgh=cxGenSvg(CSKG.tgh)}catch(e){}
+
+/* ===== Timgioh v4: einfaches Spiel-Gesicht (Augenbrauen, ruhiger Mund), kein Porträt ===== */
+{const _m=CXF3.tghmic;CXF3.tghmic=function(g,c,d){_m(g,c,d);const hb=M(0x2e221a),mo=M(0x9a5b4a);[-1,1].forEach(sx=>box(.08,.02,.012,sx*.075,1.585,.166,hb,g));box(.09,.015,.012,0,1.44,.166,mo,g)}}
+
+/* ===== Timgioh v5: menschlicheres Spiel-Gesicht (Augen, Nase, Wangen) ===== */
+{const _m=CXF3.tghmic;CXF3.tghmic=function(g,c,d){_m(g,c,d);const wh=M(0xf4f1ea),pu=M(0x15110e),nz=M(0xd9a98a),ch=M(0xe3a592);
+ [-1,1].forEach(sx=>{box(.075,.04,.012,sx*.075,1.555,.167,wh,g);box(.035,.04,.014,sx*.075,1.555,.168,pu,g);box(.07,.012,.012,sx*.075,1.535,.166,M(0xc99a80),g);box(.05,.035,.01,sx*.105,1.47,.166,ch,g)});
+ box(.04,.07,.03,0,1.5,.17,nz,g)}}
+
+/* ===== Timgioh v6: Minecraft-Look nach dem Video-Bild (blockiger Spiel-Charakter) ===== */
+CXH3.tghair2=(g,c)=>{const m=M(c),m2=M(0x4f3820);box(.33,.09,.33,0,1.665,0,m,g);box(.325,.06,.05,0,1.61,.16,m,g);box(.1,.05,.05,-.1,1.565,.16,m,g);box(.09,.04,.05,.12,1.58,.16,m2,g);box(.05,.14,.3,-.165,1.58,0,m,g);box(.05,.14,.3,.165,1.58,0,m,g);box(.33,.2,.05,0,1.58,-.16,m,g)};
+CXF3.tghface=(g,c)=>{const wh=M(0xfdfbf6),pu=M(0x3a2a1c),br=M(0xc99a88),nz=M(0xd9b693),mo=M(0xa88768);
+ [-1,1].forEach(sx=>{box(.09,.025,.012,sx*.08,1.612,.168,br,g);box(.085,.06,.012,sx*.08,1.55,.168,wh,g);box(.04,.055,.014,sx*.08+sx*-.015,1.548,.17,pu,g)});
+ box(.05,.075,.03,0,1.5,.172,nz,g);box(.11,.018,.012,0,1.445,.168,mo,g);box(.015,.04,.012,-.07,1.43,.168,mo,g);box(.015,.04,.012,.07,1.43,.168,mo,g)};
+CXFS.tghface=c=>'<rect x="38" y="44" width="30" height="8" fill="#c99a88"/><rect x="92" y="44" width="30" height="8" fill="#c99a88"/><rect x="40" y="54" width="28" height="18" fill="#fdfbf6"/><rect x="92" y="54" width="28" height="18" fill="#fdfbf6"/><rect x="54" y="56" width="12" height="16" fill="#3a2a1c"/><rect x="94" y="56" width="12" height="16" fill="#3a2a1c"/><rect x="72" y="66" width="16" height="22" fill="#d9b693"/><rect x="62" y="94" width="36" height="6" fill="#a88768"/>';
+CXHS.tghair2=c=>'<rect x="36" y="4" width="88" height="26" fill="'+c+'"/><rect x="38" y="26" width="84" height="10" fill="'+c+'"/><rect x="34" y="20" width="10" height="50" fill="'+c+'"/><rect x="116" y="20" width="10" height="50" fill="'+c+'"/>';
+CXP3.tghbody2=(g,c)=>{const sw=M(0x8e9db8),sw2=M(0x7a89a3),pn=M(0x1a1a1d),dk=M(0x0b0b0d),nk=M(0xf6ede0);
+ box(.2,.1,.22,0,1.36,.01,nk,g);box(.52,.1,.3,0,.84,0,sw2,g);
+ [-1,1].forEach(sx=>{box(.235,.62,.275,sx*.125,.4,0,pn,g);box(.245,.05,.285,sx*.125,.03,0,dk,g)});box(.04,.6,.28,0,.4,0,dk,g)};
+CXPS.tghbody2=c=>'<rect x="46" y="100" width="68" height="12" fill="#7a89a3"/><rect x="48" y="112" width="30" height="64" fill="#1a1a1d"/><rect x="82" y="112" width="30" height="64" fill="#1a1a1d"/>';
+bpRegSkin({id:'tgh',n:'Timgioh',ic:'🧱',r:'Legendär',c:{sh:0x8e9db8,pa:0x1a1a1d,sk:0xf6ede0,hr:0x6b4a2a,sb:0x0b0b0d},h:[['tghair2',0x6b4a2a]],f:['tghface',0x3a2a1c],b:null,p:['tghbody2',0x8e9db8],d:'Legendär: Minecraft-Look mit braunem Pony, großen Augen, dicken Brauen und hellblauem Pullover. Ein geheimer Skin.'},'#8e9db8');
+try{CXSVG.tgh=cxGenSvg(CSKG.tgh)}catch(e){}
+
+/* ===== Shop: immer genau 50 Skins · Seltenheits-Filter · Auto-Farben einfarbig · Schleichen abschaltbar ===== */
+const SHR={k:'dfShR'};
+const shopRf=()=>{try{return localStorage.getItem(SHR.k)||'all'}catch(e){return 'all'}};
+{const _s=shopUI;shopUI=function(tab){const r=_s.apply(this,arguments);
+ try{const t=CXTAB.tab;if(t!=='skins'&&t!=='cars')return r;const k=t==='skins'?'s':'c',box=$('box'),grid=box&&box.querySelector&&box.querySelector('.cxg');if(!grid)return r;
+  const rf=shopRf(),rars=['Selten','Episch','Legendär','Mythisch'],rid=c=>k==='s'?c.getAttribute('data-view'):c.getAttribute('data-cid');
+  const cards=Array.from(grid.children).filter(c=>c.classList&&c.classList.contains('cxc'));
+  const have=new Set(cards.map(c=>shopRar(k,rid(c))));
+  if(rf!=='all')cards.forEach(c=>{const id=rid(c);if(!id||id==='adm'||id==='adm2')return;if(shopRar(k,id)!==rf)c.style.display='none'});
+  const pill=(f,l)=>'<button class="pill'+(rf===f?' blue':'')+'" data-shr="'+f+'" style="font-size:13px;padding:6px 12px">'+l+'</button>';
+  const row='<div class="grp" id="shrar" style="padding:8px 12px;margin:0 0 10px;text-align:center"><div class="dim" style="font-size:12px;margin-bottom:6px">Nach Seltenheit filtern</div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">'+pill('all','Alle')+rars.filter(x=>have.has(x)).concat(Array.from(have).filter(x=>!rars.includes(x)&&x!=='Gratis'&&x!=='Admin')).map(x=>pill(x,x)).join('')+'</div></div>';
+  const d=document.getElementById('shdaily');if(d)d.insertAdjacentHTML('afterend',row);else grid.insertAdjacentHTML('beforebegin',row);
+  document.querySelectorAll('[data-shr]').forEach(b=>b.onclick=()=>{try{localStorage.setItem(SHR.k,b.dataset.shr)}catch(e){}shopUI()})
+ }catch(e){console.error('shopR',e)}return r}}
+/* Autos: einfarbig lackiert (Dach, Haube, Zierteile in der Karosseriefarbe) */
+function cxSolidPaint(){try{[CXPAL].forEach(P=>Object.keys(P).forEach(k=>{const p=P[k];if(!p||!p.body)return;p.hood=p.body;p.roof=p.body;p.accent=p.body}))}catch(e){}}
+cxSolidPaint();
+/* Schleichen abschaltbar */
+const snkOff=()=>{try{return localStorage.getItem('dfNoSnk')==='1'}catch(e){return false}};
+{const _t=snkTick;snkTick=function(dt){if(snkOff()){SNK.on=false;SNKF=1;SNK.noise=0;try{$('sneakb').style.display='none';$('noise').style.display='none'}catch(e){}return}return _t.apply(this,arguments)}}
+{const _sset=snkSet;snkSet=function(v){return _sset(snkOff()?false:v)}}
+{const _p=pauseUI;pauseUI=function(p2){const r=_p.apply(this,arguments);try{const a=document.getElementById('pfauto');if(a&&!document.getElementById('snkoff')){const g=a.parentNode;g.insertAdjacentHTML('afterend','<div class="grp" style="margin-top:10px"><button class="row" id="snkoff"><span class="tx"><b>🤫 Schleichen ausschalten</b><small>Kein Schleichen-Knopf, kein Lärm-Balken</small></span><i class="sw'+(snkOff()?' on':'')+'"></i></button></div>');
+ document.getElementById('snkoff').onclick=()=>{try{localStorage.setItem('dfNoSnk',snkOff()?'0':'1')}catch(e){}const sw=document.querySelector('#snkoff .sw');if(sw)sw.classList.toggle('on',snkOff());if(snkOff())snkSet(false)}}}catch(e){}return r}}
+
+/* ===== Neues Auto: Cybertruck (selbst gebaut, eckig) ===== */
+(()=>{const P=[],Q=[],Z=[];
+ const tri=(a,b,c,z,ref)=>{let n=[(b[1]-a[1])*(c[2]-a[2])-(b[2]-a[2])*(c[1]-a[1]),(b[2]-a[2])*(c[0]-a[0])-(b[0]-a[0])*(c[2]-a[2]),(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])];
+  const m=[(a[0]+b[0]+c[0])/3-ref[0],(a[1]+b[1]+c[1])/3-ref[1],(a[2]+b[2]+c[2])/3-ref[2]];if(n[0]*m[0]+n[1]*m[1]+n[2]*m[2]<0){const t=b;b=c;c=t;n=n.map(x=>-x)}
+  const l=Math.hypot(n[0],n[1],n[2])||1;n=n.map(x=>x/l);[a,b,c].forEach(v=>{P.push(v);Q.push(n)});Z.push(z)};
+ const quad=(a,b,c,d,z,ref)=>{tri(a,b,c,z,ref);tri(a,c,d,z,ref)};
+ const box=(cx,cy,cz,sx,sy,sz,z)=>{const x0=cx-sx/2,x1=cx+sx/2,y0=cy-sy/2,y1=cy+sy/2,z0=cz-sz/2,z1=cz+sz/2,r=[cx,cy,cz];
+  const v=(x,y,zz)=>[x,y,zz];quad(v(x0,y0,z0),v(x1,y0,z0),v(x1,y1,z0),v(x0,y1,z0),z,r);quad(v(x0,y0,z1),v(x1,y0,z1),v(x1,y1,z1),v(x0,y1,z1),z,r);
+  quad(v(x0,y0,z0),v(x0,y0,z1),v(x0,y1,z1),v(x0,y1,z0),z,r);quad(v(x1,y0,z0),v(x1,y0,z1),v(x1,y1,z1),v(x1,y1,z0),z,r);
+  quad(v(x0,y0,z0),v(x1,y0,z0),v(x1,y0,z1),v(x0,y0,z1),z,r);quad(v(x0,y1,z0),v(x1,y1,z0),v(x1,y1,z1),v(x0,y1,z1),z,r)};
+ const cyl=(cx,cy,cz,r,hw,zs,ze)=>{const n=16,ref=[cx,cy,cz];for(let i=0;i<n;i++){const a0=i/n*Math.PI*2,a1=(i+1)/n*Math.PI*2;
+   const p=(x,a)=>[x,cy+Math.sin(a)*r,cz+Math.cos(a)*r];quad(p(cx-hw,a0),p(cx+hw,a0),p(cx+hw,a1),p(cx-hw,a1),zs,ref);
+   tri([cx+hw,cy,cz],p(cx+hw,a0),p(cx+hw,a1),ze,ref);tri([cx-hw,cy,cz],p(cx-hw,a0),p(cx-hw,a1),ze,ref)}};
+ /* Karosserie: Stationen [z, yUnten, yOben, halbBreiteUnten, halbBreiteOben] */
+ const S=[[-2.30,.40,.60,.74,.70],[-1.20,.32,.84,.80,.74],[-.35,.32,.98,.80,.72],[.55,.32,1.45,.80,.60],[1.15,.32,1.30,.80,.58],[1.55,.32,1.08,.80,.72],[2.30,.40,1.04,.78,.74]];
+ const TOPZ=[10,10,2,11,2,0];const ref=[0,.7,0];
+ const C=s=>[[-s[3],s[1],s[0]],[s[3],s[1],s[0]],[s[4],s[2],s[0]],[-s[4],s[2],s[0]]];
+ for(let i=0;i<S.length-1;i++){const a=C(S[i]),b=C(S[i+1]);
+  quad(a[0],a[1],b[1],b[0],5,ref);quad(a[1],a[2],b[2],b[1],0,ref);quad(a[2],a[3],b[3],b[2],TOPZ[i],ref);quad(a[3],a[0],b[0],b[3],0,ref)}
+ {const a=C(S[0]);quad(a[0],a[1],a[2],a[3],0,ref);const b=C(S[S.length-1]);quad(b[0],b[1],b[2],b[3],0,ref)}
+ const at=z=>{for(let i=0;i<S.length-1;i++){const a=S[i],b=S[i+1];if(z>=a[0]&&z<=b[0]){const t=(z-a[0])/(b[0]-a[0]);return a.map((v,k)=>v+(b[k]-v)*t)}}return S[S.length-1]};
+ const sp=(z,y,sx)=>{const s=at(z),t=(y-s[1])/(s[2]-s[1]);return [sx*(s[3]+(s[4]-s[3])*t+.012),y,z]};
+ [-1,1].forEach(sx=>{const z0=-.02,z1=1.1,top=z=>at(z)[2];
+  const A=sp(z0,top(z0)-.3,sx),B=sp(z1,top(z1)-.3,sx),Cc=sp(z1,top(z1)-.07,sx),D=sp(z0,top(z0)-.07,sx);quad(A,B,Cc,D,2,[0,A[1],A[2]]);
+  /* Rad + Felge + dunkle Radkästen */
+  [-1.35,1.38].forEach(zc=>{cyl(sx*.93,.42,zc,.42,.13,3,3);cyl(sx*.93,.42,zc,.27,.135,4,4);box(sx*.93,.89,zc,.3,.06,1.0,5)});
+  /* Seitenschweller dunkel */
+  box(sx*.8,.4,.1,.04,.14,2.0,5)});
+ box(0,.62,-2.29,1.35,.04,.03,6);box(0,.93,2.29,1.4,.05,.03,7);box(0,.38,-2.3,1.3,.12,.05,5);
+ const t=P.length/3,s=13000;const p=new Int16Array(P.length*3),q=new Int8Array(P.length*3),ix=new Uint16Array(P.length),z=new Uint8Array(Z.length);
+ P.forEach((v,i)=>{for(let k=0;k<3;k++){p[i*3+k]=Math.round(v[k]*s);q[i*3+k]=Math.round(Q[i][k]*127)}ix[i]=i});Z.forEach((v,i)=>z[i]=v);
+ CXGEOC.cyb={n:'cyb',t:Z.length,s:s,p:p,q:q,z:z,ix:ix}})();
+CXPAL.cyb_steel={body:'#b9bec6',accent:'#b9bec6',hood:'#b9bec6',roof:'#b9bec6',glass:'#0b1118',tire:'#0a0a0a',rim:'#1c1c20',dark:'#101014',light:'#f4f8ff',tail:'#ff2a1a',chrome:'#d0d4da',ring:'#1c1c20'};
+CXPAL.cyb_black=Object.assign({},CXPAL.cyb_steel,{body:'#15161a',accent:'#15161a',hood:'#15161a',roof:'#15161a',rim:'#b9bec6',ring:'#b9bec6'});
+CXPAL.cyb_green=Object.assign({},CXPAL.cyb_steel,{body:'#12503a',accent:'#12503a',hood:'#12503a',roof:'#12503a',rim:'#c8a24a',ring:'#c8a24a'});
+const cybImg=(a,b)=>'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 110"><path d="M12 78 L14 60 L100 44 L134 24 L158 30 L172 40 L208 44 L208 78 Z" fill="'+a+'"/><path d="M104 46 L134 27 L152 32 L164 42 Z" fill="#0b1118"/><path d="M12 78 L208 78 L208 70 L12 70 Z" fill="#101014"/><circle cx="56" cy="82" r="17" fill="#0a0a0a"/><circle cx="56" cy="82" r="9" fill="'+b+'"/><circle cx="168" cy="82" r="17" fill="#0a0a0a"/><circle cx="168" cy="82" r="9" fill="'+b+'"/></svg>');
+CXCARP['Legendär']=CXCARP['Legendär']||6500;
+[['cyb1','Cybertruck – Edelstahl','cyb_steel','#c8cdd5','#1c1c20','Eckiger Pickup aus gebürstetem Edelstahl.'],['cyb2','Cybertruck – Mattschwarz','cyb_black','#15161a','#b9bec6','Der Cybertruck komplett in Schwarz mit hellen Felgen.'],['cyb3','Cybertruck – Waldgrün','cyb_green','#12503a','#c8a24a','Dunkelgrüner Cybertruck mit goldenen Felgen.']].forEach(a=>{if(!CXCARS.some(c=>c.id===a[0]))CXCARS.push({id:a[0],n:a[1],r:'Legendär',model:'cyb',pal:a[2],d:a[5],credit:'',img:cybImg(a[3],a[4])})});
+
+/* ===== Parkour: schwere Level (ab 80) fairer – Level 89 ist jetzt machbar ===== */
+{const _g=pkGen;pkGen=function(n){const L=_g(n);if(n<80)return L;
+ for(let i=1;i<L.length;i++){const p=L[i],q=L[i-1];
+  if(p.k==='d'&&q.k==='d'){p.k='n';delete p.on;delete p.off;delete p.ph;p.w=Math.max(p.w,3.2);p.d=Math.max(p.d,3.2)}
+  if(p.k==='d'){p.on=Math.max(p.on,2.0);p.off=Math.min(p.off,1.0)}
+  if(p.k==='b')p.w=Math.max(p.w,1.0)}
+ return L}}
 
 menuStart();
 requestAnimationFrame(frame);

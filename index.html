@@ -5715,6 +5715,92 @@ setInterval(()=>{try{pkaUI()}catch(e){}},700);
 {const _m=pkMenu;pkMenu=function(){const r=_m.apply(this,arguments);try{if(!pkaOk())return r;const go=document.getElementById('pkgo');if(go&&!document.getElementById('pkamenu')){go.parentNode.insertAdjacentHTML('afterend','<div class="grp" id="pkamenu" style="margin-top:10px;padding:12px"><b>🛠 Parkour-Admin</b><div class="dim" style="font-size:12px;margin:4px 0 8px">Alle 100 Level sind für dich frei. Im Spiel gibt es links ein Admin-Panel (Teleport, Gott-Modus, Level springen).</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="pkamn" type="number" min="1" max="100" value="'+Math.max(1,pkBest())+'" style="width:70px;padding:9px;border-radius:10px;background:#2a2d38;color:#fff;border:1px solid #444;text-align:center;font-size:16px"><button class="pill blue" id="pkams">Fortschritt setzen</button><button class="pill" id="pkamg">Level starten</button></div></div>');
   document.getElementById('pkams').onclick=()=>{pkaSetBest(+document.getElementById('pkamn').value||0);pkMenu()};document.getElementById('pkamg').onclick=()=>pkStart(+document.getElementById('pkamn').value||1)}}catch(e){}return r}}
 
+/* ===== Parkour: Fliegen (Admin) + Parkour ONLINE (Rennen mit Freunden, Raum-Code) ===== */
+/* ---- Fliegen ---- */
+PKA.fly=false;PKA.dn=false;
+{const _t=pkTick;pkTick=function(dt,now){try{if(PKA.fly&&pkaOk()&&PK.on&&!PK.done){const d=Math.min(dt,.05);PK.vy=(keys.Space?7:(PKA.dn||keys.ShiftLeft||keys.ShiftRight)?-7:0)+24*d;PK.ground=false;PK.gp=null;PK.coy=0}}catch(e){}return _t.apply(this,arguments)}}
+{const _u=pkaUI;pkaUI=function(){_u.apply(this,arguments);try{const el=document.getElementById('pkadm');if(!el||el.style.display==='none')return;
+ if(PKA.open&&!document.getElementById('pkaf2')){const g=document.getElementById('pkag');if(g)g.insertAdjacentHTML('afterend','<button id="pkaf2" class="'+(PKA.fly?'on':'')+'">✈ Fliegen '+(PKA.fly?'AN':'aus')+'</button>');
+  const b=document.getElementById('pkaf2');if(b)b.onclick=()=>{PKA.fly=!PKA.fly;if(!PKA.fly)PKA.dn=false;pkaUI()}}
+ let fb=document.getElementById('pkafb');if(PKA.fly&&!fb){fb=document.createElement('div');fb.id='pkafb';fb.style.cssText='position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 150px);z-index:9985;display:flex;flex-direction:column;gap:8px';
+  fb.innerHTML='<button id="pkafu" style="width:64px;height:64px;border-radius:32px;border:0;background:rgba(48,209,88,.85);font-size:28px">▲</button><button id="pkafd" style="width:64px;height:64px;border-radius:32px;border:0;background:rgba(255,69,58,.85);font-size:28px">▼</button>';document.body.appendChild(fb);
+  const up=document.getElementById('pkafu'),dn=document.getElementById('pkafd');up.onpointerdown=e=>{e.preventDefault();keys.Space=1};up.onpointerup=up.onpointerleave=up.onpointercancel=()=>{keys.Space=0};dn.onpointerdown=e=>{e.preventDefault();PKA.dn=true};dn.onpointerup=dn.onpointerleave=dn.onpointercancel=()=>{PKA.dn=false}}
+ if(!PKA.fly&&fb)fb.remove()}catch(e){}}}
+/* ---- Parkour Online ---- */
+const PO={on:false,host:false,peer:null,conns:{},conn:null,code:'',myId:'',name:'',pl:{},lvl:1,gh:{},cd:0};
+const poName=()=>{try{return (accReady()?accCur().name:(MP.name||'Spieler'))||'Spieler'}catch(e){return 'Spieler'}};
+const poClr=i=>[0xff3b30,0x0a84ff,0x30d158,0xffd60a,0xb06bff,0xff9f0a,0x64d2ff,0xff6bb5,0x8affd8,0xffffff][i%10];
+function poSend(m){try{if(PO.host)Object.values(PO.conns).forEach(c=>c.open&&c.send(m));else if(PO.conn&&PO.conn.open)PO.conn.send(m)}catch(e){}}
+function poRoster(){return Object.keys(PO.pl).map(id=>({id,n:PO.pl[id].n,f:PO.pl[id].f||0,ft:PO.pl[id].ft||0}))}
+function poCleanup(){try{Object.values(PO.gh).forEach(g=>{g.parent&&g.parent.remove(g)})}catch(e){}PO.gh={};try{PO.peer&&PO.peer.destroy()}catch(e){}PO.on=false;PO.host=false;PO.peer=null;PO.conns={};PO.conn=null;PO.pl={};PO.code='';const h=document.getElementById('pohud');if(h)h.remove()}
+function poMenu(msg){ov('<div class="ios"><div class="navbar"><b>🌐 Parkour Online</b><button class="pill" id="pox">Zurück</button></div><div class="sub">Alle laufen dasselbe Level · wer zuerst im Ziel ist, gewinnt</div>'
+ +'<div class="cap">Dein Name</div><div class="grp"><div class="row"><input id="pon" maxlength="14" value="'+mpE(poName())+'" autocomplete="off"></div></div>'
+ +'<div class="cap">Raum</div><div class="grp"><button class="row" id="poc"><span class="ic" style="background:#30d158">＋</span><span class="tx"><b>Raum erstellen</b><small>Du bekommst einen Code für deine Freunde</small></span></button>'
+ +'<div class="row"><input id="poj" maxlength="6" placeholder="CODE" autocapitalize="characters" style="text-transform:uppercase" autocomplete="off"><button class="pill blue" id="pojg">Beitreten</button></div></div>'
+ +'<div id="pomsg" class="foot" style="color:#ff9f0a;min-height:18px">'+(msg||'')+'</div></div>');
+ $('pox').onclick=()=>pkMenu();$('poc').onclick=()=>poCreate($('pon').value);$('pojg').onclick=()=>poJoin($('pon').value,$('poj').value)}
+const poErr=t=>{const e=document.getElementById('pomsg');if(e)e.textContent=t;else toast(t,'err')};
+function poCreate(name,tries){name=cxClean(name)||'Spieler';tries=tries||0;PO.name=name;mpLib(err=>{if(err)return poErr(err.message);poCleanup();
+ const code=Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');const peer=new Peer('dfpk-'+code,MPCFG);PO.peer=peer;
+ peer.on('error',e=>{if(e&&e.type==='unavailable-id'&&tries<4){poCleanup();return poCreate(name,tries+1)}poErr('Verbindung fehlgeschlagen ('+((e&&e.type)||'?')+').')});
+ peer.on('open',()=>{PO.on=true;PO.host=true;PO.code=code;PO.myId='h0';PO.pl={h0:{n:name,x:0,z:0,y:0,ry:0,f:0}};poLobby()});
+ peer.on('connection',c=>{c.on('data',m=>poRecv(m,c));c.on('close',()=>{const id=c._id;if(id&&PO.pl[id]){delete PO.pl[id];delete PO.conns[id];poBcast();poGhostDrop(id)}})})})}
+function poJoin(name,code){name=cxClean(name)||'Spieler';code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<6)return poErr('Bitte den 6-stelligen Code eingeben.');PO.name=name;poErr('Verbinde …');
+ mpLib(err=>{if(err)return poErr(err.message);poCleanup();const peer=new Peer(undefined,MPCFG);PO.peer=peer;peer.on('error',e=>poErr('Raum nicht gefunden. Prüfe den Code.'));
+  peer.on('open',()=>{const c=peer.connect('dfpk-'+code,{reliable:true});PO.conn=c;const to=setTimeout(()=>{if(!c.open)poErr('Keine Antwort vom Host.')},12000);
+   c.on('open',()=>{clearTimeout(to);PO.on=true;PO.host=false;PO.code=code;c.send({t:'hello',n:name})});c.on('data',m=>poRecv(m,c));c.on('close',()=>{if(PO.on){toast('Verbindung zum Raum verloren.','err');poLeave()}})})})}
+function poBcast(){const m={t:'roster',r:poRoster(),lvl:PO.lvl};poSend(m);poRecv(m)}
+function poRecv(m,c){if(!m)return;try{switch(m.t){
+ case 'hello':if(PO.host){const id='p'+(++PO.cnt||(PO.cnt=1));c._id=id;PO.conns[id]=c;PO.pl[id]={n:cxClean(m.n)||'Spieler',x:0,z:0,y:0,ry:0,f:0};c.send({t:'welcome',id});poBcast()}break;
+ case 'welcome':PO.myId=m.id;break;
+ case 'roster':{const old=PO.pl,np={};m.r.forEach(r=>{np[r.id]=Object.assign({x:0,z:0,y:0,ry:0},old[r.id]||{},{n:r.n,f:r.f,ft:r.ft})});if(!PO.host)PO.pl=np;PO.lvl=m.lvl;if(!PK.on)poLobby();break}
+ case 'start':PO.lvl=m.lvl;Object.keys(PO.pl).forEach(k=>{PO.pl[k].f=0;PO.pl[k].ft=0});poBegin(m.lvl);break;
+ case 'p':{const p=PO.pl[m.id];if(p&&m.id!==PO.myId){p.x=m.x;p.z=m.z;p.y=m.y;p.ry=m.ry;p.lv=m.lv}if(PO.host){Object.keys(PO.conns).forEach(k=>{if(k!==m.id&&PO.conns[k].open)try{PO.conns[k].send(m)}catch(e){}})}break}
+ case 'fin':{const p=PO.pl[m.id];if(p){p.f=1;p.ft=m.ft}try{const n=Object.keys(PO.pl).filter(k=>PO.pl[k].f).length;toast('🏁 '+(p?p.n:'?')+' ist im Ziel ('+n+'.) · '+poFmt(m.ft),'good')}catch(e){}if(PO.host){Object.keys(PO.conns).forEach(k=>{if(k!==m.id&&PO.conns[k].open)try{PO.conns[k].send(m)}catch(e){}})}break}
+ case 'bye':break}}catch(e){console.error('po',e)}}
+const poFmt=t=>{t=+t||0;const m=Math.floor(t/60),s=(t-m*60).toFixed(1);return m+':'+(s<10?'0':'')+s};
+function poLobby(){const ids=Object.keys(PO.pl);ov('<div class="ios"><div class="navbar"><b>🌐 Parkour Online</b><button class="pill" id="pol">Verlassen</button></div>'
+ +'<div class="grp" style="padding:14px;text-align:center"><div class="dim">Raum-Code</div><div style="font-size:34px;font-weight:800;letter-spacing:.2em;color:#ffd60a">'+PO.code+'</div><div class="dim" style="font-size:12px">Freunde: Parkour → Online → Beitreten</div></div>'
+ +'<div class="cap">Spieler ('+ids.length+')</div><div class="grp">'+ids.map((id,i)=>'<div class="row"><span class="ic" style="background:#'+poClr(i).toString(16).padStart(6,'0')+'">'+(i+1)+'</span><span class="tx"><b>'+mpE(PO.pl[id].n)+(id===PO.myId?' (du)':'')+(id==='h0'?' · Host':'')+'</b></span></div>').join('')+'</div>'
+ +(PO.host?'<div class="cap">Level</div><div class="grp"><div class="row"><input id="pol1" type="number" min="1" max="100" value="'+PO.lvl+'" style="width:80px"><button class="pill blue" id="pogo">Rennen starten</button></div></div>':'<div class="foot" style="text-align:center">Warte, bis der Host das Rennen startet … (Level '+PO.lvl+')</div>')+'</div>');
+ $('pol').onclick=()=>{poLeave();pkMenu()};if(PO.host)$('pogo').onclick=()=>{const n=Math.max(1,Math.min(100,+($('pol1').value)||1));if(!CHEATS&&n>pkBest()+1)return toast('Du kannst nur Level bis '+(pkBest()+1)+' wählen.','err');PO.lvl=n;const m={t:'start',lvl:n};poSend(m);poRecv(m)}}
+function poLeave(){poSend({t:'bye'});poCleanup()}
+function poBegin(n){PO.fs=0;pkStart(n);const cl=Object.keys(PO.pl);try{toast('🏁 Rennen startet! Level '+n,'good')}catch(e){}poHud()}
+function poGhost(id,i){let g=PO.gh[id];if(g&&g.parent===PKG)return g;if(g&&g.parent)g.parent.remove(g);g=new THREE.Group();const col=M(poClr(i));box(.5,.9,.3,0,.75,0,col,g);box(.3,.3,.3,0,1.4,0,M(0xd8a67e),g);
+ try{const cv=document.createElement('canvas');cv.width=256;cv.height=64;const x=cv.getContext('2d');x.font='700 34px sans-serif';x.textAlign='center';x.fillStyle='#fff';x.strokeStyle='#000';x.lineWidth=6;const nm=(PO.pl[id]||{}).n||'';x.strokeText(nm,128,44);x.fillText(nm,128,44);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));sp.scale.set(2.2,.55,1);sp.position.set(0,2.1,0);g.add(sp)}catch(e){}
+ PKG.add(g);PO.gh[id]=g;return g}
+function poGhostDrop(id){const g=PO.gh[id];if(g&&g.parent)g.parent.remove(g);delete PO.gh[id]}
+function poHud(){let h=document.getElementById('pohud');if(!h){h=document.createElement('div');h.id='pohud';h.style.cssText='position:fixed;right:8px;top:calc(env(safe-area-inset-top,0px) + 70px);z-index:9984;min-width:150px;padding:8px 10px;border-radius:14px;background:rgba(24,26,34,.8);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.16);color:#fff;font:600 12px/1.5 -apple-system,system-ui,sans-serif';document.body.appendChild(h)}
+ const goal=(PK.pl.find(p=>p.goal)||{z:-100}).z,ids=Object.keys(PO.pl);
+ const rows=ids.map((id,i)=>{const p=PO.pl[id],me=id===PO.myId,z=me?pos.z:p.z,pr=p.f?1:Math.max(0,Math.min(1,z/goal));return {id,i,n:p.n,f:p.f,ft:p.ft,pr}}).sort((a,b)=>(b.f-a.f)||(a.f&&b.f?a.ft-b.ft:b.pr-a.pr));
+ h.innerHTML='<div style="opacity:.7;margin-bottom:3px">🌐 Rennen · Level '+PO.lvl+'</div>'+rows.map((r,k)=>'<div>'+(k+1)+'. '+mpE(r.n)+(r.id===PO.myId?' •':'')+' <span style="float:right;margin-left:10px">'+(r.f?'🏁 '+poFmt(r.ft):Math.round(r.pr*100)+'%')+'</span></div>').join('')+'<div style="margin-top:5px"><button id="pohl" style="font:inherit;color:#fff;background:#3a3d4a;border:0;border-radius:8px;padding:5px 9px">Raum verlassen</button></div>';
+ const b=document.getElementById('pohl');if(b)b.onclick=()=>{poLeave();try{qReload()}catch(e){location.reload()}}}
+/* Positionen senden / Geister bewegen */
+setInterval(()=>{try{if(!PO.on)return;if(!PK.on){const h=document.getElementById('pohud');if(h)h.style.display='none';return}const h=document.getElementById('pohud');if(h)h.style.display='';
+ const m={t:'p',id:PO.myId,x:+(pos.x-320).toFixed(2),z:+pos.z.toFixed(2),y:+PK.y.toFixed(2),ry:+(Y||0).toFixed(2),lv:PK.lvl,sk:SKIN.cur};if(PO.myId){if(PO.host){PO.pl[PO.myId]&&Object.assign(PO.pl[PO.myId],{x:m.x,z:m.z,y:m.y});Object.keys(PO.conns).forEach(k=>{try{PO.conns[k].open&&PO.conns[k].send(m)}catch(e){}})}else poSend(m)}
+ Object.keys(PO.pl).forEach((id,i)=>{if(id===PO.myId)return;const p=PO.pl[id];if(p.lv&&p.lv!==PK.lvl){poGhostDrop(id);return}const g=poGhost(id,i);g.position.x+=(p.x-g.position.x)*.5;g.position.z+=(p.z-g.position.z)*.5;g.position.y+=(p.y-g.position.y)*.5;g.rotation.y=p.ry||0});
+ poHud()}catch(e){}},120);
+/* Ziel melden */
+{const _w=pkWin;pkWin=function(){const r=_w.apply(this,arguments);try{if(PO.on&&!PO.fs){PO.fs=1;const me=PO.pl[PO.myId];if(me){me.f=1;me.ft=PK.time}const m={t:'fin',id:PO.myId,ft:+PK.time.toFixed(1)};if(PO.host)Object.keys(PO.conns).forEach(k=>{try{PO.conns[k].open&&PO.conns[k].send(m)}catch(e){}});else poSend(m)}}catch(e){}return r}}
+/* Button im Parkour-Menü */
+{const _m=pkMenu;pkMenu=function(){const r=_m.apply(this,arguments);try{const go=document.getElementById('pkgo');if(go&&!document.getElementById('poenter')){go.parentNode.insertAdjacentHTML('afterend','<div style="margin-top:10px"><button class="pill blue" id="poenter" style="width:100%;padding:14px;background:#0a84ff">🌐 Parkour Online (mit Freunden)</button></div>');document.getElementById('poenter').onclick=()=>poMenu()}}catch(e){}return r}}
+
+/* ===== Ansicht für alle (Ego / Dritte Person / Automatisch), Skin überall sichtbar, Parkour-Ego, Skins im Online-Parkour ===== */
+const VW={n:{auto:'Automatisch',tp:'Dritte Person (Skin sichtbar)',fp:'Ego'},ic:{auto:'🎥',tp:'🧍',fp:'👁'}};
+(()=>{let v=null;try{v=localStorage.getItem('dfView')}catch(e){}CH.view=(v==='auto'||v==='tp'||v==='fp')?v:'tp'})();
+function vwSet(v,quiet){CH.view=v;try{localStorage.setItem('dfView',v)}catch(e){}if(!quiet)try{toast('Ansicht: '+VW.n[v],'good')}catch(e){}vwBtn()}
+function vwNext(){vwSet(CH.view==='tp'?'fp':CH.view==='fp'?'auto':'tp')}
+function vwBtn(){let b=document.getElementById('vwb');if(!b){b=document.createElement('button');b.id='vwb';b.style.cssText='position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 64px);z-index:60;width:40px;height:40px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:rgba(24,26,34,.65);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;font-size:20px;padding:0';b.onclick=vwNext;document.body.appendChild(b)}b.textContent=VW.ic[CH.view]||'🎥';b.style.display=(typeof ovOn!=='undefined'&&ovOn)?'none':''}
+setInterval(()=>{try{vwBtn();const s=localStorage.getItem('dfView');if(s!==CH.view&&(CH.view==='auto'||CH.view==='tp'||CH.view==='fp'))localStorage.setItem('dfView',CH.view)}catch(e){}},600);
+/* Pause-Menü: Ansicht-Zeile */
+{const _p=pauseUI;pauseUI=function(p2){const r=_p.apply(this,arguments);try{const a=document.getElementById('pfauto');if(a&&!document.getElementById('vwrow')){a.parentNode.insertAdjacentHTML('afterend','<div class="grp" style="margin-top:10px"><button class="row" id="vwrow"><span class="tx"><b>'+VW.ic[CH.view]+' Ansicht: '+VW.n[CH.view]+'</b><small>Tippen zum Wechseln · auch über den Kamera-Knopf links oben</small></span></button></div>');
+ document.getElementById('vwrow').onclick=()=>{vwNext();const t=document.querySelector('#vwrow b');if(t)t.textContent=VW.ic[CH.view]+' Ansicht: '+VW.n[CH.view]}}}catch(e){}return r}}
+/* Parkour in Ego-Ansicht */
+{const _s=pkStart;pkStart=function(n){const r=_s.apply(this,arguments);try{const o=camOv;if(o&&!o._vw){camOv=s=>{if(CH.view==='fp'){av.visible=false;cam.position.set(pos.x+s,PK.y+1.55+s,pos.z);cam.rotation.set(Pt,Y,0)}else{av.visible=true;o(s)}};camOv._vw=1}}catch(e){}return r}}
+/* Online-Parkour: Geister mit dem Skin des Spielers */
+{const _h=poRecv;poRecv=function(m,c){if(m&&m.t==='p'&&m.sk&&PO.pl[m.id])PO.pl[m.id].sk=m.sk;return _h.apply(this,arguments)}}
+{const _g=poGhost;poGhost=function(id,i){const had=PO.gh[id];const g=_g.apply(this,arguments);try{const sk=(PO.pl[id]||{}).sk,c=sk&&(MPSK[sk]||(CSK[sk]||{}).c);if(c&&g._sk!==sk){g._sk=sk;let k=0;g.children.forEach(ch=>{if(ch.material&&ch.material.color&&!ch.isSprite){ch.material=ch.material.clone();ch.material.color.setHex(k===0?(c.sh||0x888888):(c.sk||0xd8a67e));k++}})}}catch(e){}return g}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

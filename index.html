@@ -5801,6 +5801,18 @@ setInterval(()=>{try{vwBtn();const s=localStorage.getItem('dfView');if(s!==CH.vi
 {const _h=poRecv;poRecv=function(m,c){if(m&&m.t==='p'&&m.sk&&PO.pl[m.id])PO.pl[m.id].sk=m.sk;return _h.apply(this,arguments)}}
 {const _g=poGhost;poGhost=function(id,i){const had=PO.gh[id];const g=_g.apply(this,arguments);try{const sk=(PO.pl[id]||{}).sk,c=sk&&(MPSK[sk]||(CSK[sk]||{}).c);if(c&&g._sk!==sk){g._sk=sk;let k=0;g.children.forEach(ch=>{if(ch.material&&ch.material.color&&!ch.isSprite){ch.material=ch.material.clone();ch.material.color.setHex(k===0?(c.sh||0x888888):(c.sk||0xd8a67e));k++}})}}catch(e){}return g}}
 
+/* ===== Parkour Online: Eingänge im Startmenü und im Multiplayer-Menü ===== */
+{const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);try{const p=document.getElementById('p2b');if(p&&!document.getElementById('poenter2')){p.parentNode.insertAdjacentHTML('afterend','<div style="margin-top:10px"><button class="btn" id="poenter2" style="background:#0a84ff;color:#fff;border-color:#0a84ff">🏃 PARKOUR ONLINE</button></div>');document.getElementById('poenter2').onclick=()=>poMenu()}}catch(e){}return r}}
+{const _m=mpMenu;mpMenu=function(){const r=_m.apply(this,arguments);try{const g=document.getElementById('mpc1');if(g&&!document.getElementById('poenter3')){const grp=g.parentNode;grp.insertAdjacentHTML('beforebegin','<div class="cap">Weitere Online-Modi</div><div class="grp"><button class="row" id="poenter3"><span class="ic" style="background:#0a84ff">🏃</span><span class="tx"><b>Parkour Online</b><small>Rennen mit Freunden · alle laufen dasselbe Level</small></span><i class="chev">›</i></button></div>');document.getElementById('poenter3').onclick=()=>poMenu()}}catch(e){}return r}}
+
+/* ===== Admin: Verlauf „Skins entfernt“ sichtbar ===== */
+const stripLog=()=>{try{const a=JSON.parse(localStorage.getItem('dfStripLog')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}};
+const stripFmt=t=>{const d=new Date(t),p=x=>String(x).padStart(2,'0');return p(d.getDate())+'.'+p(d.getMonth()+1)+'. '+p(d.getHours())+':'+p(d.getMinutes())};
+function stripLogHtml(){const L=stripLog().slice(-8).reverse();return '<div class="cap" style="margin-top:14px">📋 Entfernt-Verlauf (diese Sitzungen)</div><div class="grp" id="gflog">'+(L.length?L.map(x=>'<div class="row"><span class="tx"><b>'+mpE(x.to)+'</b><small>'+(x.mode==='all'?'🧹 Alle Skins':'🎁 Geschenkte Skins')+' · '+stripFmt(x.t)+' · ✅ an den Server gesendet</small></span></div>').join(''):'<div class="row"><span class="tx"><small>Noch nichts entfernt.</small></span></div>')+'</div>'}
+{const _o=opsPost;opsPost=async function(b,keep){const r=await _o.apply(this,arguments);try{if(b&&b.a==='strip'&&r&&r.ok){const L=stripLog();L.push({to:b.to,mode:b.mode,t:Date.now()});localStorage.setItem('dfStripLog',JSON.stringify(L.slice(-40)));
+  try{toast('🧹 Skins von '+b.to+' werden entfernt ('+(b.mode==='all'?'alle':'geschenkte')+')','good')}catch(e){}const e=document.getElementById('gflog');if(e){const w=document.createElement('div');w.innerHTML=stripLogHtml();e.parentNode.replaceChild(w.querySelector('#gflog'),e)}}}catch(e){}return r}}
+{const _c=cxStripCard;cxStripCard=function(){return _c.apply(this,arguments)+stripLogHtml()}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

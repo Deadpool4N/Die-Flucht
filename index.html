@@ -5686,6 +5686,35 @@ CXCARP['Legendär']=CXCARP['Legendär']||6500;
   if(p.k==='b')p.w=Math.max(p.w,1.0)}
  return L}}
 
+/* ===== Parkour-Admin-Panel (nur Admin / Cheat-Modus) ===== */
+const PKA={god:false,open:false};
+const pkaOk=()=>{try{return !!(CHEATS||(typeof cxIsOp==='function'&&cxIsOp()))}catch(e){return false}};
+{const _d=pkDie;pkDie=function(m){const d0=PK.deaths;const r=_d.apply(this,arguments);if(PKA.god&&pkaOk())PK.deaths=d0;return r}}
+function pkaTp(p){if(!p)return;pos.set(320+p.x,0,p.z);PK.y=p.top;PK.vy=0;PK.ground=false;PK.gp=null;PK.iv={x:0,z:0};PK.inv=.8}
+function pkaGoto(n){n=Math.max(1,Math.min(100,n|0));pkStart(n);try{toast('🛠 Level '+n,'good')}catch(e){}pkaUI()}
+function pkaSetBest(n){n=Math.max(0,Math.min(100,n|0));const sv=pkSave();sv.b=n;pkWrite(sv);try{accSave(true)}catch(e){}try{toast('🛠 Fortschritt: '+n+' / 100','good')}catch(e){}}
+function pkaUI(){let el=document.getElementById('pkadm');
+ if(!el){el=document.createElement('div');el.id='pkadm';document.body.appendChild(el);const st=document.createElement('style');
+  st.textContent='#pkadm{position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 120px);z-index:9985;color:#fff;font:600 13px -apple-system,system-ui,sans-serif}#pkadm .pb{background:rgba(24,26,34,.85);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:6px 12px}#pkadm .pn{margin-top:6px;width:210px;padding:10px;background:rgba(24,26,34,.92);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.18);border-radius:16px}#pkadm button{font:inherit;color:#fff;background:#3a3d4a;border:0;border-radius:10px;padding:8px 6px;margin:2px;cursor:pointer}#pkadm button.on{background:#30d158;color:#000}#pkadm input{font:inherit;width:56px;padding:7px;border-radius:8px;border:1px solid #555;background:#15161c;color:#fff;text-align:center}#pkadm .r{display:flex;flex-wrap:wrap;gap:2px;align-items:center;margin:3px 0}#pkadm small{opacity:.65;display:block;margin:6px 0 2px}';document.head.appendChild(st)}
+ const show=document.body.classList.contains('pkon')&&pkaOk();el.style.display=show?'':'none';if(!show)return;
+ el.innerHTML='<div class="pb" id="pkat">🛠 Parkour-Admin '+(PKA.open?'▾':'▸')+'</div>'+(PKA.open?'<div class="pn">'
+  +'<small>Level '+PK.lvl+' · Tode '+PK.deaths+'</small><div class="r"><button id="pkap">◀</button><input id="pkan" type="number" min="1" max="100" value="'+PK.lvl+'"><button id="pkan2">Los</button><button id="pkan1">▶</button></div>'
+  +'<small>Teleport</small><div class="r"><button id="pkat1">Start</button><button id="pkat2">Checkpoint</button><button id="pkat3">Nächste Plattform</button><button id="pkat4">Ziel</button></div>'
+  +'<small>Hilfen</small><div class="r"><button id="pkag" class="'+(PKA.god?'on':'')+'">Gott-Modus '+(PKA.god?'AN':'aus')+'</button><button id="pkaf">Level geschafft</button></div>'
+  +'<small>Fortschritt</small><div class="r"><button id="pkab1">Alles frei (100)</button><button id="pkab0">Zurück auf 0</button></div></div>':'');
+ const g=i=>document.getElementById(i);g('pkat').onclick=()=>{PKA.open=!PKA.open;pkaUI()};if(!PKA.open)return;
+ g('pkap').onclick=()=>pkaGoto(PK.lvl-1);g('pkan1').onclick=()=>pkaGoto(PK.lvl+1);g('pkan2').onclick=()=>pkaGoto(+g('pkan').value||1);
+ g('pkat1').onclick=()=>pkaTp(PK.pl[0]);g('pkat2').onclick=()=>{const c=PK.cp;pkaTp(PK.pl.find(p=>p.id===c.i)||PK.pl[0])};
+ g('pkat3').onclick=()=>{const c=PK.pl.filter(p=>p.z<pos.z-.5).sort((a,b)=>b.z-a.z)[0];pkaTp(c||PK.pl[PK.pl.length-1])};
+ g('pkat4').onclick=()=>pkaTp(PK.pl.find(p=>p.goal)||PK.pl[PK.pl.length-1]);
+ g('pkag').onclick=()=>{PKA.god=!PKA.god;pkaUI()};
+ g('pkaf').onclick=()=>{if(PK.lvl<100)pkaGoto(PK.lvl+1);else try{pkWin()}catch(e){}};
+ g('pkab1').onclick=()=>pkaSetBest(100);g('pkab0').onclick=()=>pkaSetBest(0)}
+setInterval(()=>{try{pkaUI()}catch(e){}},700);
+/* Im Parkour-Menü: Admin-Zeile */
+{const _m=pkMenu;pkMenu=function(){const r=_m.apply(this,arguments);try{if(!pkaOk())return r;const go=document.getElementById('pkgo');if(go&&!document.getElementById('pkamenu')){go.parentNode.insertAdjacentHTML('afterend','<div class="grp" id="pkamenu" style="margin-top:10px;padding:12px"><b>🛠 Parkour-Admin</b><div class="dim" style="font-size:12px;margin:4px 0 8px">Alle 100 Level sind für dich frei. Im Spiel gibt es links ein Admin-Panel (Teleport, Gott-Modus, Level springen).</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><input id="pkamn" type="number" min="1" max="100" value="'+Math.max(1,pkBest())+'" style="width:70px;padding:9px;border-radius:10px;background:#2a2d38;color:#fff;border:1px solid #444;text-align:center;font-size:16px"><button class="pill blue" id="pkams">Fortschritt setzen</button><button class="pill" id="pkamg">Level starten</button></div></div>');
+  document.getElementById('pkams').onclick=()=>{pkaSetBest(+document.getElementById('pkamn').value||0);pkMenu()};document.getElementById('pkamg').onclick=()=>pkStart(+document.getElementById('pkamn').value||1)}}catch(e){}return r}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

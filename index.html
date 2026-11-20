@@ -5871,6 +5871,9 @@ function cxStripApply(ts,sm){if(!(ts>0))return 0;let done=0;try{done=+localStora
 /* Abruf öfter: Spieler bekommt die Entfernung nach ca. 12 s statt 30 s */
 setInterval(()=>{try{if(!document.hidden)cxGiftPoll()}catch(e){}},12000);
 
+/* ===== Block 153: dfSkinY (geheimer Skin) gehört zum Account ===== */
+try{if(ACCK.indexOf('dfSkinY')<0)ACCK.push('dfSkinY')}catch(e){}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

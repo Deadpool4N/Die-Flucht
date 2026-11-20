@@ -17,6 +17,28 @@ const nkey = (n) => nkeyL(n, 14);
 const CODE_ABC = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // 32 Zeichen ohne I, O, 0, 1
 const newCode = (n) => { const r = randomBytes(n); let c = ""; for (let i = 0; i < n; i++) c += CODE_ABC[r[i] & 31]; return c; };   // echte Zufallszeichen (32 teilt 256, also ohne Verzerrung)
 
+
+// ===== Trade-Markt: Angebote stellen, Gebote abgeben, annehmen. Die Gegenstände liegen währenddessen „in Verwahrung“ (der Spieler gibt sie beim Einstellen/Bieten ab; sie kommen zurück, wenn das Trade abgelehnt oder zurückgezogen wird) =====
+const TI_ID = /^[\p{L}0-9_-]{1,24}$/u;
+const TL_ID = /^t-\d+-[a-z0-9]+$/;
+const okItems = (a) => {
+  if (!Array.isArray(a) || a.length < 1 || a.length > 12) return null;
+  const out = [];
+  for (const x of a) {
+    if (!x || !["s", "p", "e", "c"].includes(x.k)) return null;
+    if (x.k === "c") { const n = Math.floor(+x.n); if (!(n >= 1 && n <= 1e9)) return null; out.push({ k: "c", n }); }
+    else {
+      const id = str(x.id, 24); if (!TI_ID.test(id)) return null;
+      const o = { k: x.k, id };
+      if (x.k === "e") { const n = Math.floor(+x.n || 1); if (!(n >= 1 && n <= 99)) return null; o.n = n; }
+      out.push(o);
+    }
+  }
+  return out;
+};
+const newNid = () => "n-" + Date.now() + "-" + newCode(4).toLowerCase();
+const noteCmd = (nk, obj) => { const nid = newNid(); return ["HSET", "df:tn:" + nk, nid, JSON.stringify(Object.assign({ nid }, obj))]; };
+
 async function db(cmds) {       // mehrere Redis-Befehle in einem Aufruf
   const r = await fetch(DB_URL + "/pipeline", {
     method: "POST",
@@ -289,7 +311,7 @@ export default async function handler(req, res) {
         if (all.length) { const [vals] = await db([["MGET", ...all.map((i) => "df:gr:" + i)]]); (vals || []).forEach((v, i) => { if (v) rv.push(all[i]); }); }
         list = list.filter((g) => !rv.includes(g.id));
         const [stv] = await db([["GET", "df:strip:" + to]]);
-        return send({ ok: true, list, rv: rv.filter((i) => chk.includes(i)), strip: +stv || 0 });
+        return send({ ok: true, list, rv: rv.filter((i) => chk.includes(i)), strip: parseInt(stv, 10) || 0, sm: String(stv || "").endsWith("|all") ? "all" : "std" });
       }
       case "strip": {                                 // Admin: alle Skins eines Spielers entfernen, außer den selbst gekauften (der Spieler führt es beim nächsten Abruf aus)
         if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
@@ -297,7 +319,7 @@ export default async function handler(req, res) {
         if (to.length < 2) return send({ error: "bad" }, 400);
         const [seen] = await db([["HGET", "df:names", to]]);
         if (!seen) return send({ error: "noname" }, 404);
-        await db([["SET", "df:strip:" + to, String(now)]]);
+        await db([["SET", "df:strip:" + to, String(now) + "|" + (b.mode === "all" ? "all" : "std")]]);
         return send({ ok: true });
       }
       case "giftrev": {                               // Geschenk zurücknehmen: der Schenker mit seinem Geheimnis oder der Admin
@@ -324,6 +346,127 @@ export default async function handler(req, res) {
         if (!meta.gh || meta.gh !== hash(gsec + "|g|" + id) + hash(id + "|g|" + gsec)) return send({ error: "auth" }, 401);
         if (done) return send({ ok: true, already: true });
         await revoke(id, meta);
+        return send({ ok: true });
+      }
+      case "tpost": {                                 // Trade einstellen (der Spieler zieht die Gegenstände erst nach „ok“ ab)
+        const nk = nkey(b.name);
+        if (nk.length < 2) return send({ error: "bad" }, 400);
+        const give = okItems(b.give); if (!give) return send({ error: "items" }, 400);
+        const sec = str(b.sec, 40); if (sec.length < 8) return send({ error: "bad" }, 400);
+        const [seen, cnt] = await db([["HGET", "df:names", nk], ["SCARD", "df:tlu:" + nk]]);
+        if (!seen) return send({ error: "noname" }, 404);
+        if (cnt >= 5) return send({ error: "limit" }, 429);
+        const id = "t-" + now + "-" + newCode(4).toLowerCase();
+        const rec = { id, by: nk, byN: str(b.name, 14), give, want: str(b.want, 40), t: now, sh: hash(sec) };
+        await db([["SET", "df:tl:" + id, JSON.stringify(rec)], ["ZADD", "df:tli", now, id], ["SADD", "df:tlu:" + nk, id]]);
+        return send({ ok: true, id });
+      }
+      case "tlist": {                                 // offene Trades (neueste zuerst)
+        const [ids] = await db([["ZREVRANGE", "df:tli", 0, 59]]);
+        const list = [];
+        if (ids && ids.length) {
+          const [vals] = await db([["MGET", ...ids.map((i) => "df:tl:" + i)]]);
+          const dead = [];
+          (vals || []).forEach((v, i) => { if (!v) { dead.push(ids[i]); return; } try { const g = JSON.parse(v); delete g.sh; list.push(g); } catch (e) {} });
+          if (dead.length) await db([["ZREM", "df:tli", ...dead]]);
+        }
+        return send({ ok: true, list });
+      }
+      case "toffer": {                                // Angebot auf ein Trade abgeben
+        const nk = nkey(b.name), id = str(b.id, 40);
+        if (nk.length < 2 || !TL_ID.test(id)) return send({ error: "bad" }, 400);
+        const give = okItems(b.give); if (!give) return send({ error: "items" }, 400);
+        const [lv, seen, cnt] = await db([["GET", "df:tl:" + id], ["HGET", "df:names", nk], ["HLEN", "df:to:" + id]]);
+        if (!lv) return send({ error: "gone" }, 404);
+        if (!seen) return send({ error: "noname" }, 404);
+        let L; try { L = JSON.parse(lv); } catch (e) { return send({ error: "gone" }, 404); }
+        if (L.by === nk) return send({ error: "own" }, 400);
+        if (cnt >= 12) return send({ error: "limit" }, 429);
+        const oid = "o-" + now + "-" + newCode(4).toLowerCase();
+        await db([["HSET", "df:to:" + id, oid, JSON.stringify({ oid, by: nk, byN: str(b.name, 14), give, t: now })]]);
+        return send({ ok: true, oid });
+      }
+      case "tmine": {                                 // Meine Trades samt Geboten (nur mit dem Geheimnis des Trades)
+        const arr = Array.isArray(b.l) ? b.l.slice(0, 5) : [];
+        const out = [];
+        for (const x of arr) {
+          const id = str(x && x.id, 40), sec = str(x && x.sec, 40);
+          if (!TL_ID.test(id)) continue;
+          const [lv, of] = await db([["GET", "df:tl:" + id], ["HGETALL", "df:to:" + id]]);
+          if (!lv) { out.push({ id, alive: false }); continue; }
+          let L; try { L = JSON.parse(lv); } catch (e) { out.push({ id, alive: false }); continue; }
+          if (L.sh !== hash(sec)) continue;
+          const offers = [];
+          const o = pairs(of);
+          for (const k of Object.keys(o)) { try { offers.push(JSON.parse(o[k])); } catch (e) {} }
+          delete L.sh;
+          out.push({ id, alive: true, listing: L, offers });
+        }
+        return send({ ok: true, list: out });
+      }
+      case "taccept": {                               // Gebot annehmen: beide Seiten bekommen ihre Gegenstände über den Posteingang
+        const id = str(b.id, 40), oid = str(b.oid, 40), sec = str(b.sec, 40);
+        if (!TL_ID.test(id)) return send({ error: "bad" }, 400);
+        const [lock] = await db([["SET", "df:tlk:" + id, "1", "NX", "EX", 20]]);
+        if (!lock) return send({ error: "busy" }, 409);
+        try {
+          const [lv, of] = await db([["GET", "df:tl:" + id], ["HGETALL", "df:to:" + id]]);
+          if (!lv) return send({ error: "gone" }, 404);
+          const L = JSON.parse(lv);
+          if (L.sh !== hash(sec)) return send({ error: "auth" }, 401);
+          const o = pairs(of);
+          if (!o[oid]) return send({ error: "nooffer" }, 404);
+          const O = JSON.parse(o[oid]);
+          const cmds = [noteCmd(L.by, { k: "done", w: O.byN, items: O.give, gave: L.give }), noteCmd(O.by, { k: "done", w: L.byN, items: L.give, gave: O.give })];
+          for (const k of Object.keys(o)) { if (k === oid) continue; try { const X = JSON.parse(o[k]); cmds.push(noteCmd(X.by, { k: "decl", w: L.byN, items: X.give })); } catch (e) {} }
+          cmds.push(["DEL", "df:tl:" + id], ["DEL", "df:to:" + id], ["ZREM", "df:tli", id], ["SREM", "df:tlu:" + L.by, id]);
+          await db(cmds);
+          return send({ ok: true });
+        } finally { await db([["DEL", "df:tlk:" + id]]); }
+      }
+      case "tdecl": {                                 // ein Gebot ablehnen (Gegenstände gehen zurück an den Bieter)
+        const id = str(b.id, 40), oid = str(b.oid, 40), sec = str(b.sec, 40);
+        if (!TL_ID.test(id)) return send({ error: "bad" }, 400);
+        const [lv, ov] = await db([["GET", "df:tl:" + id], ["HGET", "df:to:" + id, oid]]);
+        if (!lv) return send({ error: "gone" }, 404);
+        const L = JSON.parse(lv);
+        if (L.sh !== hash(sec)) return send({ error: "auth" }, 401);
+        if (!ov) return send({ ok: true });
+        const O = JSON.parse(ov);
+        await db([noteCmd(O.by, { k: "decl", w: L.byN, items: O.give }), ["HDEL", "df:to:" + id, oid]]);
+        return send({ ok: true });
+      }
+      case "tcancel": {                               // eigenes Trade zurückziehen (alles geht zurück)
+        const id = str(b.id, 40), sec = str(b.sec, 40);
+        if (!TL_ID.test(id)) return send({ error: "bad" }, 400);
+        const [lock] = await db([["SET", "df:tlk:" + id, "1", "NX", "EX", 20]]);
+        if (!lock) return send({ error: "busy" }, 409);
+        try {
+          const [lv, of] = await db([["GET", "df:tl:" + id], ["HGETALL", "df:to:" + id]]);
+          if (!lv) return send({ error: "gone" }, 404);
+          const L = JSON.parse(lv);
+          if (L.sh !== hash(sec)) return send({ error: "auth" }, 401);
+          const o = pairs(of);
+          const cmds = [noteCmd(L.by, { k: "ret", w: "", items: L.give })];
+          for (const k of Object.keys(o)) { try { const X = JSON.parse(o[k]); cmds.push(noteCmd(X.by, { k: "decl", w: L.byN, items: X.give })); } catch (e) {} }
+          cmds.push(["DEL", "df:tl:" + id], ["DEL", "df:to:" + id], ["ZREM", "df:tli", id], ["SREM", "df:tlu:" + L.by, id]);
+          await db(cmds);
+          return send({ ok: true });
+        } finally { await db([["DEL", "df:tlk:" + id]]); }
+      }
+      case "tinbox": {                                // Posteingang des Spielers (Trade abgeschlossen / Gegenstände zurück)
+        const nk = nkey(b.name);
+        if (nk.length < 2) return send({ error: "bad" }, 400);
+        const [h] = await db([["HGETALL", "df:tn:" + nk]]);
+        const o = pairs(h), list = [];
+        for (const k of Object.keys(o).slice(0, 50)) { try { list.push(JSON.parse(o[k])); } catch (e) {} }
+        return send({ ok: true, list });
+      }
+      case "tack": {                                  // Posteingang bestätigen (löscht die gelesenen Einträge)
+        const nk = nkey(b.name);
+        const ids = Array.isArray(b.ids) ? b.ids.map((x) => str(x, 40)).filter((x) => /^n-\d+-[a-z0-9]+$/.test(x)).slice(0, 50) : [];
+        if (nk.length < 2 || !ids.length) return send({ ok: true });
+        await db([["HDEL", "df:tn:" + nk, ...ids]]);
         return send({ ok: true });
       }
       case "game": {                                  // ein Spiel wurde gestartet

@@ -6027,7 +6027,7 @@ function trFair(give,get){const gv=trSum(give),tv=trSum(get);let c='#8e8e93',t='
 function trClean(a){if(!Array.isArray(a)||a.length>12)return [];const o=[];a.forEach(x=>{if(!x)return;if(x.k==='c'){const n=Math.floor(+x.n);if(n>=1&&n<=1e9)o.push({k:'c',n})}else if(x.k==='e'&&PETEGG[x.id]){const n=Math.floor(+x.n||1);if(n>=1&&n<=99)o.push({k:'e',id:x.id,n})}else if(x.k==='p'&&petById(x.id))o.push({k:'p',id:x.id});else if(x.k==='s'&&trSkinOk(x.id))o.push({k:'s',id:x.id})});return o}
 const trCanon=a=>JSON.stringify((a||[]).map(i=>i.k+':'+(i.id||'')+':'+(i.n||0)).sort());
 function trHas(a){const sk=new Set(trSkinList()),d=petD();let eg={},co=0;for(const i of a){if(i.k==='s'){if(!sk.has(i.id))return false}else if(i.k==='p'){if(!d.o.includes(i.id))return false}else if(i.k==='e'){eg[i.id]=(eg[i.id]||0)+i.n}else if(i.k==='c')co+=i.n}
- for(const r in eg)if(((d.e&&d.e[r])||0)<eg[r])return false;if(co){const c=cxCoins();if(c===Infinity||c<co)return false}return true}
+ for(const r in eg)if(((d.e&&d.e[r])||0)<eg[r])return false;if(co){const c=cxCoins();if(c!==Infinity&&c<co)return false}return true}
 function trTake(a){a.forEach(i=>{if(i.k==='s')cxTakeSkin(i.id);else if(i.k==='p'){const d=petD();d.o=d.o.filter(x=>x!==i.id);if(d.cur===i.id)d.cur='';petSave(d)}else if(i.k==='e'){const d=petD();d.e[i.id]=Math.max(0,(d.e[i.id]||0)-i.n);petSave(d)}else if(i.k==='c')cxSet(cxCoins()-i.n)});try{accSave(true)}catch(e){}}
 function trGive(a){a.forEach(i=>{if(i.k==='s'){if(cxShop().skins.includes(i.id)){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+Math.round(trVal(i)*.4))}catch(e){}}else{const c=CXSKINS.find(x=>x.id===i.id);if(c)c.give();else{const x=cxShop();x.skins.push(i.id);cxWrite('dfShop',x)}}}
  else if(i.k==='p'){if(!petGive(i.id)){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+Math.round(trVal(i)*.4))}catch(e){}}}else if(i.k==='e')petEggAdd(i.id,i.n);else if(i.k==='c'){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+i.n)}catch(e){}}});try{accSave(true)}catch(e){}}
@@ -6043,13 +6043,13 @@ const trQ=s=>document.querySelector('#trp '+s);
 /* ---- Auswahl ---- */
 const trNewSel=()=>({tab:'s',s:new Set(),p:new Set(),e:{},c:0,want:''});
 function trSelItems(P){const o=[];P.s.forEach(id=>o.push({k:'s',id}));P.p.forEach(id=>o.push({k:'p',id}));Object.keys(P.e).forEach(r=>{if(P.e[r]>0)o.push({k:'e',id:r,n:P.e[r]})});if(P.c>0)o.push({k:'c',n:P.c});return o}
-function trPicker(cfg){const P=cfg.P,items=trSelItems(P),d=petD(),coins=cxCoins();
+function trPicker(cfg){const P=cfg.P,items=trSelItems(P),d=petD(),coins=cxCoins(),cap=coins===Infinity?1e9:coins;
  let h='<div class="trh"><b>'+esc(cfg.title)+'</b><button class="tb" id="trpb">Zurück</button></div><div class="g"><div style="font-size:13px;opacity:.7">Du gibst:</div><div style="margin-top:2px">'+trList(items)+'</div>'+(cfg.info?cfg.info(items):'')+'</div>';
  h+='<div class="trt">'+[['s','🧑 Skins'],['p','🐾 Pets'],['e','🥚 Eier'],['c','🪙 Münzen']].map(t=>'<button class="tb'+(P.tab===t[0]?' on':'')+'" data-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div><div class="g">';
  if(P.tab==='s'){const L=trSkinList();h+=L.length?L.map(id=>'<button class="chip'+(P.s.has(id)?' on':'')+'" data-s="'+id+'" style="border-color:'+(P.s.has(id)?'#0a84ff':TRC[CSK[id].r]||'#444')+'">'+(CSK[id].ic||'🧑')+' '+esc(CSK[id].n)+'</button>').join(''):'<span style="opacity:.6">Du hast keine tauschbaren Skins.</span>'}
  else if(P.tab==='p'){h+=d.o.length?d.o.map(id=>{const p=petById(id);return p?'<button class="chip'+(P.p.has(id)?' on':'')+'" data-p="'+id+'" style="border-color:'+(P.p.has(id)?'#0a84ff':TRC[p.r])+'">'+p.ic+' '+esc(p.n)+'</button>':''}).join(''):'<span style="opacity:.6">Du hast noch keine Pets.</span>'}
  else if(P.tab==='e'){h+=PETR.map(r=>{const n=(d.e&&d.e[r])||0,s=P.e[r]||0;return '<div class="r" style="display:flex;align-items:center;gap:8px"><span style="flex:1"><b style="color:'+TRC[r]+'">🥚 '+r+'es Ei</b><div style="font-size:12px;opacity:.7">Du hast '+n+'</div></span><button class="tb" data-em="'+r+'">−</button><b style="min-width:24px;text-align:center">'+s+'</b><button class="tb" data-ep="'+r+'"'+(s>=n?' disabled':'')+'>+</button></div>'}).join('')}
- else{h+=coins===Infinity?'<span style="opacity:.6">Mit unendlichen Münzen kann man keine Münzen tauschen.</span>':'<div style="opacity:.8;margin-bottom:6px">Du hast 🪙 '+trFmt(coins)+'</div><input id="trcoin" inputmode="numeric" placeholder="Anzahl Münzen" value="'+(P.c||'')+'"><div style="margin-top:8px">'+[500,1000,5000,10000].map(n=>'<button class="tb" data-cq="'+n+'">+'+trFmt(n)+'</button>').join(' ')+' <button class="tb" data-cq="0">0</button></div>'}
+ else{h+='<div style="opacity:.8;margin-bottom:6px">Du hast 🪙 '+(coins===Infinity?'∞ (bis zu 1.000.000.000 pro Trade)':trFmt(coins))+'</div><input id="trcoin" inputmode="numeric" placeholder="Anzahl Münzen" value="'+(P.c||'')+'"><div style="margin-top:8px">'+[500,1000,5000,10000].map(n=>'<button class="tb" data-cq="'+n+'">+'+trFmt(n)+'</button>').join(' ')+' <button class="tb" data-cq="0">0</button></div>'}
  h+='</div>';if(cfg.extra)h+=cfg.extra;h+='<div style="margin-top:12px"><button class="tb ok" id="trpok" style="width:100%;padding:13px;font-size:16px"'+(items.length||cfg.allowEmpty?'':' disabled')+'>'+esc(cfg.okLabel)+'</button></div>';
  trPanel(h);const again=()=>trPicker(cfg);
  trQ('#trpb').onclick=cfg.onBack;trQ('#trpok').onclick=()=>cfg.onOk(trSelItems(P));
@@ -6058,8 +6058,8 @@ function trPicker(cfg){const P=cfg.P,items=trSelItems(P),d=petD(),coins=cxCoins(
  document.querySelectorAll('#trp [data-p]').forEach(b=>b.onclick=()=>{const i=b.dataset.p;P.p.has(i)?P.p.delete(i):P.p.add(i);again()});
  document.querySelectorAll('#trp [data-ep]').forEach(b=>b.onclick=()=>{const r=b.dataset.ep;P.e[r]=Math.min(((d.e&&d.e[r])||0),(P.e[r]||0)+1);again()});
  document.querySelectorAll('#trp [data-em]').forEach(b=>b.onclick=()=>{const r=b.dataset.em;P.e[r]=Math.max(0,(P.e[r]||0)-1);again()});
- document.querySelectorAll('#trp [data-cq]').forEach(b=>b.onclick=()=>{const n=+b.dataset.cq;P.c=n?Math.min(coins,(P.c||0)+n):0;again()});
- const ci=trQ('#trcoin');if(ci)ci.onchange=()=>{P.c=Math.max(0,Math.min(coins,Math.floor(+ci.value||0)));again()};
+ document.querySelectorAll('#trp [data-cq]').forEach(b=>b.onclick=()=>{const n=+b.dataset.cq;P.c=n?Math.min(cap,(P.c||0)+n):0;again()});
+ const ci=trQ('#trcoin');if(ci)ci.onchange=()=>{P.c=Math.max(0,Math.min(cap,Math.floor(+ci.value||0)));again()};
  const wi=trQ('#trwant');if(wi)wi.oninput=()=>{P.want=wi.value}}
 /* ---- Server-Helfer ---- */
 const trMe=()=>cxClean(myName());

@@ -5851,6 +5851,26 @@ document.head.appendChild(st)}
 st.textContent='#vwb{left:calc(env(safe-area-inset-left,0px) + 54px)!important;top:calc(env(safe-area-inset-top,0px) + 59px)!important;width:40px!important;height:40px!important}';
 document.head.appendChild(st)}
 
+/* ===== Block 152: „Skins entfernen“ wirklich – nimmt Geschenkte auch dann weg, wenn sie wie Pass-/Parkour-Skins heißen; Prüfung auf echt Verdientes ===== */
+function cxEarnedReal(){const E=new Set(['adm','adm2','tgh','rainbow']);
+ try{const s=bpS();(s.fc||[]).forEach(L=>{(BPT[L]&&BPT[L].f||[]).forEach(r=>{if(r[0]==='s')E.add(r[1])})});(s.pc||[]).forEach(L=>{(BPT[L]&&BPT[L].p||[]).forEach(r=>{if(r[0]==='s')E.add(r[1])})})}catch(e){}
+ try{if(typeof pkBest==='function'&&pkBest()>=100)E.add('pk100')}catch(e){}
+ return E}
+function cxStripApply(ts,sm){if(!(ts>0))return 0;let done=0;try{done=+localStorage.getItem('dfStrip')||0}catch(e){}if(ts<=done)return 0;
+ let nn=cxRead('dfBoughtN',[]);if(!Array.isArray(nn))nn=[];const bought=new Set(nn),earned=cxEarnedReal();let n=0;
+ const gift=new Set();try{const got=cxRead('dfGiftGot',{});Object.keys(got).forEach(k=>{if(!got[k].rev)(got[k].s||[]).forEach(s=>gift.add(s))})}catch(e){}
+ const gone=[];
+ if(true){CXSKINS.forEach(it=>{if(it.own()&&!bought.has(it.id)&&!earned.has(it.id)){gone.push(it.id)}});
+  try{cxShop().skins.forEach(k=>{if(!bought.has(k)&&!earned.has(k)&&!gone.includes(k))gone.push(k)})}catch(e){}}
+ else{gift.forEach(id=>{if(!bought.has(id)&&!earned.has(id)&&(CXSKINS.some(x=>x.id===id&&x.own())||cxShop().skins.includes(id)))gone.push(id)})}
+ gone.forEach(id=>{try{cxTakeSkin(id)}catch(e){}n++});
+ try{const x=cxShop();x.skins=x.skins.filter(k=>!gone.includes(k));cxWrite('dfShop',x)}catch(e){}
+ try{cxWrite('dfBought',nn.slice())}catch(e){}try{localStorage.setItem('dfStrip',String(ts))}catch(e){}try{accSave(true)}catch(e){}
+ try{if(typeof SKIN!=='undefined'&&SKIN.cur&&SKIN.cur!=='default'&&!/^adm/.test(SKIN.cur)&&!cxOwnsSk(SKIN.cur))applySkin('default')}catch(e){}
+ if(n)try{toast('🧹 '+n+' Skin'+(n===1?'':'s')+' wurde'+(n===1?'':'n')+' entfernt.','err')}catch(e){}return n}
+/* Abruf öfter: Spieler bekommt die Entfernung nach ca. 12 s statt 30 s */
+setInterval(()=>{try{if(!document.hidden)cxGiftPoll()}catch(e){}},12000);
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

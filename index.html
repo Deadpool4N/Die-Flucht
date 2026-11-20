@@ -5846,6 +5846,11 @@ st.textContent='body #inv,body.fpson1 #inv,body.fpson2 #inv,body.phone #inv,body
 +'body.fpson1 #fpsd,body.fpson2 #fpsd{top:calc(env(safe-area-inset-top,0px) + 172px)!important}';
 document.head.appendChild(st)}
 
+/* ===== Block 151: Kamera-Knopf neben HUD-Knopf statt darauf ===== */
+{const st=document.createElement('style');st.id='vwfix';
+st.textContent='#vwb{left:calc(env(safe-area-inset-left,0px) + 54px)!important;top:calc(env(safe-area-inset-top,0px) + 59px)!important;width:40px!important;height:40px!important}';
+document.head.appendChild(st)}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

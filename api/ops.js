@@ -21,11 +21,11 @@ const newCode = (n) => { const r = randomBytes(n); let c = ""; for (let i = 0; i
 // ===== Trade-Markt: Angebote stellen, Gebote abgeben, annehmen. Die Gegenstände liegen währenddessen „in Verwahrung“ (der Spieler gibt sie beim Einstellen/Bieten ab; sie kommen zurück, wenn das Trade abgelehnt oder zurückgezogen wird) =====
 const TI_ID = /^[\p{L}0-9_-]{1,24}$/u;
 const TL_ID = /^t-\d+-[a-z0-9]+$/;
-const okItems = (a) => {
-  if (!Array.isArray(a) || a.length < 1 || a.length > 12) return null;
+const okItems = (a, max = 12) => {
+  if (!Array.isArray(a) || a.length < 1 || a.length > max) return null;
   const out = [];
   for (const x of a) {
-    if (!x || !["s", "p", "e", "c"].includes(x.k)) return null;
+    if (!x || !["s", "p", "e", "c", "a"].includes(x.k)) return null;
     if (x.k === "c") { const n = Math.floor(+x.n); if (!(n >= 1 && n <= 1e9)) return null; out.push({ k: "c", n }); }
     else {
       const id = str(x.id, 24); if (!TI_ID.test(id)) return null;
@@ -453,6 +453,17 @@ export default async function handler(req, res) {
           await db(cmds);
           return send({ ok: true });
         } finally { await db([["DEL", "df:tlk:" + id]]); }
+      }
+      case "tadmin": {                                // Admin: einem Spieler Gegenstände schenken oder alles löschen (über den Posteingang)
+        if (b.key !== ADMIN_KEY) return send({ error: "auth" }, 401);
+        const to = nkey(b.to);
+        if (to.length < 2) return send({ error: "bad" }, 400);
+        const [seen] = await db([["HGET", "df:names", to]]);
+        if (!seen) return send({ error: "noname" }, 404);
+        if (b.wipe) { await db([noteCmd(to, { k: "wipe", w: "Admin", items: [] })]); return send({ ok: true }); }
+        const items = okItems(b.items, 80); if (!items) return send({ error: "items" }, 400);
+        await db([noteCmd(to, { k: "adm", w: "Admin", items })]);
+        return send({ ok: true });
       }
       case "tinbox": {                                // Posteingang des Spielers (Trade abgeschlossen / Gegenstände zurück)
         const nk = nkey(b.name);

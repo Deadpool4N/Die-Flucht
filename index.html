@@ -6068,7 +6068,7 @@ const trMine=()=>{const v=cxRead('dfTrMine',[]);return Array.isArray(v)?v:[]};
 const trErr=r=>!r?'Keine Verbindung zur Zentrale (ops.js aktuell?).':({gone:'Dieses Trade gibt es nicht mehr.',limit:'Zu viele (max. 5 eigene Trades, 12 Gebote pro Trade).',own:'Das ist dein eigenes Trade.',noname:'Dein Name ist noch nicht angemeldet.',auth:'Keine Berechtigung.',busy:'Gerade beschäftigt, nochmal versuchen.',items:'Ungültige Auswahl.'})[r.error]||'Das hat nicht geklappt.';
 /* ---- Posteingang: abgeschlossene Trades / zurückgegebene Gegenstände ---- */
 let trBusy=false;
-async function trInbox(){if(trBusy||!accReady())return 0;const nm=trMe();if(nm.length<2)return 0;trBusy=true;try{const r=await opsPost({a:'tinbox',name:nm});if(!r||!r.ok)return 0;const done=cxRead('dfTrDone',[]),dn=Array.isArray(done)?done:[];const ack=[];let n=0;
+async function trInbox_old(){if(trBusy||!accReady())return 0;const nm=trMe();if(nm.length<2)return 0;trBusy=true;try{const r=await opsPost({a:'tinbox',name:nm});if(!r||!r.ok)return 0;const done=cxRead('dfTrDone',[]),dn=Array.isArray(done)?done:[];const ack=[];let n=0;
  (r.list||[]).forEach(x=>{if(!x||!x.nid)return;ack.push(x.nid);if(dn.includes(x.nid))return;const it=trClean(x.items);trGive(it);dn.push(x.nid);n++;
   const w=x.w?esc(String(x.w)):'';try{toast(x.k==='done'?'🔄 Trade mit '+w+' abgeschlossen: '+it.map(trTxt).join(', '):x.k==='decl'?'↩ Dein Angebot bei '+w+' wurde nicht angenommen. Gegenstände zurück: '+it.map(trTxt).join(', '):'↩ Trade zurückgezogen. Gegenstände zurück: '+it.map(trTxt).join(', '),'good')}catch(e){}});
  if(n){cxWrite('dfTrDone',dn.slice(-300))}if(ack.length)await opsPost({a:'tack',name:nm,ids:ack});return n}catch(e){return 0}finally{trBusy=false}}
@@ -6132,6 +6132,57 @@ function trRecv(m){const f=m.from;
 {const _r=mpRecv;mpRecv=function(m){if(m&&m.t==='tr'){try{trRecv(m)}catch(e){console.error(e)}return}return _r.apply(this,arguments)}}
 {const _m=MPHost.prototype.msg;MPHost.prototype.msg=function(id,m){if(m&&m.t==='tr'){const p=this.P[id],to=String(m.to||'');if(!p||!this.P[to]||to===id)return;const o={t:'tr',k:String(m.k||'').slice(0,6),from:id,fn:p.name};if(m.k==='upd'&&Array.isArray(m.items))o.items=m.items.slice(0,12);if(m.k==='ok'){o.cm=String(m.cm||'').slice(0,800);o.ct=String(m.ct||'').slice(0,800)}mpHSend(to,o);return}return _m.apply(this,arguments)}}
 document.addEventListener('pointerdown',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-tr]');if(b){e.preventDefault();e.stopPropagation();trAsk(b.dataset.tr)}},true);
+
+/* ===== Block 157: Spind – Suche + Seltenheits-Filter/Sortierung · Admin: alles schenken / alles löschen ===== */
+const SPF={q:'',r:'',sort:'',own:false};
+function spFilterUI(){try{const box=document.getElementById('box');if(!box)return;const g=box.querySelector('.spg');if(!g||box.querySelector('#spfbar'))return;
+ const keys=['default','gent','ynr'].concat(Object.keys(CSK).filter(k=>cxOwnsSk(k)||!BPLOC2['s:'+k]));const cards=Array.from(g.children);if(cards.length!==keys.length)return;
+ const rar=id=>(CSK[id]&&CSK[id].r)||'';const ord={Mythisch:0,Legendär:1,Episch:2,Selten:3};
+ const rs=[...new Set(Object.keys(CSK).map(rar).filter(Boolean))].sort((a,b)=>(ord[a]??9)-(ord[b]??9));
+ const bar=document.createElement('div');bar.id='spfbar';bar.style.cssText='margin:6px 0 10px';
+ bar.innerHTML='<input id="spq" placeholder="🔍 Skin suchen …" autocomplete="off" autocapitalize="off" spellcheck="false" value="'+esc(SPF.q)+'" style="width:100%;box-sizing:border-box;padding:10px 12px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px">'
+  +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"><button class="pill'+(SPF.r?'':' blue')+'" data-fr="">Alle</button>'+rs.map(r=>'<button class="pill'+(SPF.r===r?' blue':'')+'" data-fr="'+r+'">'+r+'</button>').join('')+'</div>'
+  +'<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center"><span class="dim" style="font-size:12px">Sortieren:</span>'+[['','Normal'],['hi','Seltenste zuerst'],['lo','Häufigste zuerst'],['az','A–Z']].map(s=>'<button class="pill'+(SPF.sort===s[0]?' blue':'')+'" data-fs="'+s[0]+'">'+s[1]+'</button>').join('')+'<button class="pill'+(SPF.own?' blue':'')+'" id="spown">Nur meine</button></div><div class="dim" id="spfn" style="font-size:12px;margin-top:6px"></div>';
+ g.parentNode.insertBefore(bar,g);
+ const apply=()=>{const q=SPF.q.trim().toLowerCase();let shown=0;const rows=cards.map((c,i)=>({c,id:keys[i],i}));
+  rows.forEach(o=>{const sk=CSK[o.id],ok=!c0(o.c),nm=sk?String(sk.n).toLowerCase():(o.id==='default'?'standard':o.id==='gent'?'der gentleman':'ynr');
+   let vis=true;if(SPF.r&&rar(o.id)!==SPF.r)vis=false;if(SPF.own&&!ok)vis=false;if(q&&!(ok&&nm.includes(q)))vis=false;o.c.style.display=vis?'':'none';if(vis)shown++});
+  let L=rows.slice();if(SPF.sort==='hi')L.sort((a,b)=>((ord[rar(a.id)]??9)-(ord[rar(b.id)]??9))||a.i-b.i);else if(SPF.sort==='lo')L.sort((a,b)=>((ord[rar(b.id)]??-1)-(ord[rar(a.id)]??-1))||a.i-b.i);else if(SPF.sort==='az')L.sort((a,b)=>String((CSK[a.id]||{}).n||a.id).localeCompare(String((CSK[b.id]||{}).n||b.id),'de'));else L.sort((a,b)=>a.i-b.i);
+  L.forEach(o=>g.appendChild(o.c));const f=document.getElementById('spfn');if(f)f.textContent=(q||SPF.r||SPF.own)?shown+' Skin'+(shown===1?'':'s')+' gefunden':''};
+ const c0=c=>c.classList.contains('lk');
+ document.getElementById('spq').oninput=e=>{SPF.q=e.target.value;apply()};
+ bar.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>{SPF.r=b.dataset.fr;bar.querySelectorAll('[data-fr]').forEach(x=>x.classList.toggle('blue',x===b));apply()});
+ bar.querySelectorAll('[data-fs]').forEach(b=>b.onclick=()=>{SPF.sort=b.dataset.fs;bar.querySelectorAll('[data-fs]').forEach(x=>x.classList.toggle('blue',x===b));apply()});
+ document.getElementById('spown').onclick=e=>{SPF.own=!SPF.own;e.target.classList.toggle('blue',SPF.own);apply()};apply()}catch(e){}}
+{const _s=spindUI;spindUI=function(back,tab){const r=_s.apply(this,arguments);try{if(SPTAB==='skins')spFilterUI()}catch(e){}return r}}
+/* ---- Admin: alles schenken / alles löschen (über den Posteingang des Spielers) ---- */
+function trClean(a){if(!Array.isArray(a)||a.length>80)return [];const o=[];a.forEach(x=>{if(!x)return;if(x.k==='c'){const n=Math.floor(+x.n);if(n>=1&&n<=1e9)o.push({k:'c',n})}else if(x.k==='e'&&PETEGG[x.id]){const n=Math.floor(+x.n||1);if(n>=1&&n<=99)o.push({k:'e',id:x.id,n})}else if(x.k==='p'&&petById(x.id))o.push({k:'p',id:x.id});else if(x.k==='s'&&trSkinOk(x.id))o.push({k:'s',id:x.id});else if(x.k==='a'&&CXCARS.some(c=>c.id===x.id&&c.id!=='c0'))o.push({k:'a',id:x.id})});return o}
+{const _t=trTxt;trTxt=function(it){if(it&&it.k==='a'){const c=CXCARS.find(x=>x.id===it.id);return '🚗 '+(c?String(c.n).replace(/^.*– /,''):it.id)}return _t.apply(this,arguments)}}
+{const _g=trGive;trGive=function(a){const rest=[];a.forEach(i=>{if(i.k==='a'){try{const x=cxShop();if(!x.cars.includes(i.id)){x.cars.push(i.id);cxWrite('dfShop',x)}}catch(e){}}else rest.push(i)});return _g.call(this,rest)}}
+function trWipe(){try{const x=cxShop();x.skins=[];x.cars=[];cxWrite('dfShop',x)}catch(e){}try{['mask','gent'].forEach(id=>cxTakeSkin(id))}catch(e){}try{cxWrite('dfPets',{o:[],cur:'',e:{}});petFxCalc()}catch(e){}
+ try{if(cxCoins()!==Infinity)cxSet(0)}catch(e){}try{applySkin('default')}catch(e){}try{accSave(true)}catch(e){}}
+async function trInbox(){if(trBusy||!accReady())return 0;const nm=trMe();if(nm.length<2)return 0;trBusy=true;try{const r=await opsPost({a:'tinbox',name:nm});if(!r||!r.ok)return 0;const done=cxRead('dfTrDone',[]),dn=Array.isArray(done)?done:[];const ack=[];let n=0;
+ (r.list||[]).forEach(x=>{if(!x||!x.nid)return;ack.push(x.nid);if(dn.includes(x.nid))return;dn.push(x.nid);n++;
+  if(x.k==='wipe'){trWipe();try{toast('🗑 Der Admin hat deine Skins, Pets, Eier, Autos und Münzen gelöscht.','err')}catch(e){}return}
+  const it=trClean(x.items);trGive(it);const w=x.w?esc(String(x.w)):'';
+  try{toast(x.k==='adm'?'🎁 Geschenk vom Admin: '+(it.length>4?it.length+' Gegenstände':it.map(trTxt).join(', ')):x.k==='done'?'🔄 Trade mit '+w+' abgeschlossen: '+it.map(trTxt).join(', '):x.k==='decl'?'↩ Dein Angebot bei '+w+' wurde nicht angenommen. Gegenstände zurück: '+it.map(trTxt).join(', '):'↩ Trade zurückgezogen. Gegenstände zurück: '+it.map(trTxt).join(', '),x.k==='wipe'?'err':'good')}catch(e){}});
+ if(n){cxWrite('dfTrDone',dn.slice(-300))}if(ack.length)await opsPost({a:'tack',name:nm,ids:ack});return n}catch(e){return 0}finally{trBusy=false}}
+{const _h=cxAdminHTML;cxAdminHTML=function(o){const h=_h.apply(this,arguments);if(o)return h;
+ return h+'<div class="cap" style="margin-top:14px">🛠 Spieler verwalten (Name oben bei „Alle Skins verschenken“ eingeben)</div><div class="grp" style="padding:10px"><input id="amcoin" inputmode="numeric" placeholder="Münzen (z. B. 1000000)" style="width:100%;box-sizing:border-box;padding:9px;border-radius:10px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:14px"></div>'
+ +'<div class="grp" style="margin-top:6px"><button class="row" id="amall"><span class="tx"><b>🎁 Alles schenken</b><small>Alle Skins, Pets, Autos, je 5 Eier jeder Seltenheit und die Münzen</small></span></button><button class="row" id="ampet"><span class="tx"><b>🐾 Alle Pets schenken</b></span></button><button class="row" id="amegg"><span class="tx"><b>🥚 Je 5 Eier schenken</b></span></button><button class="row" id="amcar"><span class="tx"><b>🚗 Alle Autos schenken</b></span></button><button class="row" id="amcoin2"><span class="tx"><b>🪙 Nur Münzen schenken</b></span></button>'
+ +'<button class="row" id="amwipe"><span class="tx"><b style="color:#ff453a">🗑 Alles löschen</b><small>Löscht beim Spieler alle Skins, Pets, Eier, Autos und Münzen (zweimal tippen)</small></span></button></div><div class="foot" id="amm" style="min-height:16px"></div>'}}
+{const _b=cxAdminBind;cxAdminBind=function(online){_b.apply(this,arguments);if(online)return;const g=i=>document.getElementById(i),m=t=>{const e=g('amm');if(e)e.textContent=t};if(!g('amall'))return;let armed='';
+ const items=what=>{const o=[];if(what.pets)PETS.forEach(p=>o.push({k:'p',id:p.id}));if(what.eggs)PETR.forEach(r=>o.push({k:'e',id:r,n:5}));if(what.cars)CXCARS.forEach(c=>{if(c.id!=='c0')o.push({k:'a',id:c.id})});
+  const n=Math.floor(+((g('amcoin')||{}).value||0));if(what.coins&&n>0)o.push({k:'c',n:Math.min(n,1e9)});return o};
+ const to=()=>cxClean((g('gfan')||{}).value);
+ const send=async(btn,what,skins)=>{const t=to();if(t.length<2)return m('Bitte oben den Namen des Spielers eingeben.');m('Sende …');let okk=true;
+  if(skins){const r=await opsPost({a:'gift',key:CXRECK,to:t,from:cxClean(myName())||'Admin',skin:'*'});if(!(r&&r.ok)){m(r&&r.error==='auth'?'Admin-Schlüssel stimmt nicht.':r&&r.error==='noname'?'Diesen Spieler gibt es nicht (Name muss genau stimmen).':'Das hat nicht geklappt (ops.js aktuell?).');return}}
+  const it=items(what);if(it.length){const r=await opsPost({a:'tadmin',key:CXRECK,to:t,items:it});okk=!!(r&&r.ok);if(!okk){m(r&&r.error==='auth'?'Admin-Schlüssel stimmt nicht.':r&&r.error==='noname'?'Diesen Spieler gibt es nicht (Name muss genau stimmen).':'Das hat nicht geklappt. Läuft die Zentrale mit der neuesten ops.js?');return}}
+  m('✅ '+t+' bekommt es innerhalb von etwa 30 Sekunden (sobald das Spiel offen ist).')};
+ g('amall').onclick=()=>send('amall',{pets:1,eggs:1,cars:1,coins:1},true);g('ampet').onclick=()=>send('ampet',{pets:1});g('amegg').onclick=()=>send('amegg',{eggs:1});g('amcar').onclick=()=>send('amcar',{cars:1});
+ g('amcoin2').onclick=()=>{if(!(+((g('amcoin')||{}).value)>0))return m('Bitte oben die Münzen-Anzahl eingeben.');send('amcoin2',{coins:1})};
+ g('amwipe').onclick=async()=>{const t=to();if(t.length<2)return m('Bitte oben den Namen des Spielers eingeben.');if(armed!=='w'){armed='w';m('Nochmal tippen, um bei „'+t+'“ ALLES zu löschen.');setTimeout(()=>{if(armed==='w')armed=''},6000);return}armed='';m('Sende …');
+  const r=await opsPost({a:'tadmin',key:CXRECK,to:t,wipe:1});if(r&&r.ok)m('✅ '+t+' verliert alles innerhalb von etwa 30 Sekunden (sobald das Spiel offen ist).');else m(r&&r.error==='auth'?'Admin-Schlüssel stimmt nicht.':r&&r.error==='noname'?'Diesen Spieler gibt es nicht (Name muss genau stimmen).':'Das hat nicht geklappt. Läuft die Zentrale mit der neuesten ops.js?')}}}
 
 menuStart();
 requestAnimationFrame(frame);

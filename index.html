@@ -5837,6 +5837,15 @@ sgApply();
 {const _p=pauseUI;pauseUI=function(p2){const r=_p.apply(this,arguments);try{const a=document.getElementById('vwrow')||document.getElementById('pfauto');if(a&&!document.getElementById('sgrow')){const g=a.closest('.grp')||a.parentNode;g.insertAdjacentHTML('afterend','<div class="grp" style="margin-top:10px"><button class="row" id="sgrow"><span class="tx"><b>🌟 Weiche Grafik</b><small>Abgerundete Kanten, filmischer Look · aus = eckig wie vorher</small></span><i class="sw'+(SG.on?' on':'')+'"></i></button></div>');
  document.getElementById('sgrow').onclick=()=>{sgSet(!SG.on);const sw=document.querySelector('#sgrow .sw');if(sw)sw.classList.toggle('on',SG.on)}}}catch(e){}return r}}
 
+/* ===== Block 150: Inventar wieder ganz oben ===== */
+{const st=document.createElement('style');st.id='invtop';
+st.textContent='body #inv,body.fpson1 #inv,body.fpson2 #inv,body.phone #inv,body.phone.fpson1 #inv,body.phone.fpson2 #inv{top:calc(env(safe-area-inset-top,0px) + 10px)!important}'
++'body.phone #inv,body.phone.fpson1 #inv,body.phone.fpson2 #inv{top:calc(env(safe-area-inset-top,0px) + 6px)!important}'
++'@media (orientation:landscape){body.fpson1 #inv,body.fpson2 #inv,body.phone.fpson1 #inv,body.phone.fpson2 #inv{top:calc(env(safe-area-inset-top,0px) + 6px)!important}}'
++'body.fpson1 #fps,body.fpson2 #fps{top:calc(env(safe-area-inset-top,0px) + 112px)!important}'
++'body.fpson1 #fpsd,body.fpson2 #fpsd{top:calc(env(safe-area-inset-top,0px) + 172px)!important}';
+document.head.appendChild(st)}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

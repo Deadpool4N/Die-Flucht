@@ -5813,6 +5813,30 @@ function stripLogHtml(){const L=stripLog().slice(-8).reverse();return '<div clas
   try{toast('🧹 Skins von '+b.to+' werden entfernt ('+(b.mode==='all'?'alle':'geschenkte')+')','good')}catch(e){}const e=document.getElementById('gflog');if(e){const w=document.createElement('div');w.innerHTML=stripLogHtml();e.parentNode.replaceChild(w.querySelector('#gflog'),e)}}}catch(e){}return r}}
 {const _c=cxStripCard;cxStripCard=function(){return _c.apply(this,arguments)+stripLogHtml()}}
 
+/* ===== Weiche Grafik: abgerundete Kanten + filmischer Look (realistischer), umschaltbar ===== */
+const SG={on:true};
+try{const v=localStorage.getItem('dfSoft');SG.on=v!=='0'}catch(e){}
+function sgBend(pos,nor,w,h,d,r){const hx=w/2,hy=h/2,hz=d/2;for(let i=0;i<pos.length;i+=3){const x=pos[i],y=pos[i+1],z=pos[i+2];
+  const ix=Math.max(-hx+r,Math.min(hx-r,x)),iy=Math.max(-hy+r,Math.min(hy-r,y)),iz=Math.max(-hz+r,Math.min(hz-r,z));
+  let dx=x-ix,dy=y-iy,dz=z-iz;const l=Math.hypot(dx,dy,dz);if(l>1e-6){dx/=l;dy/=l;dz/=l;pos[i]=ix+dx*r;pos[i+1]=iy+dy*r;pos[i+2]=iz+dz*r;nor[i]=dx;nor[i+1]=dy;nor[i+2]=dz}}}
+const SGC=new Map(),_BG=THREE.BoxGeometry;
+function sgGeo(w,h,d){const m=Math.min(w,h,d);if(!(m>.03))return null;const k=[w,h,d].map(v=>v.toFixed(3)).join('_');let g=SGC.get(k);if(g)return g;
+ const r=Math.min(.07,m*.34);g=new _BG(w,h,d,2,2,2);const p=g.attributes.position,n=g.attributes.normal;sgBend(p.array,n.array,w,h,d,r);p.needsUpdate=true;n.needsUpdate=true;g.computeBoundingSphere();g.computeBoundingBox();g.userData.sg=1;SGC.set(k,g);return g}
+function sgScene(){try{sc.traverse(o=>{if(!o.isMesh||!o.geometry)return;const g=o.geometry;
+  if(SG.on){if(g.type==='BoxGeometry'&&g.parameters&&!g.userData.sg&&!o.userData.sg0){const p=g.parameters,ng=sgGeo(p.width,p.height,p.depth);if(ng){o.userData.sg0=g;o.geometry=ng}}}
+  else if(o.userData.sg0){o.geometry=o.userData.sg0;delete o.userData.sg0}})}catch(e){}}
+function sgLook(){try{R.toneMapping=SG.on?THREE.ACESFilmicToneMapping:THREE.NoToneMapping;R.toneMappingExposure=SG.on?1.25:1;
+ sc.traverse(o=>{if(o.isMesh&&o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>m.needsUpdate=true)}});
+ R.domElement.style.filter=SG.on?'contrast(1.05) saturate(1.06)':''}catch(e){}}
+function sgApply(){sgScene();sgLook()}
+function sgSet(v){SG.on=!!v;try{localStorage.setItem('dfSoft',v?'1':'0')}catch(e){}sgApply()}
+/* neue Boxen ebenfalls abrunden */
+{const _b=box;box=function(w,h,d,x,y,z,m,p){const o=_b.apply(this,arguments);try{if(SG.on&&o.geometry&&o.geometry.type==='BoxGeometry'&&!o.userData.sg0){const ng=sgGeo(w,h,d);if(ng){o.userData.sg0=o.geometry;o.geometry=ng}}}catch(e){}return o}}
+sgApply();
+{let n=0;setInterval(()=>{try{let c=0;sc.traverse(()=>c++);if(c!==n){n=c;sgScene()}}catch(e){}},4000)}
+{const _p=pauseUI;pauseUI=function(p2){const r=_p.apply(this,arguments);try{const a=document.getElementById('vwrow')||document.getElementById('pfauto');if(a&&!document.getElementById('sgrow')){const g=a.closest('.grp')||a.parentNode;g.insertAdjacentHTML('afterend','<div class="grp" style="margin-top:10px"><button class="row" id="sgrow"><span class="tx"><b>🌟 Weiche Grafik</b><small>Abgerundete Kanten, filmischer Look · aus = eckig wie vorher</small></span><i class="sw'+(SG.on?' on':'')+'"></i></button></div>');
+ document.getElementById('sgrow').onclick=()=>{sgSet(!SG.on);const sw=document.querySelector('#sgrow .sw');if(sw)sw.classList.toggle('on',SG.on)}}}catch(e){}return r}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

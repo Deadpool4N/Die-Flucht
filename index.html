@@ -2750,7 +2750,7 @@ const _lfRooms=lampFix;lampFix=function(){RM.forEach((r,i)=>{if(r&&r.g)r.g.visib
 
 
 /* ===================== Zentrale: Statistik, Bug-Meldungen, Admin-Zentrale ===================== */
-const DFBUILD='16.11.2026';
+const DFBUILD='20.11.2026';
 const OPS={url:'/api/ops',sid:(()=>{let v='';try{v=sessionStorage.getItem('dfSid')||''}catch(e){}if(!v){try{v=crypto.randomUUID()}catch(e){v='s'+Math.random().toString(36).slice(2)+Date.now().toString(36)}try{sessionStorage.setItem('dfSid',v)}catch(e){}}return v})(),on:location.protocol!=='file:',fail:0};
 const opsMode=()=>MP.on?'mp':P2?'p2':(ovOn?'menu':'solo');
 async function opsPost(b,keep){if(!OPS.on)return null;try{const r=await fetch(OPS.url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(Object.assign({sid:OPS.sid},b)),keepalive:!!keep});if(r.status===401||r.status===403)return {error:'auth'};if(r.status===429)return {error:'limit'};if(r.status===404||r.status===400){const c0=r.headers&&r.headers.get?(r.headers.get('content-type')||''):'';if(/json/.test(c0)){try{const j=await r.json();if(j&&j.error){OPS.fail=0;return j}}catch(e){}}}if(!r.ok){OPS.last={status:r.status};throw new Error('http '+r.status)}const ct=r.headers&&r.headers.get?(r.headers.get('content-type')||''):'json';if(!/json/.test(ct)){OPS.last={status:r.status,html:true};throw new Error('keine JSON-Antwort')}OPS.fail=0;OPS.last=null;return await r.json()}catch(e){if(!OPS.last)OPS.last={net:String(e&&e.message||e).slice(0,80)};OPS.fail++;if(OPS.fail>=4)OPS.on=false;return null}}
@@ -2798,7 +2798,7 @@ async function rptSend(){const ta=$('rptt'),m=$('rpm'),text=ta.value.trim();
  const cp=$('rptcp');if(cp)cp.onclick=async()=>{const t='Fehler in „Die Flucht 3D“: '+text+'\n'+Object.entries(ctx).map(([k,v])=>k+': '+v).join('\n');try{await navigator.clipboard.writeText(t);m.style.color='#30d158';m.textContent='Kopiert. Schicke den Text direkt weiter.'}catch(e){m.textContent='Kopieren nicht möglich.'}}}
 /* Zeile „Fehler melden“ unten in Menüs anhängen (nur nach dem Spiel) */
 function rptAppend(back){RPT.backFn=back;const box=$('box');if(!box||(box.querySelector&&box.querySelector('#rptopen')))return;const root=(box.querySelector&&box.querySelector('.ios'))||box;
- root.insertAdjacentHTML('beforeend','<div class="grp" style="margin-top:12px"><button class="row" id="rptopen"><span class="ic" style="background:#ff9f0a">🐞</span><span class="tx"><b>Fehler melden</b><small>Bug, durchlaufbare Wand, Ruckeln oder Idee</small></span><i class="chev">›</i></button></div><p class="foot" style="text-align:center;margin:10px 0 0">Moon Games · Update vom '+cxUpdText()+'</p>'+cxAaronHtml())}
+ root.insertAdjacentHTML('beforeend','<div class="grp" style="margin-top:12px"><button class="row" id="rptopen"><span class="ic" style="background:#ff9f0a">🐞</span><span class="tx"><b>Fehler melden</b><small>Bug, durchlaufbare Wand, Ruckeln oder Idee</small></span><i class="chev">›</i></button></div><p class="foot" style="text-align:center;margin:10px 0 0">Moon Games · <b>Alessandro Update</b> · '+cxUpdText()+'</p>'+cxAaronHtml())}
 {const _ms=menuStart;menuStart=function(){const r=_ms.apply(this,arguments);try{if(accReady())rptAppend(menuStart)}catch(e){}return r};
  const _me=mpEndUI;mpEndUI=function(m){const r=_me.apply(this,arguments);try{if(MP.ph==='end'&&MP.ended)rptAppend(()=>mpEndUI(MP.ended))}catch(e){}return r}}
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('#rptopen');if(b){e.preventDefault();rptMenu(RPT.backFn||menuStart)}},true);

@@ -738,7 +738,7 @@ function frame(now){requestAnimationFrame(frame);if(perfSkip(now))return;const d
  spin.forEach(g=>{g.rotation.y+=dt*1.6;g.position.y=g.userData.y0+Math.sin(t*2.5)*.05});
  if(!(busy||ovOn||lm||S.tied)){
   let f=-jz,r=jx;if(keys.KeyW||keys.ArrowUp)f++;if(keys.KeyS||keys.ArrowDown)f--;if(keys.KeyD||keys.ArrowRight)r++;if(keys.KeyA||keys.ArrowLeft)r--;if(keys.ShiftLeft||keys.ShiftRight){f*=.6;r*=.6}
-  const L=Math.hypot(f,r);if(L>.08){const n=Math.min(1,L)/L,sp=(L>.85?(CH.fast?6:4.2):(CH.fast?3.6:2.7))*dt*MPSPD*SNKF,dx=(-Math.sin(Y)*f+Math.cos(Y)*r)*n*sp,dz=(-Math.cos(Y)*f-Math.sin(Y)*r)*n*sp,cx=cr*20;
+  const L=Math.hypot(f,r);if(L>.08){const n=Math.min(1,L)/L,sp=(L>.85?(CH.fast?6:4.2):(CH.fast?3.6:2.7))*dt*MPSPD*SNKF*(typeof PETSPD==='number'?PETSPD:1),dx=(-Math.sin(Y)*f+Math.cos(Y)*r)*n*sp,dz=(-Math.cos(Y)*f-Math.sin(Y)*r)*n*sp,cx=cr*20;
    moveP(dx,dz);mvRun=L>.85?1:.25;bob+=dt*(L>.85?15:9)}}
  if(false){const f=0;$('bar')&&($('bar').style.width=Math.max(0,f*100)+'%');
   hunter.position.z=-3.4+(1-f)*3.6;hunter.position.x=Math.sin(t*5)*.08;hunter.rotation.z=Math.sin(t*6)*.05;if(f<=0)caught('Zu langsam!')}
@@ -2228,7 +2228,7 @@ function mpLobbyUI(){const L=MP.lobby;if(!L||MP.on)return;const ps=L.ps,code=MP.
  +'<div class="cap" style="text-align:center">Gruppen-Code</div><div style="text-align:center;font:800 40px ui-monospace,Menlo,monospace;letter-spacing:.18em;margin:2px 0 6px">'+mpE(code)+'</div><div style="text-align:center"><button class="pill" id="mpcp">Code kopieren</button></div>'
  +'<div class="cap">Dein Name</div><div class="grp"><div class="row"><input id="mpnn" maxlength="14" placeholder="Name" value="'+mpE((ps.find(p=>p.id===MP.myId)||{}).name||MP.name)+'" autocomplete="off"><button class="pill blue" id="mpns">Ändern</button></div></div><div id="mpnm" class="foot">Beleidigungen werden mit # zensiert.</div>'
  +'<div class="cap">Schwierigkeit</div>'+(MP.isHost?segH('data-md',MPDL.map(k=>[k,MPD[k].n]),df):'<div class="grp"><div class="row"><span class="tx"><b>'+D.n+'</b></span></div></div>')+'<div class="foot">Punkteziel: <b>'+D.pts+' Punkte</b> · Jäger '+D.hh+' Leben · Zeit '+Math.round(D.tm/60)+' Min.'+(MP.isHost?'':' (Host wählt)')+'</div>'
- +'<div class="cap">Spieler ('+ps.length+'/10)</div><div class="grp">'+ps.map(p=>'<div class="row"><span class="ic" style="background:'+MPM.CLR[p.ci%10]+'">'+(p.host?'★':'•')+'</span><span class="tx"><b>'+(p.sm?'📺 ':'')+(({mask:'🎭 ',gent:'🎩 ',ynr:'😎 '})[p.sk||'']||((CSK[p.sk]||{}).ic?CSK[p.sk].ic+' ':''))+mpE(p.name)+(p.id===MP.myId?' (du)':'')+'</b><small>'+(p.host?'Host':'bereit')+(p.sm?' · <span data-str>'+mpStrTxt()+'</span>':'')+'</small></span></div>').join('')+'</div>'
+ +'<div class="cap">Spieler ('+ps.length+'/10)</div><div class="grp">'+ps.map(p=>'<div class="row"><span class="ic" style="background:'+MPM.CLR[p.ci%10]+'">'+(p.host?'★':'•')+'</span><span class="tx"><b>'+(p.sm?'📺 ':'')+(({mask:'🎭 ',gent:'🎩 ',ynr:'😎 '})[p.sk||'']||((CSK[p.sk]||{}).ic?CSK[p.sk].ic+' ':''))+mpE(p.name)+(p.id===MP.myId?' (du)':'')+'</b><small>'+(p.host?'Host':'bereit')+(p.sm?' · <span data-str>'+mpStrTxt()+'</span>':'')+'</small></span>'+(p.id!==MP.myId?'<button class="trb" data-tr="'+p.id+'">🔄 Trade</button>':'')+'</div>').join('')+'</div>'
  +(MP.isHost?'<div style="margin-top:14px"><button class="pill blue" id="mpgo" style="width:100%;padding:14px">Spiel starten</button></div><div class="foot">'+(ps.length<2?(CHEATS?'Solo-Test möglich (Cheat): kein Jäger.':'Mindestens 2 Spieler nötig.'):'Ein zufälliger Spieler wird der Jäger.')+'</div>':'<div class="foot" style="margin-top:14px">Warte, bis der Host das Spiel startet …</div>')+'</div>');
  if(MP.isHost)bindSeg('data-md',v=>MP.host.setDiff(v));
  const rn=()=>{const v=$('mpnn').value.trim();if(!v)return;if(isStr()){$('mpnm').textContent='Der Streamer-Name ist festgelegt.';$('mpnm').style.color='#ff9f0a';return}
@@ -2260,7 +2260,7 @@ function mpHud(){if(!MP.snap)return;const s=MP.snap,me=mpMe(),st=me?me[4]:'ok',m
  if(MP.hko>0)h+='<br><small style="color:#ff9f0a">😵 Jäger ausgeknockt: noch '+MP.hko+' s</small>';
  if(MP.role==='h'||true)h+='<div class="hb" title="Jäger"><s style="width:'+Math.max(0,Math.min(100,s.hh/(s.hm||MPM.HH)*100))+'%"></s></div><small>Jäger '+s.hh+' / '+(s.hm||MPM.HH)+'</small>';
  $('mph').innerHTML=h;
- $('mpl').innerHTML=s.ps.map(p=>{const i=p[0],c=MPM.CLR[(MP.cis[i]||0)%10],hp=p[10]?'🔫':(p[4]==='ok'?'❤'+p[5]:p[4]==='down'?'⬇':p[4]==='dead'?'✖':'🏃');return '<div class="r"><span class="dot" style="background:'+c+'"></span>'+mpE(MP.names[i]||i)+' '+hp+'</div>'}).join('');
+ $('mpl').innerHTML=s.ps.map(p=>{const i=p[0],c=MPM.CLR[(MP.cis[i]||0)%10],hp=p[10]?'🔫':(p[4]==='ok'?'❤'+p[5]:p[4]==='down'?'⬇':p[4]==='dead'?'✖':'🏃');return '<div class="r"><span class="dot" style="background:'+c+'"></span>'+mpE(MP.names[i]||i)+' '+hp+(i!==MP.myId?' <button class="trb" data-tr="'+i+'">🔄</button>':'')+'</div>'}).join('');
  if(MP.role==='p'){const inv=MP.me.inv||[];let ib='';for(let k=0;k<3;k++){const t=inv[k];ib+=t?'<button data-u="'+k+'"><b>'+MPEM[t]+'</b>'+(k+1)+' '+(MPM.AC[t]||MPM.NM[t])+'</button>':'<button class="e"><b>·</b>leer</button>'}$('mpi').innerHTML=ib;$('mpi').querySelectorAll('[data-u]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();mpSend({t:'use',s:+b.dataset.u})})}else $('mpi').innerHTML='<button class="e"><b>🔫</b>'+MP.me.sh+' Schuss'+(MP.me.rl?' (lädt)':'')+'</button>';
  const now=performance.now();MP.log=MP.log.filter(l=>now-l.at<7000);$('mpc').innerHTML=MP.log.slice(-5).map(l=>'<div'+(l.ci!==undefined?' style="border-left:3px solid '+MPM.CLR[l.ci%10]+'"':'')+'>'+mpE(l.t)+'</div>').join('');
  const rv=s.ps.find(p=>p[9]>0&&p[4]==='down');if(rv){const mine=rv[0]===MP.myId;$('mprev').style.display='block';$('mprev').innerHTML=(mine?'Du wirst wiederbelebt …':'Wiederbeleben: '+mpE(MP.names[rv[0]]||''))+'<div><s style="width:'+Math.round(rv[9]*100)+'%"></s></div>'}else $('mprev').style.display='none';
@@ -5376,7 +5376,7 @@ function bpApply(){try{const e=bpEq(),w=BPW[e.w];
    g.position.set(.06,1.0,-.3);g.rotation.z=.75;av.add(g);BPPX=g}}catch(e){}}
 setTimeout(bpApply,1500);
 /* ---- Beschreibung der Belohnungen ---- */
-const bpItem=r=>r[0]==='c'?'🪙 '+r[1].toLocaleString('de-DE'):r[0]==='w'?'🔫 '+BPW[r[1]].n:r[0]==='p'?'⛏️ '+BPP[r[1]].n:r[0]==='a'?'🚗 '+((CXCARS.find(c=>c.id===r[1])||{}).n||'Auto').replace(/^.*– /,''):(CSK[r[1]]?CSK[r[1]].ic+' '+CSK[r[1]].n:r[1]);
+const bpItem=r=>r[0]==='e'?'🥚 '+r[1]+'es Ei':r[0]==='c'?'🪙 '+r[1].toLocaleString('de-DE'):r[0]==='w'?'🔫 '+BPW[r[1]].n:r[0]==='p'?'⛏️ '+BPP[r[1]].n:r[0]==='a'?'🚗 '+((CXCARS.find(c=>c.id===r[1])||{}).n||'Auto').replace(/^.*– /,''):(CSK[r[1]]?CSK[r[1]].ic+' '+CSK[r[1]].n:r[1]);
 const bpDesc=its=>its.length?its.map(r=>esc(bpItem(r))).join('<br>'):'–';
 /* ---- Menü ---- */
 function bpMenu(fromBar){const s=bpS(),lv=bpLevel(),coins=cxCoins(),pend=bpPend(),menu=!!($('box')&&$('box').querySelector&&$('box').querySelector('#shopopen'));
@@ -5873,6 +5873,265 @@ setInterval(()=>{try{if(!document.hidden)cxGiftPoll()}catch(e){}},12000);
 
 /* ===== Block 153: dfSkinY (geheimer Skin) gehört zum Account ===== */
 try{if(ACCK.indexOf('dfSkinY')<0)ACCK.push('dfSkinY')}catch(e){}
+
+/* ===== Block 154: Pass-Level kaufen (500 🪙) · „Aaron Gyat Shader“-Knopf ganz unten ===== */
+const BPLV=500;
+function bpBuyLevel(){const s=bpS();if(Math.floor(s.xp/BP.XP)>=BP.N)return 'max';const c=cxCoins();if(c!==Infinity&&c<BPLV)return 'coins';
+ if(c!==Infinity)cxSet(c-BPLV);s.xp=Math.min(BP.N*BP.XP,s.xp+BP.XP);cxWrite('dfBP2',s);try{accSave(true)}catch(e){}return 'ok'}
+{const _bm=bpMenu;bpMenu=function(fromBar){const r=_bm.apply(this,arguments);
+ try{const ios=document.querySelector('#box .ios')||document.querySelector('.ios');const g=ios&&ios.querySelector('.grp');if(!g||document.getElementById('bplv'))return r;
+  const lv=bpLevel(),max=lv>=BP.N;const d=document.createElement('div');d.className='grp';d.style.marginTop='10px';
+  d.innerHTML='<button class="row" id="bplv"'+(max?' disabled':'')+'><span class="ic" style="background:#30d158;color:#000">⬆️</span><span class="tx"><b>'+(max?'Maximales Level erreicht':'Level kaufen')+'</b><small>'+(max?'Du bist auf Level '+BP.N:'1 Level für '+BPLV+' 🪙 · Level '+(lv+1))+'</small></span></button>';
+  g.parentNode.insertBefore(d,g.nextSibling);
+  const b=document.getElementById('bplv');if(b&&!max)b.onclick=()=>{if(b.dataset.s!=='1'){b.dataset.s='1';b.querySelector('b').textContent='Nochmal tippen: '+BPLV+' 🪙 ausgeben';setTimeout(()=>{try{if(b.dataset.s==='1'){b.dataset.s='';b.querySelector('b').textContent='Level kaufen'}}catch(e){}},5000);return}
+   const x=bpBuyLevel();if(x==='ok'){toast('⬆️ Level gekauft! Jetzt Level '+bpLevel(),'good');bpMenu(fromBar)}else if(x==='coins'){b.dataset.s='';b.querySelector('b').textContent='Level kaufen';toast('Dir fehlen noch Coins.','err')}}}catch(e){}
+ return r}}
+/* Aaron Gyat Shader: dein Skin bekommt ein rundes, voluminöses Hinterteil (nur bei dir sichtbar) */
+const GY={on:false};try{GY.on=localStorage.getItem('dfGyat')==='1'}catch(e){}
+try{if(ACCK.indexOf('dfGyat')<0)ACCK.push('dfGyat')}catch(e){}
+function gyatBuild(){const g=new THREE.Group();g.name='gyat';
+ [-1,1].forEach(sx=>{box(.25,.3,.24,sx*.125,.74,-.2,AM.pa,g);box(.21,.2,.2,sx*.125,.62,-.24,AM.pa,g);box(.2,.14,.12,sx*.125,.88,-.17,AM.pa,g)});
+ return g}
+function gyatSync(){try{if(!av)return;let g=av.children.find(c=>c.name==='gyat');if(!g&&GY.on){g=gyatBuild();av.add(g)}if(g)g.visible=!!GY.on}catch(e){}}
+setInterval(gyatSync,400);
+function gyatSet(v){GY.on=!!v;try{localStorage.setItem('dfGyat',v?'1':'0')}catch(e){}try{accSave(true)}catch(e){}gyatSync()}
+function gyatAppend(){try{const box=document.getElementById('box');if(!box||!box.querySelector('#rptopen')||box.querySelector('#gyatb'))return;const rp=box.querySelector('#rptopen').parentNode;
+ const d=document.createElement('div');d.className='grp';d.style.marginTop='10px';
+ d.innerHTML='<button class="row" id="gyatb"><span class="ic" style="background:#bf5af2">🍑</span><span class="tx"><b>Aaron Gyat Shader</b><small id="gyats"></small></span><i class="sw'+(GY.on?' on':'')+'" id="gyatsw"></i></button>';
+ rp.parentNode.insertBefore(d,rp.nextSibling);const st=()=>{const s=document.getElementById('gyats'),w=document.getElementById('gyatsw');if(s)s.textContent=GY.on?'An – dein Skin hat ein voluminöses Gesäß':'Aus';if(w)w.classList.toggle('on',GY.on)};st();
+ document.getElementById('gyatb').onclick=()=>{gyatSet(!GY.on);st();try{toast(GY.on?'🍑 Aaron Gyat Shader an':'Aaron Gyat Shader aus','good')}catch(e){}}}catch(e){}}
+{const _ra=rptAppend;rptAppend=function(){const r=_ra.apply(this,arguments);gyatAppend();return r}}
+
+/* ===== Block 155: PETS – Eier (Kisten · Shop · Pass), Ausbrüten, Pets mit Fähigkeiten, Begleiter-Figur, Admin ===== */
+var PETSPD=1;
+const PETR=['Selten','Episch','Legendär','Mythisch'],PETRC={Selten:'#4da3ff',Episch:'#b86bff',Legendär:'#ffb020',Mythisch:'#ff453a'};
+const PETEGG={Selten:2500,Episch:6000,Legendär:15000,Mythisch:40000};
+const PETS=[
+ {id:'hund',n:'Hund',ic:'🐕',r:'Selten',a:'Schneller Freund',fx:{spd:.08},c:[0xb07a3a,0x7a4a1a],t:['ears','tail']},
+ {id:'fled',n:'Fledermaus',ic:'🦇',r:'Selten',a:'Münzspürer',fx:{coin:.10},c:[0x2a2a34,0x4a3a5a],t:['wings','ears','fly']},
+ {id:'katze',n:'Katze',ic:'🐈',r:'Selten',a:'Neun Leben',fx:{xp:.10},c:[0x9a9aa4,0x6a6a74],t:['ears','tail']},
+ {id:'ratte',n:'Ratte',ic:'🐀',r:'Selten',a:'Eierschnüffler',fx:{egg:.12,coin:.04},c:[0x7a6a5a,0xd8a0a0],t:['ears','tail']},
+ {id:'gob',n:'Goblin',ic:'👺',r:'Episch',a:'Goldgier',fx:{coin:.20},c:[0x4a9a3a,0x2a6a1a],t:['pointy']},
+ {id:'eule',n:'Eule',ic:'🦉',r:'Episch',a:'Weisheit',fx:{xp:.20},c:[0x8a6a3a,0xd8c8a0],t:['wings','ears','fly']},
+ {id:'fuchs',n:'Fuchs',ic:'🦊',r:'Episch',a:'Flinke Pfoten',fx:{spd:.12},c:[0xe07a1a,0xf5e8d0],t:['ears','tail']},
+ {id:'wolf',n:'Wolf',ic:'🐺',r:'Episch',a:'Rudelführer',fx:{spd:.10,coin:.08},c:[0x6a6e78,0x3a3e48],t:['ears','tail']},
+ {id:'phan',n:'Phantom',ic:'👻',r:'Legendär',a:'Geisterschritt',fx:{spd:.15,xp:.10},c:[0xe8eaff,0xb8bce8],t:['ghost']},
+ {id:'einh',n:'Einhorn',ic:'🦄',r:'Legendär',a:'Glücksbringer',fx:{coin:.30,egg:.10},c:[0xf4f0ff,0xff7ad8],t:['ears','tail','horn']},
+ {id:'skel',n:'Skelett-Hund',ic:'💀',r:'Legendär',a:'Knochenjäger',fx:{xp:.25,coin:.10},c:[0xe6e2d2,0xb8b4a0],t:['ears','tail']},
+ {id:'drac',n:'Drache',ic:'🐉',r:'Mythisch',a:'Drachenhort',fx:{spd:.20,coin:.30,xp:.25},c:[0xc8201a,0xff8a1a],t:['wings','horn','tail','fly']},
+ {id:'phoe',n:'Phönix',ic:'🔥',r:'Mythisch',a:'Wiedergeburt',fx:{spd:.25,xp:.30,egg:.10},c:[0xff7a1a,0xffd60a],t:['wings','tail','fly','glow']},
+ {id:'alien',n:'Alien',ic:'👽',r:'Mythisch',a:'Außerirdischer Reichtum',fx:{coin:.50,egg:.15},c:[0x5ad87a,0x1a6a3a],t:['pointy','fly','glow']}];
+const PETX={spd:'Lauftempo',coin:'Münzen',xp:'Pass-XP',egg:'Ei-Fundglück'};
+const petFxTxt=f=>Object.keys(f).map(k=>'+'+Math.round(f[k]*100)+' % '+PETX[k]).join(' · ');
+try{ACCK.push('dfPets')}catch(e){}
+const petD=()=>{const d=cxRead('dfPets',null);return (d&&typeof d==='object'&&Array.isArray(d.o))?d:{o:[],cur:'',e:{}}};
+const petSave=d=>{cxWrite('dfPets',d);try{accSave(true)}catch(e){}petFxCalc()};
+const petById=id=>PETS.find(p=>p.id===id);
+var PETFX={spd:0,coin:0,xp:0,egg:0};
+function petFxCalc(){const d=petD(),p=petById(d.cur);PETFX={spd:0,coin:0,xp:0,egg:0};if(p&&d.o.includes(p.id))Object.keys(p.fx).forEach(k=>PETFX[k]=p.fx[k]);PETSPD=1+PETFX.spd}
+function petEggAdd(r,n){const d=petD();d.e=d.e||{};d.e[r]=(d.e[r]||0)+(n||1);petSave(d)}
+function petGive(id){const d=petD();if(!petById(id)||d.o.includes(id))return false;d.o.push(id);if(!d.cur)d.cur=id;petSave(d);return true}
+function petEquip(id){const d=petD();if(id&&!d.o.includes(id))return;d.cur=id||'';petSave(d)}
+function petRoll(r){const up={Selten:['Selten','Selten','Selten','Selten','Selten','Selten','Selten','Selten','Episch'],Episch:['Episch','Episch','Episch','Episch','Episch','Episch','Episch','Legendär'],Legendär:['Legendär','Legendär','Legendär','Legendär','Legendär','Legendär','Legendär','Legendär','Legendär','Mythisch'],Mythisch:['Mythisch']}[r]||[r];
+ const rr=up[Math.floor(Math.random()*up.length)],L=PETS.filter(p=>p.r===rr),d=petD();let p=L[Math.floor(Math.random()*L.length)];if(d.o.includes(p.id)){const nw=L.filter(x=>!d.o.includes(x.id));if(nw.length&&Math.random()<.6)p=nw[Math.floor(Math.random()*nw.length)]}return p}
+function petHatch(r){const d=petD();if(!(d.e&&d.e[r]>0))return null;d.e[r]--;const p=petRoll(r),dup=d.o.includes(p.id);let coins=0;
+ if(dup){coins=Math.round(PETEGG[p.r]*.4);try{if(cxCoins()!==Infinity)cxSet(cxCoins()+coins)}catch(e){}}else{d.o.push(p.id);if(!d.cur)d.cur=p.id}petSave(d);return {p,dup,coins}}
+function petBuyEgg(r){const pr=PETEGG[r];if(!pr)return 'bad';const c=cxCoins();if(c!==Infinity&&c<pr)return 'coins';if(c!==Infinity)cxSet(c-pr);petEggAdd(r,1);return 'ok'}
+/* Vorteile im Spiel */
+{const _a=cxAdd;cxAdd=function(n){n=+n||0;if(n>0&&PETFX.coin)n=Math.round(n*(1+PETFX.coin));return _a.call(this,n)}}
+{const _x=bpXp;bpXp=function(n,why){n=+n||0;if(n>0&&PETFX.xp)n=Math.round(n*(1+PETFX.xp));return _x.call(this,n,why)}}
+/* Eier im Pass */
+{const F={10:'Selten',30:'Selten',50:'Episch',70:'Episch',90:'Legendär'},P={15:'Selten',25:'Episch',40:'Episch',55:'Legendär',65:'Episch',80:'Legendär',95:'Legendär',100:'Mythisch'};
+ Object.keys(F).forEach(L=>BPT[L].f.push(['e',F[L]]));Object.keys(P).forEach(L=>BPT[L].p.push(['e',P[L]]))}
+{const _c=bpClaim;bpClaim=function(levels){const s0=bpS(),f0=s0.fc.slice(),p0=s0.pc.slice();const r=_c.apply(this,arguments);
+ try{const s=bpS();let n=0;s.fc.forEach(L=>{if(!f0.includes(L)&&BPT[L])BPT[L].f.forEach(it=>{if(it[0]==='e'){petEggAdd(it[1],1);n++}})});s.pc.forEach(L=>{if(!p0.includes(L)&&BPT[L])BPT[L].p.forEach(it=>{if(it[0]==='e'){petEggAdd(it[1],1);n++}})});
+  if(n)toast('🥚 '+n+' Ei'+(n===1?'':'er')+' aus dem Pass!','good')}catch(e){}return r}}
+/* Eier aus Kisten (goldene Kisten im Online-Modus) */
+function petCrate(){const luck=PETFX.egg||0;if(Math.random()>.35+luck)return;const x=Math.random(),r=x<.68?'Selten':x<.9?'Episch':x<.98?'Legendär':'Mythisch';petEggAdd(r,1);try{toast('🥚 In der Kiste lag ein '+r+'es Ei!','good')}catch(e){}}
+{const _l=mpLog;mpLog=function(t,ci){const r=_l.apply(this,arguments);try{if(typeof t==='string'&&/^(✨|📦) Kiste \d/.test(t))petCrate()}catch(e){}return r}}
+/* ---- Menü ---- */
+{const st=document.createElement('style');st.textContent='@keyframes ptshake{0%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}100%{transform:rotate(-12deg)}}@keyframes ptpop{0%{transform:scale(.2)}70%{transform:scale(1.2)}100%{transform:scale(1)}}';document.head.appendChild(st)}
+const petCard=p=>'<b style="color:'+PETRC[p.r]+'">'+p.ic+' '+esc(p.n)+'</b> <span class="dim" style="font-size:12px">'+p.r+'</span><div style="font-size:13px;margin-top:2px">„'+esc(p.a)+'“: '+petFxTxt(p.fx)+'</div>';
+function petMenu(msg){const d=petD(),cur=petById(d.cur),coins=cxCoins();
+ let h='<div class="ios"><div class="navbar"><b>🐾 Pets</b><button class="pill" id="ptbk">Zurück</button></div>';
+ h+='<div class="grp" style="padding:14px"><div style="display:flex;justify-content:space-between"><b>Dein Begleiter</b><span class="dim">🪙 '+(coins===Infinity?'∞':coins.toLocaleString('de-DE'))+'</span></div><div style="margin-top:8px">'+(cur&&d.o.includes(cur.id)?petCard(cur):'<span class="dim">Noch kein Pet ausgerüstet. Brüte ein Ei aus!</span>')+'</div></div>';
+ h+='<div class="cap" style="margin-top:14px">🥚 Eier</div><div class="grp">'+PETR.map(r=>{const n=(d.e&&d.e[r])||0;return '<div class="row" style="align-items:center"><span class="tx"><b style="color:'+PETRC[r]+'">🥚 '+r+'es Ei</b><small>Du hast '+n+' · Preis '+PETEGG[r].toLocaleString('de-DE')+' 🪙</small></span><button class="pill" data-buy="'+r+'" style="flex:none;margin-right:6px">Kaufen</button><button class="pill blue" data-hat="'+r+'" style="flex:none"'+(n?'':' disabled')+'>Ausbrüten</button></div>'}).join('')+'</div>';
+ h+='<div class="foot">Eier gibt es hier im Shop, im Flucht-Pass (Belohnungen) und manchmal in goldenen Kisten im Online-Modus.</div>';
+ h+='<div class="cap" style="margin-top:14px">Sammlung ('+d.o.length+' / '+PETS.length+')</div><div class="grp">'+PETS.map(p=>{const own=d.o.includes(p.id);return '<div class="row" style="align-items:center;opacity:'+(own?1:.45)+'"><span class="tx">'+(own?petCard(p):'<b>❔ '+p.r+'es Pet</b><small>Noch nicht gefunden</small>')+'</span>'+(own?'<button class="pill'+(d.cur===p.id?' blue':'')+'" data-eq="'+p.id+'" style="flex:none">'+(d.cur===p.id?'Ausgerüstet':'Ausrüsten')+'</button>':'')+'</div>'}).join('')+'</div>';
+ h+='<p class="foot" id="ptm" style="min-height:18px">'+esc(msg||'')+'</p></div>';ov(h);
+ const q=i=>document.getElementById(i);q('ptbk').onclick=()=>menuStart();
+ document.querySelectorAll('[data-buy]').forEach(b=>{let arm=false;b.onclick=()=>{const r=b.dataset.buy;if(!arm){arm=true;b.textContent='Sicher?';setTimeout(()=>{arm=false;try{b.textContent='Kaufen'}catch(e){}},4000);return}const x=petBuyEgg(r);petMenu(x==='ok'?'🥚 '+r+'es Ei gekauft.':'Dir fehlen noch Coins.')}});
+ document.querySelectorAll('[data-hat]').forEach(b=>b.onclick=()=>petHatchUI(b.dataset.hat));
+ document.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>{petEquip(b.dataset.eq);petMenu('Ausgerüstet.')})}
+function petHatchUI(r){const d=petD();if(!(d.e&&d.e[r]>0))return petMenu('Du hast kein '+r+'es Ei.');
+ ov('<div class="ios" style="text-align:center;padding-top:60px"><div style="font-size:120px;animation:ptshake .45s infinite">🥚</div><p class="foot">Es schlüpft …</p></div>');
+ setTimeout(()=>{const x=petHatch(r);if(!x)return petMenu();const p=x.p;
+  ov('<div class="ios" style="text-align:center;padding-top:40px"><div style="font-size:110px;animation:ptpop .5s">'+p.ic+'</div><h2 style="color:'+PETRC[p.r]+';margin:6px 0">'+esc(p.n)+'</h2><div class="dim">'+p.r+'</div><div class="grp" style="padding:12px;margin-top:12px;text-align:left"><b>„'+esc(p.a)+'“</b><div style="margin-top:4px">'+petFxTxt(p.fx)+'</div></div><p class="foot">'+(x.dup?'Doppelt! Dafür gibt es '+x.coins.toLocaleString('de-DE')+' 🪙.':'✨ Neues Pet für deine Sammlung!')+'</p><button class="pill blue" id="pthx" style="width:100%;padding:13px">Weiter</button></div>');
+  try{sfx('good')}catch(e){}document.getElementById('pthx').onclick=()=>petMenu()},1700)}
+function petRow(){const d=petD(),cur=petById(d.cur),n=PETR.reduce((a,r)=>a+((d.e&&d.e[r])||0),0);
+ return '<div class="grp" style="margin-top:12px"><button class="row" id="ptopen"><span class="ic" style="background:#30d158;color:#000">🐾</span><span class="tx"><b>Pets</b><small>'+(cur&&d.o.includes(cur.id)?cur.ic+' '+esc(cur.n)+' · ':'')+d.o.length+'/'+PETS.length+' gesammelt'+(n?' · 🥚 '+n:'')+'</small></span><i class="chev">›</i></button></div>'}
+{const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);try{const box=$('box');const b=box&&box.querySelector&&box.querySelector('#bp2open');if(b&&!box.querySelector('#ptopen')){b.closest('.grp').insertAdjacentHTML('afterend',petRow());box.querySelector('#ptopen').onclick=()=>petMenu()}}catch(e){}return r}}
+{const _s=shopUI;shopUI=function(){const r=_s.apply(this,arguments);try{const ios=document.querySelector('#box .ios');if(ios&&!ios.querySelector('#ptshop')){const d=document.createElement('div');d.className='grp';d.style.marginTop='10px';d.innerHTML='<button class="row" id="ptshop"><span class="ic" style="background:#30d158;color:#000">🥚</span><span class="tx"><b>Pet-Eier</b><small>Eier kaufen und ausbrüten</small></span><i class="chev">›</i></button>';ios.insertBefore(d,ios.children[1]||null);d.querySelector('#ptshop').onclick=()=>petMenu()}}catch(e){}return r}}
+/* ---- Begleiter-Figur ---- */
+let PETM=null,PETMID='';
+function petBuild(p){const g=new THREE.Group(),c1=M(p.c[0],p.t.includes('glow')?p.c[1]:undefined),c2=M(p.c[1]),dk=M(0x111114),ghost=p.t.includes('ghost');
+ if(ghost){[c1,c2].forEach(m=>{m.transparent=true;m.opacity=.62})}
+ const body=new THREE.Group();g.add(body);body.userData.body=1;
+ box(.26,.2,.38,0,.26,0,c1,body);box(.22,.2,.2,0,.4,.22,c1,body);box(.12,.07,.08,0,.36,.34,c2,body);box(.04,.04,.03,-.06,.44,.33,dk,body);box(.04,.04,.03,.06,.44,.33,dk,body);
+ if(!ghost&&!p.t.includes('fly'))[[-.08,.16],[.08,.16],[-.08,-.16],[.08,-.16]].forEach(a=>box(.06,.14,.06,a[0],.07,a[1],c2,body));
+ if(p.t.includes('ears'))[-1,1].forEach(s=>box(.07,.11,.05,s*.07,.54,.2,c2,body));
+ if(p.t.includes('tail'))box(.05,.05,.22,0,.3,-.28,c2,body);
+ if(p.t.includes('horn'))box(.04,.12,.04,0,.57,.26,M(0xfff0b0,0xffd060),body);
+ if(p.t.includes('pointy'))[-1,1].forEach(s=>box(.14,.05,.05,s*.18,.42,.2,c2,body));
+ if(ghost)box(.2,.14,.3,0,.14,-.04,c2,body);
+ if(p.t.includes('glow'))box(.1,.1,.1,0,.56,.18,M(0xffd060,0xff7a1a),body);
+ g.userData.wings=[];if(p.t.includes('wings'))[-1,1].forEach(s=>{const w=new THREE.Group();w.position.set(s*.14,.34,-.02);body.add(w);box(.3,.03,.2,s*.15,0,0,c2,w);g.userData.wings.push([w,s])});
+ g.userData.fly=p.t.includes('fly')||ghost;g.userData.body=body;g.scale.set(.85,.85,.85);return g}
+function petSync(t){try{const d=petD(),p=petById(d.cur),show=p&&d.o.includes(p.id)&&!ovOn&&!(typeof drv!=='undefined'&&drv.on)&&av&&av.parent;
+ if(!show){if(PETM)PETM.visible=false;return}
+ if(!PETM||PETMID!==p.id){if(PETM&&PETM.parent)PETM.parent.remove(PETM);PETM=petBuild(p);PETMID=p.id;sc.add(PETM);PETM.position.set(pos.x+.7,av.position.y,pos.z+.5)}
+ PETM.visible=true;const rx=Math.cos(Y),rz=-Math.sin(Y),bx=Math.sin(Y),bz=Math.cos(Y);
+ const tx=pos.x+rx*.75+bx*.6,tz=pos.z+rz*.75+bz*.6,k=.12;
+ const dx=tx-PETM.position.x,dz=tz-PETM.position.z;if(dx*dx+dz*dz>25){PETM.position.x=tx;PETM.position.z=tz}else{PETM.position.x+=dx*k;PETM.position.z+=dz*k}
+ const fl=PETM.userData.fly,gy=av.position.y+(fl?.35+Math.sin(t*.004)*.08:Math.abs(Math.sin(t*.008))*.03);PETM.position.y+=(gy-PETM.position.y)*.2;
+ const mv=Math.hypot(dx,dz);if(mv>.03)PETM.rotation.y=Math.atan2(dx,dz);else PETM.rotation.y+=(Math.atan2(pos.x-PETM.position.x,pos.z-PETM.position.z)-PETM.rotation.y)*.05;
+ PETM.userData.wings.forEach(w=>{w[0].rotation.z=w[1]*Math.sin(t*.02)*.6})}catch(e){}}
+{const _f=frame;frame=function(){const r=_f.apply(this,arguments);petSync(performance.now());return r}}
+petFxCalc();
+/* ---- Admin: Pets geben ---- */
+{const _h=cxAdminHTML;cxAdminHTML=function(o){let h=_h.apply(this,arguments);if(o)return h;
+ return h+'<div class="cap" style="margin-top:14px">🐾 Pets (Admin)</div><div class="grp" style="padding:10px"><select id="ptsel" style="width:100%;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px">'+PETS.map(p=>'<option value="'+p.id+'">'+p.ic+' '+esc(p.n)+' ('+p.r+')</option>').join('')+'</select></div><div class="grp" style="margin-top:6px"><button class="row" id="ptgive"><span class="tx"><b>🐾 Dieses Pet mir geben</b></span></button><button class="row" id="ptall"><span class="tx"><b>🐾 Alle Pets mir geben</b></span></button><button class="row" id="pteggs"><span class="tx"><b>🥚 Je 5 Eier jeder Seltenheit</b></span></button></div><div class="foot" id="ptam" style="min-height:16px"></div>'}}
+{const _b=cxAdminBind;cxAdminBind=function(online){_b.apply(this,arguments);if(online)return;const g=i=>document.getElementById(i),m=t=>{const e=g('ptam');if(e)e.textContent=t};
+ if(g('ptgive'))g('ptgive').onclick=()=>{const id=g('ptsel').value;m(petGive(id)?'✅ '+petById(id).n+' erhalten.':'Hast du schon.')};
+ if(g('ptall'))g('ptall').onclick=()=>{let n=0;PETS.forEach(p=>{if(petGive(p.id))n++});m('✅ '+n+' neue Pets.')};
+ if(g('pteggs'))g('pteggs').onclick=()=>{PETR.forEach(r=>petEggAdd(r,5));m('✅ 20 Eier erhalten.')}}}
+
+/* ===== Block 156: TRADES – Wert & Fairness-Anzeige · Trade-Markt (Server) · direktes Traden im Spiel (🔄 neben dem Spielernamen) ===== */
+try{['dfTrMine','dfTrDone'].forEach(k=>{if(ACCK.indexOf(k)<0)ACCK.push(k)})}catch(e){}
+const TRB={s:{Selten:2500,Episch:5500,Legendär:10000,Mythisch:20000},p:{Selten:4000,Episch:9000,Legendär:22000,Mythisch:55000}};
+const TRC={Selten:'#4da3ff',Episch:'#b86bff',Legendär:'#ffb020',Mythisch:'#ff453a'};
+const trSkinOk=id=>!!CSK[id]&&!/^adm/.test(id)&&id!=='tgh'&&id!=='default'&&id!=='mask'&&id!=='gent';
+function trSkinList(){let L=[];try{L=cxShop().skins.slice()}catch(e){}const o={Mythisch:0,Legendär:1,Episch:2,Selten:3};return L.filter(trSkinOk).sort((a,b)=>((o[CSK[a].r]??4)-(o[CSK[b].r]??4))||String(CSK[a].n).localeCompare(CSK[b].n))}
+const trFmt=n=>Math.round(n).toLocaleString('de-DE');
+function trVal(it){if(!it)return 0;if(it.k==='c')return it.n;if(it.k==='e')return (PETEGG[it.id]||0)*(it.n||1);
+ if(it.k==='p'){const p=petById(it.id);return p?TRB.p[p.r]||0:0}
+ if(it.k==='s'){const s=CSK[it.id];if(!s)return 0;let pr=0;try{const c=CXSKINS.find(x=>x.id===it.id);if(c&&c.p>0)pr=c.p}catch(e){}return pr||TRB.s[s.r]||2500}return 0}
+const trSum=a=>(a||[]).reduce((t,i)=>t+trVal(i),0);
+function trTxt(it){if(it.k==='c')return '🪙 '+trFmt(it.n);if(it.k==='e')return '🥚 '+it.id+'es Ei'+(it.n>1?' ×'+it.n:'');
+ if(it.k==='p'){const p=petById(it.id);return p?p.ic+' '+p.n:'🐾 ?'}const s=CSK[it.id];return s?((s.ic||'🧑')+' '+s.n):'🧑 '+it.id}
+const trList=a=>(a&&a.length)?a.map(i=>esc(trTxt(i))).join(' · '):'–';
+function trFair(give,get){const gv=trSum(give),tv=trSum(get);let c='#8e8e93',t='Noch nichts ausgewählt';
+ if(gv||tv){if(!gv){c='#30d158';t='🎁 Geschenk für dich'}else if(!tv){c='#ff453a';t='👎 Schlechter Trade: du bekommst nichts'}else{const r=tv/gv,pc=Math.round((r-1)*100);
+  if(r>=1.1){c='#30d158';t='👍 Guter Trade für dich (+'+pc+' %)'}else if(r>=.9){c='#ffd60a';t='⚖️ Fairer Trade'}else{c='#ff453a';t='👎 Schlechter Trade für dich ('+pc+' %)'}}}
+ return '<div style="margin-top:8px;padding:9px 12px;border-radius:12px;background:'+c+'26;border:1px solid '+c+'"><b style="color:'+c+'">'+t+'</b><div style="font-size:12px;opacity:.8;margin-top:2px">Du gibst ≈ '+trFmt(gv)+' 🪙 · du bekommst ≈ '+trFmt(tv)+' 🪙 (Schätzung nach Seltenheit)</div></div>'}
+function trClean(a){if(!Array.isArray(a)||a.length>12)return [];const o=[];a.forEach(x=>{if(!x)return;if(x.k==='c'){const n=Math.floor(+x.n);if(n>=1&&n<=1e9)o.push({k:'c',n})}else if(x.k==='e'&&PETEGG[x.id]){const n=Math.floor(+x.n||1);if(n>=1&&n<=99)o.push({k:'e',id:x.id,n})}else if(x.k==='p'&&petById(x.id))o.push({k:'p',id:x.id});else if(x.k==='s'&&trSkinOk(x.id))o.push({k:'s',id:x.id})});return o}
+const trCanon=a=>JSON.stringify((a||[]).map(i=>i.k+':'+(i.id||'')+':'+(i.n||0)).sort());
+function trHas(a){const sk=new Set(trSkinList()),d=petD();let eg={},co=0;for(const i of a){if(i.k==='s'){if(!sk.has(i.id))return false}else if(i.k==='p'){if(!d.o.includes(i.id))return false}else if(i.k==='e'){eg[i.id]=(eg[i.id]||0)+i.n}else if(i.k==='c')co+=i.n}
+ for(const r in eg)if(((d.e&&d.e[r])||0)<eg[r])return false;if(co){const c=cxCoins();if(c===Infinity||c<co)return false}return true}
+function trTake(a){a.forEach(i=>{if(i.k==='s')cxTakeSkin(i.id);else if(i.k==='p'){const d=petD();d.o=d.o.filter(x=>x!==i.id);if(d.cur===i.id)d.cur='';petSave(d)}else if(i.k==='e'){const d=petD();d.e[i.id]=Math.max(0,(d.e[i.id]||0)-i.n);petSave(d)}else if(i.k==='c')cxSet(cxCoins()-i.n)});try{accSave(true)}catch(e){}}
+function trGive(a){a.forEach(i=>{if(i.k==='s'){if(cxShop().skins.includes(i.id)){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+Math.round(trVal(i)*.4))}catch(e){}}else{const c=CXSKINS.find(x=>x.id===i.id);if(c)c.give();else{const x=cxShop();x.skins.push(i.id);cxWrite('dfShop',x)}}}
+ else if(i.k==='p'){if(!petGive(i.id)){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+Math.round(trVal(i)*.4))}catch(e){}}}else if(i.k==='e')petEggAdd(i.id,i.n);else if(i.k==='c'){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+i.n)}catch(e){}}});try{accSave(true)}catch(e){}}
+/* ---- eigene Oberfläche (unabhängig vom Menü, damit Lobby-Updates sie nicht schließen) ---- */
+{const st=document.createElement('style');st.textContent='#trp{position:fixed;inset:0;z-index:10050;background:rgba(10,11,16,.98);color:#f2f2f7;overflow:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 40px;font:15px/1.4 -apple-system,system-ui,sans-serif;display:none}'
++'#trp .trh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:22px}#trp .g{background:#1c1e26;border-radius:14px;margin:8px 0;padding:12px}#trp .r{padding:10px 0;border-top:1px solid #333}#trp .r:first-child{border-top:0}'
++'#trp .tb{background:#2c2f3a;color:#fff;border:0;border-radius:10px;padding:8px 13px;font:600 14px -apple-system,system-ui,sans-serif}#trp .tb.on,#trp .tb.go{background:#0a84ff}#trp .tb.ok{background:#30d158;color:#000}#trp .tb.no{background:#ff453a}#trp .tb:disabled{opacity:.4}'
++'#trp .trt{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}#trp .chip{background:#252833;color:#fff;border:2px solid #444;border-radius:10px;padding:6px 9px;margin:3px;font:600 13px -apple-system,system-ui,sans-serif}#trp .chip.on{background:#0a84ff55;border-color:#0a84ff}#trp input{background:#2a2d38;color:#fff;border:1px solid #444;border-radius:10px;padding:9px;font-size:16px;width:100%;box-sizing:border-box}'
++'.trb{background:#30d158;color:#000;border:0;border-radius:10px;padding:3px 8px;font:700 12px system-ui;margin-left:6px;pointer-events:auto}#mpl{pointer-events:auto}#trreq{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translateX(-50%);z-index:10060;background:#1c1e26;color:#fff;border:1px solid #30d158;border-radius:14px;padding:12px 16px;font:600 15px system-ui;text-align:center;max-width:90vw}#trreq button{margin:8px 4px 0;border:0;border-radius:10px;padding:8px 14px;font:700 14px system-ui}';document.head.appendChild(st)}
+function trPanel(h){let p=document.getElementById('trp');if(!p){p=document.createElement('div');p.id='trp';document.body.appendChild(p)}p.innerHTML=h;p.style.display='block';try{if(document.pointerLockElement)document.exitPointerLock()}catch(e){}return p}
+function trHide(){const p=document.getElementById('trp');if(p)p.style.display='none'}
+const trQ=s=>document.querySelector('#trp '+s);
+/* ---- Auswahl ---- */
+const trNewSel=()=>({tab:'s',s:new Set(),p:new Set(),e:{},c:0,want:''});
+function trSelItems(P){const o=[];P.s.forEach(id=>o.push({k:'s',id}));P.p.forEach(id=>o.push({k:'p',id}));Object.keys(P.e).forEach(r=>{if(P.e[r]>0)o.push({k:'e',id:r,n:P.e[r]})});if(P.c>0)o.push({k:'c',n:P.c});return o}
+function trPicker(cfg){const P=cfg.P,items=trSelItems(P),d=petD(),coins=cxCoins();
+ let h='<div class="trh"><b>'+esc(cfg.title)+'</b><button class="tb" id="trpb">Zurück</button></div><div class="g"><div style="font-size:13px;opacity:.7">Du gibst:</div><div style="margin-top:2px">'+trList(items)+'</div>'+(cfg.info?cfg.info(items):'')+'</div>';
+ h+='<div class="trt">'+[['s','🧑 Skins'],['p','🐾 Pets'],['e','🥚 Eier'],['c','🪙 Münzen']].map(t=>'<button class="tb'+(P.tab===t[0]?' on':'')+'" data-tab="'+t[0]+'">'+t[1]+'</button>').join('')+'</div><div class="g">';
+ if(P.tab==='s'){const L=trSkinList();h+=L.length?L.map(id=>'<button class="chip'+(P.s.has(id)?' on':'')+'" data-s="'+id+'" style="border-color:'+(P.s.has(id)?'#0a84ff':TRC[CSK[id].r]||'#444')+'">'+(CSK[id].ic||'🧑')+' '+esc(CSK[id].n)+'</button>').join(''):'<span style="opacity:.6">Du hast keine tauschbaren Skins.</span>'}
+ else if(P.tab==='p'){h+=d.o.length?d.o.map(id=>{const p=petById(id);return p?'<button class="chip'+(P.p.has(id)?' on':'')+'" data-p="'+id+'" style="border-color:'+(P.p.has(id)?'#0a84ff':TRC[p.r])+'">'+p.ic+' '+esc(p.n)+'</button>':''}).join(''):'<span style="opacity:.6">Du hast noch keine Pets.</span>'}
+ else if(P.tab==='e'){h+=PETR.map(r=>{const n=(d.e&&d.e[r])||0,s=P.e[r]||0;return '<div class="r" style="display:flex;align-items:center;gap:8px"><span style="flex:1"><b style="color:'+TRC[r]+'">🥚 '+r+'es Ei</b><div style="font-size:12px;opacity:.7">Du hast '+n+'</div></span><button class="tb" data-em="'+r+'">−</button><b style="min-width:24px;text-align:center">'+s+'</b><button class="tb" data-ep="'+r+'"'+(s>=n?' disabled':'')+'>+</button></div>'}).join('')}
+ else{h+=coins===Infinity?'<span style="opacity:.6">Mit unendlichen Münzen kann man keine Münzen tauschen.</span>':'<div style="opacity:.8;margin-bottom:6px">Du hast 🪙 '+trFmt(coins)+'</div><input id="trcoin" inputmode="numeric" placeholder="Anzahl Münzen" value="'+(P.c||'')+'"><div style="margin-top:8px">'+[500,1000,5000,10000].map(n=>'<button class="tb" data-cq="'+n+'">+'+trFmt(n)+'</button>').join(' ')+' <button class="tb" data-cq="0">0</button></div>'}
+ h+='</div>';if(cfg.extra)h+=cfg.extra;h+='<div style="margin-top:12px"><button class="tb ok" id="trpok" style="width:100%;padding:13px;font-size:16px"'+(items.length||cfg.allowEmpty?'':' disabled')+'>'+esc(cfg.okLabel)+'</button></div>';
+ trPanel(h);const again=()=>trPicker(cfg);
+ trQ('#trpb').onclick=cfg.onBack;trQ('#trpok').onclick=()=>cfg.onOk(trSelItems(P));
+ document.querySelectorAll('#trp [data-tab]').forEach(b=>b.onclick=()=>{P.tab=b.dataset.tab;again()});
+ document.querySelectorAll('#trp [data-s]').forEach(b=>b.onclick=()=>{const i=b.dataset.s;P.s.has(i)?P.s.delete(i):P.s.add(i);again()});
+ document.querySelectorAll('#trp [data-p]').forEach(b=>b.onclick=()=>{const i=b.dataset.p;P.p.has(i)?P.p.delete(i):P.p.add(i);again()});
+ document.querySelectorAll('#trp [data-ep]').forEach(b=>b.onclick=()=>{const r=b.dataset.ep;P.e[r]=Math.min(((d.e&&d.e[r])||0),(P.e[r]||0)+1);again()});
+ document.querySelectorAll('#trp [data-em]').forEach(b=>b.onclick=()=>{const r=b.dataset.em;P.e[r]=Math.max(0,(P.e[r]||0)-1);again()});
+ document.querySelectorAll('#trp [data-cq]').forEach(b=>b.onclick=()=>{const n=+b.dataset.cq;P.c=n?Math.min(coins,(P.c||0)+n):0;again()});
+ const ci=trQ('#trcoin');if(ci)ci.onchange=()=>{P.c=Math.max(0,Math.min(coins,Math.floor(+ci.value||0)));again()};
+ const wi=trQ('#trwant');if(wi)wi.oninput=()=>{P.want=wi.value}}
+/* ---- Server-Helfer ---- */
+const trMe=()=>cxClean(myName());
+async function trReg(){const nm=trMe();if(nm.length<2)return false;if(cxRegDone[nm.toLowerCase()])return true;const q=await opsPost({a:'reg',name:nm});if(q&&q.ok){cxRegDone[nm.toLowerCase()]=1;return true}return false}
+const trMine=()=>{const v=cxRead('dfTrMine',[]);return Array.isArray(v)?v:[]};
+const trErr=r=>!r?'Keine Verbindung zur Zentrale (ops.js aktuell?).':({gone:'Dieses Trade gibt es nicht mehr.',limit:'Zu viele (max. 5 eigene Trades, 12 Gebote pro Trade).',own:'Das ist dein eigenes Trade.',noname:'Dein Name ist noch nicht angemeldet.',auth:'Keine Berechtigung.',busy:'Gerade beschäftigt, nochmal versuchen.',items:'Ungültige Auswahl.'})[r.error]||'Das hat nicht geklappt.';
+/* ---- Posteingang: abgeschlossene Trades / zurückgegebene Gegenstände ---- */
+let trBusy=false;
+async function trInbox(){if(trBusy||!accReady())return 0;const nm=trMe();if(nm.length<2)return 0;trBusy=true;try{const r=await opsPost({a:'tinbox',name:nm});if(!r||!r.ok)return 0;const done=cxRead('dfTrDone',[]),dn=Array.isArray(done)?done:[];const ack=[];let n=0;
+ (r.list||[]).forEach(x=>{if(!x||!x.nid)return;ack.push(x.nid);if(dn.includes(x.nid))return;const it=trClean(x.items);trGive(it);dn.push(x.nid);n++;
+  const w=x.w?esc(String(x.w)):'';try{toast(x.k==='done'?'🔄 Trade mit '+w+' abgeschlossen: '+it.map(trTxt).join(', '):x.k==='decl'?'↩ Dein Angebot bei '+w+' wurde nicht angenommen. Gegenstände zurück: '+it.map(trTxt).join(', '):'↩ Trade zurückgezogen. Gegenstände zurück: '+it.map(trTxt).join(', '),'good')}catch(e){}});
+ if(n){cxWrite('dfTrDone',dn.slice(-300))}if(ack.length)await opsPost({a:'tack',name:nm,ids:ack});return n}catch(e){return 0}finally{trBusy=false}}
+setTimeout(()=>{try{trInbox()}catch(e){}},6000);setInterval(()=>{try{if(!document.hidden)trInbox()}catch(e){}},25000);
+/* ---- Trade-Markt ---- */
+function trMarket(tab){tab=tab||'list';trPanel('<div class="trh"><b>🔄 Trades</b><button class="tb" id="trx">Schließen</button></div><div class="g">Lade …</div>');trQ('#trx').onclick=trHide;
+ const head='<div class="trh"><b>🔄 Trades</b><button class="tb" id="trx">Schließen</button></div><div class="trt"><button class="tb'+(tab==='list'?' on':'')+'" id="trt1">📋 Angebote</button><button class="tb'+(tab==='mine'?' on':'')+'" id="trt2">📦 Meine Trades</button><button class="tb ok" id="trnew">➕ Neues Trade</button></div>';
+ const bind=()=>{trQ('#trx').onclick=trHide;trQ('#trt1').onclick=()=>trMarket('list');trQ('#trt2').onclick=()=>trMarket('mine');trQ('#trnew').onclick=trNew};
+ (async()=>{await trInbox();const me=trMe();
+  if(tab==='list'){const r=await opsPost({a:'tlist'});if(!r||!r.ok){trPanel(head+'<div class="g">'+trErr(r)+'</div>');bind();return}
+   const L=(r.list||[]).filter(g=>g.by!==me.toLowerCase().slice(0,14));trPanel(head+(L.length?L.map(g=>'<div class="g"><b>'+esc(g.byN||'?')+'</b> bietet:<div style="margin:4px 0;font-size:16px">'+trList(g.give)+'</div><div style="font-size:12px;opacity:.7">Wert ≈ '+trFmt(trSum(g.give))+' 🪙'+(g.want?' · sucht: '+esc(g.want):'')+'</div><button class="tb go" data-of="'+esc(g.id)+'" style="margin-top:8px">Angebot machen</button></div>').join(''):'<div class="g" style="opacity:.7">Gerade sind keine Trades von anderen Spielern online. Stelle selbst eins ein!</div>'));bind();
+   document.querySelectorAll('#trp [data-of]').forEach(b=>b.onclick=()=>trOffer(L.find(g=>g.id===b.dataset.of)))}
+  else{const mine=trMine();if(!mine.length){trPanel(head+'<div class="g" style="opacity:.7">Du hast keine eigenen Trades online.</div>');bind();return}
+   const r=await opsPost({a:'tmine',l:mine});if(!r||!r.ok){trPanel(head+'<div class="g">'+trErr(r)+'</div>');bind();return}
+   const alive=(r.list||[]).filter(x=>x.alive),keep=mine.filter(m=>(r.list||[]).some(x=>x.id===m.id&&x.alive));if(keep.length!==mine.length)cxWrite('dfTrMine',keep);
+   trPanel(head+(alive.length?alive.map(x=>{const g=x.listing;return '<div class="g"><b>Dein Trade</b><div style="margin:4px 0;font-size:16px">'+trList(g.give)+'</div><div style="font-size:12px;opacity:.7">'+(g.want?'sucht: '+esc(g.want)+' · ':'')+x.offers.length+' Gebot'+(x.offers.length===1?'':'e')+'</div>'+x.offers.map(o=>'<div class="r"><b>'+esc(o.byN||'?')+'</b> bietet: '+trList(o.give)+trFair(g.give,o.give)+'<div style="margin-top:8px"><button class="tb ok" data-ac="'+esc(g.id)+'|'+esc(o.oid)+'">Annehmen</button> <button class="tb no" data-dc="'+esc(g.id)+'|'+esc(o.oid)+'">Ablehnen</button></div></div>').join('')+'<button class="tb no" data-cn="'+esc(g.id)+'" style="margin-top:8px">Trade zurückziehen</button></div>'}).join(''):'<div class="g" style="opacity:.7">Du hast keine offenen Trades.</div>'));bind();
+   const sec=id=>(trMine().find(m=>m.id===id)||{}).sec;
+   const act=async(a,id,oid,msg)=>{const q=await opsPost({a,id,oid,sec:sec(id)});if(q&&q.ok){await trInbox();try{toast(msg,'good')}catch(e){}}else try{toast(trErr(q),'err')}catch(e){}trMarket('mine')};
+   document.querySelectorAll('#trp [data-ac]').forEach(b=>b.onclick=()=>{const [i,o]=b.dataset.ac.split('|');act('taccept',i,o,'🔄 Trade abgeschlossen!')});
+   document.querySelectorAll('#trp [data-dc]').forEach(b=>b.onclick=()=>{const [i,o]=b.dataset.dc.split('|');act('tdecl',i,o,'Angebot abgelehnt.')});
+   document.querySelectorAll('#trp [data-cn]').forEach(b=>b.onclick=async()=>{const i=b.dataset.cn;const q=await opsPost({a:'tcancel',id:i,sec:sec(i)});if(q&&q.ok||(q&&q.error==='gone')){cxWrite('dfTrMine',trMine().filter(m=>m.id!==i));await trInbox();try{toast('Trade zurückgezogen. Gegenstände sind zurück.','good')}catch(e){}}else try{toast(trErr(q),'err')}catch(e){}trMarket('mine')})}})()}
+function trOffer(g){if(!g)return;const P=trNewSel();
+ trPicker({title:'Angebot für '+(g.byN||'?'),P,okLabel:'Angebot senden',onBack:()=>trMarket('list'),
+  info:items=>'<div style="margin-top:6px;font-size:13px">Du bekommst: <b>'+trList(g.give)+'</b></div>'+trFair(items,g.give),
+  onOk:async items=>{if(!trHas(items))return toast('Du besitzt das nicht (mehr).','err');if(!(await trReg()))return toast('Dein Name ist nicht angemeldet.','err');const r=await opsPost({a:'toffer',id:g.id,name:trMe(),give:items});
+   if(r&&r.ok){trTake(items);try{toast('📨 Angebot gesendet. Deine Gegenstände liegen in Verwahrung, bis es angenommen oder abgelehnt wird.','good')}catch(e){}trMarket('list')}else toast(trErr(r),'err')}})}
+function trNew(){const P=trNewSel();
+ trPicker({title:'Neues Trade',P,okLabel:'Trade einstellen',onBack:()=>trMarket('list'),info:items=>'<div style="font-size:12px;opacity:.7;margin-top:4px">Wert ≈ '+trFmt(trSum(items))+' 🪙. Die Gegenstände liegen in Verwahrung, bis jemand ein Gebot macht und du annimmst. Du kannst jederzeit zurückziehen.</div>',
+  extra:'<div class="g"><div style="font-size:13px;opacity:.7;margin-bottom:4px">Was suchst du? (optional)</div><input id="trwant" maxlength="40" placeholder="z. B. Drachen-Pet oder 5000 Münzen" value="'+esc(P.want)+'"></div>',
+  onOk:async items=>{if(!trHas(items))return toast('Du besitzt das nicht (mehr).','err');if(!(await trReg()))return toast('Dein Name ist nicht angemeldet.','err');const sec=Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2);
+   const r=await opsPost({a:'tpost',name:trMe(),give:items,want:P.want,sec});if(r&&r.ok){trTake(items);const L=trMine();L.push({id:r.id,sec});cxWrite('dfTrMine',L.slice(-5));try{accSave(true)}catch(e){}try{toast('✅ Trade eingestellt.','good')}catch(e){}trMarket('mine')}else toast(trErr(r),'err')}})}
+/* Zeile im Startmenü */
+{const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);try{const box=$('box');if(box&&box.querySelector&&!box.querySelector('#tropen')){const a=box.querySelector('#ptopen')||box.querySelector('#bp2open');if(a){a.closest('.grp').insertAdjacentHTML('afterend','<div class="grp" style="margin-top:12px"><button class="row" id="tropen"><span class="ic" style="background:#0a84ff">🔄</span><span class="tx"><b>Trades</b><small>Skins, Pets und Eier mit anderen Spielern tauschen</small></span><i class="chev">›</i></button></div>');box.querySelector('#tropen').onclick=()=>trMarket('list')}}}catch(e){}return r}}
+/* ---- Direktes Traden im Spiel (über den Host weitergeleitet) ---- */
+const TD={st:'',peer:'',pn:'',mine:[],theirs:[],myOk:false,thOk:false,done:false};
+const trSend=(k,ex)=>{try{mpSend(Object.assign({t:'tr',to:TD.peer,k},ex||{}))}catch(e){}};
+function trNameOf(id){return (MP.names&&MP.names[id])||(((MP.lobby&&MP.lobby.ps)||[]).find(p=>p.id===id)||{}).name||'Spieler'}
+function trAsk(id){if(!id||id===MP.myId)return;if(TD.st)return toast('Du bist schon in einem Trade.','err');TD.st='wait';TD.peer=id;TD.pn=trNameOf(id);TD.mine=[];TD.theirs=[];TD.myOk=TD.thOk=false;TD.done=false;trSend('req');
+ trPanel('<div class="trh"><b>🔄 Trade</b></div><div class="g">Anfrage an <b>'+esc(TD.pn)+'</b> gesendet … warte auf Antwort.</div><button class="tb no" id="trcx">Abbrechen</button>');trQ('#trcx').onclick=()=>trDEnd(true)}
+function trDEnd(tell,msg){if(tell&&TD.peer)trSend('x');TD.st='';TD.peer='';TD.mine=[];TD.theirs=[];TD.myOk=TD.thOk=false;trHide();const q=document.getElementById('trreq');if(q)q.remove();if(msg)try{toast(msg,'err')}catch(e){}}
+function trDStart(){TD.st='on';TD.mine=[];TD.theirs=[];TD.myOk=TD.thOk=false;trDRender()}
+function trDRender(){const mv=trSum(TD.mine),tv=trSum(TD.theirs);
+ trPanel('<div class="trh"><b>🔄 Trade mit '+esc(TD.pn)+'</b></div><div class="g"><div style="font-size:13px;opacity:.7">Dein Angebot</div><div style="font-size:16px;margin:3px 0">'+trList(TD.mine)+'</div><div style="font-size:12px;opacity:.7">≈ '+trFmt(mv)+' 🪙</div><button class="tb go" id="trdpick" style="margin-top:8px">Gegenstände wählen</button></div>'
+ +'<div class="g"><div style="font-size:13px;opacity:.7">Angebot von '+esc(TD.pn)+'</div><div style="font-size:16px;margin:3px 0">'+trList(TD.theirs)+'</div><div style="font-size:12px;opacity:.7">≈ '+trFmt(tv)+' 🪙</div></div>'+trFair(TD.mine,TD.theirs)
+ +'<div style="margin-top:10px;font-size:13px">'+(TD.myOk?'✅ Du hast bestätigt. ':'')+(TD.thOk?'✅ '+esc(TD.pn)+' hat bestätigt.':'')+'</div><div style="margin-top:10px;display:flex;gap:8px"><button class="tb ok" id="trdok" style="flex:1;padding:13px"'+((TD.mine.length||TD.theirs.length)&&!TD.myOk?'':' disabled')+'>Bestätigen</button><button class="tb no" id="trdx" style="padding:13px">Abbrechen</button></div><div style="font-size:12px;opacity:.6;margin-top:8px">Ändert einer sein Angebot, müssen beide neu bestätigen. Das Trade gilt erst, wenn beide bestätigt haben.</div>');
+ trQ('#trdx').onclick=()=>trDEnd(true,'Trade abgebrochen.');
+ trQ('#trdpick').onclick=()=>{const P=trNewSel();TD.mine.forEach(i=>{if(i.k==='s')P.s.add(i.id);else if(i.k==='p')P.p.add(i.id);else if(i.k==='e')P.e[i.id]=i.n;else if(i.k==='c')P.c=i.n});
+  trPicker({title:'Dein Angebot',P,okLabel:'Fertig',allowEmpty:true,onBack:trDRender,info:items=>trFair(items,TD.theirs),onOk:items=>{TD.mine=items;TD.myOk=TD.thOk=false;trSend('upd',{items});trDRender()}})};
+ trQ('#trdok').onclick=()=>{if(!trHas(TD.mine))return toast('Du besitzt nicht mehr alles aus deinem Angebot.','err');TD.myOk=true;trSend('ok',{cm:trCanon(TD.mine),ct:trCanon(TD.theirs)});trDCheck();if(TD.st==='on')trDRender()}}
+function trDCheck(){if(TD.st!=='on'||!TD.myOk||!TD.thOk||TD.done)return;TD.done=true;if(!trHas(TD.mine)){trDEnd(true,'Trade abgebrochen: dir fehlt etwas aus deinem Angebot.');return}
+ const get=TD.theirs.slice(),give=TD.mine.slice();trTake(give);trGive(get);const pn=TD.pn;TD.st='';TD.peer='';trHide();try{toast('🔄 Trade mit '+pn+' abgeschlossen: '+get.map(trTxt).join(', '),'good')}catch(e){}}
+function trRecv(m){const f=m.from;
+ if(m.k==='req'){if(TD.st){mpSend({t:'tr',to:f,k:'busy'});return}TD.st='ask';TD.peer=f;TD.pn=m.fn||trNameOf(f);let q=document.getElementById('trreq');if(q)q.remove();q=document.createElement('div');q.id='trreq';q.innerHTML='🔄 <b>'+esc(TD.pn)+'</b> möchte mit dir traden<br><button id="trya" style="background:#30d158">Annehmen</button><button id="trno" style="background:#ff453a;color:#fff">Ablehnen</button>';document.body.appendChild(q);
+  document.getElementById('trya').onclick=()=>{q.remove();trSend('acc');trDStart()};document.getElementById('trno').onclick=()=>{q.remove();trSend('no');TD.st='';TD.peer=''};return}
+ if(f!==TD.peer)return;
+ if(m.k==='acc'&&TD.st==='wait')trDStart();
+ else if(m.k==='busy'||m.k==='no'){trDEnd(false,m.k==='busy'?TD.pn+' ist gerade in einem anderen Trade.':TD.pn+' hat abgelehnt.')}
+ else if(m.k==='x'){const had=TD.st;trDEnd(false,TD.pn+' hat das Trade abgebrochen.')}
+ else if(TD.st==='on'){if(m.k==='upd'){TD.theirs=trClean(m.items);TD.myOk=TD.thOk=false;trDRender()}
+  else if(m.k==='ok'){if(m.cm===trCanon(TD.theirs)&&m.ct===trCanon(TD.mine)){TD.thOk=true;trDCheck();if(TD.st==='on')trDRender()}}}}
+{const _r=mpRecv;mpRecv=function(m){if(m&&m.t==='tr'){try{trRecv(m)}catch(e){console.error(e)}return}return _r.apply(this,arguments)}}
+{const _m=MPHost.prototype.msg;MPHost.prototype.msg=function(id,m){if(m&&m.t==='tr'){const p=this.P[id],to=String(m.to||'');if(!p||!this.P[to]||to===id)return;const o={t:'tr',k:String(m.k||'').slice(0,6),from:id,fn:p.name};if(m.k==='upd'&&Array.isArray(m.items))o.items=m.items.slice(0,12);if(m.k==='ok'){o.cm=String(m.cm||'').slice(0,800);o.ct=String(m.ct||'').slice(0,800)}mpHSend(to,o);return}return _m.apply(this,arguments)}}
+document.addEventListener('pointerdown',e=>{const b=e.target&&e.target.closest&&e.target.closest('[data-tr]');if(b){e.preventDefault();e.stopPropagation();trAsk(b.dataset.tr)}},true);
 
 menuStart();
 requestAnimationFrame(frame);

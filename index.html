@@ -6417,6 +6417,23 @@ setInterval(mpSkSend,2500);{const _s=applySkin;applySkin=function(){const r=_s.a
 /* ===== Block 160: Parkour-Knöpfe (↺ ⌂) und Admin-Knopf überlappen nichts mehr ===== */
 {const st=document.createElement('style');st.textContent='body.pkon #pkbtns{left:calc(env(safe-area-inset-left,0px) + 10px)!important;top:36%!important;flex-direction:column!important;gap:10px!important}body.pkon #pkadm{top:calc(36% + 118px)!important}';document.head.appendChild(st)}
 
+/* ===== Block 161: Skins der Mitspieler im Parkour deutlich erkennbar (hell, größer, Namensschild, Lauf-Animation) ===== */
+function poLabel(txt,cl){const cv=document.createElement('canvas');cv.width=320;cv.height=84;const c=cv.getContext('2d');const hx='#'+('000000'+cl.toString(16)).slice(-6);
+ c.fillStyle='rgba(10,12,18,.82)';c.beginPath();if(c.roundRect)c.roundRect(6,10,308,64,30);else c.rect(6,10,308,64);c.fill();c.lineWidth=5;c.strokeStyle=hx;c.stroke();
+ c.fillStyle='#fff';c.font='bold 36px -apple-system,Helvetica,Arial';c.textAlign='center';c.textBaseline='middle';c.fillText(String(txt||'Spieler').slice(0,14),160,43);
+ const tx=new THREE.CanvasTexture(cv),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false}));sp.scale.set(2.6,.68,1);sp.renderOrder=999;return sp}
+poGhost=function(id,i){let g=PO.gh[id];const p=PO.pl[id]||{},sk=p.sk||'default',nm=p.n||'';
+ if(g&&g.parent===PKG&&g.userData.sk===sk&&g.userData.nm===nm)return g;if(g&&g.parent)g.parent.remove(g);
+ const a=mpAvatar(i%10,false,nm);try{if(sk!=='default'&&(MPSK[sk]||CSK[sk]))mpSkinOn(a,sk)}catch(e){}
+ g=a.g;g.userData.sk=sk;g.userData.nm=nm;g.userData.a=a;g.userData.lp=null;g.scale.set(1.45,1.45,1.45);
+ try{if(a.lb)a.lb.visible=false}catch(e){}
+ try{g.traverse(o=>{if(o.isMesh&&o.material&&o.material.color&&o.material.emissive&&!o.material.transparent){o.material.emissive.copy(o.material.color).multiplyScalar(.32)}})}catch(e){}
+ try{const cl=poClr(i);const ring=new THREE.Mesh(new THREE.RingGeometry(.55,.72,28),new THREE.MeshBasicMaterial({color:cl,transparent:true,opacity:.85,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.y=.03;g.add(ring);
+  const bm=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,6,8,1,true),new THREE.MeshBasicMaterial({color:cl,transparent:true,opacity:.22,depthWrite:false}));bm.position.y=3.2;g.add(bm);
+  const lb=poLabel(nm,cl);lb.position.set(0,2.55,0);g.add(lb)}catch(e){}
+ PKG.add(g);PO.gh[id]=g;return g};
+{const _fr=frame;frame=function(t){const r=_fr.apply(this,arguments);try{if(PO.on&&PO.gh){const tm=(t||performance.now())/1000;Object.keys(PO.gh).forEach(id=>{const g=PO.gh[id],u=g&&g.userData,a=u&&u.a;if(!a||!g.parent)return;const lp=u.lp,mv=lp?Math.hypot(g.position.x-lp[0],g.position.z-lp[1]):0;u.lp=[g.position.x,g.position.z];u.mv=(u.mv||0)*.8+mv*.2;const sw=u.mv>.012?Math.sin(tm*10+(a.t||0))*.8:0;if(a.aL){a.aL.rotation.x=-sw;a.aR.rotation.x=sw;a.lL.rotation.x=sw;a.lR.rotation.x=-sw}})}}catch(e){}return r}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

@@ -25,7 +25,7 @@ const okItems = (a, max = 12) => {
   if (!Array.isArray(a) || a.length < 1 || a.length > max) return null;
   const out = [];
   for (const x of a) {
-    if (!x || !["s", "p", "e", "c", "a"].includes(x.k)) return null;
+    if (!x || !["s", "p", "e", "c", "a", "b"].includes(x.k)) return null;
     if (x.k === "c") { const n = Math.floor(+x.n); if (!(n >= 1 && n <= 1e9)) return null; out.push({ k: "c", n }); }
     else {
       const id = str(x.id, 24); if (!TI_ID.test(id)) return null;
@@ -463,6 +463,20 @@ export default async function handler(req, res) {
         if (b.wipe) { await db([noteCmd(to, { k: "wipe", w: "Admin", items: [] })]); return send({ ok: true }); }
         const items = okItems(b.items, 80); if (!items) return send({ error: "items" }, 400);
         await db([noteCmd(to, { k: "adm", w: "Admin", items })]);
+        return send({ ok: true });
+      }
+      case "tgift": {                                 // Geschenk: ein Spieler kauft Gegenstände mit eigenen Münzen für einen anderen (kommt in dessen Posteingang)
+        const from = nkey(b.from), to = nkey(b.to);
+        if (from.length < 2 || to.length < 2) return send({ error: "bad" }, 400);
+        if (from === to) return send({ error: "self" }, 400);
+        const items = okItems(b.items, 12); if (!items || items.some((i) => i.k === "c" || i.k === "a")) return send({ error: "items" }, 400);
+        const [seen, fn] = await db([["HGET", "df:names", to], ["HGET", "df:names", from]]);
+        if (!seen) return send({ error: "noname" }, 404);
+        const rk = "df:gl:" + from;
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 40) return send({ error: "limit" }, 429);
+        await db([noteCmd(to, { k: "gift", w: str(b.fromN, 20) || (typeof fn === "string" ? fn.split("|")[0] : from), items })]);
         return send({ ok: true });
       }
       case "tinbox": {                                // Posteingang des Spielers (Trade abgeschlossen / Gegenstände zurück)

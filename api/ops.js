@@ -30,7 +30,7 @@ const okItems = (a, max = 12) => {
     else {
       const id = str(x.id, 24); if (!TI_ID.test(id)) return null;
       const o = { k: x.k, id };
-      if (x.k === "e") { const n = Math.floor(+x.n || 1); if (!(n >= 1 && n <= 99)) return null; o.n = n; }
+      if (x.k === "e") { const n = Math.floor(+x.n || 1); if (!(n >= 1 && n <= 9999)) return null; o.n = n; }
       out.push(o);
     }
   }
@@ -105,7 +105,7 @@ export default async function handler(req, res) {
         const rk = "df:rls:" + hash(ip || sid || "x");
         const [cnt] = await db([["INCR", rk]]);
         if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
-        if (cnt > 40) return send({ error: "limit" }, 429);
+        if (cnt > 2000) return send({ error: "limit" }, 429);
         const key = "df:lb:" + mode + ":" + diff, hk = "df:lbv:" + mode + ":" + diff;
         const who = mode === "mp" ? "n:" + name.toLowerCase() : "v:" + str(b.vid || sid, 64);   // pro Gerät bzw. Name nur die beste Zeit
         const [old] = await db([["HGET", hk, who]]);
@@ -469,7 +469,7 @@ export default async function handler(req, res) {
         const from = nkey(b.from), to = nkey(b.to);
         if (from.length < 2 || to.length < 2) return send({ error: "bad" }, 400);
         if (from === to) return send({ error: "self" }, 400);
-        const items = okItems(b.items, 12); if (!items || items.some((i) => i.k === "c" || i.k === "a")) return send({ error: "items" }, 400);
+        const items = okItems(b.items, 500); if (!items || items.some((i) => i.k === "c" || i.k === "a")) return send({ error: "items" }, 400);
         const [seen, fn] = await db([["HGET", "df:names", to], ["HGET", "df:names", from]]);
         if (!seen) return send({ error: "noname" }, 404);
         const rk = "df:gl:" + from;

@@ -6417,6 +6417,19 @@ setInterval(mpSkSend,2500);{const _s=applySkin;applySkin=function(){const r=_s.a
 /* ===== Block 160: Parkour-Knöpfe (↺ ⌂) und Admin-Knopf überlappen nichts mehr ===== */
 {const st=document.createElement('style');st.textContent='body.pkon #pkbtns{left:calc(env(safe-area-inset-left,0px) + 10px)!important;top:36%!important;flex-direction:column!important;gap:10px!important}body.pkon #pkadm{top:calc(36% + 118px)!important}';document.head.appendChild(st)}
 
+/* ===== Block 162: Spieler-Figuren (eigene + Mitspieler + Skins) wieder eckig wie früher – nur die Welt bleibt weich ===== */
+let SGSQ=0;
+const sgIsSq=o=>{for(let p=o;p;p=p.parent)if(p.userData&&p.userData.sq)return true;return false};
+{const _b=box;box=function(){const w=SGSQ>0&&SG.on;if(w)SG.on=false;try{return _b.apply(this,arguments)}finally{if(w)SG.on=true}}}
+{const _m=mpAvatar;mpAvatar=function(){SGSQ++;try{const a=_m.apply(this,arguments);if(a&&a.g)a.g.userData.sq=true;return a}finally{SGSQ--}}}
+{const _s=cxBuildSkin;cxBuildSkin=function(){SGSQ++;try{return _s.apply(this,arguments)}finally{SGSQ--}}}
+{const _k=mpSkinOn;mpSkinOn=function(){SGSQ++;try{return _k.apply(this,arguments)}finally{SGSQ--}}}
+try{av.userData.sq=true}catch(e){}
+sgScene=function(){try{sc.traverse(o=>{if(!o.isMesh||!o.geometry)return;const g=o.geometry,sq=sgIsSq(o);
+  if(SG.on&&!sq){if(g.type==='BoxGeometry'&&g.parameters&&!g.userData.sg&&!o.userData.sg0){const p=g.parameters,ng=sgGeo(p.width,p.height,p.depth);if(ng){o.userData.sg0=g;o.geometry=ng}}}
+  else if(o.userData.sg0){o.geometry=o.userData.sg0;delete o.userData.sg0}})}catch(e){}};
+sgScene();
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

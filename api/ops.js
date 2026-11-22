@@ -479,6 +479,44 @@ export default async function handler(req, res) {
         await db([noteCmd(to, { k: "gift", w: str(b.fromN, 20) || (typeof fn === "string" ? fn.split("|")[0] : from), items })]);
         return send({ ok: true });
       }
+      case "csave": {                                // Cloud-Sicherung: Spielstand des Accounts ablegen (Gerätewechsel). Schreiben darf nur, wer das Geheimnis des Accounts oder das Cloud-Token kennt
+        const tag = String(b.tag || "").toUpperCase(), code = String(b.code || "").toUpperCase(), sec = str(b.sec, 40), tok = str(b.tok, 40);
+        if (!/^[A-HJ-NP-Z2-9]{4}$/.test(tag) || !/^[A-HJ-NP-Z2-9]{8}$/.test(code)) return send({ error: "bad" }, 400);
+        if (code.split("").filter((_, i) => i % 2 === 0).join("") !== tag) return send({ error: "bad" }, 400);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlcs:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 600) return send({ error: "limit" }, 429);
+        const [cur, th] = await db([["HGET", "df:cl", tag], ["HGET", "df:tags", tag]]);
+        let rec = null; try { rec = cur ? JSON.parse(cur) : null; } catch (e) {}
+        const secOk = !!th && sec.length >= 8 && th === hash(sec + "|" + tag) + hash(tag + "|" + sec);
+        const tokOk = !!(rec && rec.tok && tok && tok === rec.tok);
+        if (!secOk && !tokOk) return send({ error: "auth" }, 403);
+        if (rec && (+b.base || 0) < rec.ts) return send({ ok: false, conflict: true, ts: rec.ts });   // in der Cloud liegt ein neuerer Stand (von einem anderen Gerät)
+        if (!b.data || typeof b.data !== "object") return send({ error: "bad" }, 400);
+        const clean = {}; for (const k of Object.keys(b.data).slice(0, 80)) { if (/^df[A-Za-z0-9_]{1,40}$/.test(k)) clean[k] = str(b.data[k], 20000); }
+        const js = JSON.stringify(clean); if (js.length > 140000) return send({ error: "big" }, 413);
+        const old = rec && Array.isArray(rec.old) ? rec.old.slice() : []; if (rec && rec.code && rec.code !== code) old.unshift(rec.code);
+        const n = { tok: (rec && rec.tok) || newCode(16), code, old: [...new Set(old)].slice(0, 10), ts: Math.max(now, rec ? rec.ts + 1 : 0), name: str(b.name, 14).replace(/[<>&"'\\]/g, ""), data: clean };
+        await db([["HSET", "df:cl", tag, JSON.stringify(n)]]);
+        return send({ ok: true, tok: n.tok, ts: n.ts });
+      }
+      case "cload": {                                 // Cloud-Stand holen (neues Gerät): mit dem Account-Code oder dem Cloud-Token
+        const tag = String(b.tag || "").toUpperCase(), code = String(b.code || "").toUpperCase(), tok = str(b.tok, 40);
+        if (!/^[A-HJ-NP-Z2-9]{4}$/.test(tag)) return send({ error: "bad" }, 400);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rlcl:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 80) return send({ error: "limit" }, 429);
+        const [cur] = await db([["HGET", "df:cl", tag]]);
+        let rec = null; try { rec = cur ? JSON.parse(cur) : null; } catch (e) {}
+        if (!rec) return send({ ok: false, none: true });
+        const okc = (tok && rec.tok === tok) || (/^[A-HJ-NP-Z2-9]{8}$/.test(code) && (rec.code === code || (rec.old || []).includes(code)));
+        if (!okc) return send({ ok: false, error: "auth" });
+        return send({ ok: true, tok: rec.tok, ts: rec.ts, name: rec.name || "", data: rec.data || {} });
+      }
       case "accdel": {                                // Konto löschen: entfernt Account, Namen, Posteingang und Bestenlisten-Einträge (nur mit dem Geheimnis des Accounts)
         const tag = String(b.tag || "").toUpperCase(), sec = str(b.sec, 40), nsec = str(b.nsec, 40);
         const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim(), nk = nkey(nm);
@@ -490,7 +528,7 @@ export default async function handler(req, res) {
         let acc = 0, name = 0, lb = 0;
         if (/^[A-HJ-NP-Z2-9]{4}$/.test(tag) && sec.length >= 8) {
           const [h] = await db([["HGET", "df:tags", tag]]);
-          if (h && h === hash(sec + "|" + tag) + hash(tag + "|" + sec)) { await db([["HDEL", "df:tags", tag], ["HDEL", "df:tagn", tag], ["HDEL", "df:accs", tag], ["HDEL", "df:accd", tag]]); acc = 1; }
+          if (h && h === hash(sec + "|" + tag) + hash(tag + "|" + sec)) { await db([["HDEL", "df:tags", tag], ["HDEL", "df:tagn", tag], ["HDEL", "df:accs", tag], ["HDEL", "df:accd", tag], ["HDEL", "df:cl", tag]]); acc = 1; }
         }
         if (nk.length >= 2 && nsec.length >= 8) {
           const [h] = await db([["HGET", "df:nm", nk]]);
@@ -511,15 +549,27 @@ export default async function handler(req, res) {
         const nk = nkey(b.name);
         if (nk.length < 2) return send({ error: "bad" }, 400);
         const [h] = await db([["HGETALL", "df:tn:" + nk]]);
-        const o = pairs(h), list = [];
-        for (const k of Object.keys(o).slice(0, 50)) { try { list.push(JSON.parse(o[k])); } catch (e) {} }
+        const o = pairs(h), list = [], gifts = [], old = [];
+        const tsOf = (id) => +(String(id).split("-")[1]) || 0;
+        for (const k of Object.keys(o)) {
+          let x; try { x = JSON.parse(o[k]); } catch (e) { continue; }
+          if (x && x.k === "gift") {                  // Geschenke bleiben 60 Tage, damit jedes Gerät mit diesem Namen sie bekommt (wie bei Skin-Geschenken)
+            if (now - tsOf(k) > 60 * 864e5) old.push(k); else gifts.push([tsOf(k), x]);
+          } else if (list.length < 50) list.push(x);
+        }
+        gifts.sort((a, b) => b[0] - a[0]);
+        for (const g of gifts.slice(0, 60).reverse()) list.push(g[1]);
+        if (old.length) await db([["HDEL", "df:tn:" + nk, ...old.slice(0, 50)]]);
         return send({ ok: true, list });
       }
       case "tack": {                                  // Posteingang bestätigen (löscht die gelesenen Einträge)
         const nk = nkey(b.name);
         const ids = Array.isArray(b.ids) ? b.ids.map((x) => str(x, 40)).filter((x) => /^n-\d+-[a-z0-9]+$/.test(x)).slice(0, 50) : [];
         if (nk.length < 2 || !ids.length) return send({ ok: true });
-        await db([["HDEL", "df:tn:" + nk, ...ids]]);
+        const [h] = await db([["HGETALL", "df:tn:" + nk]]);
+        const o = pairs(h), del = [];
+        for (const id of ids) { let x = null; try { x = JSON.parse(o[id]); } catch (e) {} if (!x || x.k !== "gift") del.push(id); }   // Geschenke bleiben für andere Geräte erhalten
+        if (del.length) await db([["HDEL", "df:tn:" + nk, ...del]]);
         return send({ ok: true });
       }
       case "game": {                                  // ein Spiel wurde gestartet

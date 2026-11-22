@@ -6707,6 +6707,32 @@ function tmAskVoice(showFn){tmListen((t,err)=>{if(!t){showFn(err);return}const a
  const q=document.getElementById('rbq');bar.insertBefore(m,q);bar.insertBefore(v,q)}}catch(e){}return r}}
 {const _t=tutOpen;tutOpen=function(c,i){const r=_t.apply(this,arguments);try{const g=document.getElementById('tmqg');if(g&&!document.getElementById('tmmic')){const b=document.createElement('button');b.id='tmmic';b.className='tbtn g';b.textContent='🎤';b.setAttribute('aria-label','Frage sprechen');b.onclick=()=>{b.textContent='…';tmAskVoice(h=>{b.textContent='🎤';const o=document.getElementById('tma');if(o){o.style.display='block';o.innerHTML='🤖 '+h}})};g.parentNode.insertBefore(b,g)}}catch(e){}return r}}
 
+/* ===== Block 169: Roboter als kleine Leiste oben (wie beim Anruf), Runterwischen = alles sehen · weichere, natürlichere Stimme ===== */
+TM.open=false;
+{const st=document.createElement('style');st.textContent='#rbt.mini .rbc{display:none}#rbt:not(.mini) #rbpill{display:none}#rbpill{display:flex;align-items:center;gap:8px;margin:0 auto;width:min(66vw,300px);height:34px;box-sizing:border-box;padding:0 12px;border-radius:20px;background:#111319f2;border:1.5px solid #0a84ff;box-shadow:0 4px 16px #0008;cursor:pointer;touch-action:none;-webkit-user-select:none;user-select:none}#rbpill .pi{font-size:19px;line-height:1}#rbpill .pt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;opacity:.92}#rbpill .pc{opacity:.6;font-size:13px}#rbpill .wv{display:none;gap:2px;align-items:center;height:16px}#rbpill.sp .wv{display:flex}#rbpill .wv i{width:3px;background:#30d158;border-radius:2px;animation:rbw .7s ease-in-out infinite}#rbpill .wv i:nth-child(2){animation-delay:.15s}#rbpill .wv i:nth-child(3){animation-delay:.3s}@keyframes rbw{0%,100%{height:4px}50%{height:15px}}#rbhd{display:flex;justify-content:center;padding:0 0 4px;cursor:pointer;touch-action:none}#rbhd i{display:block;width:44px;height:5px;border-radius:3px;background:#ffffff55}';document.head.appendChild(st)}
+function tmOpen(v){TM.open=!!v;const r=document.getElementById('rbt');if(r)r.classList.toggle('mini',!TM.open)}
+{const _u=tmUI;tmUI=function(text,o){const r=_u.apply(this,arguments);try{const rb=document.getElementById('rbt');if(!rb)return r;
+ const plain=tmClean(tmDiaHtml?tmDiaHtml(text):text).replace(/\s+/g,' ').trim();
+ let pill=document.getElementById('rbpill');if(!pill){pill=document.createElement('div');pill.id='rbpill';rb.insertBefore(pill,rb.firstChild)}
+ pill.innerHTML='<span class="pi">🤖</span><span class="wv"><i></i><i></i><i></i></span><span class="pt">'+plain.replace(/</g,'&lt;')+'</span><span class="pc">⌄</span>';
+ let dy0=null,moved=false;pill.onpointerdown=e=>{dy0=e.clientY;moved=false};pill.onpointermove=e=>{if(dy0!=null&&e.clientY-dy0>14){moved=true;dy0=null;tmOpen(true)}};pill.onpointerup=()=>{if(dy0!=null&&!moved)tmOpen(true);dy0=null};pill.onpointercancel=()=>{dy0=null};
+ const c=rb.querySelector('.rbc');if(c&&!document.getElementById('rbhd')){const h=document.createElement('div');h.id='rbhd';h.innerHTML='<i></i>';c.parentNode.insertBefore(h,c);let y0=null,mv=false;h.onpointerdown=e=>{y0=e.clientY;mv=false};h.onpointermove=e=>{if(y0!=null&&y0-e.clientY>14){mv=true;y0=null;tmOpen(false)}};h.onpointerup=()=>{if(y0!=null&&!mv)tmOpen(false);y0=null}}
+ const hd=document.getElementById('rbhd');if(hd)hd.style.display=TM.open?'flex':'none';
+ rb.classList.toggle('mini',!TM.open)}catch(e){}return r}}
+{const _s=tmStep;tmStep=function(){const st=TM.tour&&TM.tour.s[TM.i];TM.open=!!(st&&st.k==='info');return _s.apply(this,arguments)}}
+{const _d=tmDone;tmDone=function(){TM.open=true;return _d.apply(this,arguments)}}
+{const _a=tmAskVoice;tmAskVoice=function(f){return _a.call(this,h=>{tmOpen(true);f(h)})}}
+/* ---- Stimme: weicher & natürlicher ---- */
+const TMSPK={q:[],on:false};
+function tmSpeakText(t){let s=tmClean(t);s=s.replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}]/gu,'').replace(/↺/g,' den Zurück-Knopf ').replace(/⌂/g,' den Beenden-Knopf ').replace(/[▶▼▲›‹⌄⌃•]/g,' ').replace(/→/g,' dann ').replace(/×/g,' mal ').replace(/\s*·\s*/g,', ').replace(/\(([^)]*)\)/g,', $1, ').replace(/\s+/g,' ').trim();return s}
+tmPickVoice=function(){try{const vs=speechSynthesis.getVoices()||[];const want=TMD==='bayerisch'?['de-at','de-de','de']:['de-de','de-at','de'];
+ const pri=v=>/premium|enhanced|erweitert|natural|neural/i.test(v.name)?0:/siri/i.test(v.name)?1:/anna|helena|katja|petra|google deutsch|yannick|markus|viktor/i.test(v.name)?2:3;
+ for(const l of want){const c=vs.filter(v=>(v.lang||'').replace('_','-').toLowerCase().startsWith(l)).sort((a,b)=>pri(a)-pri(b));if(c.length)return c[0]}}catch(e){}return null};
+tmSpeak=function(t,force){if(TM.mode!=='voice'&&!force)return;try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const txt=tmSpeakText(tmDia(tmClean(t)));if(!txt)return;
+ const parts=txt.match(/[^.!?]+[.!?]*/g)||[txt],v=tmPickVoice(),pill=document.getElementById('rbpill');let left=parts.length;
+ parts.forEach((p,i)=>{p=p.trim();if(!p)return left--;const u=new SpeechSynthesisUtterance(p);if(v){u.voice=v;u.lang=v.lang}else u.lang='de-DE';u.rate=TMD==='hoch'?.93:.9;u.pitch=1;u.volume=1;
+  u.onstart=()=>{if(pill)pill.classList.add('sp')};u.onend=u.onerror=()=>{left--;if(left<=0&&pill)pill.classList.remove('sp')};speechSynthesis.speak(u)})}catch(e){}};
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

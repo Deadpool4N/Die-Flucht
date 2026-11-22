@@ -6858,7 +6858,7 @@ function dayEggTake(){if(dayEggTaken())return null;let r='Häufig';const x=Math.
 const WHP={price:3000};
 const WHPR={c1:{t:'🪙 1.000 Münzen',i:'🪙',w:26,coins:1000,col:'#ff9f0a'},c2:{t:'🪙 2.500 Münzen',i:'💰',w:16,coins:2500,col:'#ffb020'},c3:{t:'🪙 6.000 Münzen',i:'💰',w:8,coins:6000,col:'#ffcc33'},c4:{t:'🪙 20.000 Münzen',i:'💎',w:2.5,coins:20000,col:'#64d2ff'},
  eH:{t:'🥚 Häufiges Ei',i:'🥚',w:14,egg:'Häufig',col:'#cfc6b4'},eS:{t:'🥚 Seltenes Ei',i:'🥚',w:8,egg:'Selten',col:'#4da3ff'},eE:{t:'🥚 Episches Ei',i:'🥚',w:4.5,egg:'Episch',col:'#b86bff'},eL:{t:'🥚 Legendäres Ei',i:'🥚',w:1.5,egg:'Legendär',col:'#ffb020'},
- bo:{t:'🍀 Glücksbooster (30 Min.)',i:'🍀',w:10,boost:1,col:'#30d158'},sk:{t:'👑 Gratis-Skin',i:'👑',w:.5,skin:1,col:'#ff453a'},tr:{t:'🎁 Trostpreis: 300 Münzen',i:'🎁',w:9,coins:300,col:'#8a8a94'},jp:{t:'🎰 JACKPOT',i:'🎰',w:.1,jp:1,col:'#ffd60a'}};
+ bo:{t:'🍀 Glücksbooster (30 Min.)',i:'🍀',w:10,boost:1,col:'#30d158'},sk:{t:'👑 Gratis-Skin',i:'👑',w:.5,skin:1,col:'#ff453a'},tr:{t:'🎁 Trostpreis: 300 Münzen',i:'🎁',w:9,coins:300,col:'#8a8a94'},jp:{t:'🎰 GIG: 1.000.000 Münzen',i:'🎰',w:.02,jp:1,col:'#ffd60a'}};
 const WHSL=['c1','eH','tr','c2','bo','eS','c1','eH','c3','eE','tr','c4','eL','sk','jp'];
 let WHFORCE='';const whAdmin=()=>{try{return !!((typeof CHEATS!=='undefined'&&CHEATS)||(accReady()&&accCur().op))}catch(e){return false}};
 function whRoll(){if(WHFORCE&&WHPR[WHFORCE]&&whAdmin()){const k=WHFORCE;WHFORCE='';return k}WHFORCE='';const lucky=luckOn(),w={};Object.keys(WHPR).forEach(k=>{let x=WHPR[k].w;if(lucky){if(['c1','tr','eH'].includes(k))x*=.5;if(['c3','c4','eE','eL','sk','bo','jp'].includes(k))x*=1.6}w[k]=x});
@@ -6866,7 +6866,7 @@ function whRoll(){if(WHFORCE&&WHPR[WHFORCE]&&whAdmin()){const k=WHFORCE;WHFORCE=
 function whApply(id){const P=WHPR[id];let txt=P.t,sub='';
  if(P.coins){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+P.coins)}catch(e){}}
  else if(P.egg){petEggAdd(P.egg,1);sub='Du findest es unter Pets → Eier.'}
- else if(P.jp){const n=Math.random()<.7?100000:150000;try{if(cxCoins()!==Infinity)cxSet(cxCoins()+n)}catch(e){}txt='🎰 JACKPOT: '+n.toLocaleString('de-DE')+' Münzen';try{accSave(true)}catch(e){}return {txt,sub:'',jp:n}}
+ else if(P.jp){const n=1000000;try{if(cxCoins()!==Infinity)cxSet(cxCoins()+n)}catch(e){}txt='🎰 GIG: '+n.toLocaleString('de-DE')+' Münzen';try{accSave(true)}catch(e){}return {txt,sub:'',jp:n}}
  else if(P.boost){luckGive(30);sub='30 Minuten lang +25 % Münzen und bessere Preise am Glücksrad.'}
  else if(P.skin){const L=CXSKINS.filter(it=>!it.hidden&&typeof it.own==='function'&&!it.own()&&typeof it.give==='function');
   if(L.length){const it=L[Math.floor(Math.random()*L.length)];try{it.give()}catch(e){const x=cxShop();if(!x.skins.includes(it.id)){x.skins.push(it.id);cxWrite('dfShop',x)}}txt='👑 Skin gewonnen: '+it.n;sub='Du findest ihn im Shop unter Skins.'}
@@ -6877,12 +6877,12 @@ function whSvg(rot){const N=WHSL.length,R=130,cx=140,cy=140;let w='';
   w+='<path d="M'+cx+' '+cy+'L'+(cx+R*Math.cos(a0)).toFixed(1)+' '+(cy+R*Math.sin(a0)).toFixed(1)+'A'+R+' '+R+' 0 0 1 '+(cx+R*Math.cos(a1)).toFixed(1)+' '+(cy+R*Math.sin(a1)).toFixed(1)+'Z" fill="'+P.col+'" fill-opacity="'+(i%2?'.55':'.85')+'" stroke="#0c0d12" stroke-width="2"/>'
    +'<text x="'+(cx+R*.72*Math.cos(am)).toFixed(1)+'" y="'+(cy+R*.72*Math.sin(am)+7).toFixed(1)+'" font-size="22" text-anchor="middle">'+P.i+'</text>'}
  const T='rotate('+(rot||0)+'deg)';return '<div id="whrot" style="width:280px;max-width:86vw;margin:0 auto;transition:transform 4.2s cubic-bezier(.12,.7,.15,1);-webkit-transition:-webkit-transform 4.2s cubic-bezier(.12,.7,.15,1);transform:'+T+';-webkit-transform:'+T+'"><svg viewBox="0 0 280 280" width="100%" style="display:block">'+w+'<circle cx="'+cx+'" cy="'+cy+'" r="22" fill="#0c0d12" stroke="#fff" stroke-width="3"/></svg></div>'}
-/* ---- JACKPOT: goldener Bildschirm, Fanfare, Schriftzug ---- */
+/* ---- GIG (Jackpot): goldener Bildschirm, Fanfare, Schriftzug ---- */
 function jackpotFx(amount,done){let d=document.getElementById('jpfx');if(d)d.remove();d=document.createElement('div');d.id='jpfx';
  d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:10120;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,#fff6b0,#ffd60a 38%,#e89a00 72%,#a86400);color:#3a2400;font-family:-apple-system,system-ui,sans-serif;text-align:center;overflow:hidden;animation:jpf .5s ease-out';
  let c='';for(let i=0;i<26;i++)c+='<span style="position:absolute;top:-8vh;left:'+Math.round(Math.random()*96)+'vw;font-size:'+(20+Math.round(Math.random()*22))+'px;animation:jpc '+(2.6+Math.random()*2.4).toFixed(2)+'s linear '+(Math.random()*2.5).toFixed(2)+'s infinite">'+['🪙','✨','💰','⭐'][i%4]+'</span>';
  d.innerHTML='<style>@keyframes jpf{from{opacity:0}to{opacity:1}}@keyframes jpz{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}@keyframes jpc{from{transform:translateY(0) rotate(0)}to{transform:translateY(118vh) rotate(360deg)}}</style>'+c
-  +'<div style="position:relative;font-size:clamp(42px,15vw,96px);font-weight:900;letter-spacing:3px;animation:jpz .6s infinite;text-shadow:0 4px 0 rgba(255,255,255,.55),0 0 34px #fff">JACKPOT!</div>'
+  +'<div style="position:relative;font-size:clamp(70px,30vw,190px);font-weight:900;letter-spacing:3px;animation:jpz .6s infinite;text-shadow:0 4px 0 rgba(255,255,255,.55),0 0 34px #fff">GIG</div>'
   +'<div style="position:relative;font-size:clamp(30px,10vw,62px);font-weight:800;margin-top:12px">+'+amount.toLocaleString('de-DE')+' 🪙</div><div style="position:relative;margin-top:26px;font-size:15px;opacity:.7">Tippen zum Weiter</div>';
  document.body.appendChild(d);try{navigator.vibrate&&navigator.vibrate([200,80,200,80,400])}catch(e){}
  let fin=false;const end=()=>{if(fin)return;fin=true;try{d.remove()}catch(e){}try{done&&done()}catch(e){}};d.addEventListener('pointerdown',e=>{e.preventDefault();end()});setTimeout(end,7000)}
@@ -6896,7 +6896,7 @@ function wheelUI(msg){const coins=cxCoins();
   +(whAdmin()?'<div class="grp" style="margin-top:10px;padding:10px;text-align:left"><b>🛠 Admin: Nächster Gewinn</b><select id="whf" style="width:100%;margin-top:6px;padding:9px;border-radius:10px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:15px"><option value="">🎲 Zufall</option>'+Object.keys(WHPR).map(k=>'<option value="'+k+'"'+(WHFORCE===k?' selected':'')+'>'+WHPR[k].t+'</option>').join('')+'</select><small style="opacity:.7;display:block;margin-top:4px">Gilt nur für die nächste Drehung.</small></div>':'')
   +'<div style="margin-top:10px"><button class="pill blue" id="whgo" style="font-size:18px;padding:14px 26px;width:min(88%,330px)">Drehen · '+WHP.price.toLocaleString('de-DE')+' 🪙</button></div>'
   +'<p class="foot" id="whm" style="min-height:44px;font-size:15px">'+(msg||'')+'</p>'
-  +'<div class="grp" style="text-align:left;margin-top:8px"><div class="row"><span class="tx"><b>Mögliche Preise</b><small>🪙 Münzen bis 20.000 · 🥚 Eier (auch Episch und Legendär) · 🍀 Glücksbooster · 👑 Skin gratis (sehr selten) · 🎰 JACKPOT mit 100.000 oder 150.000 Münzen (extrem selten)</small></span></div></div></div>');
+  +'<div class="grp" style="text-align:left;margin-top:8px"><div class="row"><span class="tx"><b>Mögliche Preise</b><small>🪙 Münzen bis 20.000 · 🥚 Eier (auch Episch und Legendär) · 🍀 Glücksbooster · 👑 Skin gratis (sehr selten) · 🎰 GIG mit 1.000.000 Münzen (extrem selten)</small></span></div></div></div>');
  const q=i=>document.getElementById(i);q('whx').onclick=()=>shopUI();if(q('whf'))q('whf').onchange=()=>{WHFORCE=q('whf').value};
  q('whgo').onclick=()=>{if(whBusy)return;const c=cxCoins();if(c!==Infinity&&c<WHP.price){q('whm').textContent='Dafür fehlen dir noch '+(WHP.price-c).toLocaleString('de-DE')+' 🪙.';return}
   whBusy=true;q('whgo').disabled=true;q('whx').disabled=true;if(c!==Infinity)cxSet(c-WHP.price);

@@ -6530,6 +6530,183 @@ function tutOpen(c,i){TUTS.c=c==null?-1:c;TUTS.i=i||0;let el=document.getElement
 {const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);try{const a=document.querySelector('.ios .sub');if(a&&!document.getElementById('tutb')){a.insertAdjacentHTML('afterend','<div class="grp" style="margin-top:12px"><button class="row" id="tutb"><span class="ic" style="background:#0a84ff">📖</span><span class="tx"><b>Tutorial</b><small>Alles Schritt für Schritt erklärt</small></span><i class="chev">›</i></button></div>');document.getElementById('tutb').onclick=()=>tutOpen()}}catch(e){}return r}}
 {const _p=pauseUI;pauseUI=function(p2){const r=_p.apply(this,arguments);try{const a=document.getElementById('vwrow')||document.getElementById('pfauto')||document.getElementById('sgrow');if(a&&!document.getElementById('tutp')){const g=a.closest('.grp')||a.parentNode;g.insertAdjacentHTML('afterend','<div class="grp" style="margin-top:8px"><button class="row" id="tutp"><span class="tx"><b>📖 Tutorial</b><small>Anleitung Schritt für Schritt</small></span></button></div>');document.getElementById('tutp').onclick=()=>tutOpen()}}catch(e){}return r}}
 
+/* ===== Block 166: Tutorial-Modus – Spielmodi testen mit Roboter-Helfer, Pfeilen & abgedunkeltem Bildschirm (zählt nicht: alles wird beim Beenden zurückgesetzt) ===== */
+const TM={on:false,snap:null,tour:null,i:0,tm:null,hit:null,mode:'bubble'};
+try{const v=localStorage.getItem('dfRobot');if(v==='voice'||v==='bubble')TM.mode=v}catch(e){}
+function tmBegin(){if(TM.on)return;TM.on=true;TM.snap={};try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);TM.snap[k]=localStorage.getItem(k)}}catch(e){}}
+{const _o=opsPost;opsPost=async function(){if(TM.on)return null;return _o.apply(this,arguments)}}
+{const _a=accSave;accSave=function(){if(TM.on)return;return _a.apply(this,arguments)}}
+try{const _c=cloudPush;cloudPush=function(){if(TM.on)return;return _c.apply(this,arguments)}}catch(e){}
+function tmEnd(){try{speechSynthesis.cancel()}catch(e){}
+ try{if(TM.snap){const keep=localStorage.getItem('dfRobot');const cur=[];for(let i=0;i<localStorage.length;i++)cur.push(localStorage.key(i));cur.forEach(k=>{if(!(k in TM.snap)&&k!=='dfRobot')localStorage.removeItem(k)});Object.keys(TM.snap).forEach(k=>{if(k!=='dfRobot')localStorage.setItem(k,TM.snap[k])});if(keep!=null)localStorage.setItem('dfRobot',keep)}}catch(e){}
+ TM.on=false;TM.snap=null;try{sessionStorage.removeItem('dfTutTour')}catch(e){}qReload()}
+/* ---- Antworten des Roboters ---- */
+const TMFAQ=[
+ [['hallo','hi ','wer bist'],'Ich bin dein Helfer-Roboter. Ich erkläre dir das Spiel Schritt für Schritt und beantworte deine Fragen.'],
+ [['münze','coins','geld'],'Münzen bekommst du fürs Spielen, durch Aufgaben und im Pass. Damit kaufst du im Shop Skins und Eier, Pass-Level (500 Münzen) und Geschenke.'],
+ [['was soll ich','was muss ich','wie weiter','nächste','hilfe'],null],
+ [['bot','helfer'],'Ich bin dein Bot. In den Online-Tests bin ich dein Mitspieler und laufe hinter dir her, damit du alles ausprobieren kannst.'],
+ [['zählt','rekord','belohnung','timer','zeit'],'Im Tutorial zählt nichts: Es läuft kein Timer, es gibt keine Rekorde und keine Belohnungen. Beim Beenden wird alles zurückgesetzt.']];
+const tmClean=t=>String(t||'').replace(/<[^>]+>/g,'').replace(/\n+/g,' ');
+function tmAnswer(q){q=String(q||'').toLowerCase().trim();if(!q)return 'Stell mir eine Frage, zum Beispiel: Wie öffne ich ein Ei?';
+ for(const f of TMFAQ){if(f[0].some(k=>q.includes(k))){if(f[1])return f[1];const st=TM.tour&&TM.tour.s[TM.i];return st?'Gerade dran: '+tmClean(st.r):'Starte unten einen Spielmodus zum Testen. Ich helfe dir dann Schritt für Schritt.'}}
+ const tk=q.split(/[^a-zäöüß0-9]+/).filter(w=>w.length>=3).map(w=>w.replace(/(en|er|e|n|s)$/,'')).filter(w=>w.length>=3);let best=null,bs=0;
+ TUT.forEach(c=>c.s.forEach(s=>{const hay=(c.n+' '+s.t+' '+s.b+' '+(s.tip||'')).toLowerCase();let sc=0;tk.forEach(w=>{if(hay.includes(w))sc+=(s.t.toLowerCase().includes(w)||c.n.toLowerCase().includes(w))?3:1});if(sc>bs){bs=sc;best={c,s}}}));
+ if(best&&bs>=1)return best.s.t+': '+tmClean(best.s.b)+(best.s.tip?' Tipp: '+tmClean(best.s.tip):'');
+ return 'Das weiß ich leider nicht genau. Frag zum Beispiel: Wie öffne ich ein Ei? · Wie funktioniert der Pass? · Wie spiele ich online?'}
+function tmSpeak(t){if(TM.mode!=='voice')return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(tmClean(t));u.lang='de-DE';u.rate=1;speechSynthesis.speak(u)}catch(e){}}
+function tmSetMode(m){TM.mode=m;try{localStorage.setItem('dfRobot',m);if(TM.snap)TM.snap.dfRobot=m}catch(e){}if(m!=='voice'){try{speechSynthesis.cancel()}catch(e){}}}
+/* ---- Oberfläche ---- */
+{const st=document.createElement('style');st.textContent='#rbt{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 8px);width:min(94vw,560px);z-index:10090;font:15px/1.4 -apple-system,system-ui,sans-serif;color:#fff;display:none}#rbt.bot{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}#rbt .rbc{display:flex;gap:10px;align-items:flex-start;background:#15171f;border:2px solid #0a84ff;border-radius:18px;padding:10px 12px;box-shadow:0 8px 30px #000a}#rbt .rbi{font-size:34px;line-height:1;animation:rbb 2s ease-in-out infinite}@keyframes rbb{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}#rbt .rbx{flex:1;min-width:0}#rbt .rbt{margin-bottom:6px}#rbt .rbbs{display:flex;flex-wrap:wrap;gap:6px}#rbt button{border:0;border-radius:10px;padding:7px 11px;font:600 13px -apple-system,system-ui,sans-serif;background:#ffffff26;color:#fff}#rbt button.p{background:#30d158;color:#000}#rbt button.d{background:#ff453a}#rbt input{width:100%;box-sizing:border-box;margin-top:6px;padding:8px;border-radius:10px;border:1px solid #444;background:#2a2d38;color:#fff;font-size:14px}'
++'#cch{position:fixed;inset:0;z-index:10080;pointer-events:none}#cch .dm{position:fixed;background:rgba(0,0,0,.74);pointer-events:auto}#cch .rg{position:fixed;border:4px solid #ff3b30;border-radius:18px;box-shadow:0 0 0 3px #ff3b3055,0 0 24px #ff3b30;pointer-events:none;animation:cpl 1.1s ease-in-out infinite}@keyframes cpl{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}#cch .ar{position:fixed;font-size:46px;color:#ff3b30;text-shadow:0 0 10px #000,0 0 18px #ff3b30;pointer-events:none;animation:cbn .8s ease-in-out infinite;line-height:1;transform:translateX(-50%)}@keyframes cbn{0%,100%{margin-top:0}50%{margin-top:-10px}}';document.head.appendChild(st)}
+function tmRobot(){let r=document.getElementById('rbt');if(!r){r=document.createElement('div');r.id='rbt';document.body.appendChild(r)}return r}
+function tmUI(text,o){o=o||{};const r=tmRobot();r.style.display='block';r.className=o.bottom?'bot':'';
+ r.innerHTML='<div class="rbc"><div class="rbi">🤖</div><div class="rbx"><div class="rbt" id="rbtx">'+text+'</div><div class="rbbs">'+(o.next?'<button class="p" id="rbnx">'+(o.next===true?'Weiter ▶':o.next)+'</button>':'')+'<button id="rbq">💬 Fragen</button><button id="rbvo">'+(TM.mode==='voice'?'🔊 Ton an':'🔇 Nur Text')+'</button>'+(o.skip?'<button id="rbsk">Überspringen ›</button>':'')+'<button class="d" id="rbend">Tutorial beenden</button></div><div id="rbask" style="display:none"><input id="rbin" placeholder="Frag mich etwas … (Enter)" maxlength="120"></div></div></div>';
+ const g=i=>document.getElementById(i);if(g('rbnx'))g('rbnx').onclick=()=>tmNext();if(g('rbsk'))g('rbsk').onclick=()=>tmNext();
+ g('rbvo').onclick=()=>{tmSetMode(TM.mode==='voice'?'bubble':'voice');g('rbvo').textContent=TM.mode==='voice'?'🔊 Ton an':'🔇 Nur Text';if(TM.mode==='voice')tmSpeak('Ich spreche jetzt mit dir. '+text)};
+ g('rbq').onclick=()=>{const a=g('rbask');a.style.display=a.style.display==='none'?'block':'none';if(a.style.display==='block')g('rbin').focus()};
+ g('rbin').onkeydown=e=>{if(e.key==='Enter'){const q=g('rbin').value;g('rbin').value='';const a=tmAnswer(q);g('rbtx').textContent=a;tmSpeak(a)}};
+ g('rbend').onclick=()=>{const b=g('rbend');if(b.dataset.s!=='1'){b.dataset.s='1';b.textContent='Nochmal tippen: Beenden & zurücksetzen';return}tmEnd()}}
+function coachClear(){const c=document.getElementById('cch');if(c)c.remove()}
+function coachDraw(rect){coachClear();const c=document.createElement('div');c.id='cch';const W=innerWidth,H=innerHeight;
+ if(!rect){c.innerHTML='<div class="dm" style="left:0;top:0;width:100%;height:100%"></div>';document.body.appendChild(c);return}
+ const p=8,l=Math.max(0,rect.left-p),t=Math.max(0,rect.top-p),r=Math.min(W,rect.right+p),b=Math.min(H,rect.bottom+p);
+ const D=(x,y,w,h)=>'<div class="dm" style="left:'+x+'px;top:'+y+'px;width:'+Math.max(0,w)+'px;height:'+Math.max(0,h)+'px"></div>';
+ const up=rect.top>150,ax=Math.max(24,Math.min(W-24,(rect.left+rect.right)/2));
+ c.innerHTML=D(0,0,W,t)+D(0,b,W,H-b)+D(0,t,l,b-t)+D(r,t,W-r,b-t)+'<div class="rg" style="left:'+(l-2)+'px;top:'+(t-2)+'px;width:'+(r-l+4)+'px;height:'+(b-t+4)+'px"></div>'
+  +'<div class="ar" style="left:'+ax+'px;top:'+(up?Math.max(0,t-58):Math.min(H-50,b+6))+'px">'+(up?'▼':'▲')+'</div>';document.body.appendChild(c)}
+const tmVis=el=>{if(!el)return null;const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return(r.width>4&&r.height>4&&cs.display!=='none'&&cs.visibility!=='hidden')?r:null};
+const tmFind=sel=>{const a=Array.isArray(sel)?sel:[sel];for(const s of a){const e=document.querySelector(s);if(e&&tmVis(e))return e}return null};
+function tmNext(){clearInterval(TM.tm);TM.hit=null;coachClear();TM.i++;tmStep()}
+function tmDone(){coachClear();clearInterval(TM.tm);tmUI('🎉 Geschafft! Das war der Test. Du kannst jetzt frei weiterspielen und alles ausprobieren. Es zählt nichts davon. Wenn du fertig bist, tippe auf „Tutorial beenden“. Dann ist alles wieder wie vorher.');tmSpeak('Geschafft! Du kannst jetzt frei weiterspielen. Es zählt nichts davon.')}
+function tmStep(){clearInterval(TM.tm);coachClear();const T=TM.tour,st=T&&T.s[TM.i];if(!st)return tmDone();try{st.d&&st.d()}catch(e){}
+ const txt=st.r;tmSpeak(txt);
+ if(st.k==='info'){tmUI(txt,{next:true,skip:false});coachDraw(null);return}
+ if(st.k==='wait'){tmUI(txt,{skip:true});let n=0;TM.tm=setInterval(()=>{try{if(st.c()){clearInterval(TM.tm);setTimeout(tmNext,700)}}catch(e){}},400);return}
+ /* click */
+ let miss=0,tgt=null,placed='';tmUI(txt,{skip:true});
+ const hit=()=>{if(TM.hit)return;TM.hit=1;coachClear();clearInterval(TM.tm);setTimeout(()=>{TM.hit=null;tmNext()},500)};
+ TM.tm=setInterval(()=>{const el=tmFind(st.sel);if(!el){miss++;if(miss>10){clearInterval(TM.tm);tmUI(txt+'<br><small>(Ich sehe die Stelle gerade nicht. Tippe auf Weiter.)</small>',{next:true});coachDraw(null)}return}
+  const r=el.getBoundingClientRect(),key=[r.left|0,r.top|0,r.width|0,r.height|0].join(',');
+  if(el!==tgt){tgt=el;['pointerdown','touchstart','mousedown'].forEach(ev=>el.addEventListener(ev,hit,{capture:true,once:true,passive:true}));placed=''}
+  if(key!==placed){placed=key;coachDraw(r);const bot=r.top<170&&r.left<innerWidth;const rb=document.getElementById('rbt');if(rb)rb.className=bot?'bot':''}},250)}
+function tmStart(id){const T=TOURS[id];if(!T)return;try{const e=document.getElementById('tut');if(e)e.remove()}catch(e){}
+ tmBegin();TM.tour=T;TM.i=0;try{if(!document.getElementById('start')&&!ovOn)menuStart()}catch(e){}setTimeout(tmStep,250)}
+/* ---- Bots für die Online-Tests ---- */
+{const _pc=poCreate;poCreate=function(name,tries){if(!TM.on)return _pc.apply(this,arguments);name=cxClean(name)||'Spieler';try{poCleanup()}catch(e){}PO.name=name;PO.on=true;PO.host=true;PO.code='ÜBUNG';PO.myId='h0';PO.pl={h0:{n:name,x:0,z:0,y:0,ry:0,f:0},bot:{n:'Helfer-Bot',x:0,z:0,y:0,ry:0,f:0,sk:'gold'}};PO.bot=1;poLobby()}}
+{const H=[];setInterval(()=>{try{if(!PO.on||!PO.bot||!PK.on||!PO.pl.bot)return;H.push({x:pos.x-320,z:pos.z,y:PK.y,ry:Y||0});if(H.length>200)H.shift();const e=H[Math.max(0,H.length-22)],b=PO.pl.bot;b.x=e.x+1.2;b.z=e.z;b.y=e.y;b.ry=e.ry;b.lv=PK.lvl}catch(e){}},120)}
+{const _mc=mpCreate;mpCreate=function(name){if(!TM.on)return _mc.apply(this,arguments);name=cxClean(name)||'Spieler';MP.name=name;MP.isHost=true;MP.code='ÜBUNG';MP.myId='h0';MP.conns={};MP.peer={destroy(){},reconnect(){}};MP.host=new MPHost(mpHSend,mpHBcast,mpBoxes());MP.host.add('h0',name,0,SKIN.cur,(MP.bn=cxBn()));MP.host.add('bot1','Helfer-Bot',0,'gold',[]);MP.iv=setInterval(mpHostLoop,66);MP.bot=1;try{MP.host.lobby()}catch(e){}}}
+setInterval(()=>{try{const h=MP.host;if(!TM.on||!MP.bot||!h||h.phase!=='play')return;const me=h.P.h0,b=h.P.bot1;if(!me||!b||b.role!=='p'||b.st!=='ok')return;const tx=me.x+1.2,tz=me.z+.9,dx=tx-b.x,dz=tz-b.z,d=Math.hypot(dx,dz),s=Math.min(d,.28);const nx=d>.05?b.x+dx/d*s:b.x,nz=d>.05?b.z+dz/d*s:b.z;h.msg('bot1',{t:'p',x:nx,z:nz,ry:Math.atan2(-dx,-dz),pt:0,m:d>.3?1:0})}catch(e){}},100);
+/* ---- Touren ---- */
+const TOURS={
+ l1:{n:'Level 1 · Die Flucht',ic:'🏚',s:[
+  {k:'info',r:'Hallo! Ich bin dein Helfer-Roboter 🤖. Wir testen jetzt <b>Level 1</b>. Das zählt nicht: Es gibt keinen Timer und keine Belohnung. Wenn ein Pfeil erscheint, tippe genau auf die rot markierte Stelle.'},
+  {k:'click',sel:'[data-lv="Leicht"]',r:'Tippe auf <b>Leicht</b>. Dann startet das Spiel.'},
+  {k:'info',r:'Du sitzt gefesselt auf einem Stuhl. Wische mit dem rechten Daumen über den Bildschirm, dann schaust du dich um. Probiere es kurz aus und tippe dann auf Weiter.'},
+  {k:'click',sel:'#joy',r:'Das ist der <b>Stick</b>. Damit läufst du. Tippe ihn an.'},
+  {k:'click',sel:'#inv',r:'Das ist dein <b>Inventar</b>. Hier landen alle Items. Tippe ein Item an, um es auszuwählen.'},
+  {k:'click',sel:'#act',r:'Das ist der <b>Aktions-Knopf</b>. Er erscheint, wenn du nah an etwas bist: aufheben, öffnen, benutzen.'},
+  {k:'wait',c:()=>has('Dietrich'),r:'Am Boden glänzt etwas. Sieh dich um, geh nah heran und tippe den Aktions-Knopf. Das ist dein <b>Dietrich</b>.'},
+  {k:'wait',c:()=>!S.tied,r:'Wähle den Dietrich im Inventar aus. Dann tippe bei den Fesseln den Aktions-Knopf und knacke das Schloss.'},
+  {k:'wait',c:()=>has('Brecheisen'),r:'Du bist frei! Geh zum Regal im Lagerraum und durchsuche es. Dort liegt ein <b>Brecheisen</b>.'},
+  {k:'info',r:'Sehr gut! Mit dem Brecheisen öffnest du die Kiste, dann folgt die Tür, der Keller und das Labyrinth. Spiele ruhig weiter. Ich bin immer da, tippe auf „Fragen“.'}]},
+ l2:{n:'Level 2 · Beta',ic:'🧪',s:[
+  {k:'info',r:'Wir testen <b>Level 2</b>. In der echten Beta brauchst du ein Passwort. Beim Test starte ich es für dich.'},
+  {k:'info',d:()=>{try{closeOv()}catch(e){}try{startPart2('Leicht')}catch(e){}},r:'Du bist in der Zelle. Sieh dich um und suche den Weg hinaus. Tippe dann auf Weiter.'},
+  {k:'click',sel:'#joy',r:'Mit dem <b>Stick</b> läufst du.'},
+  {k:'click',sel:'#inv',r:'Im <b>Inventar</b> siehst du deine Items, zum Beispiel die Taschenlampe.'},
+  {k:'info',r:'Im Serverraum brauchst du drei Sicherungen und die Taschenlampe. In den Katakomben schleichst du (Stick halb). In der Maschinenhalle ziehst du die Hebel nach dem Wartungsplan. Viel Spaß beim Testen!'}]},
+ pk:{n:'Parkour',ic:'🏃',s:[
+  {k:'info',r:'Wir testen <b>Parkour</b>: ein Hüpf-Modus mit 100 Leveln. Es zählt nicht, nichts wird gespeichert.'},
+  {k:'click',sel:'#pkopen',r:'Tippe auf <b>Parkour</b>.'},
+  {k:'click',sel:'#pkgo',r:'Tippe auf diesen Knopf, um <b>Level 1</b> zu starten.'},
+  {k:'click',sel:'#pkjump',r:'Das ist der <b>SPRUNG</b>-Knopf. Tippe ihn an.'},
+  {k:'click',sel:'#pkbtns',r:'Mit <b>↺</b> springst du zum letzten Checkpoint zurück. Mit <b>⌂</b> beendest du Parkour.'},
+  {k:'wait',c:()=>pos.z<-8,r:'Laufe mit dem Stick nach vorne und springe über die Lücken.'},
+  {k:'info',r:'Prima! Ziel ist die Fahne am Ende des Levels. Teste frei weiter.'}]},
+ po:{n:'Parkour Online (mit Bot)',ic:'🌐',s:[
+  {k:'info',r:'Wir testen <b>Parkour Online</b>. Online spielt man mit Freunden. Beim Test bin ich dein Mitspieler: der <b>Helfer-Bot</b>.'},
+  {k:'click',sel:'#pkopen',r:'Tippe auf <b>Parkour</b>.'},
+  {k:'click',sel:'#poenter',r:'Tippe auf <b>Parkour Online</b>.'},
+  {k:'click',sel:'#poc',r:'Mit <b>Raum erstellen</b> bekommst du einen Code für Freunde. Beim Test kommt gleich der Bot dazu.'},
+  {k:'info',r:'Das ist die Lobby. Oben steht der Raum-Code, darunter die Spieler: du und der Helfer-Bot.'},
+  {k:'click',sel:'#pogo',r:'Tippe auf <b>Rennen starten</b>.'},
+  {k:'info',r:'Das Rennen läuft! Ich laufe kurz hinter dir her. Du siehst meinen Skin und meinen Namen. Rechts siehst du die Rangliste.'},
+  {k:'wait',c:()=>pos.z<-8,r:'Laufe nach vorne. Wer zuerst im Ziel ist, gewinnt.'},
+  {k:'info',r:'Super! Probiere ruhig weiter.'}]},
+ mp:{n:'Multiplayer · Haus (mit Bot)',ic:'🏠',s:[
+  {k:'info',r:'Wir testen den <b>Multiplayer im Haus</b>. Ein Spieler ist der Jäger, die anderen lösen Rätsel und fliehen. Beim Test bin ich dein Mitspieler: der <b>Helfer-Bot</b>.'},
+  {k:'click',sel:'#mpb',r:'Tippe auf <b>Multiplayer</b>.'},
+  {k:'click',sel:'#mpc1',r:'Tippe auf <b>Gruppe erstellen</b>. Im echten Spiel bekommst du einen Code für Freunde.'},
+  {k:'info',r:'Das ist die <b>Lobby</b>: Oben der Code, darunter die Spieler (du und ich). Der Host wählt Schwierigkeit und Spielmodus.'},
+  {k:'click',sel:'#mpgo',r:'Tippe auf <b>Spiel starten</b>.'},
+  {k:'info',r:'Ein zufälliger Spieler wird der Jäger. Alle anderen setzen drei Sicherungen ein, drücken die Druckplatten, geben den Tresor-Code ein und fliehen durch die Haustür. Ich laufe hinter dir her.'}]},
+ ar:{n:'Arena (mit Bot)',ic:'🏟',s:[
+  {k:'info',r:'Wir testen die <b>Arena</b>: Alle kämpfen ums Überleben, nur einer bleibt übrig. Freie Plätze füllen Bots auf.'},
+  {k:'click',sel:'#mpb',r:'Tippe auf <b>Multiplayer</b>.'},
+  {k:'click',sel:'#mpc1',r:'Tippe auf <b>Gruppe erstellen</b>.'},
+  {k:'click',sel:'[data-mm="ar1"]',r:'Wähle hier den Spielmodus <b>Arena Einzel</b>.'},
+  {k:'click',sel:'#mpgo',r:'Tippe auf <b>Spiel starten</b>.'},
+  {k:'info',r:'Plündere Kisten, sammle Waffen und bleibe am Leben. Die Zone wird kleiner. Viel Glück!'}]}};
+/* ---- Tutorial-Startseite: Spielmodi testen + Roboter ---- */
+{const _t=tutOpen;tutOpen=function(c,i){const r=_t.apply(this,arguments);try{if(c==null||c<0){const el=document.getElementById('tut');if(el&&!document.getElementById('tmsec')){const d=document.createElement('div');d.id='tmsec';
+ d.innerHTML='<div style="margin:22px 0 8px;font-size:20px;font-weight:800">🎮 Spielmodus testen</div><div style="opacity:.75;font-size:14px;margin-bottom:8px">Probiere jeden Modus aus. Mein Roboter 🤖 zeigt dir mit Pfeilen, wohin du tippen musst. Es zählt nichts, beim Beenden ist alles wie vorher.</div>'
+ +Object.keys(TOURS).map(k=>'<button class="tc" data-tm="'+k+'"><i>'+TOURS[k].ic+'</i><span>'+TOURS[k].n+'<small>Testen · '+TOURS[k].s.length+' Schritte</small></span></button>').join('')
+ +'<div style="margin:18px 0 6px;font-size:16px;font-weight:700">🤖 Roboter-Einstellung</div><div style="display:flex;gap:8px"><button class="tbtn '+(TM.mode==='bubble'?'':'g')+'" id="tmb">💬 Sprechblase</button><button class="tbtn '+(TM.mode==='voice'?'':'g')+'" id="tmv">🔊 Mit Ton</button></div>'
+ +'<div style="margin:18px 0 6px;font-size:16px;font-weight:700">❓ Frag den Roboter</div><div style="display:flex;gap:8px"><input id="tmq" placeholder="z. B. Wie öffne ich ein Ei?" maxlength="120" style="flex:1;padding:11px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:15px"><button class="tbtn" id="tmqg">Fragen</button></div><div id="tma" class="tn" style="display:none;margin-top:10px"></div>';
+ el.appendChild(d);
+ d.querySelectorAll('[data-tm]').forEach(b=>b.onclick=()=>{const id=b.dataset.tm;if(TUTS.fromStart===false){try{sessionStorage.setItem('dfTutTour',id)}catch(e){}qReload()}else tmStart(id)});
+ const setm=m=>{tmSetMode(m);document.getElementById('tmb').className='tbtn '+(m==='bubble'?'':'g');document.getElementById('tmv').className='tbtn '+(m==='voice'?'':'g');if(m==='voice')tmSpeak('Hallo! Ich spreche jetzt mit dir.')};
+ document.getElementById('tmb').onclick=()=>setm('bubble');document.getElementById('tmv').onclick=()=>setm('voice');
+ const ask=()=>{const q=document.getElementById('tmq').value,a=tmAnswer(q),o=document.getElementById('tma');o.style.display='block';o.textContent='🤖 '+a;tmSpeak(a)};document.getElementById('tmqg').onclick=ask;document.getElementById('tmq').onkeydown=e=>{if(e.key==='Enter')ask()}}}}catch(e){}return r}}
+{const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);try{const b=document.getElementById('tutb');if(b)b.onclick=()=>{TUTS.fromStart=true;tutOpen()}}catch(e){}return r}}
+{const _p=pauseUI;pauseUI=function(p2){const r=_p.apply(this,arguments);try{const b=document.getElementById('tutp');if(b)b.onclick=()=>{TUTS.fromStart=false;tutOpen()}}catch(e){}return r}}
+try{const t=sessionStorage.getItem('dfTutTour');if(t){sessionStorage.removeItem('dfTutTour');setTimeout(()=>tmStart(t),900)}}catch(e){}
+
+/* ===== Block 167: Dialekt-Modus für den Roboter: Hochdeutsch · Schwäbisch · Bayerisch (auch für die Tutorial-Texte) ===== */
+let TMD='hoch';try{const v=localStorage.getItem('dfRobotDia');if(v==='schwaebisch'||v==='bayerisch')TMD=v}catch(e){}
+const TMDW={
+ schwaebisch:{w:{'ich':'i','ist':'isch','bist':'bisch','nicht':'net','nichts':'nix','das':'des','dies':'des','ein':'en','eine':'a','einen':'en','einem':'em','kein':'koi','keine':'koi','auch':'au','aus':'us','auf':'uff','noch':'no','und':'on','oder':'odr','haben':'hent','habe':'han','hast':'hosch','hat':'hot','sind':'send','wir':'mir','sie':'se','wie':'wia','kann':'ka','kannst':'kasch','musst':'muasch','soll':'soll','sollst':'sollsch','wirst':'wirsch','dein':'dei','deine':'dei','deinen':'dein','dich':'di','mein':'mei','meine':'mei','ja':'jo','gut':'guat','sehr':'arg','klein':'kloi','nur':'bloß','jetzt':'jetzt','mal':'mol','wenn':'wenn','dann':'no','zurück':'zruck','zum':'zom','zur':'zor','mit':'mit','von':'vo','heißt':'heißt','alles':'älles','alle':'älle','geh':'gang','gehe':'gang','gehen':'gau','nach':'noch','schnell':'schnell','sehen':'sähe','siehst':'siehsch','sieh':'sieh','weißt':'woisch','weiß':'woiß','will':'will','willst':'witt','geht':'goht','heute':'heit','etwas':'ebbes','nichts':'nix','Kiste':'Kischt','Tür':'Dür','Hund':'Hond','Hunde':'Hond','Zeit':'Zeit','Spiel':'Spiel','Tipp':'Tipp','gleich':'glei','vielleicht':'vielleicht','einfach':'oifach','immer':'emmer','wieder':'widder','dort':'dött','hier':'do','da':'do','dahinter':'dahenter','genau':'gnau','ganz':'ganz','richtig':'richtig','groß':'groß','bitte':'bitte'},
+  pre:['Ha noi, ','Also, ','Gell, ','Hajo, '],post:['Gell?','Des goht scho!','Mir schaffet des!','Ha jo, ganz oifach!'],ver:s=>s.replace(/(?<![A-Za-zÄÖÜäöüß])([a-zäöüß]{3,})st(?![A-Za-zÄÖÜäöüß])/g,(m,a)=>/^(er|zuer|zul|letz|näch|lang|best|größ|meis|höch)$/.test(a)||/^(e)$/.test(a)?m:a+'sch').replace(/(?<![A-Za-zÄÖÜäöüß])([a-zäöüß]{4,})en(?![A-Za-zÄÖÜäöüß])/g,'$1a')},
+ bayerisch:{w:{'ich':'i','ist':'is','nicht':'ned','nichts':'nix','das':'des','dies':'des','ein':'a','eine':'a','einen':'an','einem':'am','kein':'koa','keine':'koa','auch':'aa','aber':'aba','oder':'oda','haben':'ham','habe':'hob','hast':'host','sind':'san','wir':'mia','wie':'wia','jetzt':'jetzad','gut':'guad','von':'vo','dein':'dei','deine':'dei','dich':'di','mein':'mei','meine':'mei','nur':'bloß','schön':'schee','sehr':'recht','mal':'moi','noch':'no','musst':'muasst','du':'du','geh':'geh','gehe':'geh','ja':'fei','zurück':'zruck','alles':'ois','alle':'olle','nach':'nach','hier':'do','da':'do','dort':'dort','heute':'heid','etwas':'woas','will':'will','Kiste':'Kistn','Hunde':'Hund','groß':'groß','klein':'kloa','genau':'gnau','immer':'imma','wieder':'wieda','weiß':'woaß','weißt':'woaßt','bitte':'bittschön','Mädchen':'Madl','Junge':'Bua','Freunde':'Spezln','Freund':'Spezl'},
+  pre:['Mei, ','Servus! ','Also, ','Hoi, '],post:['Basst scho!','Do schau her!','Pfiat di!','Des kriagn ma scho hin!'],ver:s=>s.replace(/(?<![A-Za-zÄÖÜäöüß])([a-zäöüß]{4,})en(?![A-Za-zÄÖÜäöüß])/g,'$1n')}};
+function tmDia(t){if(TMD==='hoch'||!t)return t;const D=TMDW[TMD];let s=String(t);
+ s=s.replace(/(?<![A-Za-zÄÖÜäöüß])([A-Za-zÄÖÜäöüß]+)(?![A-Za-zÄÖÜäöüß])/g,(m)=>{const k=m.toLowerCase();let r=D.w[m]!==undefined?D.w[m]:(D.w[k]!==undefined?D.w[k]:null);if(r===null)return m;if(m[0]===m[0].toUpperCase()&&m[0]!==m[0].toLowerCase()&&!(D.w[m]!==undefined))r=r[0].toUpperCase()+r.slice(1);return r});
+ s=D.ver(s);
+ if(s.length>45&&/[.!)]$/.test(s.trim())&&!D.post.some(p=>s.endsWith(p))){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;s+=' '+D.post[Math.abs(h)%D.post.length]}
+ return s}
+function tmDiaHtml(h){if(TMD==='hoch')return h;return String(h).split(/(<[^>]+>)/).map(p=>p[0]==='<'?p:tmDia(p)).join('')}
+{const _u=tmUI;tmUI=function(text,o){return _u.call(this,tmDiaHtml(text),o)}}
+{const _s=tmSpeak;tmSpeak=function(t){return _s.call(this,tmDia(tmClean(t)))}}
+{const _a=tmAnswer;tmAnswer=function(q){const a=_a.apply(this,arguments);return tmDia(a)}}
+function tmSetDia(d){TMD=d;try{localStorage.setItem('dfRobotDia',d);if(TM.snap)TM.snap.dfRobotDia=d}catch(e){}}
+{const _e=tmEnd;tmEnd=function(){let k=null;try{k=localStorage.getItem('dfRobotDia')}catch(e){}if(TM.snap&&k!=null){TM.snap.dfRobotDia=k}return _e.apply(this,arguments)}}
+{const _t=tutOpen;tutOpen=function(c,i){const r=_t.apply(this,arguments);try{const el=document.getElementById('tut');if(!el)return r;
+ if(TMD!=='hoch')el.querySelectorAll('.tb h2,.tb>div,.tt,.tn,.tc span').forEach(e=>{if(!e.dataset.dia){e.dataset.dia=1;e.innerHTML=tmDiaHtml(e.innerHTML)}});
+ const sec=document.getElementById('tmsec');if(sec&&!document.getElementById('tmdia')){const d=document.createElement('div');d.id='tmdia';d.innerHTML='<div style="margin:18px 0 6px;font-size:16px;font-weight:700">🗣 Sprache des Roboters</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="tbtn '+(TMD==='hoch'?'':'g')+'" data-d="hoch">Hochdeutsch</button><button class="tbtn '+(TMD==='schwaebisch'?'':'g')+'" data-d="schwaebisch">🥨 Schwäbisch</button><button class="tbtn '+(TMD==='bayerisch'?'':'g')+'" data-d="bayerisch">🍺 Bayerisch</button></div>';
+  const anchor=document.getElementById('tmq');const row=anchor&&anchor.parentNode&&anchor.parentNode.previousSibling;sec.insertBefore(d,row||null);
+  d.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{tmSetDia(b.dataset.d);const sample={hoch:'Hallo! Ich spreche jetzt Hochdeutsch.',schwaebisch:'Hallo! Ich schwätz jetzt Schwäbisch, des isch ganz oifach.',bayerisch:'Servus! Jetzt red i bayerisch, des is ganz easy.'}[TMD];tmSpeak(sample);tutOpen(-1)})}}catch(e){}return r}}
+let tmCur='';
+{const _r=tmUI;tmUI=function(text,o){tmCur=text;const r=_r.apply(this,arguments);try{const bar=document.querySelector('#rbt .rbbs');if(bar&&!document.getElementById('rbdia')){const b=document.createElement('button');b.id='rbdia';b.textContent=TMD==='hoch'?'🗣 Hochdeutsch':TMD==='schwaebisch'?'🥨 Schwäbisch':'🍺 Bayerisch';b.onclick=()=>{const n=TMD==='hoch'?'schwaebisch':TMD==='schwaebisch'?'bayerisch':'hoch';tmSetDia(n);b.textContent=n==='hoch'?'🗣 Hochdeutsch':n==='schwaebisch'?'🥨 Schwäbisch':'🍺 Bayerisch';const t=document.getElementById('rbtx');if(t)t.innerHTML=tmDiaHtml(tmCur||'')};bar.insertBefore(b,bar.firstChild)}}catch(e){}return r}}
+
+/* ===== Block 168: Der Roboter kann sprechen (Sprachausgabe mit passender Stimme) und zuhören (Mikrofon: Fragen per Sprache stellen) ===== */
+function tmPickVoice(){try{const vs=speechSynthesis.getVoices()||[];const want=TMD==='bayerisch'?['de-AT','de-DE','de']:['de-DE','de-AT','de'];
+ const pri=v=>/premium|enhanced|erweitert|natural/i.test(v.name)?0:/anna|markus|petra|google|yannick|viktor/i.test(v.name)?1:2;
+ for(const l of want){const c=vs.filter(v=>(v.lang||'').replace('_','-').toLowerCase().startsWith(l.toLowerCase())).sort((a,b)=>pri(a)-pri(b));if(c.length)return c[0]}}catch(e){}return null}
+tmSpeak=function(t,force){if(TM.mode!=='voice'&&!force)return;try{if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(tmDia(tmClean(t)));const v=tmPickVoice();if(v){u.voice=v;u.lang=v.lang}else u.lang='de-DE';u.rate=TMD==='hoch'?1:.95;u.pitch=1.05;speechSynthesis.speak(u)}catch(e){}};
+try{speechSynthesis.getVoices();if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',()=>{})}catch(e){}
+function tmListen(cb,onState){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){cb(null,'Dein Browser kann nicht zuhören. Tippe deine Frage einfach ein.');return}
+ try{const r=new SR();r.lang='de-DE';r.interimResults=false;r.maxAlternatives=1;onState&&onState(1);
+  r.onresult=e=>{const t=e.results&&e.results[0]&&e.results[0][0]&&e.results[0][0].transcript;onState&&onState(0);cb(t||null,t?'':'Ich habe dich nicht verstanden.')};
+  r.onerror=e=>{onState&&onState(0);cb(null,e&&e.error==='not-allowed'?'Ich darf dein Mikrofon nicht benutzen. Erlaube es in den Browser-Einstellungen.':'Das Zuhören hat nicht geklappt. Tippe die Frage ein.')};
+  r.onend=()=>{onState&&onState(0)};r.start()}catch(e){cb(null,'Das Zuhören hat nicht geklappt. Tippe die Frage ein.')}}
+function tmAskVoice(showFn){tmListen((t,err)=>{if(!t){showFn(err);return}const a=tmAnswer(t);showFn('Du: „'+t+'“<br>'+a);tmSpeak(a,true)},null)}
+{const _u=tmUI;tmUI=function(text,o){const r=_u.apply(this,arguments);try{const bar=document.querySelector('#rbt .rbbs');if(bar&&!document.getElementById('rbmic')){
+ const m=document.createElement('button');m.id='rbmic';m.textContent='🎤 Sprechen';m.onclick=()=>{m.textContent='🎤 Ich höre zu …';tmAskVoice(h=>{m.textContent='🎤 Sprechen';const t=document.getElementById('rbtx');if(t)t.innerHTML=h})};
+ const v=document.createElement('button');v.id='rbrd';v.textContent='🔊 Vorlesen';v.onclick=()=>{const t=document.getElementById('rbtx');if(t)tmSpeak(t.innerHTML,true)};
+ const q=document.getElementById('rbq');bar.insertBefore(m,q);bar.insertBefore(v,q)}}catch(e){}return r}}
+{const _t=tutOpen;tutOpen=function(c,i){const r=_t.apply(this,arguments);try{const g=document.getElementById('tmqg');if(g&&!document.getElementById('tmmic')){const b=document.createElement('button');b.id='tmmic';b.className='tbtn g';b.textContent='🎤';b.setAttribute('aria-label','Frage sprechen');b.onclick=()=>{b.textContent='…';tmAskVoice(h=>{b.textContent='🎤';const o=document.getElementById('tma');if(o){o.style.display='block';o.innerHTML='🤖 '+h}})};g.parentNode.insertBefore(b,g)}}catch(e){}return r}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

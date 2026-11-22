@@ -8,7 +8,7 @@ const ADMIN_KEY = process.env.ADMIN_KEY || "1709";
 
 const ONLINE_MS = 150 * 1000;   // so lange zählt ein Spieler nach seinem letzten Lebenszeichen als online
 const MAX_REPORTS = 150;        // älteste Meldungen werden automatisch gelöscht
-const CATS = ["bug", "wand", "lag", "sonst", "meinung"];
+const CATS = ["bug", "wand", "lag", "sonst", "meinung", "spieler"];
 const MODES = ["menu", "solo", "mp", "p2"];
 const ID_RE = /^r-\d{15}-[a-z0-9]+$/;
 const RES_NAMES = new Set(["entwickler (op)", "entwickler", "keshynr", "admin", "administrator", "moon games", "op"]);   // diese Namen gehören den Sonderkonten
@@ -478,6 +478,34 @@ export default async function handler(req, res) {
         if (cnt > 40) return send({ error: "limit" }, 429);
         await db([noteCmd(to, { k: "gift", w: str(b.fromN, 20) || (typeof fn === "string" ? fn.split("|")[0] : from), items })]);
         return send({ ok: true });
+      }
+      case "accdel": {                                // Konto löschen: entfernt Account, Namen, Posteingang und Bestenlisten-Einträge (nur mit dem Geheimnis des Accounts)
+        const tag = String(b.tag || "").toUpperCase(), sec = str(b.sec, 40), nsec = str(b.nsec, 40);
+        const nm = str(b.name, 14).replace(/[<>&"'\\]/g, "").trim(), nk = nkey(nm);
+        const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim();
+        const rk = "df:rld:" + hash(ip || sid || "x");
+        const [cnt] = await db([["INCR", rk]]);
+        if (cnt === 1) await db([["EXPIRE", rk, 3600]]);
+        if (cnt > 30) return send({ error: "limit" }, 429);
+        let acc = 0, name = 0, lb = 0;
+        if (/^[A-HJ-NP-Z2-9]{4}$/.test(tag) && sec.length >= 8) {
+          const [h] = await db([["HGET", "df:tags", tag]]);
+          if (h && h === hash(sec + "|" + tag) + hash(tag + "|" + sec)) { await db([["HDEL", "df:tags", tag], ["HDEL", "df:tagn", tag], ["HDEL", "df:accs", tag], ["HDEL", "df:accd", tag]]); acc = 1; }
+        }
+        if (nk.length >= 2 && nsec.length >= 8) {
+          const [h] = await db([["HGET", "df:nm", nk]]);
+          if (h && h === hash(nsec + "|n|" + nk) + hash(nk + "|n|" + nsec)) {
+            await db([["HDEL", "df:nm", nk], ["HDEL", "df:names", nk], ["DEL", "df:tn:" + nk]]); name = 1;
+            for (const mode of ["solo", "p2", "mp"]) for (const diff of ["leicht", "mittel", "schwer", "alptraum", "extrem", "normal"]) {
+              const key = "df:lb:" + mode + ":" + diff;
+              const [all] = await db([["ZRANGE", key, 0, -1]]);
+              const kill = [];
+              for (const m of all || []) { try { const o = JSON.parse(m); if (String(o.n || "").toLowerCase() === nk) kill.push(m); } catch (e) {} }
+              if (kill.length) { await db([["ZREM", key, ...kill]]); lb += kill.length; }
+            }
+          }
+        }
+        return send({ ok: true, acc, name, lb });
       }
       case "tinbox": {                                // Posteingang des Spielers (Trade abgeschlossen / Gegenstände zurück)
         const nk = nkey(b.name);

@@ -6798,6 +6798,370 @@ document.addEventListener('click',e=>{const u=e.target&&e.target.closest&&e.targ
 {const _tl=tmListen;tmListen=function(cb,st){let ok=false;try{ok=localStorage.getItem('dfMicOK')==='1'}catch(e){}if(ok)return _tl.apply(this,arguments);const a=arguments,self=this;
  dfModal('🎤 Mikrofon','<div>Der Roboter hört nur zu, wenn du auf 🎤 tippst. Danach fragt dich dein Gerät noch einmal, ob das Mikrofon benutzt werden darf. Deine Sprache wird von Apple oder Google in Text umgewandelt. Wir speichern keine Aufnahmen.</div>',[{t:'Abbrechen',f:()=>{cb(null,'Okay, ich höre nicht zu. Tippe deine Frage einfach ein.')}},{t:'Weiter',c:'p',f:()=>{try{localStorage.setItem('dfMicOK','1')}catch(e){}_tl.apply(self,a)}}])}}
 
+/* block171: Geschenke schneller abholen (beim Zurückkehren in die App, beim Start) */
+try{document.addEventListener('visibilitychange',()=>{try{if(!document.hidden)setTimeout(()=>{try{trInbox()}catch(e){}},700)}catch(e){}});window.addEventListener('focus',()=>{try{setTimeout(()=>{try{trInbox()}catch(e){}},700)}catch(e){}});setTimeout(()=>{try{trInbox()}catch(e){}},2000)}catch(e){}
+
+/* ===== Block 172: mehr Eier (6 neue Eiarten, 24 neue Pets), tägliches Gratis-Ei, Glücksrad im Shop ===== */
+const NEWEGG={Häufig:{p:900,c:'#cfc6b4'},Wild:{p:5000,c:'#3ad87a'},Eisig:{p:8000,c:'#7ad8ff'},Feurig:{p:12000,c:'#ff7a2a'},Golden:{p:25000,c:'#ffd60a'},Kosmisch:{p:120000,c:'#c77dff'}};
+{Object.keys(NEWEGG).forEach(k=>{PETEGG[k]=NEWEGG[k].p;PETRC[k]=NEWEGG[k].c});
+ const ord=['Häufig','Wild','Selten','Eisig','Feurig','Episch','Golden','Legendär','Mythisch','Kosmisch'];PETR.length=0;ord.forEach(x=>PETR.push(x));
+ const NP=[
+  ['welp','Welpe','🐶','Häufig','Kleiner Begleiter',{spd:.03},[0xd8b070,0xb08040],'hund'],
+  ['kaetz','Kätzchen','🐱','Häufig','Neugierig',{xp:.04},[0xf0a050,0xffd8a0],'katze'],
+  ['maus','Maus','🐭','Häufig','Kleiner Finder',{coin:.04},[0xb0b0b8,0xffc0c8],'ratte'],
+  ['kueken','Küken','🐤','Häufig','Eier-Nase',{egg:.05},[0xffe060,0xfff0a0],'eule'],
+  ['waldw','Waldwolf','🐺','Wild','Jäger des Waldes',{spd:.14,coin:.05},[0x3a6a3a,0x1a3a1a],'wolf'],
+  ['dschk','Dschungelkatze','🐆','Wild','Lautlos',{xp:.15},[0x3ac86a,0x1a6a3a],'katze'],
+  ['busch','Buschratte','🐀','Wild','Fundgrube',{egg:.15,coin:.05},[0x6a8a2a,0xb0d060],'ratte'],
+  ['pilz','Pilz-Goblin','🍄','Wild','Sporen-Glück',{coin:.15,xp:.05},[0xd04a4a,0xffffff],'gob'],
+  ['eisw','Eiswolf','❄️','Eisig','Frostlauf',{spd:.16,xp:.10},[0xd8f0ff,0x7ac8ff],'wolf'],
+  ['schnf','Schneefuchs','🦊','Eisig','Schneeflink',{spd:.14,coin:.10},[0xf4f8ff,0xa8d8ff],'fuchs'],
+  ['frost','Frosteule','🦉','Eisig','Eisweisheit',{xp:.28},[0x9ad8ff,0xeaf8ff],'eule'],
+  ['eisg','Eisgeist','🧊','Eisig','Kältehauch',{spd:.18,xp:.15},[0xb0e8ff,0xe8f8ff],'phan'],
+  ['lavh','Lavahund','🌋','Feurig','Glutpfoten',{spd:.15,coin:.12},[0xff5a1a,0x801a00],'hund'],
+  ['feuf','Feuerfuchs','🦊','Feurig','Funkenflink',{spd:.18},[0xff4a10,0xffd060],'fuchs'],
+  ['glutk','Glutkatze','😼','Feurig','Heißes Glück',{coin:.22,xp:.10},[0x601008,0xff8a1a],'katze'],
+  ['magd','Magma-Drache','🐲','Feurig','Magmahort',{spd:.20,coin:.25,xp:.10},[0x501010,0xff6a00],'drac'],
+  ['goldh','Gold-Hund','🐕','Golden','Goldnase',{coin:.40},[0xffd04a,0xc89000],'hund'],
+  ['goldk','Gold-Katze','🐈','Golden','Goldglanz',{coin:.30,xp:.20},[0xffe070,0xd8a000],'katze'],
+  ['goldd','Gold-Drache','🐉','Golden','Goldregen',{coin:.50,spd:.15},[0xffc800,0xff8a00],'drac'],
+  ['goldp','Gold-Phönix','🔥','Golden','Goldene Asche',{coin:.45,xp:.30,egg:.10},[0xffe070,0xffa000],'phoe'],
+  ['stern','Sternen-Einhorn','🌟','Kosmisch','Sternenstaub',{coin:.60,egg:.20,xp:.20},[0x4a2a9a,0xff7ad8],'einh'],
+  ['galax','Galaxie-Drache','🌌','Kosmisch','Sternensturm',{spd:.30,coin:.50,xp:.30},[0x1a1a5a,0x9a4aff],'drac'],
+  ['nebel','Nebel-Phantom','🔮','Kosmisch','Nebelschritt',{spd:.30,xp:.50},[0x7a2ad8,0x2a1a6a],'phan'],
+  ['kosmo','Kosmo-Alien','🛸','Kosmisch','Kosmischer Reichtum',{coin:.80,egg:.30,xp:.30},[0x9a5aff,0x2a0a6a],'alien']];
+ NP.forEach(a=>{const b=PETS.find(p=>p.id===a[7]);PETS.push({id:a[0],n:a[1],ic:a[2],r:a[3],a:a[4],fx:a[5],c:a[6],t:(b&&b.t)||[],base:a[7],sp:(a[3]==='Kosmisch'||a[3]==='Golden'||a[3]==='Feurig'||a[3]==='Eisig')?a[6][1]:0})});
+ /* Eier-Optik pro Eiart und pro Pet */
+ Object.assign(PETEGGR,{Häufig:{c1:0xe8e0d0,c2:0xfff8ec,pat:'dots',acc:0x8a7a6a,glow:'#cfc6b4'},Wild:{c1:0x2a9a4a,c2:0xa8f0a0,pat:'spots',acc:0x1a4a1a,glow:'#3ad87a'},Eisig:{c1:0x5ac8ff,c2:0xe8faff,pat:'zig',acc:0xffffff,glow:'#7ad8ff'},Feurig:{c1:0xc81a00,c2:0xffa020,pat:'flame',acc:0xffe060,glow:'#ff7a2a'},Golden:{c1:0xe8a800,c2:0xfff0a0,pat:'stars',acc:0xffffff,glow:'#ffd60a'},Kosmisch:{c1:0x2a1a6a,c2:0xc77dff,pat:'swirl',acc:0xffe0ff,glow:'#c77dff'}});
+ const PATS={Häufig:['dots','stripes','spots','feathers'],Wild:['spots','claw','warts','feathers'],Eisig:['zig','swirl','ghost','stars'],Feurig:['flame','scales','claw','swirl'],Golden:['stars','scales','swirl','flame'],Kosmisch:['swirl','stars','ghost','alien']};
+ const cnt={};NP.forEach(a=>{const r=a[3],i=cnt[r]=(cnt[r]||0);cnt[r]++;PETEGGD[a[0]]=Object.assign({},PETEGGR[r],{pat:(PATS[r]||['dots'])[i%4],glow:NEWEGG[r].c})});
+ /* Figur: neue Pets benutzen die Form ihres Vorbilds mit eigenen Farben und Funken */
+ {const _pb=petBuild;petBuild=function(p){if(p&&p.base){const q=Object.assign({},p,{id:p.base});const g=_pb.call(this,q);try{const u=g.userData;if(p.sp&&u&&u.sparks){for(let i=0;i<6;i++){const s=new THREE.Mesh(PSG,PMT(p.sp,{e:p.sp,r:.2}));s.scale.set(.03,.03,.03);g.add(s);u.sparks.push({m:s,a:i/6*6.283,r:.45*(.8+Math.random()*.4),h:.3+Math.random()*.3,sp:.8+Math.random()*.6})}}}catch(e){}return g}return _pb.apply(this,arguments)}}
+ try{ACCK.push('dfEggDay','dfLuck')}catch(e){}
+}
+/* ---- Glücksbooster (30 Minuten: +25 % Münzen und bessere Preise am Glücksrad) ---- */
+const luckOn=()=>{try{return (+localStorage.getItem('dfLuck')||0)>Date.now()}catch(e){return false}};
+const luckLeft=()=>{try{return Math.max(0,Math.round(((+localStorage.getItem('dfLuck')||0)-Date.now())/60000))}catch(e){return 0}};
+function luckGive(min){try{const b=Math.max(Date.now(),+localStorage.getItem('dfLuck')||0);localStorage.setItem('dfLuck',String(b+(min||30)*60000));accSave(true)}catch(e){}}
+{const _a=cxAdd;cxAdd=function(n){n=+n||0;if(n>0&&luckOn())n=Math.round(n*1.25);return _a.call(this,n)}}
+/* ---- Tägliches Gratis-Ei ---- */
+const dayKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+function dayEggTaken(){try{return localStorage.getItem('dfEggDay')===dayKey()}catch(e){return false}}
+function dayEggTake(){if(dayEggTaken())return null;let r='Häufig';const x=Math.random();if(x<.03)r='Episch';else if(x<.2)r='Selten';try{localStorage.setItem('dfEggDay',dayKey())}catch(e){}petEggAdd(r,1);return r}
+{const _pm=petMenu;petMenu=function(){const r=_pm.apply(this,arguments);
+  try{const a=[...document.querySelectorAll('.cap')].find(e=>e.textContent.includes('Eier'));
+   if(a&&!document.getElementById('ptday')){const got=dayEggTaken();
+    a.insertAdjacentHTML('beforebegin','<div class="grp" style="margin-top:14px"><button class="row" id="ptday"'+(got?' disabled style="opacity:.55"':'')+'><span class="ic" style="background:#30d158">🎁</span><span class="tx"><b>Tägliches Gratis-Ei</b><small>'+(got?'Heute schon abgeholt. Komm morgen wieder!':'Jeden Tag ein Ei geschenkt')+'</small></span>'+(got?'':'<i class="chev">›</i>')+'</button></div>');
+    const b=document.getElementById('ptday');if(b&&!got)b.onclick=()=>{const e=dayEggTake();if(e)petMenu('🎁 Du hast ein '+e+'es Ei bekommen!')}}}catch(e){}
+  return r}}
+/* ---- Glücksrad ---- */
+const WHP={price:3000};
+const WHPR={c1:{t:'🪙 1.000 Münzen',i:'🪙',w:26,coins:1000,col:'#ff9f0a'},c2:{t:'🪙 2.500 Münzen',i:'💰',w:16,coins:2500,col:'#ffb020'},c3:{t:'🪙 6.000 Münzen',i:'💰',w:8,coins:6000,col:'#ffcc33'},c4:{t:'🪙 20.000 Münzen',i:'💎',w:2.5,coins:20000,col:'#64d2ff'},
+ eH:{t:'🥚 Häufiges Ei',i:'🥚',w:14,egg:'Häufig',col:'#cfc6b4'},eS:{t:'🥚 Seltenes Ei',i:'🥚',w:8,egg:'Selten',col:'#4da3ff'},eE:{t:'🥚 Episches Ei',i:'🥚',w:4.5,egg:'Episch',col:'#b86bff'},eL:{t:'🥚 Legendäres Ei',i:'🥚',w:1.5,egg:'Legendär',col:'#ffb020'},
+ bo:{t:'🍀 Glücksbooster (30 Min.)',i:'🍀',w:10,boost:1,col:'#30d158'},sk:{t:'👑 Gratis-Skin',i:'👑',w:.5,skin:1,col:'#ff453a'},tr:{t:'🎁 Trostpreis: 300 Münzen',i:'🎁',w:9,coins:300,col:'#8a8a94'},jp:{t:'🎰 JACKPOT',i:'🎰',w:.1,jp:1,col:'#ffd60a'}};
+const WHSL=['c1','eH','tr','c2','bo','eS','c1','eH','c3','eE','tr','c4','eL','sk','jp'];
+function whRoll(){const lucky=luckOn(),w={};Object.keys(WHPR).forEach(k=>{let x=WHPR[k].w;if(lucky){if(['c1','tr','eH'].includes(k))x*=.5;if(['c3','c4','eE','eL','sk','bo','jp'].includes(k))x*=1.6}w[k]=x});
+ let t=0;Object.keys(w).forEach(k=>t+=w[k]);let r=Math.random()*t,pick='tr';for(const k of Object.keys(w)){r-=w[k];if(r<=0){pick=k;break}}return pick}
+function whApply(id){const P=WHPR[id];let txt=P.t,sub='';
+ if(P.coins){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+P.coins)}catch(e){}}
+ else if(P.egg){petEggAdd(P.egg,1);sub='Du findest es unter Pets → Eier.'}
+ else if(P.jp){const n=Math.random()<.7?100000:150000;try{if(cxCoins()!==Infinity)cxSet(cxCoins()+n)}catch(e){}txt='🎰 JACKPOT: '+n.toLocaleString('de-DE')+' Münzen';try{accSave(true)}catch(e){}return {txt,sub:'',jp:n}}
+ else if(P.boost){luckGive(30);sub='30 Minuten lang +25 % Münzen und bessere Preise am Glücksrad.'}
+ else if(P.skin){const L=CXSKINS.filter(it=>!it.hidden&&typeof it.own==='function'&&!it.own()&&typeof it.give==='function');
+  if(L.length){const it=L[Math.floor(Math.random()*L.length)];try{it.give()}catch(e){const x=cxShop();if(!x.skins.includes(it.id)){x.skins.push(it.id);cxWrite('dfShop',x)}}txt='👑 Skin gewonnen: '+it.n;sub='Du findest ihn im Shop unter Skins.'}
+  else{try{if(cxCoins()!==Infinity)cxSet(cxCoins()+50000)}catch(e){}txt='🪙 50.000 Münzen (du hast schon alle Skins!)'}}
+ try{accSave(true)}catch(e){}return {txt,sub}}
+function whSvg(rot){const N=WHSL.length,R=130,cx=140,cy=140;let w='';
+ for(let i=0;i<N;i++){const a0=(i/N)*2*Math.PI-Math.PI/2,a1=((i+1)/N)*2*Math.PI-Math.PI/2,am=(a0+a1)/2,P=WHPR[WHSL[i]];
+  w+='<path d="M'+cx+' '+cy+'L'+(cx+R*Math.cos(a0)).toFixed(1)+' '+(cy+R*Math.sin(a0)).toFixed(1)+'A'+R+' '+R+' 0 0 1 '+(cx+R*Math.cos(a1)).toFixed(1)+' '+(cy+R*Math.sin(a1)).toFixed(1)+'Z" fill="'+P.col+'" fill-opacity="'+(i%2?'.55':'.85')+'" stroke="#0c0d12" stroke-width="2"/>'
+   +'<text x="'+(cx+R*.72*Math.cos(am)).toFixed(1)+'" y="'+(cy+R*.72*Math.sin(am)+7).toFixed(1)+'" font-size="22" text-anchor="middle">'+P.i+'</text>'}
+ const T='rotate('+(rot||0)+'deg)';return '<div id="whrot" style="width:280px;max-width:86vw;margin:0 auto;transition:transform 4.2s cubic-bezier(.12,.7,.15,1);-webkit-transition:-webkit-transform 4.2s cubic-bezier(.12,.7,.15,1);transform:'+T+';-webkit-transform:'+T+'"><svg viewBox="0 0 280 280" width="100%" style="display:block">'+w+'<circle cx="'+cx+'" cy="'+cy+'" r="22" fill="#0c0d12" stroke="#fff" stroke-width="3"/></svg></div>'}
+/* ---- JACKPOT: goldener Bildschirm, Fanfare, Schriftzug ---- */
+function jackpotFx(amount,done){let d=document.getElementById('jpfx');if(d)d.remove();d=document.createElement('div');d.id='jpfx';
+ d.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:10120;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 38%,#fff6b0,#ffd60a 38%,#e89a00 72%,#a86400);color:#3a2400;font-family:-apple-system,system-ui,sans-serif;text-align:center;overflow:hidden;animation:jpf .5s ease-out';
+ let c='';for(let i=0;i<26;i++)c+='<span style="position:absolute;top:-8vh;left:'+Math.round(Math.random()*96)+'vw;font-size:'+(20+Math.round(Math.random()*22))+'px;animation:jpc '+(2.6+Math.random()*2.4).toFixed(2)+'s linear '+(Math.random()*2.5).toFixed(2)+'s infinite">'+['🪙','✨','💰','⭐'][i%4]+'</span>';
+ d.innerHTML='<style>@keyframes jpf{from{opacity:0}to{opacity:1}}@keyframes jpz{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}@keyframes jpc{from{transform:translateY(0) rotate(0)}to{transform:translateY(118vh) rotate(360deg)}}</style>'+c
+  +'<div style="position:relative;font-size:clamp(42px,15vw,96px);font-weight:900;letter-spacing:3px;animation:jpz .6s infinite;text-shadow:0 4px 0 rgba(255,255,255,.55),0 0 34px #fff">JACKPOT!</div>'
+  +'<div style="position:relative;font-size:clamp(30px,10vw,62px);font-weight:800;margin-top:12px">+'+amount.toLocaleString('de-DE')+' 🪙</div><div style="position:relative;margin-top:26px;font-size:15px;opacity:.7">Tippen zum Weiter</div>';
+ document.body.appendChild(d);try{navigator.vibrate&&navigator.vibrate([200,80,200,80,400])}catch(e){}
+ let fin=false;const end=()=>{if(fin)return;fin=true;try{d.remove()}catch(e){}try{done&&done()}catch(e){}};d.addEventListener('pointerdown',e=>{e.preventDefault();end()});setTimeout(end,7000)}
+{const _sf=sfx;sfx=function(n){if(n==='jackpot'){if(!AU.ctx||!AU.sfxOn||AU.ctx.state!=='running')return;try{[523,659,784,1047,1319,1568].forEach((f,i)=>tone(f,f,.22,'triangle',.1,5000,i*.11));[0,.14,.28].forEach(d=>[523,784,1047,1568].forEach(f=>tone(f,f,.7,'sine',.06,5000,.75+d)));for(let k=0;k<6;k++)tone(1760,1760,.08,'square',.04,5000,1.7+k*.12)}catch(e){}return}return _sf.apply(this,arguments)}}
+let whBusy=false,whRot=0;
+function wheelUI(msg){const coins=cxCoins();
+ ov('<div class="ios" style="text-align:center"><div class="navbar"><b style="font-size:24px">🎡 Glücksrad</b><button class="pill" id="whx">Zurück</button></div>'
+  +'<div style="margin:6px 0"><span class="badge" style="display:inline-block;padding:7px 16px;border-radius:999px;background:rgba(255,159,10,.2);font-size:20px;font-weight:800">🪙 '+(coins===Infinity?'∞':coins.toLocaleString('de-DE'))+'</span></div>'
+  +(luckOn()?'<div class="foot" style="color:#30d158">🍀 Glücksbooster aktiv: noch '+luckLeft()+' Min. (+25 % Münzen, bessere Preise)</div>':'')
+  +'<div style="position:relative;display:inline-block;margin-top:6px"><div style="position:absolute;left:50%;top:-8px;transform:translateX(-50%);font-size:30px;z-index:2;filter:drop-shadow(0 2px 4px #000)">🔻</div>'+whSvg(whRot)+'</div>'
+  +'<div style="margin-top:10px"><button class="pill blue" id="whgo" style="font-size:18px;padding:14px 26px;width:min(88%,330px)">Drehen · '+WHP.price.toLocaleString('de-DE')+' 🪙</button></div>'
+  +'<p class="foot" id="whm" style="min-height:44px;font-size:15px">'+(msg||'')+'</p>'
+  +'<div class="grp" style="text-align:left;margin-top:8px"><div class="row"><span class="tx"><b>Mögliche Preise</b><small>🪙 Münzen bis 20.000 · 🥚 Eier (auch Episch und Legendär) · 🍀 Glücksbooster · 👑 Skin gratis (sehr selten) · 🎰 JACKPOT mit 100.000 oder 150.000 Münzen (extrem selten)</small></span></div></div></div>');
+ const q=i=>document.getElementById(i);q('whx').onclick=()=>shopUI();
+ q('whgo').onclick=()=>{if(whBusy)return;const c=cxCoins();if(c!==Infinity&&c<WHP.price){q('whm').textContent='Dafür fehlen dir noch '+(WHP.price-c).toLocaleString('de-DE')+' 🪙.';return}
+  whBusy=true;q('whgo').disabled=true;q('whx').disabled=true;if(c!==Infinity)cxSet(c-WHP.price);
+  const id=whRoll(),idx=[];WHSL.forEach((k,i)=>{if(k===id)idx.push(i)});const slot=idx[Math.floor(Math.random()*idx.length)],N=WHSL.length;
+  const target=360-((slot+.5)/N)*360,base=Math.ceil(whRot/360)*360;whRot=base+360*5+target;
+  const g=q('whrot'),T='rotate('+whRot+'deg)';if(g){void g.offsetWidth;requestAnimationFrame(()=>{g.style.transform=T;g.style.webkitTransform=T})}q('whm').textContent='Es dreht sich …';
+  setTimeout(()=>{const r=whApply(id);whBusy=false;const show=()=>wheelUI('<b style="font-size:19px">'+r.txt+'</b><br>'+r.sub);if(r.jp){try{sfx('jackpot')}catch(e){}jackpotFx(r.jp,show)}else{try{sfx('good')}catch(e){}show()}},4400)}}
+{const _s=shopUI;shopUI=function(){const r=_s.apply(this,arguments);try{const a=document.getElementById('shmg');if(a&&!document.getElementById('shwh')){a.insertAdjacentHTML('afterend','<button class="pill" id="shwh" style="font-size:13px;padding:6px 14px;margin-left:6px;background:#ff9f0a;color:#000">🎡 Glücksrad</button>');document.getElementById('shwh').onclick=()=>wheelUI()}}catch(e){}return r}}
+
+/* ===== Block 173: Spielmodus „Insel · 100 Tage“ – sammeln, schnitzen, bauen, 1000 Jäger am Ende ===== */
+const IS={on:false,over:false,phase:'',cfg:{len:30,days:100,gun:0},inv:{},tools:{},wp:'hand',nodes:[],blocks:[],occ:{},hunters:[],build:'',brot:0,gh:null,msgT:0,msg:'',cd:0,hudT:0};
+const ISK=340,ISR=66,ISHP=2;
+const ISG=new THREE.Group();ISG.position.x=ISK;sc.add(ISG);ISG.visible=false;
+const ISLT={h:new THREE.HemisphereLight(0xffffff,0x667788,.95),s:new THREE.DirectionalLight(0xfff4e0,.9)};ISLT.s.position.set(30,60,20);ISG.add(ISLT.h);ISG.add(ISLT.s);
+RM[17]={g:ISG,m:M(0),b:{position:{x:0,y:0,z:0}}};NAMES[17]='Insel';BND[17]=[-80,80,-80,80];COL[17]=[];
+try{ACCK.push('dfIsl')}catch(e){}
+const ISN={wood:['🪵','Holz'],plank:['🟫','Planken'],stone:['🪨','Stein'],coco:['🥥','Kokosnuss'],berry:['🫐','Beeren'],fiber:['🌿','Fasern'],arrow:['🏹','Pfeile'],shell:['🔸','Schrot']};
+const ISREC=[
+ {id:'plank',n:'Holzstamm schnitzen',ic:'🪚',d:'Aus 1 Holz werden 2 Planken. Planken brauchst du zum Bauen.',need:{wood:1},give:{plank:2}},
+ {id:'axe',n:'Steinaxt',ic:'🪓',d:'Du sammelst doppelt so schnell.',need:{wood:3,stone:2},tool:'axe'},
+ {id:'spear',n:'Speer',ic:'🔱',d:'Nahkampf: ein Treffer besiegt einen Jäger.',need:{wood:2,stone:1},tool:'spear'},
+ {id:'bow',n:'Bogen',ic:'🏹',d:'Schießt Pfeile auf Entfernung.',need:{plank:3,fiber:2},tool:'bow'},
+ {id:'arrow',n:'5 Pfeile',ic:'➶',d:'Munition für den Bogen.',need:{wood:1,stone:1},give:{arrow:5}},
+ {id:'shell',n:'4 Schrot-Patronen',ic:'🔸',d:'Munition für die Shotgun.',need:{wood:1,stone:2},give:{shell:4},gun:1}];
+const ISBP=[
+ {id:'floor',n:'Boden',ic:'▦',need:{plank:3},d:'Ein fester Boden für dein Haus.'},
+ {id:'wall',n:'Wand',ic:'▮',need:{plank:2},hp:140,d:'Hält Jäger auf.'},
+ {id:'roof',n:'Dach',ic:'⌂',need:{plank:3},d:'Ein Dach über dem Kopf.'},
+ {id:'pal',n:'Palisade',ic:'🪵',need:{plank:1},hp:70,d:'Billiger Zaun aus Pfählen.'},
+ {id:'trap',n:'Spitzenfalle',ic:'🔺',need:{plank:2,stone:1},hp:40,uses:5,d:'Besiegt 5 Jäger, die darüber laufen.'},
+ {id:'fire',n:'Lagerfeuer',ic:'🔥',need:{wood:3,stone:2},d:'Heilt dich in der Nähe.'}];
+const isInv=k=>IS.inv[k]||0,isHas=n=>Object.keys(n).every(k=>isInv(k)>=n[k]),isPay=n=>{Object.keys(n).forEach(k=>IS.inv[k]=isInv(k)-n[k])};
+const isTxt=n=>Object.keys(n).map(k=>n[k]+'× '+ISN[k][0]+' '+ISN[k][1]).join(', ');
+const isMsg=t=>{IS.msg=t;IS.msgT=3};
+let isRs=1;const isRnd=()=>{isRs=(isRs*16807)%2147483647;return (isRs-1)/2147483646};
+function isWeapons(){const w=['hand'];if(IS.tools.spear)w.push('spear');if(IS.tools.bow)w.push('bow');if(IS.hasGun)w.push('gun');return w}
+const ISWN={hand:['✊','Hände'],spear:['🔱','Speer'],bow:['🏹','Bogen'],gun:['🔫','Shotgun']};
+/* ---- Craften ---- */
+function isCraft(id){const r=ISREC.find(x=>x.id===id);if(!r)return 'bad';if(r.tool&&IS.tools[r.tool])return 'have';if(!isHas(r.need))return 'need';
+ isPay(r.need);if(r.tool){IS.tools[r.tool]=1;if(r.tool!=='axe')IS.wp=r.tool}if(r.give)Object.keys(r.give).forEach(k=>IS.inv[k]=isInv(k)+r.give[k]);return 'ok'}
+/* ---- Welt bauen ---- */
+function isTree(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);const s=.9+isRnd()*.4;
+ box(.36*s,4.2*s,.36*s,0,2.1*s,0,M(0x8a5a2a),g).rotation.z=(isRnd()-.5)*.15;
+ for(let i=0;i<5;i++){const a=i/5*6.283,l=box(.35,.1,1.9*s,Math.sin(a)*.9*s,4.15*s,Math.cos(a)*.9*s,M(0x2f9a3a),g);l.rotation.y=a;l.rotation.x=-.35}
+ box(.3,.3,.3,.2,3.95*s,.2,M(0x6a4a1a),g);box(.3,.3,.3,-.2,3.9*s,-.15,M(0x6a4a1a),g);return g}
+function isRock(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);const s=.8+isRnd()*.7;box(1.4*s,.9*s,1.2*s,0,.4*s,0,M(0x8a8c94),g).rotation.y=isRnd()*3;box(.8*s,.6*s,.8*s,.3*s,.9*s,.1,M(0x9a9ca4),g);return g}
+function isBush(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);box(1.1,.8,1.1,0,.4,0,M(0x2a7a2a),g);for(let i=0;i<5;i++)box(.14,.14,.14,(isRnd()-.5)*.9,.6+isRnd()*.4,(isRnd()-.5)*.9,M(0xd0203a,0x400010),g);return g}
+const ISNT={palm:{hp:4,r:.55,mk:isTree},rock:{hp:5,r:.85,mk:isRock},bush:{hp:2,r:.6,mk:isBush}};
+function isWorld(){
+ while(ISG.children.length>2)ISG.remove(ISG.children[ISG.children.length-1]);
+ IS.nodes=[];IS.blocks=[];IS.bl2=[];IS.occ={};IS.hunters=[];isRs=12345;
+ const sea=new THREE.Mesh(new THREE.CircleGeometry(700,40),M(0x2a7aa8,0x082838));sea.rotation.x=-Math.PI/2;sea.position.y=-.35;ISG.add(sea);
+ const sand=new THREE.Mesh(new THREE.CylinderGeometry(ISR+6,ISR+9,.9,40),M(0xe8d49a));sand.position.y=-.4;ISG.add(sand);
+ const gr=new THREE.Mesh(new THREE.CylinderGeometry(ISR-6,ISR-4,1,40),M(0x5aa03a));gr.position.y=-.34;ISG.add(gr);
+ const place=(t,n)=>{for(let i=0;i<n;i++){let x=0,z=0,ok=false;for(let k=0;k<30&&!ok;k++){const a=isRnd()*6.283,d=8+isRnd()*(ISR-14);x=Math.cos(a)*d;z=Math.sin(a)*d;ok=IS.nodes.every(o=>Math.hypot(o.x-x,o.z-z)>2.6)}
+   const T=ISNT[t];IS.nodes.push({t,x,z,hp:T.hp,max:T.hp,r:T.r,alive:true,tm:0,g:T.mk(x,z)})}};
+ place('palm',46);place('rock',26);place('bush',30)}
+/* ---- Tag und Nacht ---- */
+function isLight(){const k=(IS.dt/IS.cfg.len)%1,L=Math.max(.12,Math.min(1,.5+.55*Math.cos((k-.3)*6.283)));IS.L=L;
+ const lerp=(a,b,t)=>Math.round(a+(b-a)*t),c=(r1,g1,b1,r2,g2,b2)=>(lerp(r1,r2,L)<<16)|(lerp(g1,g2,L)<<8)|lerp(b1,b2,L),sky=c(8,12,34,126,200,255);
+ try{sc.background=new THREE.Color(sky);sc.fog.color.setHex(sky);sc.fog.near=40;sc.fog.far=200;ISLT.h.intensity=.22+.78*L;ISLT.s.intensity=.1+.85*L}catch(e){}}
+/* ---- Bewegung & Kollision ---- */
+function isBlk(x,z,r){for(let i=0;i<IS.blocks.length;i++){const b=IS.blocks[i];if(x>b.x0-r&&x<b.x1+r&&z>b.z0-r&&z<b.z1+r)return b}return null}
+function isNodeHit(x,z,r){for(let i=0;i<IS.nodes.length;i++){const n=IS.nodes[i];if(n.alive&&n.t!=='bush'&&Math.hypot(n.x-x,n.z-z)<n.r+r)return true}return false}
+function isMove(dx,dz){const px=pos.x-ISK,pz=pos.z,ok=(x,z)=>Math.hypot(x,z)<ISR&&!isBlk(x,z,.32)&&!isNodeHit(x,z,.3);
+ if(ok(px+dx,pz))pos.x+=dx;if(ok(pos.x-ISK,pz+dz))pos.z+=dz}
+{const _mv=moveP;moveP=function(dx,dz){if(IS.on)return isMove(dx,dz);return _mv.apply(this,arguments)}}
+/* ---- Bauen ---- */
+function isSnap(id,rot){const f=-Math.sin(Y)*3.4,g=-Math.cos(Y)*3.4,px=pos.x-ISK+f,pz=pos.z+g,cell=v=>Math.floor(v/2)*2+1,edge=v=>Math.round(v/2)*2;
+ if(id==='wall'||id==='pal')return rot===0?{x:cell(px),z:edge(pz)}:{x:edge(px),z:cell(pz)};return {x:cell(px),z:cell(pz)}}
+const isKey=(id,s,rot)=>(id==='wall'||id==='pal'?'W|'+rot:id==='floor'?'F':id==='roof'?'R':'G')+'|'+s.x+'|'+s.z;
+function isCanPlace(id,s,rot){const P=ISBP.find(p=>p.id===id);if(!P)return 'Unbekannt';if(Math.hypot(s.x,s.z)>ISR-6)return 'Zu nah am Wasser';if(!isHas(P.need))return 'Dir fehlt: '+isTxt(P.need);if(IS.occ[isKey(id,s,rot)])return 'Hier steht schon etwas';
+ if((id==='wall'||id==='pal')&&IS.occ[isKey(id==='wall'?'pal':'wall',s,rot)])return 'Hier steht schon etwas';
+ if(id==='wall'||id==='pal'){const px=pos.x-ISK,pz=pos.z,h=rot===0?{x0:s.x-1,x1:s.x+1,z0:s.z-.2,z1:s.z+.2}:{x0:s.x-.2,x1:s.x+.2,z0:s.z-1,z1:s.z+1};if(px>h.x0-.5&&px<h.x1+.5&&pz>h.z0-.5&&pz<h.z1+.5)return 'Du stehst im Weg'}return ''}
+function isPiece(id,rot,ghost){const g=new THREE.Group(),mats=[],mat=c=>{const m=M(c);if(ghost){m.transparent=true;m.opacity=.5}mats.push(m);return m},add=(w,h,d,x,y,z,c)=>box(w,h,d,x,y,z,mat(c),g);
+ switch(id){
+  case 'floor':add(1.96,.24,1.96,0,.12,0,0xb08850);break;
+  case 'wall':if(rot===0){add(2,2.2,.4,0,1.1,0,0x9a6a3a);add(2.04,.12,.46,0,2.2,0,0x6a4020)}else{add(.4,2.2,2,0,1.1,0,0x9a6a3a);add(.46,.12,2.04,0,2.2,0,0x6a4020)}break;
+  case 'roof':add(2.3,.22,2.3,0,2.45,0,0x7a4a2a);add(2.1,.1,2.1,0,2.6,0,0x9a6a3a);break;
+  case 'pal':[-.8,0,.8].forEach(o=>{if(rot===0)add(.3,1.6,.3,o,.8,0,0x8a5a2a);else add(.3,1.6,.3,0,.8,o,0x8a5a2a)});break;
+  case 'trap':add(1.5,.1,1.5,0,.05,0,0x4a3a2a);[[-.4,-.4],[.4,-.4],[-.4,.4],[.4,.4],[0,0]].forEach(a=>{const o=new THREE.Mesh(new THREE.ConeGeometry(.13,.55,6),mat(0xcfcfd8));o.position.set(a[0],.38,a[1]);g.add(o)});break;
+  case 'fire':add(.9,.14,.14,0,.08,0,0x5a3a1a);add(.14,.14,.9,0,.1,0,0x5a3a1a);{const m=M(0xff8a1a,0xff5a00);if(ghost){m.transparent=true;m.opacity=.5}mats.push(m);const o=new THREE.Mesh(new THREE.ConeGeometry(.28,.8,7),m);o.position.y=.5;g.add(o)}break}
+ g.userData.mats=mats;return g}
+function isGhostSet(){if(IS.gh){try{ISG.remove(IS.gh)}catch(e){}IS.gh=null}if(IS.build){IS.gh=isPiece(IS.build,IS.brot,true);ISG.add(IS.gh)}}
+function isGhostUpd(){if(!IS.gh||!IS.build)return;const s=isSnap(IS.build,IS.brot),bad=isCanPlace(IS.build,s,IS.brot);IS.gs=s;IS.gbad=bad;
+ IS.gh.position.set(s.x,0,s.z);try{IS.gh.userData.mats.forEach(m=>m.color.setHex(bad?0xff4040:0x40ff70))}catch(e){}}
+function isPlace(){if(!IS.build)return 'none';const s=isSnap(IS.build,IS.brot),bad=isCanPlace(IS.build,s,IS.brot);if(bad){isMsg('✖ '+bad);return bad}
+ const P=ISBP.find(p=>p.id===IS.build);isPay(P.need);IS.occ[isKey(P.id,s,IS.brot)]=1;const m=isPiece(P.id,IS.brot,false);m.position.set(s.x,0,s.z);ISG.add(m);
+ const b={id:P.id,m,x:s.x,z:s.z,hp:P.hp||0,uses:P.uses||0,key:isKey(P.id,s,IS.brot)};
+ if(P.id==='wall'||P.id==='pal'){const rot=IS.brot;b.x0=rot===0?s.x-1:s.x-.2;b.x1=rot===0?s.x+1:s.x+.2;b.z0=rot===0?s.z-.2:s.z-1;b.z1=rot===0?s.z+.2:s.z+1;IS.blocks.push(b)}
+ IS.bl2=(IS.bl2||[]);IS.bl2.push(b);try{sfx('thud')}catch(e){}isMsg('✔ '+P.n+' gebaut');return ''}
+function isBreak(b){try{ISG.remove(b.m)}catch(e){}let i=IS.blocks.indexOf(b);if(i>=0)IS.blocks.splice(i,1);i=(IS.bl2||[]).indexOf(b);if(i>=0)IS.bl2.splice(i,1);delete IS.occ[b.key]}
+/* ---- Jäger ---- */
+function isHunterMesh(){const g=new THREE.Group();box(.5,.9,.3,0,.85,0,M(0x4a5a3a),g);box(.34,.34,.34,0,1.5,0,M(0xe8b890),g);box(.4,.12,.4,0,1.75,0,M(0x2a3a1a),g);box(.12,.7,.12,-.34,.8,0,M(0x4a5a3a),g);box(.12,.7,.12,.34,.8,0,M(0x4a5a3a),g);box(.16,.6,.16,-.13,.3,0,M(0x2a2a2a),g);box(.16,.6,.16,.13,.3,0,M(0x2a2a2a),g);ISG.add(g);return g}
+function isSpawnH(){if(IS.toSpawn<=0)return null;const a=isRnd()*6.283,x=Math.cos(a)*(ISR-1),z=Math.sin(a)*(ISR-1);let h=IS.hunters.find(q=>q.free);
+ if(!h){if(IS.hunters.length>=90)return null;h={m:isHunterMesh()};IS.hunters.push(h)}
+ Object.assign(h,{free:false,dead:0,x,z,hp:ISHP,sp:2.3+isRnd()*.9,ph:isRnd()*6});try{h.m.visible=true;h.m.scale.set(1,1,1)}catch(e){}IS.toSpawn--;IS.alive++;return h}
+function isKill(h,why){if(h.free||h.dead>0)return;h.dead=.3;IS.alive--;IS.killed++}
+function isHurt(h,d){if(h.free||h.dead>0)return;h.hp-=d;if(h.hp<=0)isKill(h)}
+function isHunters(dt){const px=pos.x-ISK,pz=pos.z;
+ if(IS.phase==='battle'){IS.spawnT-=dt;const cap=Math.min(60,25+Math.floor(IS.killed/40));if(IS.spawnT<=0&&IS.toSpawn>0&&IS.alive<cap){isSpawnH();IS.spawnT=.22}
+  if(IS.killed>=IS.total&&!IS.over)isEnd(true)}
+ let near=0;
+ IS.hunters.forEach(h=>{if(h.free)return;
+  if(h.dead>0){h.dead-=dt;try{const k=Math.max(.01,h.dead/.3);h.m.scale.set(k,k,k)}catch(e){}if(h.dead<=0){h.free=true;h.dead=0;try{h.m.visible=false}catch(e){}}return}
+  const dx=px-h.x,dz=pz-h.z,d=Math.hypot(dx,dz)||1;
+  if(d<1.05){IS.hp-=3.5*dt;near++}
+  else{const sx=dx/d*h.sp*dt,sz=dz/d*h.sp*dt;let moved=false;
+   if(!isBlk(h.x+sx,h.z+sz,.35)){h.x+=sx;h.z+=sz;moved=true}
+   else if(!isBlk(h.x+sx,h.z,.35)&&Math.abs(sx)>1e-4){h.x+=sx;moved=true}
+   else if(!isBlk(h.x,h.z+sz,.35)&&Math.abs(sz)>1e-4){h.z+=sz;moved=true}
+   if(!moved){const b=isBlk(h.x+sx*3,h.z+sz*3,.45)||isBlk(h.x,h.z,.8);if(b){b.hp-=6*dt;if(b.hp<=0)isBreak(b)}}}
+  try{h.m.position.set(h.x,Math.abs(Math.sin(IS.time*8+h.ph))*.08,h.z);h.m.rotation.y=Math.atan2(dx,dz)}catch(e){}
+  (IS.bl2||[]).slice().forEach(b=>{if(h.dead<=0&&!h.free&&b.id==='trap'&&b.uses>0&&Math.hypot(b.x-h.x,b.z-h.z)<1){b.uses--;isKill(h);if(b.uses<=0)isBreak(b)}})});
+ if(near>0){IS.hitT=(IS.hitT||0)+dt;if(IS.hitT>.8){IS.hitT=0;try{sfx('thud');shake(.2)}catch(e){}}}}
+/* ---- Aktion: sammeln oder kämpfen ---- */
+const isFw=()=>({x:-Math.sin(Y),z:-Math.cos(Y)});
+function isCone(x,z,range,cm){const f=isFw(),dx=x-(pos.x-ISK),dz=z-pos.z,L=Math.hypot(dx,dz);return L<=range&&(L<.01||(dx*f.x+dz*f.z)/L>=cm)}
+function isAction(){if(!IS.on||IS.over||ovOn)return 'off';if(IS.build)return isPlace()||'ok';
+ const now=performance.now();if(now<IS.cd)return 'cd';const alive=IS.hunters.filter(h=>!h.free&&!h.dead);const w=IS.wp;
+ if(w==='gun'&&isInv('shell')>0&&alive.some(h=>isCone(h.x,h.z,16,.88))){IS.cd=now+700;IS.inv.shell--;let n=0;alive.forEach(h=>{if(isCone(h.x,h.z,16,.88)){isHurt(h,3);n++}});try{sfx('crash');shake(.25)}catch(e){}return 'gun'}
+ if(w==='bow'&&isInv('arrow')>0&&alive.some(h=>isCone(h.x,h.z,32,.98))){IS.cd=now+520;IS.inv.arrow--;let best=null,bd=1e9;alive.forEach(h=>{if(isCone(h.x,h.z,32,.98)){const d=Math.hypot(h.x-(pos.x-ISK),h.z-pos.z);if(d<bd){bd=d;best=h}}});if(best)isHurt(best,2);try{sfx('tap')}catch(e){}return 'bow'}
+ const mr=w==='spear'?2.9:2.1,md=w==='spear'?2:1;
+ const mh=alive.filter(h=>isCone(h.x,h.z,mr,.25));
+ if(mh.length){IS.cd=now+(w==='spear'?380:450);mh.slice(0,w==='spear'?3:1).forEach(h=>isHurt(h,md));try{sfx('tap')}catch(e){}return 'melee'}
+ let bn=null,bd=1e9;IS.nodes.forEach(n=>{if(!n.alive)return;const d=Math.hypot(n.x-(pos.x-ISK),n.z-pos.z);if(d<3.1&&d<bd&&isCone(n.x,n.z,3.1,.1)){bd=d;bn=n}});
+ if(bn){IS.cd=now+(IS.tools.axe?330:560);isGather(bn);return 'gather'}
+ if(w==='gun'||w==='bow'){isMsg(w==='gun'&&!isInv('shell')?'Keine Schrot-Patronen mehr (im Buch herstellen)':w==='bow'&&!isInv('arrow')?'Keine Pfeile mehr (im Buch herstellen)':'Kein Ziel in Reichweite')}
+ return 'none'}
+function isGather(n){n.hp-=IS.tools.axe?2:1;const add=(k,c)=>{IS.inv[k]=isInv(k)+c};try{sfx('tap')}catch(e){}
+ if(n.t==='palm'){if(isRnd()<.4){add('coco',1);isMsg('+1 🥥')}else isMsg('Du schlägst auf die Palme …');if(n.hp<=0){const c=IS.tools.axe?3:2;add('wood',c);isMsg('Palme gefällt: +'+c+' 🪵');n.alive=false;n.tm=50;try{n.g.visible=false}catch(e){}}}
+ else if(n.t==='rock'){if(n.hp<=0){const c=IS.tools.axe?3:2;add('stone',c);isMsg('+'+c+' 🪨');n.alive=false;n.tm=60;try{n.g.visible=false}catch(e){}}else isMsg('Du schlägst auf den Stein …')}
+ else{if(n.hp<=0){add('berry',2);if(isRnd()<.5)add('fiber',1);isMsg('+2 🫐');n.alive=false;n.tm=40;try{n.g.visible=false}catch(e){}}else isMsg('Du pflückst …')}}
+function isEat(auto){if(isInv('coco')>0){IS.inv.coco--;IS.hun=Math.min(100,IS.hun+28);isMsg('🥥 Gegessen');return true}if(isInv('berry')>0){IS.inv.berry--;IS.hun=Math.min(100,IS.hun+12);isMsg('🫐 Gegessen');return true}if(!auto)isMsg('Du hast nichts zu essen. Sammle Kokosnüsse und Beeren!');return false}
+function isWeaponNext(){const w=isWeapons(),i=w.indexOf(IS.wp);IS.wp=w[(i+1)%w.length];isMsg(ISWN[IS.wp][0]+' '+ISWN[IS.wp][1])}
+/* ---- Spielablauf ---- */
+function isBeginBattle(){IS.phase='battle';IS.toSpawn=IS.total;IS.alive=0;IS.killed=0;IS.spawnT=0;IS.dt=IS.cfg.len*.3;toast('⚔ Die Jäger-Armee landet! '+IS.total+' Jäger kommen auf die Insel!','err');try{sfx('crash')}catch(e){}}
+function isTick(dt,now){if(ovOn||IS.over||busy)return;dt=Math.min(dt,.05);IS.time+=dt;
+ if(IS.phase==='day'){IS.dt+=dt;if(IS.dt>=IS.cfg.len){IS.dt-=IS.cfg.len;IS.day++;if(IS.day>IS.cfg.days){IS.day=IS.cfg.days;isBeginBattle()}else isMsg('🌅 Tag '+IS.day)}}
+ isLight();
+ IS.hun=Math.max(0,IS.hun-dt*.4);if(IS.hun<=8)isEat(true);
+ if(IS.hun<=0)IS.hp-=1.2*dt;else if(IS.hun>50&&IS.hp<100)IS.hp=Math.min(100,IS.hp+1.5*dt);
+ (IS.bl2||[]).forEach(b=>{if(b.id==='fire'&&Math.hypot(b.x-(pos.x-ISK),b.z-pos.z)<4.5&&IS.hp<100)IS.hp=Math.min(100,IS.hp+4*dt)});
+ IS.nodes.forEach(n=>{if(!n.alive){n.tm-=dt;if(n.tm<=0){n.alive=true;n.hp=n.max;try{n.g.visible=true}catch(e){}}}});
+ isHunters(dt);isGhostUpd();
+ if(IS.msgT>0)IS.msgT-=dt;
+ if(IS.hp<=0&&!IS.over)isEnd(false);
+ IS.hudT-=dt;if(IS.hudT<=0){IS.hudT=.25;isHud()}}
+{const _u=updGame;updGame=function(dt,t,now){if(IS.on)try{isTick(dt,now)}catch(e){console.error('is',e)}return _u.apply(this,arguments)}}
+function isHud(){const e=document.getElementById('ishud');if(!e)return;const bar=(v,c)=>'<span class="isb"><i style="width:'+Math.max(0,Math.min(100,v))+'%;background:'+c+'"></i></span>';
+ const day=IS.phase==='battle'?'⚔ Armee: '+(IS.total-IS.killed)+' übrig · '+IS.alive+' auf der Insel':'🏝 Tag '+IS.day+' / '+IS.cfg.days+' · '+(IS.L>.55?'☀️':IS.L>.3?'🌇':'🌙');
+ const sub=IS.phase==='battle'?'Besiege alle '+IS.total+' Jäger!':(IS.cfg.days-IS.day)+' Tage bis zur Jäger-Armee';
+ const inv=Object.keys(ISN).filter(k=>isInv(k)>0).map(k=>ISN[k][0]+isInv(k)).join('  ');
+ e.innerHTML='<b>'+day+'</b><small>'+sub+'</small><div class="isbs">❤ '+bar(IS.hp,'#ff453a')+' 🍖 '+bar(IS.hun,'#ff9f0a')+'</div><small>'+(inv||'Noch nichts gesammelt')+' · '+ISWN[IS.wp][0]+'</small>'+(IS.msgT>0?'<small style="color:#ffd60a;opacity:1">'+esc(IS.msg)+'</small>':'');
+ const a=document.getElementById('isact');if(a)a.textContent=IS.build?'BAUEN':(IS.wp==='gun'||IS.wp==='bow')?'🎯':'AKTION';
+ const bm=document.getElementById('isbm');if(bm){bm.style.display=IS.build?'flex':'none';if(IS.build){const P=ISBP.find(p=>p.id===IS.build);const html='<b>'+P.n+'</b> <small>'+isTxt(P.need)+'</small>'+(IS.gbad?'<small style="color:#ff6a60">'+esc(IS.gbad)+'</small>':'')+'<div>'+ISBP.map(p=>'<button data-pc="'+p.id+'"'+(p.id===IS.build?' class="on"':'')+'>'+p.ic+'</button>').join('')+'<button id="isrot">⟳</button><button id="isxb">✖</button></div>';
+  if(bm._h!==html){bm._h=html;bm.innerHTML=html;
+   bm.querySelectorAll('[data-pc]').forEach(b=>b.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();IS.build=b.dataset.pc;isGhostSet()}));const r=document.getElementById('isrot');if(r)r.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();IS.brot=IS.brot?0:1;isGhostSet()});const x=document.getElementById('isxb');if(x)x.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();IS.build='';isGhostSet()})}}}}
+/* ---- Start / Ende ---- */
+function isStart(){const c=IS.cfg;closeOv();if(!IS.bg0)IS.bg0={bg:sc.background,fc:sc.fog.color.getHex(),fn:sc.fog.near,ff:sc.fog.far};
+ Object.assign(IS,{on:true,over:false,phase:'day',day:1,dt:c.len*.12,time:0,hp:100,hun:90,inv:{},tools:{},wp:'hand',build:'',brot:0,total:1000,toSpawn:0,alive:0,killed:0,spawnT:0,hasGun:!!c.gun,msgT:0,cd:0,L:1});
+ if(IS.hasGun)IS.inv.shell=12;
+ try{isWorld()}catch(e){console.error('isWorld',e)}
+ GAMEON=true;cr=17;pos.set(ISK,0,0);Y=0;Pt=.15;H=1.6;S.tied=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;lm=false;MPSPD=1;
+ ['chase','drive','dhud','mini'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});S.inv=[];S.sel=null;inv();GUN.eq=false;$('loc').textContent='Insel · '+c.days+' Tage';
+ document.body.classList.add('ison');
+ camOv=s=>{const d=5.2,pit=Math.max(-.05,Math.min(1.1,.4-Pt*.7)),cp=Math.cos(pit),tx=pos.x,ty=1.3,tz=pos.z;cam.position.set(tx+Math.sin(Y)*d*cp+s,ty+Math.sin(pit)*d+s,tz+Math.cos(Y)*d*cp);cam.lookAt(tx,ty,tz)};
+ isLight();isHud();toast('🏝 Du bist gestrandet! Schlage auf Palmen (AKTION), sammle Holz, Steine und Kokosnüsse. Öffne das 📖 Buch zum Herstellen und 🏗 zum Bauen.','good')}
+function isLeave(){IS.on=false;IS.build='';try{isGhostSet()}catch(e){}IS.gh=null;if(camOv)camOv=null;document.body.classList.remove('ison');const b=IS.bg0;if(b){sc.background=b.bg;sc.fog.color.setHex(b.fc);sc.fog.near=b.fn;sc.fog.far=b.ff}}
+function isExit(){isLeave();goHome()}
+function isEnd(win){if(IS.over)return;IS.over=true;const c=IS.cfg,sv=cxRead('dfIsl',{}),days=win?c.days:IS.day;let coins=0,egg='',note='';
+ sv.best=Math.max(sv.best|0,days);
+ if(win){coins=Math.round(2000*c.days/100);sv.wins=(sv.wins|0)+1;if(c.days>=50&&!sv['w'+c.days]){sv['w'+c.days]=1;egg='Golden'}try{cxAdd(coins)}catch(e){}if(egg)petEggAdd(egg,1);try{bpXp(Math.round(300*c.days/100),'insel')}catch(e){}}
+ else{coins=Math.min(1000,days*5);try{cxAdd(coins)}catch(e){}}
+ cxWrite('dfIsl',sv);try{accSave(true)}catch(e){}
+ setTimeout(()=>{ov('<div class="ios" style="text-align:center"><div class="apptitle" style="font-size:28px">'+(win?'🏆 INSEL VERTEIDIGT!':'💀 Das war es')+'</div><div class="sub">'+(win?'Du hast alle '+IS.total+' Jäger besiegt.':'Du hast bis Tag '+IS.day+' durchgehalten · '+IS.killed+' Jäger besiegt.')+'</div>'
+  +'<div class="grp" style="text-align:left;margin-top:10px"><div class="row"><span class="ic" style="background:#ff9f0a">🪙</span><span class="tx"><b>+'+coins.toLocaleString('de-DE')+' Münzen</b><small>'+(win?'Belohnung fürs Überleben und Verteidigen':'Trostbelohnung')+'</small></span></div>'+(egg?'<div class="row"><span class="ic" style="background:#ffd60a">🥚</span><span class="tx"><b>1 Goldenes Ei</b><small>Erster Sieg mit '+c.days+' Tagen</small></span></div>':'')+'</div>'
+  +'<div style="margin-top:14px"><button class="pill blue" id="isre" style="width:100%;padding:14px">Nochmal spielen</button></div><div style="margin-top:8px"><button class="pill" id="ishm" style="width:100%">Hauptmenü</button></div></div>');
+  const q=i=>document.getElementById(i);q('isre').onclick=()=>isSetup();q('ishm').onclick=()=>isExit()},win?1200:600)}
+/* ---- Menüs ---- */
+const ISLENS=[[10,'10 s'],[20,'20 s'],[30,'30 s'],[45,'45 s'],[60,'1 Min'],[90,'1,5 Min'],[120,'2 Min'],[300,'5 Min']],ISDAYS=[10,25,50,100];
+function isDur(){const m=Math.round(IS.cfg.len*IS.cfg.days/60);return m>=60?Math.floor(m/60)+' Std. '+(m%60)+' Min.':m+' Min.'}
+function isSetup(){const c=IS.cfg,sv=cxRead('dfIsl',{});if(sv.len)c.len=sv.len;if(sv.days)c.days=sv.days;const can=(typeof GUN!=='undefined'&&(GUN.avail()||CHEATS));if(!can)c.gun=0;
+ ov('<div class="ios"><div class="navbar"><b>🏝 Insel · '+c.days+' Tage</b><button class="pill" id="isbk">Zurück</button></div>'
+  +'<p class="foot" style="text-align:left;margin:4px 12px">Du bist auf einer einsamen Insel gestrandet. Sammle Holz, Steine, Kokosnüsse und Beeren. Schnitze Holzstämme zu Planken, baue dir eine Basis und stelle Waffen her. Nach den Tagen landet eine Armee aus <b>1000 Jägern</b>. Sie haben nur wenig Leben. Verteidige dich!</p>'
+  +'<div class="cap">Wie lang ist ein Tag?</div><div class="grp" style="padding:8px">'+ISLENS.map(a=>'<button class="pill'+(c.len===a[0]?' blue':'')+'" data-ln="'+a[0]+'" style="margin:3px">'+a[1]+'</button>').join('')+'<div style="margin-top:8px"><input id="islen" inputmode="numeric" placeholder="Eigene Sekunden pro Tag (5 bis 600)" style="width:100%;box-sizing:border-box;padding:10px;border-radius:10px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:15px"></div></div>'
+  +'<div class="cap">Wie viele Tage?</div><div class="grp" style="padding:8px">'+ISDAYS.map(d=>'<button class="pill'+(c.days===d?' blue':'')+'" data-dy="'+d+'" style="margin:3px">'+d+' Tage</button>').join('')+'</div>'
+  +'<div class="foot">Spielzeit bis zur Armee: ca. '+isDur()+'</div>'
+  +(can?'<div class="cap">Ausrüstung</div><div class="grp"><button class="row" id="isgun"><span class="ic" style="background:#ffd60a">🔫</span><span class="tx"><b>Shotgun mitnehmen</b><small>Du startest mit 12 Patronen. Weitere stellst du im Buch her.</small></span><i class="sw'+(c.gun?' on':'')+'"></i></button></div>':'<div class="foot">🔒 Die Shotgun kannst du mitnehmen, sobald du sie freigeschaltet hast.</div>')
+  +'<div style="margin-top:14px"><button class="pill blue" id="isgo" style="width:100%;padding:16px;font-size:18px">Los geht’s</button></div>'
+  +'<div class="foot">Steuerung: Bewegen wie immer · AKTION (PC: E) sammeln und kämpfen · 📖 (C) Buch · 🏗 (B) Bauen · 🔄 (Q) Waffe · 🥥 (X) Essen · ⟳ (R) Teil drehen</div>'
+  +(sv.best?'<div class="foot">Dein Rekord: Tag '+sv.best+(sv.wins?' · '+sv.wins+' Siege':'')+'</div>':'')+'</div>');
+ const q=i=>document.getElementById(i),save=()=>{const s=cxRead('dfIsl',{});s.len=c.len;s.days=c.days;cxWrite('dfIsl',s)};
+ q('isbk').onclick=()=>menuStart();document.querySelectorAll('[data-ln]').forEach(b=>b.onclick=()=>{c.len=+b.dataset.ln;save();isSetup()});document.querySelectorAll('[data-dy]').forEach(b=>b.onclick=()=>{c.days=+b.dataset.dy;save();isSetup()});
+ q('islen').onchange=()=>{const v=Math.floor(+q('islen').value);if(v>=5&&v<=600){c.len=v;save();isSetup()}};
+ if(q('isgun'))q('isgun').onclick=()=>{c.gun=c.gun?0:1;isSetup()};q('isgo').onclick=()=>{const v=Math.floor(+(q('islen').value||0));if(v>=5&&v<=600)c.len=v;save();isStart()}}
+function isBook(msg){if(!IS.on)return;const rec=ISREC.filter(r=>!r.gun||IS.hasGun);
+ ov('<div class="ios"><div class="navbar"><b>📖 Baubuch</b><button class="pill blue" id="isbx">Fertig</button></div>'
+  +'<div class="grp" style="padding:10px"><b>Rucksack</b><div style="margin-top:6px">'+(Object.keys(ISN).filter(k=>isInv(k)>0).map(k=>'<span style="display:inline-block;margin:2px 10px 2px 0">'+ISN[k][0]+' '+ISN[k][1]+': <b>'+isInv(k)+'</b></span>').join('')||'<span class="dim">Noch leer. Schlage auf Palmen, Steine und Büsche!</span>')+'</div></div>'
+  +'<div class="cap">Herstellen</div><div class="grp">'+rec.map(r=>{const have=r.tool&&IS.tools[r.tool],ok=!have&&isHas(r.need);return '<div class="row" style="align-items:center"><span class="ic" style="background:#3a3a44">'+r.ic+'</span><span class="tx"><b>'+r.n+'</b><small>'+r.d+'<br>Kostet: '+isTxt(r.need)+'</small></span>'+(have?'<span class="dim" style="flex:none">✓ Hast du</span>':'<button class="pill'+(ok?' blue':'')+'" data-cr="'+r.id+'" style="flex:none"'+(ok?'':' disabled')+'>Bauen</button>')+'</div>'}).join('')+'</div>'
+  +'<div class="cap">Bauen (Knopf 🏗)</div><div class="grp">'+ISBP.map(p=>'<div class="row"><span class="ic" style="background:#3a3a44">'+p.ic+'</span><span class="tx"><b>'+p.n+'</b><small>'+p.d+'<br>Kostet: '+isTxt(p.need)+'</small></span></div>').join('')+'</div>'
+  +'<div class="foot">Tipp: Zuerst Holz sammeln, dann im Buch „Holzstamm schnitzen“. Wände und Palisaden halten Jäger auf. Ein Lagerfeuer heilt dich. Gegessen wird automatisch, wenn du Hunger hast.'+(msg?'<br><b>'+esc(msg)+'</b>':'')+'</div></div>');
+ const q=i=>document.getElementById(i);q('isbx').onclick=()=>closeOv();document.querySelectorAll('[data-cr]').forEach(b=>b.onclick=()=>{const r=isCraft(b.dataset.cr);isBook(r==='ok'?'✔ Hergestellt':r==='need'?'Dir fehlt etwas.':'')})}
+/* ---- Oberfläche ---- */
+{const st=document.createElement('style');st.textContent='#ishud,#isbtns,#isact,#isbm{position:fixed;z-index:8;display:none;color:#fff;font-family:-apple-system,system-ui,sans-serif}#ishud{left:0;right:0;top:8px;text-align:center;pointer-events:none;text-shadow:0 2px 8px #000;font-weight:700;font-size:15px}#ishud small{display:block;font-weight:500;opacity:.9}.isb{display:inline-block;width:96px;height:9px;border-radius:5px;background:rgba(255,255,255,.22);vertical-align:middle;margin:0 8px 0 2px;overflow:hidden}.isb i{display:block;height:100%}'
+ +'#isbtns{left:calc(env(safe-area-inset-left,0px) + 10px);top:34%;flex-direction:column;gap:10px}#isbtns button{font-size:21px;width:46px;height:46px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;touch-action:none}'
+ +'#isact{right:22px;bottom:26px;width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,255,255,.7);background:rgba(48,209,88,.5);font-size:16px;font-weight:800;touch-action:none;user-select:none;-webkit-user-select:none}'
+ +'#isbm{left:50%;transform:translateX(-50%);bottom:12px;flex-direction:column;align-items:center;gap:4px;background:rgba(0,0,0,.62);padding:8px 12px;border-radius:16px;max-width:92vw;text-align:center}#isbm small{display:block;opacity:.85}#isbm button{font-size:20px;width:44px;height:44px;border-radius:12px;border:0;background:rgba(255,255,255,.18);color:#fff;margin:2px}#isbm button.on{background:#30d158}'
+ +'body.ison #ishud,body.ison #isbtns,body.ison #isact{display:flex}body.ison #ishud{display:block}body.ison #isact{display:block}body.ison #isbm{display:flex}';document.head.appendChild(st);
+ ['ishud','isbtns','isact','isbm'].forEach(id=>{const e=document.createElement(id==='isact'?'button':'div');e.id=id;document.body.appendChild(e)});
+ const B=document.getElementById('isbtns');B.innerHTML='<button id="isbook" aria-label="Buch">📖</button><button id="isbld" aria-label="Bauen">🏗</button><button id="iswp" aria-label="Waffe">🔄</button><button id="iseat" aria-label="Essen">🥥</button><button id="isex" aria-label="Beenden">✕</button>';
+ document.getElementById('isact').textContent='AKTION';
+ const on=(id,f)=>{const e=document.getElementById(id);e.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();if(IS.on)f()})};
+ on('isact',()=>isAction());on('isbook',()=>isBook());on('isbld',()=>{IS.build=IS.build?'':'floor';isGhostSet()});on('iswp',()=>isWeaponNext());on('iseat',()=>isEat(false));
+ let ex=0;on('isex',()=>{if(ex){ex=0;isExit()}else{ex=1;isMsg('Nochmal ✕ tippen zum Beenden');setTimeout(()=>ex=0,3000)}});
+ addEventListener('keydown',e=>{if(!IS.on||ovOn||IS.over)return;const c=e.code;if(c==='KeyE'||c==='Enter')isAction();else if(c==='KeyC')isBook();else if(c==='KeyB'){IS.build=IS.build?'':'floor';isGhostSet()}else if(c==='KeyQ')isWeaponNext();else if(c==='KeyX')isEat(false);else if(c==='KeyR'&&IS.build){IS.brot=IS.brot?0:1;isGhostSet()}})}
+/* ---- Verbindung zum restlichen Spiel ---- */
+{const _tl=tele;tele=function(r){if(IS.on&&r!==17)isLeave();return _tl.apply(this,arguments)};
+ const _ng=newGame;newGame=function(){if(IS.on){isLeave();cr=0}return _ng.apply(this,arguments)};
+ const _m=menuStart;menuStart=function(){if(IS.on){isLeave();cr=0}const r=_m.apply(this,arguments);
+  try{const a=document.querySelector('.ios .sub');if(a&&!document.getElementById('isbtn')&&document.querySelector('[data-lv]')){const g=document.getElementById('tutb');const html='<div class="grp" style="margin-top:12px"><button class="row" id="isbtn"><span class="ic" style="background:#30d158">🏝</span><span class="tx"><b>Insel · 100 Tage</b><small>Überleben, bauen, 1000 Jäger besiegen</small></span><i class="chev">›</i></button></div>';
+   if(g&&g.parentNode)g.parentNode.insertAdjacentHTML('afterend',html);else a.insertAdjacentHTML('afterend',html);const b=document.getElementById('isbtn');if(b)b.onclick=()=>isSetup()}}catch(e){}return r}}
+
+/* ===== Block 174: Cloud-Sicherung des Accounts – Eier, Pets, Pass, Münzen, Skins kommen auf dem neuen Gerät mit ===== */
+const CLD={t:0,busy:false,st:''};
+const clOk=a=>!!(a&&a.tag&&a.tag.length===4&&!a.op&&!a.str&&!a.view&&!a.guest&&(a.sec||a.tok));
+const clJ=s=>{try{return JSON.parse(s)}catch(e){return null}};
+const clU=(a,b)=>[...new Set([].concat(Array.isArray(a)?a:[],Array.isArray(b)?b:[]))];
+const clMax=(a,b)=>Math.max(+a||0,+b||0);
+/* beim Abgleich zweier Geräte nichts verlieren: Münzen/XP = Maximum, Listen = Vereinigung */
+function accMerge(L,C){L=L||{};C=C||{};const o=Object.assign({},L,C),put=(k,v)=>{o[k]=JSON.stringify(v)};
+ try{if(L.dfCoins!=null||C.dfCoins!=null)o.dfCoins=String(clMax(L.dfCoins,C.dfCoins))}catch(e){}
+ try{const a=clJ(L.dfShop)||{},b=clJ(C.dfShop)||{};if(L.dfShop!=null||C.dfShop!=null)put('dfShop',Object.assign({},a,b,{skins:clU(a.skins,b.skins),cars:clU(a.cars,b.cars)}))}catch(e){}
+ try{const a=clJ(L.dfPets)||{},b=clJ(C.dfPets)||{};if(L.dfPets!=null||C.dfPets!=null){const e={};Object.keys(Object.assign({},a.e,b.e)).forEach(k=>e[k]=clMax((a.e||{})[k],(b.e||{})[k]));put('dfPets',{o:clU(a.o,b.o),cur:b.cur||a.cur||'',e})}}catch(e){}
+ try{const a=clJ(L.dfBP2)||{},b=clJ(C.dfBP2)||{};if(L.dfBP2!=null||C.dfBP2!=null)put('dfBP2',Object.assign({},a,b,{xp:clMax(a.xp,b.xp),prem:(a.prem||b.prem)?1:0,fc:clU(a.fc,b.fc),pc:clU(a.pc,b.pc),o:clU(a.o,b.o)}))}catch(e){}
+ try{const a=clJ(L.dfInv)||{},b=clJ(C.dfInv)||{};if(L.dfInv!=null||C.dfInv!=null){const m=Object.assign({},a,b);Object.keys(m).forEach(k=>{if(typeof m[k]==='number')m[k]=clMax(a[k],b[k])});put('dfInv',m)}}catch(e){}
+ try{const a=clJ(L.dfStats)||{},b=clJ(C.dfStats)||{};if(L.dfStats!=null||C.dfStats!=null){const m=Object.assign({},a,b);Object.keys(m).forEach(k=>{if(typeof m[k]==='number')m[k]=clMax(a[k],b[k])});put('dfStats',m)}}catch(e){}
+ return o}
+function clBody(a){const d=accSnap();return {a:'csave',tag:a.tag,sec:a.sec||'',tok:a.tok||'',code:accMake(a,d),name:a.name,data:d,base:a.cts||0}}
+async function clPush(keep){if(typeof TM!=='undefined'&&TM&&TM.on)return 'tm';if(!accReady())return 'no';const a=accCur();if(!clOk(a))return 'skip';if(CLD.busy)return 'busy';CLD.busy=true;
+ try{let r=await opsPost(clBody(a),keep);
+  if(r&&r.conflict){const p=await opsPost({a:'cload',tag:a.tag,tok:a.tok||'',code:accMake(a,accSnap())});
+   if(p&&p.ok){const m=accMerge(accSnap(),p.data);accApply(m);a.data=m;a.tok=p.tok;a.cts=p.ts;try{petFxCalc()}catch(e){}r=await opsPost(Object.assign(clBody(a),{base:p.ts}),keep);CLD.merged=1}}
+  if(r&&r.ok){a.tok=r.tok;a.cts=r.ts;a.cok=Date.now();try{accStore()}catch(e){}return 'ok'}
+  return r&&r.error==='auth'?'auth':'fail'}catch(e){return 'err'}finally{CLD.busy=false}}
+/* neues Gerät: gerade per Code eingeloggt -> Stand aus der Cloud holen */
+async function clBoot(){if(!accReady())return 'no';const a=accCur();if(!a||a.op||a.str||a.view||!a.imp||a.cdone||(a.ctry||0)>=15||!a.tag)return 'skip';a.ctry=(a.ctry||0)+1;
+ try{const r=await opsPost({a:'cload',tag:a.tag,code:a.cin||a.code,tok:a.tok||''});
+  if(r&&r.ok&&r.data){const m=Object.assign({},a.data||{},r.data);a.data=m;a.tok=r.tok;a.cts=r.ts;a.cdone=1;if(r.name)a.name=r.name;try{accStore()}catch(e){}accApply(m);try{toast('☁️ Dein Spielstand wurde geladen.','good')}catch(e){}setTimeout(()=>{try{qReload()}catch(e){}},1300);return 'loaded'}
+  try{accStore()}catch(e){}return r&&r.none?'none':'fail'}catch(e){return 'err'}}
+/* Zugang merken: der eingegebene Code wird später zum Laden gebraucht */
+{const _i=accImport;accImport=function(code,nm){const r=_i.apply(this,arguments);try{if(r&&r.id&&!r.existing){const a=ACC.list[r.id];if(a)a.cin=String(code||'').toUpperCase()}}catch(e){}return r}}
+/* automatisch sichern: nach jeder Änderung, beim Verlassen der App und beim Start */
+{const _cp=cloudPush;cloudPush=function(a){try{clearTimeout(CLD.t);CLD.t=setTimeout(()=>{clPush()},3500)}catch(e){}return _cp.apply(this,arguments)}}
+document.addEventListener('visibilitychange',()=>{try{if(document.hidden){clearTimeout(CLD.t);clPush(true)}}catch(e){}});
+setTimeout(()=>{clBoot().then(r=>{if(r!=='loaded')clPush()}).catch(()=>{})},5000);
+setInterval(()=>{try{if(!document.hidden)clPush()}catch(e){}},180000);
+/* Knöpfe in „Rechtliches & Sicherheit → Konto & Daten“ */
+{const _lh=lgHtml;lgHtml=function(t){const h=_lh.apply(this,arguments);if(t!=='acc')return h;
+  return h+'<h3>☁️ Cloud-Sicherung</h3><p>Dein Spielstand (Münzen, Skins, Pets, Eier, Pass) wird automatisch in der Cloud gesichert. Auf einem neuen Gerät holst du ihn mit deinem Account-Code zurück.</p><button class="lgb" id="lgcs">Jetzt sichern</button><button class="lgb" id="lgcl">Stand aus der Cloud laden</button><p id="lgcm" style="min-height:20px"></p>'}}
+{const _lo=lgOpen;lgOpen=function(t){const r=_lo.apply(this,arguments);try{const s=document.getElementById('lgcs'),l=document.getElementById('lgcl'),m=document.getElementById('lgcm');
+  if(s&&m){s.onclick=async()=>{m.textContent='Sichere …';const a=accReady()?accCur():null;const x=await clPush();m.textContent=x==='ok'?'✔ Gesichert.':x==='skip'?'Dieses Konto kann nicht gesichert werden (Gast).':x==='auth'?'Keine Berechtigung für dieses Konto.':'Das hat nicht geklappt. Prüfe die Verbindung.'}}
+  if(l&&m){let arm=false;l.onclick=async()=>{if(!arm){arm=true;l.textContent='Sicher? Nochmal tippen';setTimeout(()=>{arm=false;l.textContent='Stand aus der Cloud laden'},4000);return}
+   arm=false;l.textContent='Stand aus der Cloud laden';m.textContent='Lade …';const a=accReady()?accCur():null;if(!clOk(a)&&!(a&&a.tag&&a.imp)){m.textContent='Dieses Konto hat keine Cloud-Sicherung.';return}
+   const p=await opsPost({a:'cload',tag:a.tag,tok:a.tok||'',code:a.cin||accMake(a,accSnap())});if(p&&p.ok){const mg=accMerge(accSnap(),p.data);a.data=mg;a.tok=p.tok;a.cts=p.ts;try{accStore()}catch(e){}accApply(mg);m.textContent='✔ Geladen. Das Spiel startet neu …';setTimeout(()=>{try{qReload()}catch(e){}},900)}
+   else m.textContent=p&&p.none?'In der Cloud liegt noch kein Stand. Sichere zuerst auf dem alten Gerät (Jetzt sichern).':p&&p.error==='auth'?'Der Code passt nicht mehr. Nimm den aktuellen Code vom alten Gerät.':'Das hat nicht geklappt. Prüfe die Verbindung.'}}}catch(e){}return r}}
+
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

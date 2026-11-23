@@ -7397,8 +7397,8 @@ function vrPad(srcs,dt){let lx=0,lz=0,rx=0;const pr=(g,i)=>!!(g&&g.buttons[i]&&g
  srcs.forEach(s=>{const g=s.gamepad;if(!g)return;const L=s.handedness==='left',a=g.axes||[],big=Math.hypot(a[2]||0,a[3]||0)>=Math.hypot(a[0]||0,a[1]||0),x=(big?a[2]:a[0])||0,y=(big?a[3]:a[1])||0;
   if(L){lx=Math.abs(x)>.15?x:0;lz=Math.abs(y)>.15?y:0}else rx=Math.abs(x)>.2?x:0;
   const p=L?'l':'r';if(ovOn&&Math.abs(y)>.15)VRX.sc=(VRX.sc||0)+y*dt*700;
-  edge(p+'t',pr(g,0),()=>{if(ovOn){vrMenuClick(s.handedness)}else if(L)vrKey('Space',1);else{vrKey('KeyE',1);try{if(near&&!busy)near.run()}catch(e){}}},()=>{if(L)vrKey('Space',0);else vrKey('KeyE',0)});
-  edge(p+'k',pr(g,3),()=>{if(L)vrApe();else vrView()});
+  edge(p+'t',pr(g,0),()=>{if(ovOn){vrMenuClick(s.handedness)}else if(VRS.on&&VRS.hov[s.handedness]!=null){vrScrClick(s.handedness)}else if(L)vrKey('Space',1);else{vrKey('KeyE',1);try{if(near&&!busy)near.run()}catch(e){}}},()=>{if(L)vrKey('Space',0);else vrKey('KeyE',0)});
+  if(L){edge('lk',pr(g,3),()=>{VRX.lkT=0},()=>{if((VRX.lkT||0)<.6)vrScrToggle();else vrApe()});if(pr(g,3))VRX.lkT=(VRX.lkT||0)+dt}else edge('rk',pr(g,3),()=>vrView());
   VRX.grip[p]=pr(g,1);
   edge(p+'s',pr(g,1)&&!VRX.ape,()=>vrKey(L?'KeyC':'KeyB',1),()=>vrKey(L?'KeyC':'KeyB',0));
   if(L){edge('lx',pr(g,4),()=>vrKey('KeyX',1),()=>vrKey('KeyX',0));
@@ -7469,7 +7469,7 @@ function vrFrame(t){const s=VRX.s;if(!s)return;const dt=Math.min(.05,(t-(VRX.lt|
  VRX.lp={x:hx,z:hz};
  const vb=VRX.view==='tp'?3.4:VRX.view==='top'?4.5:0,vu=VRX.view==='tp'?1.5:VRX.view==='top'?11:0,ox=Math.sin(Y)*vb,oz=Math.cos(Y)*vb;
  if(VRX.ape&&!(busy||ovOn||lm||S.tied)){[0,1].forEach(i=>{try{const c=R.xr.getController(i),hd=c.userData.h,k=hd==='left'?'l':'r',cp=c.position,pv=VRX.hp[i];if(pv&&VRX.grip[k]){const dx=cp.x-pv.x,dz=cp.z-pv.z;if(Math.hypot(dx,dz)<.6)moveP(-(dx*cn+dz*sn)*1.9,-(-dx*sn+dz*cn)*1.9)}VRX.hp[i]={x:cp.x,z:cp.z}}catch(e){}})}
- VRX.rig.rotation.y=VRX.snap;VRX.rig.position.set(pos.x+ox-(hx*cn+hz*sn),Math.max(0,H-1.6)+vu+((typeof PK!=='undefined'&&PK.on)?PK.y:0),pos.z+oz-(-hx*sn+hz*cn));try{vrMenu(dt)}catch(e){console.error('vrm',e)}
+ VRX.rig.rotation.y=VRX.snap;VRX.rig.position.set(pos.x+ox-(hx*cn+hz*sn),Math.max(0,H-1.6)+vu+((typeof PK!=='undefined'&&PK.on)?PK.y:0),pos.z+oz-(-hx*sn+hz*cn));try{vrMenu(dt)}catch(e){console.error('vrm',e)}try{vrScr(dt)}catch(e){console.error('vrs',e)}
  VRX.pt+=dt;if(VRX.pt>.25){VRX.pt=0;try{vrPanel()}catch(e){}}
  VRX.fc++;VRX.ft+=dt;if(VRX.ft>=1){VRX.fps=Math.round(VRX.fc/VRX.ft);VRX.fc=0;VRX.ft=0}
  try{frame(t)}catch(e){VRX.err=String(e&&e.message||e).slice(0,80);console.error('vrframe',e)}}
@@ -7478,7 +7478,7 @@ async function vrStart(){if(VRX.on||!navigator.xr)return;
   R.xr.enabled=true;try{R.xr.setReferenceSpaceType('local-floor')}catch(e){}try{R.xr.setFoveation(1)}catch(e){}
   s.addEventListener('end',vrEnd);R.setAnimationLoop(vrFrame);await R.xr.setSession(s);
   VRX.on=true;VRX.lp=null;VRX.view='fp';VRX.old=CH.view;CH.view='fp';VRX.snap=0;VRX.lt=0;VRX.btn={};VRX.hold={};VRX.rig.add(cam);cam.add(VRX.pan);try{releaseInput()}catch(e){}
-  try{toast('🥽 VR an: links Stick laufen · rechts Stick drehen · rechter Trigger Aktion · rechter Stick drücken = Ansicht · linker Stick drücken = Affen-Modus','good')}catch(e){}try{vrnUnlock()}catch(e){}}
+  try{toast('🥽 VR an: links Stick laufen · rechts Stick drehen · rechter Trigger Aktion · rechter Stick drücken = Ansicht · linker Stick kurz = Handy-Bildschirm, lang = Affen-Modus','good')}catch(e){}try{vrnUnlock()}catch(e){}}
  catch(e){console.error('vr',e);try{toast('VR konnte nicht gestartet werden: '+(e&&e.message||e),'err')}catch(x){}}}
 function vrEnd(){if(!VRX.on&&!VRX.s)return;VRX.on=false;VRX.s=null;try{R.setAnimationLoop(null)}catch(e){}try{R.xr.enabled=false}catch(e){}
  try{cam.remove(VRX.pan);if(cam.parent)cam.parent.remove(cam)}catch(e){}
@@ -7540,6 +7540,45 @@ function vwNext(){vwSet(CH.view==='tp'?'fp':CH.view==='fp'?'top':CH.view==='top'
 {const _c=camUpdate;camUpdate=function(s){const r=_c.apply(this,arguments);try{if(VRX.on)return r;const v=CH.view,cx=pos.x,cz=pos.z,by=(typeof PK!=='undefined'&&PK.on?PK.y:0)+((IS&&IS.on)?(IS.sy||0):0);
   if(v==='top'&&!drv.view&&!lm){av.visible=true;const hh=(IS&&IS.on)||(typeof PK!=='undefined'&&PK.on)?11:6.5,bk=(IS&&IS.on)||(typeof PK!=='undefined'&&PK.on)?5:2.2;cam.position.set(cx+Math.sin(Y)*bk+s,by+hh+s,cz+Math.cos(Y)*bk);cam.lookAt(cx,by+.8,cz)}
   else if(v==='fp'&&IS&&IS.on){av.visible=false;cam.position.set(cx+s,by+1.6+s,cz);cam.rotation.set(Pt,Y,0)}}catch(e){}return r}}
+/* ===== Block 181: VR-Handy-Bildschirm: die ganze Oberfläche (Knöpfe, Musik, Anrufe, Ansicht …) wie auf dem Handy ===== */
+function vrInline(src,dst,skip){try{const cs=getComputedStyle(src);let t='';for(let i=0;i<cs.length;i++){const p=cs[i];if(/^(transition|animation|backdrop|-webkit-backdrop)/.test(p))continue;t+=p+':'+cs.getPropertyValue(p)+';'}dst.setAttribute('style',t+'transition:none;animation:none;')}catch(e){}
+ if(src.tagName==='INPUT'||src.tagName==='TEXTAREA'){try{dst.setAttribute('value',src.value||'')}catch(e){}}
+ if(src.tagName==='CANVAS'){try{const im=document.createElement('img');im.src=src.toDataURL();im.setAttribute('style',dst.getAttribute('style'));dst.parentNode&&dst.parentNode.replaceChild(im,dst);return}catch(e){}}
+ if(src.tagName==='IFRAME'||src.tagName==='VIDEO'){try{dst.parentNode&&dst.parentNode.removeChild(dst)}catch(e){}return}
+ const a=Array.from(src.children),b=Array.from(dst.children);for(let i=0;i<a.length&&i<b.length;i++){if(skip){let hid=false;try{const c=getComputedStyle(a[i]);hid=c.display==='none'||c.visibility==='hidden'}catch(e){}if(hid){try{dst.removeChild(b[i])}catch(e){}continue}}vrInline(a[i],b[i],skip)}}
+const VRS={on:false,mesh:null,cv:null,img:null,items:[],hov:{},S:1,W:1,H:1,t:0,busy:false,dirty:true,dom:true,lk:0};
+try{new MutationObserver(()=>{VRS.dd=true}).observe(document.body,{subtree:true,childList:true,attributes:true,characterData:true})}catch(e){}
+function vrScrCapture(){if(VRS.busy)return;VRS.busy=true;VRS.dd=false;try{const W=Math.max(300,innerWidth),Hh=Math.max(200,innerHeight),S=VRS.cv.width/W;
+  const wrap=document.createElement('div');wrap.setAttribute('xmlns','http://www.w3.org/1999/xhtml');wrap.style.cssText='position:relative;width:'+W+'px;height:'+Hh+'px;overflow:hidden;background:linear-gradient(160deg,#101a33,#0b0d14 60%,#1a1030);';
+  const items=[];
+  Array.from(document.body.children).forEach(e=>{if(/^(CANVAS|SCRIPT|STYLE|LINK|IFRAME)$/.test(e.tagName)||/^(look|ov|fade|vig|hovl|vrb)$/.test(e.id))return;let cs;try{cs=getComputedStyle(e)}catch(x){return}if(cs.display==='none'||cs.visibility==='hidden'||+cs.opacity===0)return;
+   const c=e.cloneNode(true);vrInline(e,c,true);wrap.appendChild(c);
+   const all=[e].concat(Array.from(e.querySelectorAll('button,a,.row,[role=button],input,[onclick]')));all.forEach(x=>{if(x.tagName!=='BUTTON'&&x.tagName!=='A'&&x.tagName!=='INPUT'&&!x.onclick&&!(x.classList&&x.classList.contains('row'))&&x.getAttribute('role')!=='button')return;const r=x.getBoundingClientRect();if(r.width>4&&r.height>4&&r.right>0&&r.bottom>0)items.push({el:x,x:r.left,y:r.top,w:r.width,h:r.height,dis:!!x.disabled})})});
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+Math.round(W*S)+'" height="'+Math.round(Hh*S)+'" viewBox="0 0 '+W+' '+Hh+'"><foreignObject x="0" y="0" width="'+W+'" height="'+Hh+'">'+new XMLSerializer().serializeToString(wrap)+'</foreignObject></svg>';
+  const im=new Image();im.onload=()=>{VRS.busy=false;VRS.img=im;VRS.items=items;VRS.S=S;VRS.W=W;VRS.H=Hh;VRS.dirty=true};im.onerror=()=>{VRS.busy=false;VRS.fail=(VRS.fail||0)+1};im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)}catch(e){VRS.busy=false;VRS.fail=(VRS.fail||0)+1}}
+function vrScrBuild(){if(VRS.mesh)return;const W=Math.max(300,innerWidth),Hh=Math.max(200,innerHeight),cw=1280,ch=Math.round(1280*Hh/W);const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;VRS.cv=cv;
+ VRS.mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.6*ch/cw),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));VRS.mesh.renderOrder=997;VRS.mesh.visible=false;VRX.rig.add(VRS.mesh)}
+function vrScrToggle(){if(!VRX.on||ovOn)return;vrScrBuild();VRS.on=!VRS.on;const m=VRS.mesh;m.visible=VRS.on;if(VRS.on){const v=new THREE.Vector3(),p=new THREE.Vector3();cam.getWorldDirection(v);cam.getWorldPosition(p);v.y=0;if(v.length()<.01)v.set(0,0,-1);v.normalize();
+  const w=new THREE.Vector3(p.x+v.x*1.25,p.y-.12,p.z+v.z*1.25);VRX.rig.worldToLocal(w);m.position.copy(w);const hp=p.clone();VRX.rig.worldToLocal(hp);m.lookAt(hp);VRS.t=1;VRS.dd=true;VRS.dirty=true;try{toast('📱 Handy-Bildschirm an (linken Stick kurz drücken = aus)','good')}catch(e){}}else{VRS.hov={}}}
+function vrScrDraw(){const c=VRS.cv,x=c.getContext('2d'),S=VRS.S;x.fillStyle='#0b0d14';x.fillRect(0,0,c.width,c.height);if(VRS.img){try{x.drawImage(VRS.img,0,0,c.width,c.height)}catch(e){}}
+ Object.keys(VRS.hov).map(k=>VRS.items[VRS.hov[k]]).filter(Boolean).forEach(it=>{x.fillStyle='rgba(10,132,255,.3)';x.strokeStyle='#fff';x.lineWidth=4;x.fillRect(it.x*S,it.y*S,it.w*S,it.h*S);x.strokeRect(it.x*S,it.y*S,it.w*S,it.h*S)});
+ x.strokeStyle='#ffffff44';x.lineWidth=6;x.strokeRect(3,3,c.width-6,c.height-6);VRS.mesh.material.map.needsUpdate=true}
+function vrScr(dt){if(!VRS.mesh)return;if(ovOn){if(VRS.mesh.visible)VRS.mesh.visible=false;return}if(VRS.on&&!VRS.mesh.visible)VRS.mesh.visible=true;if(!VRS.on)return;
+ VRS.t+=dt;if((VRS.dd||!VRS.img)&&VRS.t>.8&&!VRS.busy&&(VRS.fail||0)<4){VRS.t=0;vrScrCapture()}
+ const old=JSON.stringify(Object.keys(VRS.hov).map(k=>VRS.hov[k]));VRS.hov={};const m=VRS.mesh,S=VRS.S||1;m.updateMatrixWorld(true);
+ [0,1].forEach(i=>{const c=R.xr.getController(i);if(!c)return;c.updateMatrixWorld(true);const o=new THREE.Vector3().setFromMatrixPosition(c.matrixWorld),d=new THREE.Vector3(0,0,-1).transformDirection(c.matrixWorld);
+  const hit=new THREE.Raycaster(o,d,0,6).intersectObject(m)[0];if(!hit||!hit.uv)return;const cx=hit.uv.x*VRS.cv.width/S,cy=(1-hit.uv.y)*VRS.cv.height/S;let best=-1,ba=1e12;
+  VRS.items.forEach((it,j)=>{if(cx>=it.x&&cx<=it.x+it.w&&cy>=it.y&&cy<=it.y+it.h){const a=it.w*it.h;if(a<ba){ba=a;best=j}}});if(best>=0)VRS.hov[c.userData.h||('c'+i)]=best});
+ if(JSON.stringify(Object.keys(VRS.hov).map(k=>VRS.hov[k]))!==old)VRS.dirty=true;if(VRS.dirty&&VRS.img){VRS.dirty=false;vrScrDraw()}}
+function vrScrClick(hand){const k=VRS.hov[hand],it=k!=null?VRS.items[k]:null;if(!it||it.dis)return false;const e=it.el;
+ try{const cx=it.x+it.w/2,cy=it.y+it.h/2,ev=t=>{try{e.dispatchEvent(new PointerEvent(t,{bubbles:true,cancelable:true,pointerId:7,pointerType:'touch',clientX:cx,clientY:cy,isPrimary:true}))}catch(x){}};ev('pointerdown');ev('pointerup');e.click();if(e.tagName==='INPUT')e.focus()}catch(x){}
+ try{(VRX.s.inputSources||[]).forEach(s=>{if(s.handedness===hand&&s.gamepad&&s.gamepad.hapticActuators&&s.gamepad.hapticActuators[0])s.gamepad.hapticActuators[0].pulse(.4,40)})}catch(x){}VRS.dd=true;VRS.t=.5;return true}
+/* Musik-Schnellschalter (für alle Geräte und im VR-Handy) */
+function vmuOn(){try{return !!((typeof SP!=='undefined'&&SP.playing)||AU.musicOn)}catch(e){return false}}
+function vmuToggle(){try{if(vmuOn()){try{if(SP.playing&&SP.ctrl)SP.ctrl.pause()}catch(e){}try{SA&&SA.playing&&0}catch(e){}AU.musicOn=false;if(AU.ctx)AU.mus.gain.setTargetAtTime(0,AU.ctx.currentTime,.1);toast('🔇 Musik aus','good')}
+  else{AU.musicOn=true;if(AU.ctx)AU.mus.gain.setTargetAtTime(1,AU.ctx.currentTime,.1);toast('🔊 Musik an','good')}auUI()}catch(e){console.error('vmu',e)}vmuBtn()}
+function vmuBtn(){let b=document.getElementById('vmu');if(!b){b=document.createElement('button');b.id='vmu';b.style.cssText='position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 112px);z-index:60;width:40px;height:40px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:rgba(24,26,34,.65);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;font-size:19px;padding:0';b.onclick=vmuToggle;document.body.appendChild(b)}b.textContent=vmuOn()?'🔊':'🔇';b.style.display=(typeof ovOn!=='undefined'&&ovOn)?'none':''}
+setInterval(()=>{try{vmuBtn()}catch(e){}},700);
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

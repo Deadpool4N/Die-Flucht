@@ -7001,9 +7001,9 @@ function isWorld(){
  place('palm',180);place('rock',36);place('bush',100);place('log',50);
  isJungle();isAnimals()}
 /* ---- Tag und Nacht ---- */
-function isLight(){const k=(IS.dt/IS.cfg.len)%1,L=Math.max(.12,Math.min(1,.5+.55*Math.cos((k-.3)*6.283)));IS.L=L;
- const lerp=(a,b,t)=>Math.round(a+(b-a)*t),c=(r1,g1,b1,r2,g2,b2)=>(lerp(r1,r2,L)<<16)|(lerp(g1,g2,L)<<8)|lerp(b1,b2,L),sky=c(8,12,34,126,200,255);
- try{sc.background=new THREE.Color(sky);sc.fog.color.setHex(sky);sc.fog.near=40;sc.fog.far=135;ISLT.h.intensity=.22+.78*L;ISLT.s.intensity=.1+.85*L}catch(e){}}
+function isLight(){const k=(IS.dt/IS.cfg.len)%1,L=Math.max(.04,Math.min(1,.5+.62*Math.cos((k-.3)*6.283)));IS.L=L;
+ const lerp=(a,b,t)=>Math.round(a+(b-a)*t),c=(r1,g1,b1,r2,g2,b2)=>(lerp(r1,r2,L)<<16)|(lerp(g1,g2,L)<<8)|lerp(b1,b2,L),sky=c(2,4,14,126,200,255);
+ try{sc.background=new THREE.Color(sky);sc.fog.color.setHex(sky);sc.fog.near=40;sc.fog.far=135;ISLT.h.intensity=.08+.92*L;ISLT.s.intensity=.02+.93*L}catch(e){}}
 /* ---- Bewegung & Kollision ---- */
 function isBlk(x,z,r){for(let i=0;i<IS.blocks.length;i++){const b=IS.blocks[i];if(x>b.x0-r&&x<b.x1+r&&z>b.z0-r&&z<b.z1+r)return b}return null}
 function isNodeHit(x,z,r){for(let i=0;i<IS.nodes.length;i++){const n=IS.nodes[i];if(n.alive&&n.t!=='bush'&&Math.hypot(n.x-x,n.z-z)<n.r+r)return true}return false}
@@ -7393,11 +7393,11 @@ function vrKey(c,d){if(d)keys[c]=1;else keys[c]=0;try{dispatchEvent(new Keyboard
 function vrBoxClick(re){try{const bs=Array.from(document.querySelectorAll('#box button'));const b=re?bs.find(x=>re.test(x.textContent)):(bs.find(x=>/blue|btn/.test(x.className))||bs[0]);if(b){b.click();return true}}catch(e){}return false}
 /* Eingabe: reine Funktion über die Controller-Daten (testbar) */
 function vrPad(srcs,dt){let lx=0,lz=0,rx=0;const pr=(g,i)=>!!(g&&g.buttons[i]&&g.buttons[i].pressed);
- const edge=(id,on,dn,up)=>{const was=VRX.btn[id];VRX.btn[id]=on;if(on&&!was)dn&&dn();if(!on&&was)up&&up()};
+ const edge=(id,on,dn,up)=>{const was=VRX.btn[id];VRX.btn[id]=on;try{if(on&&!was)dn&&dn();if(!on&&was)up&&up()}catch(e){console.error('vrpad',e)}};
  srcs.forEach(s=>{const g=s.gamepad;if(!g)return;const L=s.handedness==='left',a=g.axes||[],big=Math.hypot(a[2]||0,a[3]||0)>=Math.hypot(a[0]||0,a[1]||0),x=(big?a[2]:a[0])||0,y=(big?a[3]:a[1])||0;
   if(L){lx=Math.abs(x)>.15?x:0;lz=Math.abs(y)>.15?y:0}else rx=Math.abs(x)>.2?x:0;
   const p=L?'l':'r';if(ovOn&&Math.abs(y)>.15)VRX.sc=(VRX.sc||0)+y*dt*700;
-  edge(p+'t',pr(g,0),()=>{if(ovOn){vrMenuClick(s.handedness)}else if(VRS.on&&VRS.hov[s.handedness]!=null){vrScrClick(s.handedness)}else if(L)vrKey('Space',1);else{vrKey('KeyE',1);try{if(near&&!busy)near.run()}catch(e){}}},()=>{if(L)vrKey('Space',0);else vrKey('KeyE',0)});
+  edge(p+'t',pr(g,0),()=>{if(ovOn){vrMenuClick(s.handedness)}else if(VRT.hov[s.handedness]!=null){vrToolClick(s.handedness)}else if(VRS.on&&VRS.hov[s.handedness]!=null){vrScrClick(s.handedness)}else if(S.tied&&pinObj.visible&&!S.f.pin){IA[0].run()}else if(L)vrKey('Space',1);else{vrKey('KeyE',1);try{if(near&&!busy)near.run()}catch(e){}}},()=>{if(L)vrKey('Space',0);else vrKey('KeyE',0)});
   if(L){edge('lk',pr(g,3),()=>{VRX.lkT=0},()=>{if((VRX.lkT||0)<.6)vrScrToggle();else vrApe()});if(pr(g,3))VRX.lkT=(VRX.lkT||0)+dt}else edge('rk',pr(g,3),()=>vrView());
   VRX.grip[p]=pr(g,1);
   edge(p+'s',pr(g,1)&&!VRX.ape,()=>vrKey(L?'KeyC':'KeyB',1),()=>vrKey(L?'KeyC':'KeyB',0));
@@ -7446,7 +7446,7 @@ function vrMenuClick(hand){const k=VRM.hov[hand];const it=k!=null?VRM.items[k]:n
 function vrWrap(x,t,w,maxL){const words=String(t).split(/\s+/);let line='',lines=[];words.forEach(wd=>{const tt=line?line+' '+wd:wd;if(x.measureText(tt).width>w&&line){lines.push(line);line=wd}else line=tt});if(line)lines.push(line);return lines.slice(0,maxL)}
 function vrPanel(){const c=VRX.cv,x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);const T=id=>{const e=document.getElementById(id);return e?e.textContent:''};
  if(ovOn){VRX.pan.visible=false;return}VRX.pan.visible=true;let rows=[];const toastOn=(()=>{const e=document.getElementById('toast');return e&&+e.style.opacity>0&&e.textContent})();
- {rows.push([(T('loc')||'')+'  ·  '+VRX.fps+' FPS  ·  Ansicht '+({fp:'Ego',tp:'hinten',top:'oben'})[VRX.view],1]);if(VRX.err)rows.push(['⚠ '+VRX.err,2]);if(IS&&IS.on)rows.push(['❤ '+Math.round(IS.hp)+'  🍖 '+Math.round(IS.hun)+'  Tag '+IS.day+(IS.phase==='battle'?'  ⚔ '+IS.alive+' Jäger':''),0]);
+ {if(S.tied)rows.push(['⛓ Du bist gefesselt'+(pinObj.visible&&!S.f.pin?': Trigger = Nadel greifen':': sieh dich um'),1]);rows.push([(T('loc')||'')+'  ·  '+VRX.fps+' FPS  ·  Ansicht '+({fp:'Ego',tp:'hinten',top:'oben'})[VRX.view],1]);if(VRX.err)rows.push(['⚠ '+VRX.err,2]);if(IS&&IS.on)rows.push(['❤ '+Math.round(IS.hp)+'  🍖 '+Math.round(IS.hun)+'  Tag '+IS.day+(IS.phase==='battle'?'  ⚔ '+IS.alive+' Jäger':''),0]);
   try{const co=cxCoins();rows.push(['🪙 '+(co===Infinity?'∞':co.toLocaleString('de-DE')),2])}catch(e){}
   if(near&&near._l)rows.push(['▶ '+near._l+'  (rechter Trigger)',0]);if(toastOn)rows.push([toastOn,0])}
  x.fillStyle='rgba(12,14,22,.78)';x.beginPath();x.roundRect?x.roundRect(4,4,c.width-8,c.height-8,28):x.rect(4,4,c.width-8,c.height-8);x.fill();
@@ -7469,7 +7469,7 @@ function vrFrame(t){const s=VRX.s;if(!s)return;const dt=Math.min(.05,(t-(VRX.lt|
  VRX.lp={x:hx,z:hz};
  const vb=VRX.view==='tp'?3.4:VRX.view==='top'?4.5:0,vu=VRX.view==='tp'?1.5:VRX.view==='top'?11:0,ox=Math.sin(Y)*vb,oz=Math.cos(Y)*vb;
  if(VRX.ape&&!(busy||ovOn||lm||S.tied)){[0,1].forEach(i=>{try{const c=R.xr.getController(i),hd=c.userData.h,k=hd==='left'?'l':'r',cp=c.position,pv=VRX.hp[i];if(pv&&VRX.grip[k]){const dx=cp.x-pv.x,dz=cp.z-pv.z;if(Math.hypot(dx,dz)<.6)moveP(-(dx*cn+dz*sn)*1.9,-(-dx*sn+dz*cn)*1.9)}VRX.hp[i]={x:cp.x,z:cp.z}}catch(e){}})}
- VRX.rig.rotation.y=VRX.snap;VRX.rig.position.set(pos.x+ox-(hx*cn+hz*sn),Math.max(0,H-1.6)+vu+((typeof PK!=='undefined'&&PK.on)?PK.y:0),pos.z+oz-(-hx*sn+hz*cn));try{vrMenu(dt)}catch(e){console.error('vrm',e)}try{vrScr(dt)}catch(e){console.error('vrs',e)}
+ VRX.rig.rotation.y=VRX.snap;VRX.rig.position.set(pos.x+ox-(hx*cn+hz*sn),Math.max(0,H-1.6)+vu+((typeof PK!=='undefined'&&PK.on)?PK.y:0),pos.z+oz-(-hx*sn+hz*cn));try{vrMenu(dt)}catch(e){console.error('vrm',e)}try{vrScr(dt)}catch(e){console.error('vrs',e)}try{vrTool(dt)}catch(e){console.error('vrt',e)}
  VRX.pt+=dt;if(VRX.pt>.25){VRX.pt=0;try{vrPanel()}catch(e){}}
  VRX.fc++;VRX.ft+=dt;if(VRX.ft>=1){VRX.fps=Math.round(VRX.fc/VRX.ft);VRX.fc=0;VRX.ft=0}
  try{frame(t)}catch(e){VRX.err=String(e&&e.message||e).slice(0,80);console.error('vrframe',e)}}
@@ -7477,11 +7477,11 @@ async function vrStart(){if(VRX.on||!navigator.xr)return;
  try{const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});vrBuild();VRX.s=s;
   R.xr.enabled=true;try{R.xr.setReferenceSpaceType('local-floor')}catch(e){}try{R.xr.setFoveation(1)}catch(e){}
   s.addEventListener('end',vrEnd);R.setAnimationLoop(vrFrame);await R.xr.setSession(s);
-  VRX.on=true;VRX.lp=null;VRX.view='fp';VRX.old=CH.view;CH.view='fp';VRX.snap=0;VRX.lt=0;VRX.btn={};VRX.hold={};VRX.rig.add(cam);cam.add(VRX.pan);try{releaseInput()}catch(e){}
+  VRX.on=true;VRX.lp=null;VRX.view='fp';VRX.old=CH.view;CH.view='fp';VRX.snap=0;VRX.lt=0;VRX.btn={};VRX.hold={};VRX.rig.add(cam);cam.add(VRX.pan);try{vrToolBuild()}catch(e){console.error(e)}try{releaseInput()}catch(e){}
   try{toast('🥽 VR an: links Stick laufen · rechts Stick drehen · rechter Trigger Aktion · rechter Stick drücken = Ansicht · linker Stick kurz = Handy-Bildschirm, lang = Affen-Modus','good')}catch(e){}try{vrnUnlock()}catch(e){}}
  catch(e){console.error('vr',e);try{toast('VR konnte nicht gestartet werden: '+(e&&e.message||e),'err')}catch(x){}}}
 function vrEnd(){if(!VRX.on&&!VRX.s)return;VRX.on=false;VRX.s=null;try{R.setAnimationLoop(null)}catch(e){}try{R.xr.enabled=false}catch(e){}
- try{cam.remove(VRX.pan);if(cam.parent)cam.parent.remove(cam)}catch(e){}
+ try{cam.remove(VRX.pan);if(VRT.mesh)cam.remove(VRT.mesh);if(VRS.mesh)VRS.mesh.visible=false;VRS.on=false;if(cam.parent)cam.parent.remove(cam)}catch(e){}
  ['KeyE','KeyC','KeyB','KeyX','KeyQ','KeyR','Space'].forEach(k=>keys[k]=0);jx=jz=0;if(VRX.old)CH.view=VRX.old;
  try{cam.position.set(0,0,0);cam.rotation.set(0,0,0);cam.up.set(0,1,0);R.setPixelRatio(perfRatio());size()}catch(e){}
  try{requestAnimationFrame(frame)}catch(e){}}
@@ -7579,6 +7579,34 @@ function vmuToggle(){try{if(vmuOn()){try{if(SP.playing&&SP.ctrl)SP.ctrl.pause()}
   else{AU.musicOn=true;if(AU.ctx)AU.mus.gain.setTargetAtTime(1,AU.ctx.currentTime,.1);toast('🔊 Musik an','good')}auUI()}catch(e){console.error('vmu',e)}vmuBtn()}
 function vmuBtn(){let b=document.getElementById('vmu');if(!b){b=document.createElement('button');b.id='vmu';b.style.cssText='position:fixed;left:8px;top:calc(env(safe-area-inset-top,0px) + 112px);z-index:60;width:40px;height:40px;border-radius:20px;border:1px solid rgba(255,255,255,.2);background:rgba(24,26,34,.65);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);color:#fff;font-size:19px;padding:0';b.onclick=vmuToggle;document.body.appendChild(b)}b.textContent=vmuOn()?'🔊':'🔇';b.style.display=(typeof ovOn!=='undefined'&&ovOn)?'none':''}
 setInterval(()=>{try{vmuBtn()}catch(e){}},700);
+/* ===== Block 182: VR-Leiste (Telefon, Musik, Ansicht, Handy, Lampe, Menü), Taschenlampe + Tag/Nacht auf der Insel ===== */
+const VRT={mesh:null,cv:null,hov:{},dirty:true,tt:0,its:[{k:'ph',t:'📞',n:'Telefon'},{k:'mu',t:'🔊',n:'Musik'},{k:'vw',t:'👁',n:'Ansicht'},{k:'sc',t:'📱',n:'Handy'},{k:'fl',t:'🔦',n:'Lampe'},{k:'mn',t:'☰',n:'Menü'}]};
+function vrToolBuild(){if(VRT.mesh)return;const cv=document.createElement('canvas');cv.width=1200;cv.height=220;VRT.cv=cv;
+ VRT.mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.5,.275),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));VRT.mesh.renderOrder=1000;VRT.mesh.position.set(0,-.7,-1.15);VRT.mesh.rotation.x=-.3;cam.add(VRT.mesh)}
+function vrToolDraw(){const c=VRT.cv,x=c.getContext('2d'),n=VRT.its.length,w=c.width/n;x.clearRect(0,0,c.width,c.height);const hv=Object.keys(VRT.hov).map(k=>VRT.hov[k]);
+ VRT.its.forEach((it,i)=>{const on=(it.k==='fl'&&IS.on&&IS.fl)||(it.k==='sc'&&VRS.on),h=hv.includes(i);x.fillStyle=h?'rgba(10,132,255,.95)':on?'rgba(48,209,88,.85)':'rgba(20,22,32,.86)';x.beginPath();x.roundRect?x.roundRect(i*w+8,8,w-16,c.height-16,34):x.rect(i*w+8,8,w-16,c.height-16);x.fill();
+  x.strokeStyle=h?'#fff':'#ffffff55';x.lineWidth=h?6:3;x.stroke();x.textAlign='center';x.fillStyle='#fff';x.font='84px sans-serif';let ic=it.t;if(it.k==='mu')ic=vmuOn()?'🔊':'🔇';x.fillText(ic,i*w+w/2,132);x.font='700 30px -apple-system,sans-serif';x.fillText(it.n,i*w+w/2,188)});
+ VRT.mesh.material.map.needsUpdate=true}
+function vrTool(dt){if(!VRT.mesh)return;const show=VRX.on&&!ovOn;VRT.mesh.visible=show;if(!show)return;VRT.tt+=dt;
+ const old=JSON.stringify(VRT.hov);VRT.hov={};VRT.mesh.updateMatrixWorld(true);
+ [0,1].forEach(i=>{const c=R.xr.getController(i);if(!c)return;c.updateMatrixWorld(true);const o=new THREE.Vector3().setFromMatrixPosition(c.matrixWorld),d=new THREE.Vector3(0,0,-1).transformDirection(c.matrixWorld);
+  const hit=new THREE.Raycaster(o,d,0,6).intersectObject(VRT.mesh)[0];if(!hit||!hit.uv)return;const k=Math.min(VRT.its.length-1,Math.floor(hit.uv.x*VRT.its.length));VRT.hov[c.userData.h||('c'+i)]=k});
+ if(JSON.stringify(VRT.hov)!==old||VRT.tt>.5){VRT.tt=0;vrToolDraw()}}
+function vrToolClick(hand){const k=VRT.hov[hand];if(k==null)return false;const it=VRT.its[k];
+ try{if(it.k==='ph'){const c=document.getElementById('phchip');if(c)c.click();else try{phRender(1)}catch(e){}if(!VRS.on)vrScrToggle();else VRS.dd=true}
+  else if(it.k==='mu')vmuToggle();else if(it.k==='vw')vrView();else if(it.k==='sc')vrScrToggle();else if(it.k==='fl'){if(IS.on)isFlashToggle();else toast('🔦 Die Lampe gibt es im Insel-Modus','err')}
+  else if(it.k==='mn'){const b=document.getElementById('mb');if(b)b.click()}}catch(e){console.error('vrtool',e)}
+ try{(VRX.s.inputSources||[]).forEach(s=>{if(s.handedness===hand&&s.gamepad&&s.gamepad.hapticActuators&&s.gamepad.hapticActuators[0])s.gamepad.hapticActuators[0].pulse(.5,50)})}catch(e){}VRT.dirty=true;VRT.tt=1;return true}
+/* ---- Taschenlampe ---- */
+let ISFL=null;
+function isFlashToggle(){if(!IS.on)return;IS.fl=!IS.fl;isMsg(IS.fl?'🔦 Taschenlampe an':'🔦 Taschenlampe aus');try{sfx('tap')}catch(e){}}
+function isFlashTick(){try{if(!ISFL){ISFL=new THREE.SpotLight(0xfff0c8,0,48,.62,.5,1.1);sc.add(ISFL);sc.add(ISFL.target)}
+ const on=IS.on&&IS.fl&&!IS.over;ISFL.visible=on;ISFL.intensity=on?2.2+(1-(IS.L||1))*3.2:0;if(on){const f=isFw(),px=pos.x,pz=pos.z;ISFL.position.set(px,1.5+(IS.sy||0),pz);ISFL.target.position.set(px+f.x*12,.6,pz+f.z*12);ISFL.target.updateMatrixWorld()}}catch(e){}}
+{const _l=isLight;isLight=function(){const r=_l.apply(this,arguments);isFlashTick();return r}}
+{const _s=isStart;isStart=function(){const r=_s.apply(this,arguments);IS.fl=false;try{isMsg('🔦 Du hast eine Taschenlampe: Taste F oder der 🔦-Knopf (nachts wichtig!)')}catch(e){}return r}}
+{const _lv=isLeave;isLeave=function(){IS.fl=false;isFlashTick();return _lv.apply(this,arguments)}}
+{const B=document.getElementById('isbtns');if(B&&!document.getElementById('isfl')){const b=document.createElement('button');b.id='isfl';b.setAttribute('aria-label','Taschenlampe');b.textContent='🔦';b.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();isFlashToggle()});B.insertBefore(b,B.firstChild)}
+ addEventListener('keydown',e=>{if(IS.on&&!ovOn&&!IS.over&&e.code==='KeyF')isFlashToggle()})}
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

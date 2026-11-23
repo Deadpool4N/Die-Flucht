@@ -7280,6 +7280,52 @@ function ioCheckAll(){if(!IO.host||IS.over)return;const ids=Object.keys(IO.pl);i
 {const _hu=isHunters;isHunters=function(dt){_hu.apply(this,arguments);if(IO.on&&IO.host){IO.pl[IO.myId]&&(IO.pl[IO.myId].dead=IS.dead?1:0);if(IS.phase==='battle')ioCheckAll()}}}
 /* Menü-Knopf in der Einrichtung */
 {const _s2=isSetup;isSetup=function(){const r=_s2.apply(this,arguments);try{const go=document.getElementById('isgo');if(go&&!document.getElementById('isonl')){const b=document.createElement('div');b.style.marginTop='8px';b.innerHTML='<button class="pill" id="isonl" style="width:100%;padding:14px">🌐 Online spielen (bis 4)</button>';go.parentNode.appendChild(b);document.getElementById('isonl').onclick=()=>ioMenu()}}catch(e){console.error(e)}return r}}
+/* ===== Block 176: Eier in großen Mengen kaufen und alle auf einmal öffnen ===== */
+{const st=document.createElement('style');st.textContent='#hall{position:fixed;inset:0;z-index:10056;background:radial-gradient(ellipse at 50% 30%,#2a2f4a 0%,#0a0b10 75%);color:#fff;display:flex;font-family:-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none}'
++'#hall .hs{width:min(44vw,230px);flex:none;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0008;padding:calc(env(safe-area-inset-top,0px) + 10px) 8px 12px;border-right:1px solid #ffffff22}'
++'#hall .hs .it{display:flex;align-items:center;gap:7px;padding:6px;border-radius:10px;background:#ffffff12;margin-bottom:6px;font-size:13px}#hall .hs .it img{width:34px;height:34px;flex:none}#hall .hs .it .e{width:34px;text-align:center;font-size:24px;flex:none}'
++'#hall .hs .it b{display:block;line-height:1.15}#hall .hs .it small{opacity:.8}#hall .hs .nw{background:#30d158;color:#000;border-radius:6px;padding:0 5px;font-size:10px;font-weight:800;margin-left:4px}'
++'#hall .hm{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;text-align:center;overflow-y:auto}#hall .hb{margin:5px;border:0;border-radius:14px;padding:13px 20px;font:700 16px -apple-system,system-ui,sans-serif;color:#000;background:#30d158}#hall .hb.g{background:#ffffff26;color:#fff}';document.head.appendChild(st)}
+const ioN=n=>(+n||0).toLocaleString('de-DE');
+function petBulk(rs){const d=petD();d.e=d.e||{};const res={},tot={eggs:0,coins:0,neu:0,dup:0},byR={};
+ (rs||PETR).forEach(r=>{const n=d.e[r]|0;if(n<=0)return;for(let i=0;i<n;i++){const p=petRoll(r),dup=d.o.includes(p.id);let x=res[p.id];if(!x)x=res[p.id]={p,n:0,neu:0};x.n++;
+   if(dup){const c=Math.round(PETEGG[p.r]*.4);tot.coins+=c;tot.dup++}else{d.o.push(p.id);if(!d.cur)d.cur=p.id;x.neu=1;tot.neu++}}
+  byR[r]=n;tot.eggs+=n;d.e[r]=0});
+ if(tot.coins>0){try{if(cxCoins()!==Infinity)cxSet(cxCoins()+tot.coins)}catch(e){}}
+ petSave(d);return {res,tot,byR}}
+function petBulkUI(rs){const d0=petD(),have=(rs||PETR).reduce((a,r)=>a+((d0.e&&d0.e[r])|0),0);if(!have)return petMenu('Du hast keine Eier zum Öffnen.');
+ const R=petBulk(rs),list=Object.keys(R.res).map(k=>R.res[k]).sort((a,b)=>PETR.indexOf(b.p.r)-PETR.indexOf(a.p.r)||b.n-a.n);
+ let el=document.getElementById('hall');if(el)el.remove();el=document.createElement('div');el.id='hall';document.body.appendChild(el);try{navigator.vibrate&&navigator.vibrate([60,30,120])}catch(e){}
+ const thumb=p=>{let u=null;try{u=petThumb(p)}catch(e){}return u?'<img src="'+u+'">':'<span class="e">'+p.ic+'</span>'};
+ const side='<div class="hs"><div style="font-weight:800;margin-bottom:8px">🥚 Ergebnis</div>'+Object.keys(R.byR).map(r=>'<div class="it"><span class="e">🥚</span><span><b style="color:'+PETRC[r]+'">'+r+'es Ei</b><small>'+ioN(R.byR[r])+' geöffnet</small></span></div>').join('')
+  +'<div style="font-weight:800;margin:10px 0 8px">🐾 Erhalten</div>'+list.map(x=>'<div class="it">'+thumb(x.p)+'<span><b style="color:'+PETRC[x.p.r]+'">'+esc(x.p.n)+(x.neu?'<span class="nw">NEU</span>':'')+'</b><small>×'+ioN(x.n)+' · '+x.p.r+'</small></span></div>').join('')+'</div>';
+ const sum=()=>{el.innerHTML=side+'<div class="hm"><div style="font-size:26px;font-weight:800">🎉 '+ioN(R.tot.eggs)+' Eier geöffnet</div>'
+  +'<div style="margin-top:12px;padding:12px 16px;border-radius:14px;background:#ffffff18;line-height:1.6"><b>✨ '+ioN(R.tot.neu)+'</b> neue Pets<br><b>🔁 '+ioN(R.tot.dup)+'</b> Doppelte<br><b>🪙 +'+ioN(R.tot.coins)+'</b> Münzen für Doppelte</div>'
+  +'<div style="margin-top:16px"><button class="hb" id="hone">Alle einzeln ansehen</button><button class="hb g" id="hdone">Fertig</button></div></div>';
+  document.getElementById('hone').onclick=()=>one(0);document.getElementById('hdone').onclick=()=>{el.remove();petMenu()}};
+ const one=i=>{const x=list[i];if(!x)return sum();const p=x.p,u=(()=>{try{return petThumb(p)}catch(e){return null}})();el.style.setProperty('--hg',PETRC[p.r]);
+  el.innerHTML=side+'<div class="hm"><div style="font-size:14px;letter-spacing:3px;color:'+PETRC[p.r]+';font-weight:800;text-transform:uppercase">'+p.r+' · '+(i+1)+' / '+list.length+'</div>'
+  +'<div style="animation:hpop .6s cubic-bezier(.2,1.3,.4,1);margin:6px 0">'+(u?'<img src="'+u+'" style="width:min(38vw,240px);height:min(38vw,240px);filter:drop-shadow(0 0 20px '+PETRC[p.r]+')">':'<div style="font-size:110px">'+p.ic+'</div>')+'</div>'
+  +'<div style="font-size:26px;font-weight:800">'+p.ic+' '+esc(p.n)+'</div><div style="font-size:18px;margin-top:4px">×'+ioN(x.n)+(x.neu?' · <span style="color:#30d158">NEU</span>':'')+'</div>'
+  +'<div style="margin-top:8px;padding:10px 14px;border-radius:14px;background:#ffffff18;max-width:100%"><b>„'+esc(p.a)+'“</b><div style="margin-top:3px;opacity:.9">'+petFxTxt(p.fx)+'</div></div>'
+  +'<div style="margin-top:14px">'+(i>0?'<button class="hb g" id="hpv">‹ Zurück</button>':'')+'<button class="hb" id="hnx">'+(i<list.length-1?'Weiter ›':'Übersicht')+'</button></div></div>';
+  const pv=document.getElementById('hpv');if(pv)pv.onclick=()=>one(i-1);document.getElementById('hnx').onclick=()=>one(i+1)};
+ sum()}
+/* Menü ergänzen: Alle öffnen + Mengen kaufen */
+function petBuyN(r,n){const pr=PETEGG[r];if(!pr||n<1)return 0;const c=cxCoins();let k=n;if(c!==Infinity)k=Math.min(n,Math.floor(c/pr));if(k<1)return 0;if(c!==Infinity)cxSet(c-pr*k);petEggAdd(r,k);return k}
+{const _m=petMenu;petMenu=function(msg){const r0=_m.apply(this,arguments);try{
+ const d=petD(),tot=PETR.reduce((a,r)=>a+((d.e&&d.e[r])|0),0),rows=document.querySelectorAll('[data-buy]');
+ rows.forEach(b=>{const r=b.dataset.buy,row=b.closest('.row'),n=(d.e&&d.e[r])|0,pr=PETEGG[r];
+  const tx=row.querySelector('.tx small');if(tx)tx.textContent='Du hast '+ioN(n)+' · Preis '+pr.toLocaleString('de-DE')+' 🪙';
+  const w=document.createElement('div');w.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 10px;width:100%;box-sizing:border-box';
+  const mk=(t,fn,cls)=>{const x=document.createElement('button');x.className='pill'+(cls?' '+cls:'');x.style.cssText='flex:none;padding:6px 11px;font-size:13px';x.textContent=t;x.onclick=fn;w.appendChild(x)};
+  [10,100,1000].forEach(k=>mk('×'+ioN(k),()=>{const g=petBuyN(r,k);petMenu(g?'🥚 '+ioN(g)+' × '+r+'es Ei gekauft.':'Dir fehlen Coins.')}));
+  mk('Max',()=>{const c=cxCoins(),m=c===Infinity?10000:Math.min(100000,Math.floor(c/pr));const g=petBuyN(r,m);petMenu(g?'🥚 '+ioN(g)+' × '+r+'es Ei gekauft.':'Dir fehlen Coins.')});
+  if(n>1)mk('Alle '+ioN(n)+' öffnen',()=>petBulkUI([r]),'blue');
+  row.parentNode.insertBefore(w,row.nextSibling)});
+ const cap=Array.from(document.querySelectorAll('.cap')).find(e=>/Eier/.test(e.textContent));
+ if(cap&&tot>0){const g=document.createElement('div');g.style.cssText='padding:0 12px 10px';g.innerHTML='<button class="pill blue" id="ptall" style="width:100%;padding:14px;font-size:17px">🎁 Alle Eier auf einmal öffnen ('+ioN(tot)+')</button>';cap.parentNode.insertBefore(g,cap.nextSibling);document.getElementById('ptall').onclick=()=>petBulkUI()}
+ }catch(e){console.error('petBulk',e)}return r0}}
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

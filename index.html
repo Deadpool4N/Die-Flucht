@@ -729,7 +729,7 @@ let near=null;$('act').onclick=()=>{if(near&&!busy&&!ovOn)near.run()};
 function size(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}addEventListener('resize',size);size();
 /* ---------- Schleife ---------- */
 let last=performance.now(),bob=0;
-function frame(now){requestAnimationFrame(frame);if(perfSkip(now))return;const dt=Math.min(.05,(now-last)/1e3);last=now;const t=now/1e3;
+function frame(now){if(!VRX.on){if(VRX.ln===now)return;VRX.ln=now;requestAnimationFrame(frame)}if(!VRX.on&&perfSkip(now))return;const dt=Math.min(.05,(now-last)/1e3);last=now;const t=now/1e3;
  for(let i=tw.length-1;i>=0;i--){const a=tw[i];a.t+=dt;const k=Math.min(1,a.t/a.d);a.f(k);if(k>=1){tw.splice(i,1);a.done&&a.done()}}
  const b0=RM[0].b;b0.position.x=Math.sin(t*1.3)*.15;
  lamp.position.set(cr*20+(cr===0?b0.position.x:0),2.6,0);
@@ -7326,6 +7326,64 @@ function petBuyN(r,n){const pr=PETEGG[r];if(!pr||n<1)return 0;const c=cxCoins();
  const cap=Array.from(document.querySelectorAll('.cap')).find(e=>/Eier/.test(e.textContent));
  if(cap&&tot>0){const g=document.createElement('div');g.style.cssText='padding:0 12px 10px';g.innerHTML='<button class="pill blue" id="ptall" style="width:100%;padding:14px;font-size:17px">🎁 Alle Eier auf einmal öffnen ('+ioN(tot)+')</button>';cap.parentNode.insertBefore(g,cap.nextSibling);document.getElementById('ptall').onclick=()=>petBulkUI()}
  }catch(e){console.error('petBulk',e)}return r0}}
+/* ===== Block 177: VR-Modus für Meta Quest (WebXR, Controller-Steuerung) ===== */
+const VRX={on:false,sup:false,s:null,rig:null,pan:null,pc:null,pt:0,snap:0,sn:{},btn:{},hold:{},cv:null,old:null};
+function vrKey(c,d){if(d)keys[c]=1;else keys[c]=0;try{dispatchEvent(new KeyboardEvent(d?'keydown':'keyup',{code:c,key:c}))}catch(e){}}
+function vrBoxClick(re){try{const bs=Array.from(document.querySelectorAll('#box button'));const b=re?bs.find(x=>re.test(x.textContent)):(bs.find(x=>/blue|btn/.test(x.className))||bs[0]);if(b){b.click();return true}}catch(e){}return false}
+/* Eingabe: reine Funktion über die Controller-Daten (testbar) */
+function vrPad(srcs,dt){let lx=0,lz=0,rx=0;const pr=(g,i)=>!!(g&&g.buttons[i]&&g.buttons[i].pressed);
+ const edge=(id,on,dn,up)=>{const was=VRX.btn[id];VRX.btn[id]=on;if(on&&!was)dn&&dn();if(!on&&was)up&&up()};
+ srcs.forEach(s=>{const g=s.gamepad;if(!g)return;const L=s.handedness==='left',a=g.axes||[],x=a[2]||0,y=a[3]||0;
+  if(L){lx=Math.abs(x)>.15?x:0;lz=Math.abs(y)>.15?y:0}else rx=Math.abs(x)>.2?x:0;
+  const p=L?'l':'r';
+  edge(p+'t',pr(g,0),()=>{if(ovOn){vrBoxClick()}else if(L)vrKey('Space',1);else{vrKey('KeyE',1);try{if(near&&!busy)near.run()}catch(e){}}},()=>{if(L)vrKey('Space',0);else vrKey('KeyE',0)});
+  edge(p+'s',pr(g,1),()=>vrKey(L?'KeyC':'KeyB',1),()=>vrKey(L?'KeyC':'KeyB',0));
+  if(L){edge('lx',pr(g,4),()=>vrKey('KeyX',1),()=>vrKey('KeyX',0));
+   edge('ly',pr(g,5),()=>{VRX.hold.y=0},()=>{if(VRX.hold.y<1.2)vrKey('KeyR',1),vrKey('KeyR',0)});if(pr(g,5)){VRX.hold.y=(VRX.hold.y||0)+dt;if(VRX.hold.y>=1.2&&!VRX.hold.d){VRX.hold.d=1;try{VRX.s.end()}catch(e){}}}else VRX.hold.d=0}
+  else{edge('ra',pr(g,4),()=>vrKey('Space',1),()=>vrKey('Space',0));edge('rb',pr(g,5),()=>{if(ovOn){vrBoxClick(/zurück|schließen|fertig|ok|weiter|abbrechen/i)}else vrKey('KeyQ',1)},()=>vrKey('KeyQ',0))}});
+ jx=lx;jz=lz;
+ if(rx&&!VRX.sn.on){VRX.sn.on=1;VRX.snap+=(rx>0?-1:1)*Math.PI/6}if(!rx)VRX.sn.on=0;
+ return {lx,lz,rx}}
+/* Anzeige-Tafel im Blickfeld */
+function vrWrap(x,t,w,maxL){const words=String(t).split(/\s+/);let line='',lines=[];words.forEach(wd=>{const tt=line?line+' '+wd:wd;if(x.measureText(tt).width>w&&line){lines.push(line);line=wd}else line=tt});if(line)lines.push(line);return lines.slice(0,maxL)}
+function vrPanel(){const c=VRX.cv,x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);const T=id=>{const e=document.getElementById(id);return e?e.textContent:''};
+ let rows=[];const toastOn=(()=>{const e=document.getElementById('toast');return e&&+e.style.opacity>0&&e.textContent})();
+ if(ovOn){const b=document.getElementById('box');const t=(b?b.innerText:'').replace(/\s+/g,' ').trim();rows=[['📋 Menü (2D)',1],[t.slice(0,420),0],['Trigger = Hauptknopf · B = Zurück · Y lang halten = VR beenden',2]]}
+ else{rows.push([T('loc')||'',1]);if(IS&&IS.on)rows.push(['❤ '+Math.round(IS.hp)+'  🍖 '+Math.round(IS.hun)+'  Tag '+IS.day+(IS.phase==='battle'?'  ⚔ '+IS.alive+' Jäger':''),0]);
+  try{const co=cxCoins();rows.push(['🪙 '+(co===Infinity?'∞':co.toLocaleString('de-DE')),2])}catch(e){}
+  if(near&&near._l)rows.push(['▶ '+near._l+'  (rechter Trigger)',0]);if(toastOn)rows.push([toastOn,0])}
+ x.fillStyle='rgba(12,14,22,.78)';x.beginPath();x.roundRect?x.roundRect(4,4,c.width-8,c.height-8,28):x.rect(4,4,c.width-8,c.height-8);x.fill();
+ x.fillStyle='#fff';x.textAlign='left';let y=46;rows.forEach(r=>{x.font=(r[1]===1?'700 30px':r[1]===2?'24px':'28px')+' -apple-system,sans-serif';x.fillStyle=r[1]===1?'#ffd60a':r[1]===2?'#9aa':'#fff';vrWrap(x,r[0],c.width-40,5).forEach(l=>{if(y<c.height-8){x.fillText(l,20,y);y+=r[1]===1?38:34}})});
+ VRX.pan.material.map.needsUpdate=true}
+function vrBuild(){if(VRX.rig)return;const rig=new THREE.Group();VRX.rig=rig;
+ const cv=document.createElement('canvas');cv.width=768;cv.height=300;VRX.cv=cv;const tx=new THREE.CanvasTexture(cv);
+ const pan=new THREE.Mesh(new THREE.PlaneGeometry(.9,.352),new THREE.MeshBasicMaterial({map:tx,transparent:true,depthTest:false}));pan.renderOrder=999;pan.position.set(0,-.34,-1.05);pan.rotation.x=-.25;VRX.pan=pan;
+ [0,1].forEach(i=>{const c=R.xr.getController(i),m=new THREE.Mesh(new THREE.BoxGeometry(.04,.04,.14),new THREE.MeshBasicMaterial({color:i?0xff9f0a:0x0a84ff}));m.position.z=-.04;c.add(m);
+  const ln=new THREE.Mesh(new THREE.BoxGeometry(.004,.004,.9),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.35}));ln.position.z=-.5;c.add(ln);rig.add(c)});
+ sc.add(rig)}
+function vrFrame(t){const s=VRX.s;if(!s)return;const dt=Math.min(.05,(t-(VRX.lt||t))/1e3||0.016);VRX.lt=t;
+ try{const src=[];s.inputSources.forEach(i=>src.push(i));vrPad(src,dt)}catch(e){}
+ const v=new THREE.Vector3();cam.getWorldDirection(v);if(Math.hypot(v.x,v.z)>.05)Y=Math.atan2(-v.x,-v.z);Pt=0;
+ VRX.rig.rotation.y=VRX.snap;VRX.rig.position.set(pos.x,Math.max(0,H-1.6),pos.z);
+ VRX.pt+=dt;if(VRX.pt>.25){VRX.pt=0;try{vrPanel()}catch(e){}}
+ frame(t)}
+async function vrStart(){if(VRX.on||!navigator.xr)return;
+ try{const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']});vrBuild();VRX.s=s;
+  R.xr.enabled=true;try{R.xr.setReferenceSpaceType('local-floor')}catch(e){}
+  s.addEventListener('end',vrEnd);R.setAnimationLoop(vrFrame);await R.xr.setSession(s);
+  VRX.on=true;VRX.old=CH.view;CH.view='fp';VRX.snap=0;VRX.lt=0;VRX.btn={};VRX.hold={};VRX.rig.add(cam);cam.add(VRX.pan);try{releaseInput()}catch(e){}
+  try{toast('🥽 VR an: links Stick laufen · rechts Stick drehen · rechter Trigger Aktion','good')}catch(e){}}
+ catch(e){console.error('vr',e);try{toast('VR konnte nicht gestartet werden: '+(e&&e.message||e),'err')}catch(x){}}}
+function vrEnd(){if(!VRX.on&&!VRX.s)return;VRX.on=false;VRX.s=null;try{R.setAnimationLoop(null)}catch(e){}try{R.xr.enabled=false}catch(e){}
+ try{cam.remove(VRX.pan);if(cam.parent)cam.parent.remove(cam)}catch(e){}
+ ['KeyE','KeyC','KeyB','KeyX','KeyQ','KeyR','Space'].forEach(k=>keys[k]=0);jx=jz=0;if(VRX.old)CH.view=VRX.old;
+ try{cam.position.set(0,0,0);cam.rotation.set(0,0,0);cam.up.set(0,1,0);R.setPixelRatio(perfRatio());size()}catch(e){}
+ try{requestAnimationFrame(frame)}catch(e){}}
+/* VR-Knopf */
+{const b=document.createElement('button');b.id='vrb';b.className='hud';b.textContent='🥽 VR starten';b.style.cssText='display:none;position:fixed;z-index:8;right:10px;top:calc(env(safe-area-inset-top,0px) + 92px);padding:9px 13px;border-radius:14px;border:1px solid #ffffff55;background:#0a84ffdd;color:#fff;font:700 14px -apple-system,system-ui,sans-serif';b.onclick=()=>vrStart();document.body.appendChild(b);
+ try{if(navigator.xr&&navigator.xr.isSessionSupported)navigator.xr.isSessionSupported('immersive-vr').then(ok=>{VRX.sup=!!ok;if(ok){setTimeout(()=>{try{toast('🥽 Meta Quest erkannt: Im Spiel oben rechts „VR starten“ tippen.','good')}catch(e){}},2500)}}).catch(()=>{})}catch(e){}
+ setInterval(()=>{b.style.display=(VRX.sup&&!VRX.on&&!ovOn)?'block':'none'},500)}
+{const _r=R.render;R.render=function(){if(VRX.on)try{av.visible=false}catch(e){}return _r.apply(this,arguments)}}
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

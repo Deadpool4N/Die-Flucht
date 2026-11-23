@@ -6941,14 +6941,14 @@ function isCraft(id){const r=ISREC.find(x=>x.id===id);if(!r)return 'bad';if(r.to
 /* ---- Welt bauen ---- */
 function isTree(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);const s=.9+isRnd()*.4;
  box(.36*s,4.2*s,.36*s,0,2.1*s,0,M(0x8a5a2a),g).rotation.z=(isRnd()-.5)*.15;
- for(let i=0;i<(IO.on?3:5);i++){const a=i/(IO.on?3:5)*6.283,l=box(.35,.1,1.9*s,Math.sin(a)*.9*s,4.15*s,Math.cos(a)*.9*s,M(0x2f9a3a),g);l.rotation.y=a;l.rotation.x=-.35}
- if(!IO.on){box(.3,.3,.3,.2,3.95*s,.2,M(0x6a4a1a),g);box(.3,.3,.3,-.2,3.9*s,-.15,M(0x6a4a1a),g)}return g}
+ for(let i=0;i<3;i++){const a=i/3*6.283,l=box(.35,.1,1.9*s,Math.sin(a)*.9*s,4.15*s,Math.cos(a)*.9*s,M(0x2f9a3a),g);l.rotation.y=a;l.rotation.x=-.35}
+ return g}
 function isRock(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);const s=.8+isRnd()*.7;box(1.4*s,.9*s,1.2*s,0,.4*s,0,M(0x8a8c94),g).rotation.y=isRnd()*3;box(.8*s,.6*s,.8*s,.3*s,.9*s,.1,M(0x9a9ca4),g);return g}
-function isBush(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);box(1.1,.8,1.1,0,.4,0,M(0x2a7a2a),g);for(let i=0;i<(IO.on?3:5);i++)box(.14,.14,.14,(isRnd()-.5)*.9,.6+isRnd()*.4,(isRnd()-.5)*.9,M(0xd0203a,0x400010),g);return g}
+function isBush(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);box(1.1,.8,1.1,0,.4,0,M(0x2a7a2a),g);for(let i=0;i<3;i++)box(.14,.14,.14,(isRnd()-.5)*.9,.6+isRnd()*.4,(isRnd()-.5)*.9,M(0xd0203a,0x400010),g);return g}
 function isLog(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);g.rotation.y=isRnd()*3.14;const l=box(2.6,.5,.5,0,.3,0,M(0x7a4e24),g);l.rotation.z=(isRnd()-.5)*.1;box(.1,.52,.52,1.3,.3,0,M(0xd8b878),g);box(.5,.3,.12,-.4,.65,.2,M(0x2f8a3a),g);return g}
 const ISNT={palm:{hp:4,r:.55,mk:isTree},rock:{hp:5,r:.85,mk:isRock},bush:{hp:2,r:.6,mk:isBush},log:{hp:3,r:.8,mk:isLog}};
-function isStreams(){IS.wat=[];IS.wseg=[];const defs=IO.on?[[.6,3.9,5,.9],[2.4,5.5,-4,1.3]]:[];
- defs.forEach(d=>{const R0=ISR-9,a0=d[0],a1=d[1],P0=[Math.cos(a0)*R0,Math.sin(a0)*R0],P1=[Math.cos(a1)*R0,Math.sin(a1)*R0],C=[Math.cos((a0+a1)/2+d[3])*14,Math.sin((a0+a1)/2+d[3])*14];let prev=null;
+function isStreams(){IS.wat=[];IS.wseg=[];const defs=[[.6,3.9,5,.9],[2.4,5.5,-4,1.3]];
+ defs.forEach(d=>{const R0=ISR-9,a0=d[0],a1=d[1],P0=[Math.cos(a0)*R0,Math.sin(a0)*R0],P1=[Math.cos(a1)*R0,Math.sin(a1)*R0],C=[Math.cos((a0+a1)/2+d[3])*62,Math.sin((a0+a1)/2+d[3])*62];let prev=null;
   for(let i=0;i<=64;i++){const t=i/64,u=1-t,bx=u*u*P0[0]+2*u*t*C[0]+t*t*P1[0],bz=u*u*P0[1]+2*u*t*C[1]+t*t*P1[1],dx=P1[0]-P0[0],dz=P1[1]-P0[1],L=Math.hypot(dx,dz)||1,m=Math.sin(t*d[2]*3)*3.2,x=bx+(-dz/L)*m,z=bz+(dx/L)*m;
    if(prev){const sx=x-prev[0],sz=z-prev[1];IS.wseg.push([(x+prev[0])/2,(z+prev[1])/2,Math.hypot(sx,sz),Math.atan2(sx,sz)])}IS.wat.push([x,z]);prev=[x,z]}})}
 const isWater=(x,z)=>{const w=IS.wat;if(!w||!w.length)return false;for(let i=0;i<w.length;i++){if(Math.abs(w[i][0]-x)<2.4&&Math.abs(w[i][1]-z)<2.4&&Math.hypot(w[i][0]-x,w[i][1]-z)<2.0)return true}return false};
@@ -6956,15 +6956,17 @@ function isInst(geo,col,n,fn,emi){const m=new THREE.InstancedMesh(geo,emi!=null?
 function isJungle(){try{const rp=(minD)=>{for(let k=0;k<20;k++){const a=isRnd()*6.283,d=minD+isRnd()*(ISR-6-minD),x=Math.cos(a)*d,z=Math.sin(a)*d;if(!isWater(x,z))return [x,z]}return null};
   const B=new THREE.BoxGeometry(1,1,1);
   if(IS.wseg.length)isInst(B,0x3aa0d8,IS.wseg.length,(o,i)=>{const w=IS.wseg[i];o.position.set(w[0],.17,w[1]);o.rotation.set(0,w[3],0);o.scale.set(3.6,.08,w[2]+.5)},0x0a3050);
-  const fe=[];for(let i=0;i<650;i++){const q=rp(6);if(q)fe.push([q[0],q[1],.6+isRnd()*.9,.35+isRnd()*.6,isRnd()*3,isRnd()])}
+  const fe=[];for(let i=0;i<1300;i++){const q=rp(5);if(q)fe.push([q[0],q[1],.6+isRnd()*.9,.35+isRnd()*.6,isRnd()*3,isRnd()])}
   isInst(B,0x2e8a2e,fe.length,(o,i)=>{const f=fe[i];o.position.set(f[0],.16+f[3]/2,f[1]);o.rotation.set(0,f[4],0);o.scale.set(f[2],f[3],f[2])});
   isInst(B,0x1f6a24,fe.length,(o,i)=>{const f=fe[i];o.position.set(f[0]+.2,.16+f[3]*.8,f[1]-.15);o.rotation.set(.3,f[4]+.8,.2);o.scale.set(f[2]*.9,.12,f[2]*.9)});
-  const dp=[];for(let i=0;i<190;i++){const q=rp(9);if(q)dp.push([q[0],q[1],3.4+isRnd()*2.2,isRnd()*3])}
+  const dp=[];for(let i=0;i<420;i++){const q=rp(8);if(q)dp.push([q[0],q[1],3.4+isRnd()*2.2,isRnd()*3])}
   isInst(B,0x7a4e24,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2]/2,t[1]);o.rotation.set(0,t[3],0);o.scale.set(.32,t[2],.32)});
   isInst(B,0x23882e,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2],t[1]);o.rotation.set(0,t[3],0);o.scale.set(3.4,.2,.7)});
   isInst(B,0x2a9a34,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2],t[1]);o.rotation.set(0,t[3]+1.57,0);o.scale.set(3.4,.2,.7)});
   isInst(B,0x1f7a2a,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2]+.05,t[1]);o.rotation.set(0,t[3]+.78,0);o.scale.set(3,.2,.7)});
-  IS.vines=[];for(let i=0;i<22;i++){const q=rp(10);if(!q)continue;if(IS.nodes.some(n=>Math.hypot(n.x-q[0],n.z-q[1])<1.6))continue;const g=new THREE.Group();g.position.set(q[0],0,q[1]);ISG.add(g);
+  const hv=[];for(let i=0;i<500;i++){const q=rp(7);if(q)hv.push([q[0],q[1],2+isRnd()*3.5,isRnd()*3,isRnd()*1.6-.8])}
+  isInst(B,0x2f8f35,hv.length,(o,i)=>{const v=hv[i];o.position.set(v[0]+v[4],.16+4-v[2]/2+(v[2]>3?.6:0),v[1]);o.rotation.set(0,v[3],0);o.scale.set(.1,v[2],.1)});
+  IS.vines=[];for(let i=0;i<40;i++){const q=rp(9);if(!q)continue;if(IS.nodes.some(n=>Math.hypot(n.x-q[0],n.z-q[1])<1.6))continue;const g=new THREE.Group();g.position.set(q[0],0,q[1]);ISG.add(g);
    box(.5,7.5,.5,0,3.75,0,M(0x6a4420),g);box(3.2,.3,.3,0,7.4,0,M(0x2f9a3a),g);box(.14,5.6,.14,.5,4.7,.2,M(0x3aa03a),g);box(.12,4.6,.12,-.45,5.2,-.2,M(0x2a8a30),g);box(.5,.2,.5,.5,1.9,.2,M(0xd8b860),g);IS.vines.push({x:q[0],z:q[1],g})}
  }catch(e){console.error('jungle',e)}}
 function isWorld(){
@@ -6972,15 +6974,15 @@ function isWorld(){
  IS.nodes=[];IS.blocks=[];IS.bl2=[];IS.occ={};IS.hunters=[];IS.vines=[];IS.sw=null;IS.sy=0;isRs=12345;isStreams();
  const sea=new THREE.Mesh(new THREE.CircleGeometry(700,40),M(0x2a7aa8,0x082838));sea.rotation.x=-Math.PI/2;sea.position.y=-.35;ISG.add(sea);
  const sand=new THREE.Mesh(new THREE.CylinderGeometry(ISR+6,ISR+9,.9,40),M(0xe8d49a));sand.position.y=-.4;ISG.add(sand);
- const gr=new THREE.Mesh(new THREE.CylinderGeometry(ISR-6,ISR-4,1,40),M(IO.on?0x3f8f2c:0x5aa03a));gr.position.y=-.34;ISG.add(gr);
- const place=(t,n)=>{const sp=IO.on?1.7:2.6;for(let i=0;i<n;i++){let x=0,z=0,ok=false;for(let k=0;k<40&&!ok;k++){const a=isRnd()*6.283,d=8+isRnd()*(ISR-14);x=Math.cos(a)*d;z=Math.sin(a)*d;ok=IS.nodes.every(o=>Math.hypot(o.x-x,o.z-z)>sp)&&!isWater(x,z)}
+ const gr=new THREE.Mesh(new THREE.CylinderGeometry(ISR-6,ISR-4,1,40),M(0x3f8f2c));gr.position.y=-.34;ISG.add(gr);
+ const place=(t,n)=>{const sp=1.6;for(let i=0;i<n;i++){let x=0,z=0,ok=false;for(let k=0;k<40&&!ok;k++){const a=isRnd()*6.283,d=8+isRnd()*(ISR-14);x=Math.cos(a)*d;z=Math.sin(a)*d;ok=IS.nodes.every(o=>Math.hypot(o.x-x,o.z-z)>sp)&&!isWater(x,z)}
    const T=ISNT[t];IS.nodes.push({t,x,z,hp:T.hp,max:T.hp,r:T.r,alive:true,tm:0,g:T.mk(x,z)})}};
- if(IO.on){place('palm',150);place('rock',36);place('bush',80);place('log',40)}else{place('palm',46);place('rock',26);place('bush',30)}
- if(IO.on)isJungle()}
+ place('palm',180);place('rock',36);place('bush',100);place('log',50);
+ isJungle()}
 /* ---- Tag und Nacht ---- */
 function isLight(){const k=(IS.dt/IS.cfg.len)%1,L=Math.max(.12,Math.min(1,.5+.55*Math.cos((k-.3)*6.283)));IS.L=L;
  const lerp=(a,b,t)=>Math.round(a+(b-a)*t),c=(r1,g1,b1,r2,g2,b2)=>(lerp(r1,r2,L)<<16)|(lerp(g1,g2,L)<<8)|lerp(b1,b2,L),sky=c(8,12,34,126,200,255);
- try{sc.background=new THREE.Color(sky);sc.fog.color.setHex(sky);sc.fog.near=40;sc.fog.far=IO.on?135:200;ISLT.h.intensity=.22+.78*L;ISLT.s.intensity=.1+.85*L}catch(e){}}
+ try{sc.background=new THREE.Color(sky);sc.fog.color.setHex(sky);sc.fog.near=40;sc.fog.far=135;ISLT.h.intensity=.22+.78*L;ISLT.s.intensity=.1+.85*L}catch(e){}}
 /* ---- Bewegung & Kollision ---- */
 function isBlk(x,z,r){for(let i=0;i<IS.blocks.length;i++){const b=IS.blocks[i];if(x>b.x0-r&&x<b.x1+r&&z>b.z0-r&&z<b.z1+r)return b}return null}
 function isNodeHit(x,z,r){for(let i=0;i<IS.nodes.length;i++){const n=IS.nodes[i];if(n.alive&&n.t!=='bush'&&Math.hypot(n.x-x,n.z-z)<n.r+r)return true}return false}
@@ -7055,7 +7057,7 @@ function isAction(){if(!IS.on||IS.over||ovOn||IS.dead)return 'off';if(IS.build)r
  if(mh.length){IS.cd=now+(w==='spear'?380:450);mh.slice(0,w==='spear'?3:1).forEach(h=>isHit(h,md));try{sfx('tap')}catch(e){}return 'melee'}
  let bn=null,bd=1e9;IS.nodes.forEach(n=>{if(!n.alive)return;const d=Math.hypot(n.x-(pos.x-ISK),n.z-pos.z);if(d<3.1&&d<bd&&isCone(n.x,n.z,3.1,.1)){bd=d;bn=n}});
  if(bn){IS.cd=now+(IS.tools.axe?330:560);isGather(bn);return 'gather'}
- {const vn=(IS.vines||[]).find(v=>Math.hypot(v.x-(pos.x-ISK),v.z-pos.z)<3.4);if(vn&&!IS.sw){IS.cd=now+700;isSwing();return 'swing'}}
+ {const vn=(IS.vines||[]).find(v=>Math.hypot(v.x-(pos.x-ISK),v.z-pos.z)<3.4);if(vn&&(!IS.sw||IS.sw.t>.4)){IS.cd=now+500;isSwing();return 'swing'}}
  if(w==='gun'||w==='bow'){isMsg(w==='gun'&&!isInv('shell')?'Keine Schrot-Patronen mehr (im Buch herstellen)':w==='bow'&&!isInv('arrow')?'Keine Pfeile mehr (im Buch herstellen)':'Kein Ziel in Reichweite')}
  return 'none'}
 function isYield(n,axe){n.hp-=axe?2:1;const add={};let msg='';const c3=axe?3:2;
@@ -7064,13 +7066,13 @@ function isYield(n,axe){n.hp-=axe?2:1;const add={};let msg='';const c3=axe?3:2;
  else if(n.t==='log'){if(n.hp<=0){add.wood=c3;msg='Baumstamm zerlegt: +'+c3+' 🪵'}else msg='Du hackst den Stamm …'}
  else{if(n.hp<=0){add.berry=2;if(isRnd()<.5)add.fiber=1;msg='+2 🫐'}else msg='Du pflückst …'}
  return {add,msg,fell:n.hp<=0}}
-function isFell(n){n.alive=false;n.tm=n.t==='palm'?50:n.t==='rock'?60:n.t==='log'?70:40;try{n.g.visible=false}catch(e){}}
+function isFell(n){n.alive=false;n.tm=n.t==='palm'?50:n.t==='rock'?60:n.t==='log'?70:40;if(n.t==='palm')n.fa=0;else try{n.g.visible=false}catch(e){}}
 function isApplyYield(add,msg){Object.keys(add||{}).forEach(k=>{IS.inv[k]=isInv(k)+add[k]});if(msg)isMsg(msg)}
 function ioNode(n){if(IO.host)ioSend({t:'n',i:IS.nodes.indexOf(n),hp:n.hp,a:n.alive?1:0})}
 function isGather(n){try{sfx('tap')}catch(e){}
  if(IO.on&&!IO.host){ioSend({t:'gn',i:IS.nodes.indexOf(n),ax:IS.tools.axe?1:0});return}
  const r=isYield(n,IS.tools.axe);isApplyYield(r.add,r.msg);if(r.fell)isFell(n);ioNode(n)}
-function isSwing(){const f=isFw();IS.sw={t:0,d:1.05,dx:f.x,dz:f.z,len:18};try{sfx('tap')}catch(e){}isMsg('🌿 Schwiiing!')}
+function isSwing(){const f=isFw();IS.sw={t:0,d:1.05,dx:f.x,dz:f.z,len:24};try{sfx('tap')}catch(e){}isMsg('🌿 Schwiiing!')}
 function isSwingTick(dt){const w=IS.sw;if(!w){IS.sy=0;return}w.t+=dt;const p=Math.min(1,w.t/w.d),sp=w.len/w.d*dt,nx=pos.x+w.dx*sp,nz=pos.z+w.dz*sp;if(Math.hypot(nx-ISK,nz)<ISR-4&&!isBlk(nx-ISK,nz,.35)){pos.x=nx;pos.z=nz}IS.sy=Math.sin(p*Math.PI)*3.4;if(p>=1){IS.sw=null;IS.sy=0}}
 function isEat(auto){if(isInv('coco')>0){IS.inv.coco--;IS.hun=Math.min(100,IS.hun+28);isMsg('🥥 Gegessen');return true}if(isInv('berry')>0){IS.inv.berry--;IS.hun=Math.min(100,IS.hun+12);isMsg('🫐 Gegessen');return true}if(!auto)isMsg('Du hast nichts zu essen. Sammle Kokosnüsse und Beeren!');return false}
 function isWeaponNext(){const w=isWeapons(),i=w.indexOf(IS.wp);IS.wp=w[(i+1)%w.length];isMsg(ISWN[IS.wp][0]+' '+ISWN[IS.wp][1])}
@@ -7082,7 +7084,8 @@ function isTick(dt,now){if(ovOn||IS.over||busy)return;dt=Math.min(dt,.05);IS.tim
  IS.hun=Math.max(0,IS.hun-dt*.4);if(IS.hun<=8&&!IS.dead)isEat(true);
  if(IS.hun<=0)IS.hp-=1.2*dt;else if(IS.hun>50&&IS.hp<100)IS.hp=Math.min(100,IS.hp+1.5*dt);
  (IS.bl2||[]).forEach(b=>{if(b.id==='fire'&&Math.hypot(b.x-(pos.x-ISK),b.z-pos.z)<4.5&&IS.hp<100)IS.hp=Math.min(100,IS.hp+4*dt)});
- if(!(IO.on&&!IO.host))IS.nodes.forEach(n=>{if(!n.alive){n.tm-=dt;if(n.tm<=0){n.alive=true;n.hp=n.max;try{n.g.visible=true}catch(e){}ioNode(n)}}});
+ if(!(IO.on&&!IO.host))IS.nodes.forEach(n=>{if(!n.alive){n.tm-=dt;if(n.tm<=0){n.alive=true;n.hp=n.max;n.fa=null;try{n.g.visible=true;n.g.rotation.z=0}catch(e){}ioNode(n)}}});
+ IS.nodes.forEach(n=>{if(n.fa!=null){n.fa+=dt;try{n.g.rotation.z=Math.min(1.45,n.fa*3)}catch(e){}if(n.fa>.7){n.fa=null;try{n.g.visible=false;n.g.rotation.z=0}catch(e){}}}});
  if(IO.on&&!IO.host)ioHuntClient(dt);else isHunters(dt);
  if(IO.on)ioTick(dt);
  isSwingTick(dt);
@@ -7104,7 +7107,7 @@ function isHud(){const e=document.getElementById('ishud');if(!e)return;const bar
 /* ---- Start / Ende ---- */
 function isStart(){const c=IS.cfg;closeOv();if(!IS.bg0)IS.bg0={bg:sc.background,fc:sc.fog.color.getHex(),fn:sc.fog.near,ff:sc.fog.far};
  Object.assign(IS,{on:true,over:false,phase:'day',day:1,dt:c.len*.12,time:0,hp:100,hun:90,inv:{},tools:{},wp:'hand',build:'',brot:0,total:1000,toSpawn:0,alive:0,killed:0,spawnT:0,hasGun:!!c.gun,msgT:0,cd:0,L:1,dead:false,hmap:{}});IO.hid=0;IO.dmg={};
- ISR=IO.on?95:66;if(IO.on)IS.tools.axe=1;
+ ISR=95;IS.tools.axe=1;
  if(IS.hasGun)IS.inv.shell=12;
  try{isWorld()}catch(e){console.error('isWorld',e)}
  GAMEON=true;cr=17;{const ix=IO.on?Math.max(0,['h0','p1','p2','p3'].indexOf(IO.myId)):0;pos.set(ISK+(ix%2?1.6:-1.6)*(ix?1:0),0,ix>1?1.6:0)}Y=0;Pt=.15;H=1.6;S.tied=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;lm=false;MPSPD=1;
@@ -7273,7 +7276,7 @@ function ioRecv(m,c){if(!m)return;try{switch(m.t){
  /* Client empfängt */
  case 'tm':if(!IO.host&&IS.on){if(m.d>IS.day&&!IS.over){isMsg('🌅 Tag '+m.d)}IS.day=m.d;IS.dt=m.dt;if(m.ph==='battle'&&IS.phase!=='battle'){IS.phase='battle';toast('⚔ Die Jäger-Armee landet! '+IS.total+' Jäger kommen auf die Insel!','err');try{sfx('crash')}catch(e){}}IS.phase=m.ph;IS.killed=m.k;IS.alive=m.a;IS.toSpawn=m.s}break;
  case 'hs':if(!IO.host&&IS.on)ioSnap(m.a);break;
- case 'n':if(!IO.host&&IS.on){const n=IS.nodes[m.i];if(n){n.hp=m.hp;n.alive=!!m.a;try{n.g.visible=!!m.a}catch(e){}}}break;
+ case 'n':if(!IO.host&&IS.on){const n=IS.nodes[m.i];if(n){n.hp=m.hp;n.alive=!!m.a;n.fa=null;try{n.g.visible=!!m.a;n.g.rotation.z=0}catch(e){}}}break;
  case 'y':if(!IO.host&&IS.on)isApplyYield(m.add,m.msg);break;
  case 'b':if(!IO.host&&IS.on){isAddPiece(m.id,m.x,m.z,m.r)}break;
  case 'bk':if(!IO.host&&IS.on){const b=(IS.bl2||[]).find(q=>q.key===m.k);if(b)isBreak(b,true)}break;
@@ -7309,6 +7312,12 @@ function ioCheckAll(){if(!IO.host||IS.over)return;const ids=Object.keys(IO.pl);i
 {const _hu=isHunters;isHunters=function(dt){_hu.apply(this,arguments);if(IO.on&&IO.host){IO.pl[IO.myId]&&(IO.pl[IO.myId].dead=IS.dead?1:0);if(IS.phase==='battle')ioCheckAll()}}}
 /* Menü-Knopf in der Einrichtung */
 {const _s2=isSetup;isSetup=function(){const r=_s2.apply(this,arguments);try{const go=document.getElementById('isgo');if(go&&!document.getElementById('isonl')){const b=document.createElement('div');b.style.marginTop='8px';b.innerHTML='<button class="pill" id="isonl" style="width:100%;padding:14px">🌐 Online spielen (bis 4)</button>';go.parentNode.appendChild(b);document.getElementById('isonl').onclick=()=>ioMenu()}}catch(e){console.error(e)}return r}}
+
+/* VR-Kästchen neben PC / iPad / Handy */
+function vrPick(){if(VRX.on)return;if(!navigator.xr||!VRX.sup){try{toast('🥽 VR geht im Meta-Quest-Browser (WebXR). Hier wurde keine VR-Brille erkannt.','err')}catch(e){}return}vrStart()}
+function vrSegInject(){try{document.querySelectorAll('.seg').forEach(sg=>{if(!sg.querySelector('[data-ct]')||sg.querySelector('[data-ct=vr]'))return;const b=document.createElement('button');b.setAttribute('data-vr','1');b.textContent='🥽 VR';b.onclick=ev=>{ev.stopPropagation();vrPick()};sg.appendChild(b)})}catch(e){}}
+{const _m=menuStart;menuStart=function(){const r=_m.apply(this,arguments);vrSegInject();return r}}
+{const _p=pauseUI;pauseUI=function(){const r=_p.apply(this,arguments);vrSegInject();return r}}
 /* ===== Block 176: Eier in großen Mengen kaufen und alle auf einmal öffnen ===== */
 {const st=document.createElement('style');st.textContent='#hall{position:fixed;inset:0;z-index:10056;background:radial-gradient(ellipse at 50% 30%,#2a2f4a 0%,#0a0b10 75%);color:#fff;display:flex;font-family:-apple-system,system-ui,sans-serif;-webkit-user-select:none;user-select:none}'
 +'#hall .hs{width:min(44vw,230px);flex:none;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0008;padding:calc(env(safe-area-inset-top,0px) + 10px) 8px 12px;border-right:1px solid #ffffff22}'

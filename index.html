@@ -6905,10 +6905,11 @@ function wheelUI(msg){const coins=cxCoins();
   const g=q('whrot'),T='rotate('+whRot+'deg)';if(g){void g.offsetWidth;requestAnimationFrame(()=>{g.style.transform=T;g.style.webkitTransform=T})}q('whm').textContent='Es dreht sich …';
   setTimeout(()=>{const r=whApply(id);whBusy=false;const show=()=>wheelUI('<b style="font-size:19px">'+r.txt+'</b><br>'+r.sub);if(r.jp){try{sfx('jackpot')}catch(e){}jackpotFx(r.jp,show)}else{try{sfx('good')}catch(e){}show()}},4400)}}
 {const _s=shopUI;shopUI=function(){const r=_s.apply(this,arguments);try{const a=document.getElementById('shmg');if(a&&!document.getElementById('shwh')){a.insertAdjacentHTML('afterend','<button class="pill" id="shwh" style="font-size:13px;padding:6px 14px;margin-left:6px;background:#ff9f0a;color:#000">🎡 Glücksrad</button>');document.getElementById('shwh').onclick=()=>wheelUI()}}catch(e){}return r}}
-
 /* ===== Block 173: Spielmodus „Insel · 100 Tage“ – sammeln, schnitzen, bauen, 1000 Jäger am Ende ===== */
 const IS={on:false,over:false,phase:'',cfg:{len:30,days:100,gun:0},inv:{},tools:{},wp:'hand',nodes:[],blocks:[],occ:{},hunters:[],build:'',brot:0,gh:null,msgT:0,msg:'',cd:0,hudT:0};
 const ISK=340,ISR=66,ISHP=2;
+const IO={on:false,host:false,myId:'',pl:{},conns:{},conn:null,peer:null,code:'',cnt:0,hid:0,dmg:{},t:0,tm:0,hs:0,fl:0,gh:{},go:false};
+function ioSend(m){try{if(IO.host){Object.keys(IO.conns).forEach(k=>{const c=IO.conns[k];if(c&&c.open)try{c.send(m)}catch(e){}})}else if(IO.conn&&IO.conn.open)IO.conn.send(m)}catch(e){}}
 const ISG=new THREE.Group();ISG.position.x=ISK;sc.add(ISG);ISG.visible=false;
 const ISLT={h:new THREE.HemisphereLight(0xffffff,0x667788,.95),s:new THREE.DirectionalLight(0xfff4e0,.9)};ISLT.s.position.set(30,60,20);ISG.add(ISLT.h);ISG.add(ISLT.s);
 RM[17]={g:ISG,m:M(0),b:{position:{x:0,y:0,z:0}}};NAMES[17]='Insel';BND[17]=[-80,80,-80,80];COL[17]=[];
@@ -6961,7 +6962,7 @@ function isLight(){const k=(IS.dt/IS.cfg.len)%1,L=Math.max(.12,Math.min(1,.5+.55
 /* ---- Bewegung & Kollision ---- */
 function isBlk(x,z,r){for(let i=0;i<IS.blocks.length;i++){const b=IS.blocks[i];if(x>b.x0-r&&x<b.x1+r&&z>b.z0-r&&z<b.z1+r)return b}return null}
 function isNodeHit(x,z,r){for(let i=0;i<IS.nodes.length;i++){const n=IS.nodes[i];if(n.alive&&n.t!=='bush'&&Math.hypot(n.x-x,n.z-z)<n.r+r)return true}return false}
-function isMove(dx,dz){const px=pos.x-ISK,pz=pos.z,ok=(x,z)=>Math.hypot(x,z)<ISR&&!isBlk(x,z,.32)&&!isNodeHit(x,z,.3);
+function isMove(dx,dz){if(IS.dead)return;const px=pos.x-ISK,pz=pos.z,ok=(x,z)=>Math.hypot(x,z)<ISR&&!isBlk(x,z,.32)&&!isNodeHit(x,z,.3);
  if(ok(px+dx,pz))pos.x+=dx;if(ok(pos.x-ISK,pz+dz))pos.z+=dz}
 {const _mv=moveP;moveP=function(dx,dz){if(IS.on)return isMove(dx,dz);return _mv.apply(this,arguments)}}
 /* ---- Bauen ---- */
@@ -6983,27 +6984,34 @@ function isPiece(id,rot,ghost){const g=new THREE.Group(),mats=[],mat=c=>{const m
 function isGhostSet(){if(IS.gh){try{ISG.remove(IS.gh)}catch(e){}IS.gh=null}if(IS.build){IS.gh=isPiece(IS.build,IS.brot,true);ISG.add(IS.gh)}}
 function isGhostUpd(){if(!IS.gh||!IS.build)return;const s=isSnap(IS.build,IS.brot),bad=isCanPlace(IS.build,s,IS.brot);IS.gs=s;IS.gbad=bad;
  IS.gh.position.set(s.x,0,s.z);try{IS.gh.userData.mats.forEach(m=>m.color.setHex(bad?0xff4040:0x40ff70))}catch(e){}}
+function isAddPiece(id,x,z,rot){const P=ISBP.find(p=>p.id===id);if(!P)return null;const s={x,z},key=isKey(id,s,rot);if(IS.occ[key])return null;IS.occ[key]=1;const m=isPiece(id,rot,false);m.position.set(x,0,z);ISG.add(m);
+ const b={id,m,x,z,hp:P.hp||0,uses:P.uses||0,key};
+ if(id==='wall'||id==='pal'){b.x0=rot===0?x-1:x-.2;b.x1=rot===0?x+1:x+.2;b.z0=rot===0?z-.2:z-1;b.z1=rot===0?z+.2:z+1;IS.blocks.push(b)}
+ IS.bl2=(IS.bl2||[]);IS.bl2.push(b);return b}
 function isPlace(){if(!IS.build)return 'none';const s=isSnap(IS.build,IS.brot),bad=isCanPlace(IS.build,s,IS.brot);if(bad){isMsg('✖ '+bad);return bad}
- const P=ISBP.find(p=>p.id===IS.build);isPay(P.need);IS.occ[isKey(P.id,s,IS.brot)]=1;const m=isPiece(P.id,IS.brot,false);m.position.set(s.x,0,s.z);ISG.add(m);
- const b={id:P.id,m,x:s.x,z:s.z,hp:P.hp||0,uses:P.uses||0,key:isKey(P.id,s,IS.brot)};
- if(P.id==='wall'||P.id==='pal'){const rot=IS.brot;b.x0=rot===0?s.x-1:s.x-.2;b.x1=rot===0?s.x+1:s.x+.2;b.z0=rot===0?s.z-.2:s.z-1;b.z1=rot===0?s.z+.2:s.z+1;IS.blocks.push(b)}
- IS.bl2=(IS.bl2||[]);IS.bl2.push(b);try{sfx('thud')}catch(e){}isMsg('✔ '+P.n+' gebaut');return ''}
-function isBreak(b){try{ISG.remove(b.m)}catch(e){}let i=IS.blocks.indexOf(b);if(i>=0)IS.blocks.splice(i,1);i=(IS.bl2||[]).indexOf(b);if(i>=0)IS.bl2.splice(i,1);delete IS.occ[b.key]}
+ const P=ISBP.find(p=>p.id===IS.build);isPay(P.need);
+ if(IO.on&&!IO.host){ioSend({t:'bld',id:P.id,x:s.x,z:s.z,r:IS.brot});try{sfx('thud')}catch(e){}isMsg('✔ '+P.n+' wird gebaut …');return ''}
+ isAddPiece(P.id,s.x,s.z,IS.brot);if(IO.on)ioSend({t:'b',id:P.id,x:s.x,z:s.z,r:IS.brot});
+ try{sfx('thud')}catch(e){}isMsg('✔ '+P.n+' gebaut');return ''}
+function isBreak(b,quiet){try{ISG.remove(b.m)}catch(e){}let i=IS.blocks.indexOf(b);if(i>=0)IS.blocks.splice(i,1);i=(IS.bl2||[]).indexOf(b);if(i>=0)IS.bl2.splice(i,1);delete IS.occ[b.key];if(IO.host&&!quiet)ioSend({t:'bk',k:b.key})}
 /* ---- Jäger ---- */
 function isHunterMesh(){const g=new THREE.Group();box(.5,.9,.3,0,.85,0,M(0x4a5a3a),g);box(.34,.34,.34,0,1.5,0,M(0xe8b890),g);box(.4,.12,.4,0,1.75,0,M(0x2a3a1a),g);box(.12,.7,.12,-.34,.8,0,M(0x4a5a3a),g);box(.12,.7,.12,.34,.8,0,M(0x4a5a3a),g);box(.16,.6,.16,-.13,.3,0,M(0x2a2a2a),g);box(.16,.6,.16,.13,.3,0,M(0x2a2a2a),g);ISG.add(g);return g}
 function isSpawnH(){if(IS.toSpawn<=0)return null;const a=isRnd()*6.283,x=Math.cos(a)*(ISR-1),z=Math.sin(a)*(ISR-1);let h=IS.hunters.find(q=>q.free);
  if(!h){if(IS.hunters.length>=90)return null;h={m:isHunterMesh()};IS.hunters.push(h)}
- Object.assign(h,{free:false,dead:0,x,z,hp:ISHP,sp:2.3+isRnd()*.9,ph:isRnd()*6});try{h.m.visible=true;h.m.scale.set(1,1,1)}catch(e){}IS.toSpawn--;IS.alive++;return h}
+ Object.assign(h,{free:false,dead:0,x,z,hp:ISHP,sp:2.3+isRnd()*.9,ph:isRnd()*6,id:++IO.hid});try{h.m.visible=true;h.m.scale.set(1,1,1)}catch(e){}IS.toSpawn--;IS.alive++;return h}
 function isKill(h,why){if(h.free||h.dead>0)return;h.dead=.3;IS.alive--;IS.killed++}
 function isHurt(h,d){if(h.free||h.dead>0)return;h.hp-=d;if(h.hp<=0)isKill(h)}
-function isHunters(dt){const px=pos.x-ISK,pz=pos.z;
- if(IS.phase==='battle'){IS.spawnT-=dt;const cap=Math.min(60,25+Math.floor(IS.killed/40));if(IS.spawnT<=0&&IS.toSpawn>0&&IS.alive<cap){isSpawnH();IS.spawnT=.22}
+function isTargets(){const t=[{id:'me',x:pos.x-ISK,z:pos.z,loc:1}];if(IO.host)Object.keys(IO.pl).forEach(k=>{const p=IO.pl[k];if(k!==IO.myId&&!p.dead)t.push({id:k,x:p.x,z:p.z})});return IS.dead&&t.length&&t[0].loc?t.slice(1):t}
+function isHunters(dt){const T=isTargets();
+ if(IS.phase==='battle'){IS.spawnT-=dt;const np=1+Object.keys(IO.pl).length>1&&IO.on?Object.keys(IO.pl).length:1,cap=Math.min(60+20*(np-1),Math.floor((25+IS.killed/40)*(1+.45*(np-1))));if(IS.spawnT<=0&&IS.toSpawn>0&&IS.alive<cap){isSpawnH();IS.spawnT=.22}
   if(IS.killed>=IS.total&&!IS.over)isEnd(true)}
  let near=0;
  IS.hunters.forEach(h=>{if(h.free)return;
   if(h.dead>0){h.dead-=dt;try{const k=Math.max(.01,h.dead/.3);h.m.scale.set(k,k,k)}catch(e){}if(h.dead<=0){h.free=true;h.dead=0;try{h.m.visible=false}catch(e){}}return}
-  const dx=px-h.x,dz=pz-h.z,d=Math.hypot(dx,dz)||1;
-  if(d<1.05){IS.hp-=3.5*dt;near++}
+  let tg=null,bd=1e9;for(let i=0;i<T.length;i++){const q=T[i],dd=Math.hypot(q.x-h.x,q.z-h.z);if(dd<bd){bd=dd;tg=q}}
+  if(!tg){try{h.m.position.set(h.x,0,h.z)}catch(e){}return}
+  const dx=tg.x-h.x,dz=tg.z-h.z,d=bd||1;
+  if(d<1.05){if(tg.loc){IS.hp-=3.5*dt;near++}else IO.dmg[tg.id]=(IO.dmg[tg.id]||0)+3.5*dt}
   else{const sx=dx/d*h.sp*dt,sz=dz/d*h.sp*dt;let moved=false;
    if(!isBlk(h.x+sx,h.z+sz,.35)){h.x+=sx;h.z+=sz;moved=true}
    else if(!isBlk(h.x+sx,h.z,.35)&&Math.abs(sx)>1e-4){h.x+=sx;moved=true}
@@ -7015,35 +7023,45 @@ function isHunters(dt){const px=pos.x-ISK,pz=pos.z;
 /* ---- Aktion: sammeln oder kämpfen ---- */
 const isFw=()=>({x:-Math.sin(Y),z:-Math.cos(Y)});
 function isCone(x,z,range,cm){const f=isFw(),dx=x-(pos.x-ISK),dz=z-pos.z,L=Math.hypot(dx,dz);return L<=range&&(L<.01||(dx*f.x+dz*f.z)/L>=cm)}
-function isAction(){if(!IS.on||IS.over||ovOn)return 'off';if(IS.build)return isPlace()||'ok';
+function isHit(h,d){if(IO.on&&!IO.host){if(h.id!=null)ioSend({t:'hit',h:h.id,d});h.hp-=d;if(h.hp<=0){h.free=true;try{h.m.visible=false}catch(e){}if(IS.hmap)delete IS.hmap[h.id]}}else isHurt(h,d)}
+function isAction(){if(!IS.on||IS.over||ovOn||IS.dead)return 'off';if(IS.build)return isPlace()||'ok';
  const now=performance.now();if(now<IS.cd)return 'cd';const alive=IS.hunters.filter(h=>!h.free&&!h.dead);const w=IS.wp;
- if(w==='gun'&&isInv('shell')>0&&alive.some(h=>isCone(h.x,h.z,16,.88))){IS.cd=now+700;IS.inv.shell--;let n=0;alive.forEach(h=>{if(isCone(h.x,h.z,16,.88)){isHurt(h,3);n++}});try{sfx('crash');shake(.25)}catch(e){}return 'gun'}
- if(w==='bow'&&isInv('arrow')>0&&alive.some(h=>isCone(h.x,h.z,32,.98))){IS.cd=now+520;IS.inv.arrow--;let best=null,bd=1e9;alive.forEach(h=>{if(isCone(h.x,h.z,32,.98)){const d=Math.hypot(h.x-(pos.x-ISK),h.z-pos.z);if(d<bd){bd=d;best=h}}});if(best)isHurt(best,2);try{sfx('tap')}catch(e){}return 'bow'}
+ if(w==='gun'&&isInv('shell')>0&&alive.some(h=>isCone(h.x,h.z,16,.88))){IS.cd=now+700;IS.inv.shell--;let n=0;alive.forEach(h=>{if(isCone(h.x,h.z,16,.88)){isHit(h,3);n++}});try{sfx('crash');shake(.25)}catch(e){}return 'gun'}
+ if(w==='bow'&&isInv('arrow')>0&&alive.some(h=>isCone(h.x,h.z,32,.98))){IS.cd=now+520;IS.inv.arrow--;let best=null,bd=1e9;alive.forEach(h=>{if(isCone(h.x,h.z,32,.98)){const d=Math.hypot(h.x-(pos.x-ISK),h.z-pos.z);if(d<bd){bd=d;best=h}}});if(best)isHit(best,2);try{sfx('tap')}catch(e){}return 'bow'}
  const mr=w==='spear'?2.9:2.1,md=w==='spear'?2:1;
  const mh=alive.filter(h=>isCone(h.x,h.z,mr,.25));
- if(mh.length){IS.cd=now+(w==='spear'?380:450);mh.slice(0,w==='spear'?3:1).forEach(h=>isHurt(h,md));try{sfx('tap')}catch(e){}return 'melee'}
+ if(mh.length){IS.cd=now+(w==='spear'?380:450);mh.slice(0,w==='spear'?3:1).forEach(h=>isHit(h,md));try{sfx('tap')}catch(e){}return 'melee'}
  let bn=null,bd=1e9;IS.nodes.forEach(n=>{if(!n.alive)return;const d=Math.hypot(n.x-(pos.x-ISK),n.z-pos.z);if(d<3.1&&d<bd&&isCone(n.x,n.z,3.1,.1)){bd=d;bn=n}});
  if(bn){IS.cd=now+(IS.tools.axe?330:560);isGather(bn);return 'gather'}
  if(w==='gun'||w==='bow'){isMsg(w==='gun'&&!isInv('shell')?'Keine Schrot-Patronen mehr (im Buch herstellen)':w==='bow'&&!isInv('arrow')?'Keine Pfeile mehr (im Buch herstellen)':'Kein Ziel in Reichweite')}
  return 'none'}
-function isGather(n){n.hp-=IS.tools.axe?2:1;const add=(k,c)=>{IS.inv[k]=isInv(k)+c};try{sfx('tap')}catch(e){}
- if(n.t==='palm'){if(isRnd()<.4){add('coco',1);isMsg('+1 🥥')}else isMsg('Du schlägst auf die Palme …');if(n.hp<=0){const c=IS.tools.axe?3:2;add('wood',c);isMsg('Palme gefällt: +'+c+' 🪵');n.alive=false;n.tm=50;try{n.g.visible=false}catch(e){}}}
- else if(n.t==='rock'){if(n.hp<=0){const c=IS.tools.axe?3:2;add('stone',c);isMsg('+'+c+' 🪨');n.alive=false;n.tm=60;try{n.g.visible=false}catch(e){}}else isMsg('Du schlägst auf den Stein …')}
- else{if(n.hp<=0){add('berry',2);if(isRnd()<.5)add('fiber',1);isMsg('+2 🫐');n.alive=false;n.tm=40;try{n.g.visible=false}catch(e){}}else isMsg('Du pflückst …')}}
+function isYield(n,axe){n.hp-=axe?2:1;const add={};let msg='';const c3=axe?3:2;
+ if(n.t==='palm'){if(isRnd()<.4){add.coco=1;msg='+1 🥥'}else msg='Du schlägst auf die Palme …';if(n.hp<=0){add.wood=c3;msg='Palme gefällt: +'+c3+' 🪵'}}
+ else if(n.t==='rock'){if(n.hp<=0){add.stone=c3;msg='+'+c3+' 🪨'}else msg='Du schlägst auf den Stein …'}
+ else{if(n.hp<=0){add.berry=2;if(isRnd()<.5)add.fiber=1;msg='+2 🫐'}else msg='Du pflückst …'}
+ return {add,msg,fell:n.hp<=0}}
+function isFell(n){n.alive=false;n.tm=n.t==='palm'?50:n.t==='rock'?60:40;try{n.g.visible=false}catch(e){}}
+function isApplyYield(add,msg){Object.keys(add||{}).forEach(k=>{IS.inv[k]=isInv(k)+add[k]});if(msg)isMsg(msg)}
+function ioNode(n){if(IO.host)ioSend({t:'n',i:IS.nodes.indexOf(n),hp:n.hp,a:n.alive?1:0})}
+function isGather(n){try{sfx('tap')}catch(e){}
+ if(IO.on&&!IO.host){ioSend({t:'gn',i:IS.nodes.indexOf(n),ax:IS.tools.axe?1:0});return}
+ const r=isYield(n,IS.tools.axe);isApplyYield(r.add,r.msg);if(r.fell)isFell(n);ioNode(n)}
 function isEat(auto){if(isInv('coco')>0){IS.inv.coco--;IS.hun=Math.min(100,IS.hun+28);isMsg('🥥 Gegessen');return true}if(isInv('berry')>0){IS.inv.berry--;IS.hun=Math.min(100,IS.hun+12);isMsg('🫐 Gegessen');return true}if(!auto)isMsg('Du hast nichts zu essen. Sammle Kokosnüsse und Beeren!');return false}
 function isWeaponNext(){const w=isWeapons(),i=w.indexOf(IS.wp);IS.wp=w[(i+1)%w.length];isMsg(ISWN[IS.wp][0]+' '+ISWN[IS.wp][1])}
 /* ---- Spielablauf ---- */
 function isBeginBattle(){IS.phase='battle';IS.toSpawn=IS.total;IS.alive=0;IS.killed=0;IS.spawnT=0;IS.dt=IS.cfg.len*.3;toast('⚔ Die Jäger-Armee landet! '+IS.total+' Jäger kommen auf die Insel!','err');try{sfx('crash')}catch(e){}}
 function isTick(dt,now){if(ovOn||IS.over||busy)return;dt=Math.min(dt,.05);IS.time+=dt;
- if(IS.phase==='day'){IS.dt+=dt;if(IS.dt>=IS.cfg.len){IS.dt-=IS.cfg.len;IS.day++;if(IS.day>IS.cfg.days){IS.day=IS.cfg.days;isBeginBattle()}else isMsg('🌅 Tag '+IS.day)}}
+ if(IS.phase==='day'){IS.dt+=dt;if(IS.dt>=IS.cfg.len){if(IO.on&&!IO.host)IS.dt=IS.cfg.len-.01;else{IS.dt-=IS.cfg.len;IS.day++;if(IS.day>IS.cfg.days){IS.day=IS.cfg.days;isBeginBattle()}else isMsg('🌅 Tag '+IS.day)}}}
  isLight();
- IS.hun=Math.max(0,IS.hun-dt*.4);if(IS.hun<=8)isEat(true);
+ IS.hun=Math.max(0,IS.hun-dt*.4);if(IS.hun<=8&&!IS.dead)isEat(true);
  if(IS.hun<=0)IS.hp-=1.2*dt;else if(IS.hun>50&&IS.hp<100)IS.hp=Math.min(100,IS.hp+1.5*dt);
  (IS.bl2||[]).forEach(b=>{if(b.id==='fire'&&Math.hypot(b.x-(pos.x-ISK),b.z-pos.z)<4.5&&IS.hp<100)IS.hp=Math.min(100,IS.hp+4*dt)});
- IS.nodes.forEach(n=>{if(!n.alive){n.tm-=dt;if(n.tm<=0){n.alive=true;n.hp=n.max;try{n.g.visible=true}catch(e){}}}});
- isHunters(dt);isGhostUpd();
+ if(!(IO.on&&!IO.host))IS.nodes.forEach(n=>{if(!n.alive){n.tm-=dt;if(n.tm<=0){n.alive=true;n.hp=n.max;try{n.g.visible=true}catch(e){}ioNode(n)}}});
+ if(IO.on&&!IO.host)ioHuntClient(dt);else isHunters(dt);
+ if(IO.on)ioTick(dt);
+ isGhostUpd();
  if(IS.msgT>0)IS.msgT-=dt;
- if(IS.hp<=0&&!IS.over)isEnd(false);
+ if(IS.hp<=0&&!IS.over&&!IS.dead){if(IO.on)ioDown();else isEnd(false)}
  IS.hudT-=dt;if(IS.hudT<=0){IS.hudT=.25;isHud()}}
 {const _u=updGame;updGame=function(dt,t,now){if(IS.on)try{isTick(dt,now)}catch(e){console.error('is',e)}return _u.apply(this,arguments)}}
 function isHud(){const e=document.getElementById('ishud');if(!e)return;const bar=(v,c)=>'<span class="isb"><i style="width:'+Math.max(0,Math.min(100,v))+'%;background:'+c+'"></i></span>';
@@ -7057,15 +7075,15 @@ function isHud(){const e=document.getElementById('ishud');if(!e)return;const bar
    bm.querySelectorAll('[data-pc]').forEach(b=>b.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();IS.build=b.dataset.pc;isGhostSet()}));const r=document.getElementById('isrot');if(r)r.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();IS.brot=IS.brot?0:1;isGhostSet()});const x=document.getElementById('isxb');if(x)x.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();IS.build='';isGhostSet()})}}}}
 /* ---- Start / Ende ---- */
 function isStart(){const c=IS.cfg;closeOv();if(!IS.bg0)IS.bg0={bg:sc.background,fc:sc.fog.color.getHex(),fn:sc.fog.near,ff:sc.fog.far};
- Object.assign(IS,{on:true,over:false,phase:'day',day:1,dt:c.len*.12,time:0,hp:100,hun:90,inv:{},tools:{},wp:'hand',build:'',brot:0,total:1000,toSpawn:0,alive:0,killed:0,spawnT:0,hasGun:!!c.gun,msgT:0,cd:0,L:1});
+ Object.assign(IS,{on:true,over:false,phase:'day',day:1,dt:c.len*.12,time:0,hp:100,hun:90,inv:{},tools:{},wp:'hand',build:'',brot:0,total:1000,toSpawn:0,alive:0,killed:0,spawnT:0,hasGun:!!c.gun,msgT:0,cd:0,L:1,dead:false,hmap:{}});IO.hid=0;IO.dmg={};
  if(IS.hasGun)IS.inv.shell=12;
  try{isWorld()}catch(e){console.error('isWorld',e)}
- GAMEON=true;cr=17;pos.set(ISK,0,0);Y=0;Pt=.15;H=1.6;S.tied=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;lm=false;MPSPD=1;
+ GAMEON=true;cr=17;{const ix=IO.on?Math.max(0,['h0','p1','p2','p3'].indexOf(IO.myId)):0;pos.set(ISK+(ix%2?1.6:-1.6)*(ix?1:0),0,ix>1?1.6:0)}Y=0;Pt=.15;H=1.6;S.tied=false;ch.on=false;gd.on=false;gd.climb=false;drv.on=false;drv.view=false;busy=false;lm=false;MPSPD=1;
  ['chase','drive','dhud','mini'].forEach(i=>{const e=$(i);if(e)e.style.display='none'});S.inv=[];S.sel=null;inv();GUN.eq=false;$('loc').textContent='Insel · '+c.days+' Tage';
  document.body.classList.add('ison');
  camOv=s=>{const d=5.2,pit=Math.max(-.05,Math.min(1.1,.4-Pt*.7)),cp=Math.cos(pit),tx=pos.x,ty=1.3,tz=pos.z;cam.position.set(tx+Math.sin(Y)*d*cp+s,ty+Math.sin(pit)*d+s,tz+Math.cos(Y)*d*cp);cam.lookAt(tx,ty,tz)};
  isLight();isHud();toast('🏝 Du bist gestrandet! Schlage auf Palmen (AKTION), sammle Holz, Steine und Kokosnüsse. Öffne das 📖 Buch zum Herstellen und 🏗 zum Bauen.','good')}
-function isLeave(){IS.on=false;IS.build='';try{isGhostSet()}catch(e){}IS.gh=null;if(camOv)camOv=null;document.body.classList.remove('ison');const b=IS.bg0;if(b){sc.background=b.bg;sc.fog.color.setHex(b.fc);sc.fog.near=b.fn;sc.fog.far=b.ff}}
+function isLeave(){if(IO.on)ioClose(true);IS.on=false;IS.build='';try{isGhostSet()}catch(e){}IS.gh=null;if(camOv)camOv=null;document.body.classList.remove('ison');const b=IS.bg0;if(b){sc.background=b.bg;sc.fog.color.setHex(b.fc);sc.fog.near=b.fn;sc.fog.far=b.ff}}
 function isExit(){isLeave();goHome()}
 function isEnd(win){if(IS.over)return;IS.over=true;const c=IS.cfg,sv=cxRead('dfIsl',{}),days=win?c.days:IS.day;let coins=0,egg='',note='';
  sv.best=Math.max(sv.best|0,days);
@@ -7119,7 +7137,6 @@ function isBook(msg){if(!IS.on)return;const rec=ISREC.filter(r=>!r.gun||IS.hasGu
  const _m=menuStart;menuStart=function(){if(IS.on){isLeave();cr=0}const r=_m.apply(this,arguments);
   try{const a=document.querySelector('.ios .sub');if(a&&!document.getElementById('isbtn')&&document.querySelector('[data-lv]')){const g=document.getElementById('tutb');const html='<div class="grp" style="margin-top:12px"><button class="row" id="isbtn"><span class="ic" style="background:#30d158">🏝</span><span class="tx"><b>Insel · 100 Tage</b><small>Überleben, bauen, 1000 Jäger besiegen</small></span><i class="chev">›</i></button></div>';
    if(g&&g.parentNode)g.parentNode.insertAdjacentHTML('afterend',html);else a.insertAdjacentHTML('afterend',html);const b=document.getElementById('isbtn');if(b)b.onclick=()=>isSetup()}}catch(e){}return r}}
-
 /* ===== Block 174: Cloud-Sicherung des Accounts – Eier, Pets, Pass, Münzen, Skins kommen auf dem neuen Gerät mit ===== */
 const CLD={t:0,busy:false,st:''};
 const clOk=a=>!!(a&&a.tag&&a.tag.length===4&&!a.op&&!a.str&&!a.view&&!a.guest&&(a.sec||a.tok));
@@ -7163,7 +7180,106 @@ setInterval(()=>{try{if(!document.hidden)clPush()}catch(e){}},180000);
    arm=false;l.textContent='Stand aus der Cloud laden';m.textContent='Lade …';const a=accReady()?accCur():null;if(!clOk(a)&&!(a&&a.tag&&a.imp)){m.textContent='Dieses Konto hat keine Cloud-Sicherung.';return}
    const p=await opsPost({a:'cload',tag:a.tag,tok:a.tok||'',code:a.cin||accMake(a,accSnap())});if(p&&p.ok){const mg=accMerge(accSnap(),p.data);a.data=mg;a.tok=p.tok;a.cts=p.ts;try{accStore()}catch(e){}accApply(mg);m.textContent='✔ Geladen. Das Spiel startet neu …';setTimeout(()=>{try{qReload()}catch(e){}},900)}
    else m.textContent=p&&p.none?'In der Cloud liegt noch kein Stand. Sichere zuerst auf dem alten Gerät (Jetzt sichern).':p&&p.error==='auth'?'Der Code passt nicht mehr. Nimm den aktuellen Code vom alten Gerät.':'Das hat nicht geklappt. Prüfe die Verbindung.'}}}catch(e){}return r}}
-
+/* ===== Block 175: Insel online (Host + bis zu 3 Mitspieler, PeerJS) ===== */
+const IOCOL=[0xff9f0a,0x0a84ff,0x30d158,0xff453a];
+const ioIx=id=>Math.max(0,['h0','p1','p2','p3'].indexOf(id));
+function ioErr(t){const e=document.getElementById('ioerr');if(e)e.textContent=t;else try{toast(t,'err')}catch(x){}}
+function ioClean(){try{if(IO.peer)IO.peer.destroy()}catch(e){}Object.keys(IO.gh).forEach(k=>{try{const g=IO.gh[k];if(g.parent)g.parent.remove(g)}catch(e){}});
+ Object.assign(IO,{on:false,host:false,myId:'',pl:{},conns:{},conn:null,peer:null,code:'',cnt:0,dmg:{},t:0,tm:0,hs:0,fl:0,gh:{},go:false})}
+function ioClose(silent){try{if(IO.on)ioSend({t:'bye',id:IO.myId})}catch(e){}ioClean()}
+function ioRoster(){return Object.keys(IO.pl).map(k=>({id:k,n:IO.pl[k].n}))}
+function ioBcast(){const m={t:'roster',r:ioRoster()};ioSend(m);ioRecv(m)}
+function ioCreate(name,tries){tries=tries||0;name=cxClean(name)||'Spieler';mpLib(err=>{if(err)return ioErr(err.message);ioClean();
+ const code=Array.from({length:6},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');const peer=new Peer('dfis-'+code,MPCFG);IO.peer=peer;
+ peer.on('error',e=>{if(e&&e.type==='unavailable-id'&&tries<4){ioClean();return ioCreate(name,tries+1)}ioErr('Verbindung fehlgeschlagen ('+((e&&e.type)||'?')+').')});
+ peer.on('open',()=>{IO.on=true;IO.host=true;IO.code=code;IO.myId='h0';IO.pl={h0:{n:name,x:0,z:0,ry:0,hp:100,dead:0}};ioLobby()});
+ peer.on('connection',c=>{c.on('data',m=>ioRecv(m,c));c.on('close',()=>{const id=c._id;if(id&&IO.pl[id]){delete IO.pl[id];delete IO.conns[id];ioDropAv(id);if(IS.on)try{toast('Ein Mitspieler hat die Insel verlassen.','err')}catch(e){}if(!IS.on||IS.over)ioBcast();else ioBcast()}})})})}
+function ioJoin(name,code){name=cxClean(name)||'Spieler';code=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(code.length<6)return ioErr('Bitte den 6-stelligen Code eingeben.');ioErr('Verbinde …');
+ mpLib(err=>{if(err)return ioErr(err.message);ioClean();const peer=new Peer(undefined,MPCFG);IO.peer=peer;peer.on('error',e=>ioErr('Raum nicht gefunden. Prüfe den Code.'));
+  peer.on('open',()=>{const c=peer.connect('dfis-'+code,{reliable:true});IO.conn=c;const to=setTimeout(()=>{if(!c.open)ioErr('Keine Antwort vom Host.')},12000);
+   c.on('open',()=>{clearTimeout(to);IO.on=true;IO.host=false;IO.code=code;c.send({t:'hello',n:name})});c.on('data',m=>ioRecv(m,c));
+   c.on('close',()=>{if(IO.on){const was=IS.on&&!IS.over;try{toast('Verbindung zum Host verloren.','err')}catch(e){}ioClean();if(was){isLeave();goHome()}else isSetup()}})})})}
+function ioLobby(){const ids=Object.keys(IO.pl),c=IS.cfg,can=(typeof GUN!=='undefined'&&(GUN.avail()||CHEATS));if(!can)c.gun=0;
+ ov('<div class="ios"><div class="navbar"><b>🌐 Insel Online</b><button class="pill" id="iol">Verlassen</button></div>'
+ +'<div class="grp" style="padding:14px;text-align:center"><div class="dim">Raum-Code</div><div style="font-size:34px;font-weight:800;letter-spacing:.2em;color:#ffd60a">'+IO.code+'</div><div class="dim" style="font-size:12px">Freunde: Spielmodi → Insel → Online beitreten</div></div>'
+ +'<div class="cap">Spieler ('+ids.length+'/4)</div><div class="grp">'+ids.map((id,i)=>'<div class="row"><span class="ic" style="background:#'+IOCOL[ioIx(id)].toString(16).padStart(6,'0')+'">'+(ioIx(id)+1)+'</span><span class="tx"><b>'+mpE(IO.pl[id].n)+(id===IO.myId?' (du)':'')+(id==='h0'?' · Host':'')+'</b></span></div>').join('')+'</div>'
+ +(IO.host?'<div class="cap">Tag-Länge</div><div class="grp" style="padding:8px">'+ISLENS.map(a=>'<button class="pill'+(c.len===a[0]?' blue':'')+'" data-ln="'+a[0]+'" style="margin:3px">'+a[1]+'</button>').join('')+'</div><div class="cap">Tage</div><div class="grp" style="padding:8px">'+ISDAYS.map(d=>'<button class="pill'+(c.days===d?' blue':'')+'" data-dy="'+d+'" style="margin:3px">'+d+' Tage</button>').join('')+'</div><div class="foot">Spielzeit bis zur Armee: ca. '+isDur()+'. Je mehr Spieler, desto mehr Jäger auf einmal.</div>':'<div class="foot" style="text-align:center">Warte, bis der Host startet … ('+c.days+' Tage · '+c.len+' s pro Tag)</div>')
+ +(can?'<div class="grp"><button class="row" id="iogun"><span class="ic" style="background:#ffd60a">🔫</span><span class="tx"><b>Shotgun mitnehmen</b><small>Nur für dich</small></span><i class="sw'+(c.gun?' on':'')+'"></i></button></div>':'')
+ +(IO.host?'<div style="margin-top:12px"><button class="pill blue" id="iogo" style="width:100%;padding:16px;font-size:18px">Los geht’s</button></div>':'')+'</div>');
+ const q=i=>document.getElementById(i);q('iol').onclick=()=>{ioClose();isSetup()};
+ if(q('iogun'))q('iogun').onclick=()=>{c.gun=c.gun?0:1;ioLobby()};
+ if(IO.host){document.querySelectorAll('[data-ln]').forEach(b=>b.onclick=()=>{c.len=+b.dataset.ln;ioLobby()});document.querySelectorAll('[data-dy]').forEach(b=>b.onclick=()=>{c.days=+b.dataset.dy;ioLobby()});
+  q('iogo').onclick=()=>{IO.go=true;const m={t:'start',len:c.len,days:c.days};ioSend(m);ioRecv(m)}}}
+function ioMenu(){const nm=(typeof myName==='function'?myName():'')||'Spieler';
+ ov('<div class="ios"><div class="navbar"><b>🌐 Insel Online</b><button class="pill" id="iob">Zurück</button></div>'
+ +'<p class="foot" style="text-align:left;margin:4px 12px">Erlebt die 100 Tage zusammen: bis zu 4 Spieler. Gemeinsam sammeln, bauen und die Jäger-Armee besiegen. Wer ausgeschaltet wird, ist bis zum nächsten Morgen raus. Fällt das ganze Team in der Schlacht, ist die Insel verloren.</p>'
+ +'<div class="grp" style="padding:12px"><button class="pill blue" id="iohost" style="width:100%;padding:14px">Raum erstellen</button></div>'
+ +'<div class="cap">Beitreten</div><div class="grp" style="padding:12px"><input id="iocode" maxlength="6" placeholder="Raum-Code" style="width:100%;box-sizing:border-box;padding:12px;border-radius:10px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:20px;letter-spacing:.2em;text-align:center;text-transform:uppercase"><button class="pill" id="iojoin" style="width:100%;margin-top:8px">Beitreten</button></div>'
+ +'<div class="foot" id="ioerr" style="text-align:center;color:#ff9f0a"></div></div>');
+ const q=i=>document.getElementById(i);q('iob').onclick=()=>isSetup();q('iohost').onclick=()=>{ioErr('Erstelle Raum …');ioCreate(nm)};q('iojoin').onclick=()=>ioJoin(nm,q('iocode').value)}
+/* ---- Spielerfiguren ---- */
+function ioAv(id){let g=IO.gh[id];if(g&&g.parent)return g;g=new THREE.Group();const i=ioIx(id),col=M(IOCOL[i]);box(.5,.9,.3,0,.75,0,col,g);box(.3,.3,.3,0,1.4,0,M(0xd8a67e),g);box(.12,.7,.12,-.34,.75,0,col,g);box(.12,.7,.12,.34,.75,0,col,g);
+ try{const cv=document.createElement('canvas');cv.width=256;cv.height=64;const x=cv.getContext('2d');x.font='700 34px sans-serif';x.textAlign='center';x.fillStyle='#fff';x.strokeStyle='#000';x.lineWidth=6;const nm=(IO.pl[id]||{}).n||'';x.strokeText(nm,128,44);x.fillText(nm,128,44);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));sp.scale.set(2.2,.55,1);sp.position.set(0,2.1,0);g.add(sp)}catch(e){}
+ ISG.add(g);IO.gh[id]=g;return g}
+function ioDropAv(id){const g=IO.gh[id];if(g&&g.parent)g.parent.remove(g);delete IO.gh[id]}
+/* ---- Nachrichten ---- */
+function ioRecv(m,c){if(!m)return;try{switch(m.t){
+ case 'hello':if(IO.host){const ids=Object.keys(IO.pl);if(ids.length>=4||IS.on||IO.go){try{c.send({t:'full'})}catch(e){}return}
+  let k=1;while(IO.pl['p'+k])k++;const id='p'+k;c._id=id;IO.conns[id]=c;IO.pl[id]={n:cxClean(m.n)||'Spieler',x:0,z:0,ry:0,hp:100,dead:0};c.send({t:'welcome',id});ioBcast()}break;
+ case 'full':ioErr('Raum ist voll oder das Spiel läuft schon.');ioClean();break;
+ case 'welcome':IO.myId=m.id;break;
+ case 'roster':{const old=IO.pl,np={};m.r.forEach(r=>{np[r.id]=Object.assign({x:0,z:0,ry:0,hp:100,dead:0},old[r.id]||{},{n:r.n})});if(!IO.host)IO.pl=np;Object.keys(IO.gh).forEach(k=>{if(!np[k])ioDropAv(k)});if(!IS.on)ioLobby();break}
+ case 'start':{const c2=IS.cfg;c2.len=m.len;c2.days=m.days;IO.go=true;isStart();break}
+ case 'p':{const p=IO.pl[m.id];if(p&&m.id!==IO.myId){p.x=m.x;p.z=m.z;p.ry=m.ry;p.hp=m.hp;p.dead=m.d;p.seen=1}
+  if(IO.host)Object.keys(IO.conns).forEach(k=>{if(k!==m.id&&IO.conns[k].open)try{IO.conns[k].send(m)}catch(e){}});break}
+ case 'bye':if(IO.host&&m.id&&IO.pl[m.id]){delete IO.pl[m.id];const cc=IO.conns[m.id];delete IO.conns[m.id];ioDropAv(m.id);try{cc.close()}catch(e){}ioBcast()}break;
+ /* Host empfängt */
+ case 'hit':if(IO.host&&IS.on){const h=IS.hunters.find(q=>!q.free&&q.dead<=0&&q.id===m.h);if(h)isHurt(h,Math.min(3,+m.d||1))}break;
+ case 'gn':if(IO.host&&IS.on){const n=IS.nodes[m.i];if(n&&n.alive){const r=isYield(n,m.ax);if(r.fell)isFell(n);try{c.send({t:'y',add:r.add,msg:r.msg})}catch(e){}ioNode(n)}}break;
+ case 'bld':if(IO.host&&IS.on){const P=ISBP.find(p=>p.id===m.id);const s={x:+m.x,z:+m.z},r=m.r|0;
+  const bad=!P||!(Math.abs(s.x)<ISR&&Math.abs(s.z)<ISR)||Math.hypot(s.x,s.z)>ISR-6||IS.occ[isKey(m.id,s,r)];
+  if(bad){try{c.send({t:'y',add:P?P.need:{},msg:'✖ Hier ist kein Platz'})}catch(e){}}
+  else{isAddPiece(m.id,s.x,s.z,r);ioSend({t:'b',id:m.id,x:s.x,z:s.z,r})}}break;
+ case 'dead':if(IO.host&&c&&IO.pl[c._id]){IO.pl[c._id].dead=1;ioCheckAll()}break;
+ /* Client empfängt */
+ case 'tm':if(!IO.host&&IS.on){if(m.d>IS.day&&!IS.over){isMsg('🌅 Tag '+m.d)}IS.day=m.d;IS.dt=m.dt;if(m.ph==='battle'&&IS.phase!=='battle'){IS.phase='battle';toast('⚔ Die Jäger-Armee landet! '+IS.total+' Jäger kommen auf die Insel!','err');try{sfx('crash')}catch(e){}}IS.phase=m.ph;IS.killed=m.k;IS.alive=m.a;IS.toSpawn=m.s}break;
+ case 'hs':if(!IO.host&&IS.on)ioSnap(m.a);break;
+ case 'n':if(!IO.host&&IS.on){const n=IS.nodes[m.i];if(n){n.hp=m.hp;n.alive=!!m.a;try{n.g.visible=!!m.a}catch(e){}}}break;
+ case 'y':if(!IO.host&&IS.on)isApplyYield(m.add,m.msg);break;
+ case 'b':if(!IO.host&&IS.on){isAddPiece(m.id,m.x,m.z,m.r)}break;
+ case 'bk':if(!IO.host&&IS.on){const b=(IS.bl2||[]).find(q=>q.key===m.k);if(b)isBreak(b,true)}break;
+ case 'dmg':if(IS.on&&!IS.over&&!IS.dead){IS.hp-=m.v;try{sfx('thud');shake(.2)}catch(e){}}break;
+ case 'rv':ioRevive();break;
+ case 'end':if(!IO.host&&IS.on&&!IS.over){IS.day=m.d;IS.killed=m.k;isEnd(!!m.w)}break}}catch(e){console.error('io',e)}}
+/* ---- Jäger beim Client spiegeln ---- */
+function ioSnap(a){const seen={};for(let i=0;i+2<a.length;i+=3){const id=a[i];seen[id]=1;let h=IS.hmap[id];
+  if(!h||h.free){h=IS.hunters.find(q=>q.free);if(!h){if(IS.hunters.length>=90)continue;h={m:isHunterMesh()};IS.hunters.push(h);h.fresh=1}
+   Object.assign(h,{free:false,dead:0,id,hp:ISHP,x:a[i+1]/10,z:a[i+2]/10,ph:Math.random()*6});IS.hmap[id]=h;try{h.m.visible=true;h.m.scale.set(1,1,1)}catch(e){}}
+  h.tx=a[i+1]/10;h.tz=a[i+2]/10}
+ Object.keys(IS.hmap).forEach(k=>{if(!seen[k]){const h=IS.hmap[k];if(h&&!h.free){h.free=true;try{h.m.visible=false}catch(e){}}delete IS.hmap[k]}})}
+function ioHuntClient(dt){IS.hunters.forEach(h=>{if(h.free)return;const k=Math.min(1,dt*10),ox=h.x,oz=h.z;if(h.tx!=null){h.x+=(h.tx-h.x)*k;h.z+=(h.tz-h.z)*k}
+ try{h.m.position.set(h.x,Math.abs(Math.sin(IS.time*8+h.ph))*.08,h.z);if(Math.hypot(h.x-ox,h.z-oz)>.002)h.m.rotation.y=Math.atan2(h.x-ox,h.z-oz)}catch(e){}})}
+/* ---- Takt ---- */
+function ioTick(dt){IO.t+=dt;IO.tm+=dt;IO.hs+=dt;IO.fl+=dt;
+ if(IO.lastDay==null)IO.lastDay=IS.day;if(IS.day!==IO.lastDay){IO.lastDay=IS.day;if(IO.host){Object.keys(IO.pl).forEach(k=>IO.pl[k].dead=0);ioSend({t:'rv'});ioRevive()}}
+ if(IO.t>=.1){IO.t=0;const me=IO.pl[IO.myId];if(me){me.x=pos.x-ISK;me.z=pos.z;me.ry=Y;me.hp=IS.hp;me.dead=IS.dead?1:0}
+  ioSend({t:'p',id:IO.myId,x:+(pos.x-ISK).toFixed(2),z:+pos.z.toFixed(2),ry:+Y.toFixed(2),hp:Math.round(IS.hp),d:IS.dead?1:0})}
+ if(IO.host){
+  if(IO.tm>=.5){IO.tm=0;ioSend({t:'tm',d:IS.day,dt:+IS.dt.toFixed(1),ph:IS.phase,k:IS.killed,a:IS.alive,s:IS.toSpawn})}
+  if(IO.hs>=.1){IO.hs=0;const a=[];IS.hunters.forEach(h=>{if(!h.free&&h.dead<=0)a.push(h.id,Math.round(h.x*10),Math.round(h.z*10))});ioSend({t:'hs',a})}
+  if(IO.fl>=.3){IO.fl=0;Object.keys(IO.dmg).forEach(k=>{const v=IO.dmg[k];if(v>0&&IO.conns[k]&&IO.conns[k].open){try{IO.conns[k].send({t:'dmg',v:+v.toFixed(1)})}catch(e){}}delete IO.dmg[k]})}}
+ Object.keys(IO.pl).forEach(k=>{if(k===IO.myId)return;const p=IO.pl[k];if(!p.seen)return;const g=ioAv(k);g.visible=!p.dead;const f=Math.min(1,dt*12);g.position.x+=((p.x)-g.position.x)*f;g.position.z+=((p.z)-g.position.z)*f;if(!g.userData.i){g.position.set(p.x,0,p.z);g.userData.i=1}g.rotation.y=p.ry||0;})
+ if(IS.dead){let t=null;Object.keys(IO.pl).forEach(k=>{const p=IO.pl[k];if(k!==IO.myId&&!p.dead&&!t)t=p});if(t){pos.x=t.x+ISK+1.5;pos.z=t.z+1.5}}}
+/* ---- Tod, Wiederbelebung, Ende ---- */
+function ioDown(){if(IS.dead)return;IS.dead=true;IS.hp=0;try{shake(.4);sfx('crash')}catch(e){}isMsg('💀 Du wurdest ausgeschaltet! Du schaust zu, bis der nächste Tag beginnt.');
+ const me=IO.pl[IO.myId];if(me)me.dead=1;if(IO.host)ioCheckAll();else ioSend({t:'dead',id:IO.myId})}
+function ioRevive(){if(!IS.dead)return;IS.dead=false;IS.hp=50;IS.hun=Math.max(IS.hun,50);const ix=ioIx(IO.myId);pos.x=ISK+(ix%2?1.6:-1.6)*(ix?1:0);pos.z=ix>1?1.6:0;isMsg('☀ Neuer Tag! Du bist wieder dabei.')}
+function ioCheckAll(){if(!IO.host||IS.over)return;const ids=Object.keys(IO.pl);if(ids.length&&ids.every(k=>IO.pl[k].dead)&&IS.phase==='battle')isEnd(false)}
+{const _e=isEnd;isEnd=function(win){if(IS.over)return;if(IO.on&&IO.host)ioSend({t:'end',w:win?1:0,d:IS.day,k:IS.killed});return _e.apply(this,arguments)}}
+{const _s=isSetup;isSetup=function(){if(IO.on)ioClose(true);return _s.apply(this,arguments)}}
+{const _hu=isHunters;isHunters=function(dt){_hu.apply(this,arguments);if(IO.on&&IO.host){IO.pl[IO.myId]&&(IO.pl[IO.myId].dead=IS.dead?1:0);if(IS.phase==='battle')ioCheckAll()}}}
+/* Menü-Knopf in der Einrichtung */
+{const _s2=isSetup;isSetup=function(){const r=_s2.apply(this,arguments);try{const go=document.getElementById('isgo');if(go&&!document.getElementById('isonl')){const b=document.createElement('div');b.style.marginTop='8px';b.innerHTML='<button class="pill" id="isonl" style="width:100%;padding:14px">🌐 Online spielen (bis 4)</button>';go.parentNode.appendChild(b);document.getElementById('isonl').onclick=()=>ioMenu()}}catch(e){console.error(e)}return r}}
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

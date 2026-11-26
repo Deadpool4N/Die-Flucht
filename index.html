@@ -6939,14 +6939,14 @@ const ISWN={hand:['✊','Hände'],spear:['🔱','Speer'],bow:['🏹','Bogen'],gu
 function isCraft(id){const r=ISREC.find(x=>x.id===id);if(!r)return 'bad';if(r.tool&&IS.tools[r.tool])return 'have';if(!isHas(r.need))return 'need';
  isPay(r.need);if(r.tool){IS.tools[r.tool]=1;if(r.tool!=='axe')IS.wp=r.tool}if(r.give)Object.keys(r.give).forEach(k=>IS.inv[k]=isInv(k)+r.give[k]);return 'ok'}
 /* ---- Welt bauen ---- */
-function isTree(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);const s=.9+isRnd()*.4;
+function isTree(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);const s=1.55+isRnd()*.6;
  box(.36*s,4.2*s,.36*s,0,2.1*s,0,M(0x8a5a2a),g).rotation.z=(isRnd()-.5)*.15;
  for(let i=0;i<3;i++){const a=i/3*6.283,l=box(.35,.1,1.9*s,Math.sin(a)*.9*s,4.15*s,Math.cos(a)*.9*s,M(0x2f9a3a),g);l.rotation.y=a;l.rotation.x=-.35}
  return g}
 function isRock(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);const s=.8+isRnd()*.7;box(1.4*s,.9*s,1.2*s,0,.4*s,0,M(0x8a8c94),g).rotation.y=isRnd()*3;box(.8*s,.6*s,.8*s,.3*s,.9*s,.1,M(0x9a9ca4),g);return g}
 function isBush(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);box(1.1,.8,1.1,0,.4,0,M(0x2a7a2a),g);for(let i=0;i<3;i++)box(.14,.14,.14,(isRnd()-.5)*.9,.6+isRnd()*.4,(isRnd()-.5)*.9,M(0xd0203a,0x400010),g);return g}
 function isLog(x,z){const g=new THREE.Group();g.position.set(x,0,z);ISG.add(g);g.rotation.y=isRnd()*3.14;const l=box(2.6,.5,.5,0,.3,0,M(0x7a4e24),g);l.rotation.z=(isRnd()-.5)*.1;box(.1,.52,.52,1.3,.3,0,M(0xd8b878),g);box(.5,.3,.12,-.4,.65,.2,M(0x2f8a3a),g);return g}
-const ISNT={palm:{hp:4,r:.55,mk:isTree},rock:{hp:5,r:.85,mk:isRock},bush:{hp:2,r:.6,mk:isBush},log:{hp:3,r:.8,mk:isLog}};
+const ISNT={palm:{hp:4,r:.8,mk:isTree},rock:{hp:5,r:.85,mk:isRock},bush:{hp:2,r:.6,mk:isBush},log:{hp:3,r:.8,mk:isLog}};
 function isStreams(){IS.wat=[];IS.wseg=[];const defs=[[.6,3.9,5,.9],[2.4,5.5,-4,1.3]];
  defs.forEach(d=>{const R0=ISR-9,a0=d[0],a1=d[1],P0=[Math.cos(a0)*R0,Math.sin(a0)*R0],P1=[Math.cos(a1)*R0,Math.sin(a1)*R0],C=[Math.cos((a0+a1)/2+d[3])*62,Math.sin((a0+a1)/2+d[3])*62];let prev=null;
   for(let i=0;i<=64;i++){const t=i/64,u=1-t,bx=u*u*P0[0]+2*u*t*C[0]+t*t*P1[0],bz=u*u*P0[1]+2*u*t*C[1]+t*t*P1[1],dx=P1[0]-P0[0],dz=P1[1]-P0[1],L=Math.hypot(dx,dz)||1,m=Math.sin(t*d[2]*3)*3.2,x=bx+(-dz/L)*m,z=bz+(dx/L)*m;
@@ -6959,11 +6959,11 @@ function isJungle(){try{const rp=(minD)=>{for(let k=0;k<20;k++){const a=isRnd()*
   const fe=[];for(let i=0;i<1300;i++){const q=rp(5);if(q)fe.push([q[0],q[1],.6+isRnd()*.9,.35+isRnd()*.6,isRnd()*3,isRnd()])}
   isInst(B,0x2e8a2e,fe.length,(o,i)=>{const f=fe[i];o.position.set(f[0],.16+f[3]/2,f[1]);o.rotation.set(0,f[4],0);o.scale.set(f[2],f[3],f[2])});
   isInst(B,0x1f6a24,fe.length,(o,i)=>{const f=fe[i];o.position.set(f[0]+.2,.16+f[3]*.8,f[1]-.15);o.rotation.set(.3,f[4]+.8,.2);o.scale.set(f[2]*.9,.12,f[2]*.9)});
-  const dp=[];for(let i=0;i<420;i++){const q=rp(8);if(q)dp.push([q[0],q[1],3.4+isRnd()*2.2,isRnd()*3])}
-  isInst(B,0x7a4e24,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2]/2,t[1]);o.rotation.set(0,t[3],0);o.scale.set(.32,t[2],.32)});
-  isInst(B,0x23882e,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2],t[1]);o.rotation.set(0,t[3],0);o.scale.set(3.4,.2,.7)});
-  isInst(B,0x2a9a34,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2],t[1]);o.rotation.set(0,t[3]+1.57,0);o.scale.set(3.4,.2,.7)});
-  isInst(B,0x1f7a2a,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2]+.05,t[1]);o.rotation.set(0,t[3]+.78,0);o.scale.set(3,.2,.7)});
+  const dp=[];for(let i=0;i<420;i++){const q=rp(8);if(q)dp.push([q[0],q[1],5+isRnd()*3.4,isRnd()*3])}
+  isInst(B,0x7a4e24,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2]/2,t[1]);o.rotation.set(0,t[3],0);o.scale.set(.45,t[2],.45)});
+  isInst(B,0x23882e,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2],t[1]);o.rotation.set(0,t[3],0);o.scale.set(5,.25,1)});
+  isInst(B,0x2a9a34,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2],t[1]);o.rotation.set(0,t[3]+1.57,0);o.scale.set(5,.25,1)});
+  isInst(B,0x1f7a2a,dp.length,(o,i)=>{const t=dp[i];o.position.set(t[0],.16+t[2]+.05,t[1]);o.rotation.set(0,t[3]+.78,0);o.scale.set(4.4,.25,1)});
   const hv=[];for(let i=0;i<500;i++){const q=rp(7);if(q)hv.push([q[0],q[1],2+isRnd()*3.5,isRnd()*3,isRnd()*1.6-.8])}
   isInst(B,0x2f8f35,hv.length,(o,i)=>{const v=hv[i];o.position.set(v[0]+v[4],.16+4-v[2]/2+(v[2]>3?.6:0),v[1]);o.rotation.set(0,v[3],0);o.scale.set(.1,v[2],.1)});
   IS.vines=[];for(let i=0;i<40;i++){const q=rp(9);if(!q)continue;if(IS.nodes.some(n=>Math.hypot(n.x-q[0],n.z-q[1])<1.6))continue;const g=new THREE.Group();g.position.set(q[0],0,q[1]);ISG.add(g);
@@ -7646,6 +7646,36 @@ function ojFx(amount,done){let d=document.getElementById('ojfx');if(d)d.remove()
   +'<div style="position:relative;font-size:clamp(26px,8vw,50px);font-weight:800;margin-top:10px">+'+amount.toLocaleString('de-DE')+' 🪙 · 🍀 Booster</div><div style="position:relative;margin-top:24px;font-size:15px;opacity:.7">Tippen zum Weiter</div>';
  document.body.appendChild(d);try{navigator.vibrate&&navigator.vibrate([150,60,150,60,300])}catch(e){}
  let fin=false;const end=()=>{if(fin)return;fin=true;try{d.remove()}catch(e){}try{done&&done()}catch(e){}};d.addEventListener('pointerdown',e=>{e.preventDefault();end()});setTimeout(end,7000)}
+/* ===== Block 184: Insel – Axt-Upgrades (Stein→Eisen→Diamant), Minecraft-Hotbar, Lampen-Button wechselt Inventar (Doppeltipp = nehmen) ===== */
+ISREC.push({id:'axe2',n:'Eisenaxt (Upgrade)',ic:'⛏',d:'Upgrade der Steinaxt: Bäume fallen schneller und geben +1 Holz.',need:{plank:4,stone:8},tool:'axe2'},
+ {id:'axe3',n:'Diamantaxt (Upgrade)',ic:'💎',d:'Braucht die Eisenaxt. Bäume fallen sehr schnell, +2 Holz.',need:{plank:8,stone:20},tool:'axe3'});
+const isAxeL=()=>IS.tools.axe3?3:IS.tools.axe2?2:1;
+{const _c=isCraft;isCraft=function(id){if(id==='axe3'&&!IS.tools.axe2)return 'need';const w=IS.wp;const r=_c.apply(this,arguments);if(id==='axe2'||id==='axe3'){IS.wp=w;if(r==='ok')isMsg((id==='axe2'?'⛏ Eisenaxt':'💎 Diamantaxt')+' gebaut!')}return r}}
+{const _y=isYield;isYield=function(n,axe){const L=axe?isAxeL():1;if(L>1&&n.hp>0)n.hp-=(L-1)*1.2;const r=_y.apply(this,arguments);try{if(L>1&&r&&r.add&&r.add.wood){r.add.wood+=L-1;if(r.msg)r.msg+=' ('+(L===2?'⛏':'💎')+' +'+(L-1)+')'}}catch(e){}return r}}
+/* Hotbar */
+const HBS=[['hand','✊'],['spear','🔱'],['bow','🏹'],['gun','🔫'],['axe','🪓'],['fl','🔦'],['meat','🍖'],['coco','🥥'],['berry','🫐']];
+let HBC=0,HBsig='';
+function hbHave(k){if(k==='hand'||k==='fl'||k==='axe')return true;if(k==='spear')return !!IS.tools.spear;if(k==='bow')return !!IS.tools.bow;if(k==='gun')return !!IS.hasGun;return isInv(k)>0}
+function hbAct(i){const k=HBS[i][0];if(!hbHave(k)){isMsg('Noch nicht vorhanden');return}
+ if(['hand','spear','bow','gun'].includes(k)){IS.wp=k;isMsg(ISWN[k][0]+' '+ISWN[k][1])}
+ else if(k==='axe'){const L=isAxeL();isMsg((L===1?'🪓 Steinaxt':L===2?'⛏ Eisenaxt':'💎 Diamantaxt')+(L<3?' · Upgrade im 📖 Buch':' · maximal'))}
+ else if(k==='fl')isFlashToggle();
+ else{const h=IS.hun;IS.inv[k]--;IS.hun=Math.min(100,IS.hun+(k==='meat'?38:k==='coco'?28:12));isMsg(HBS[i][1]+' Gegessen')}
+ try{sfx('tap')}catch(e){}hbRender(true)}
+function hbCycle(){for(let n=1;n<=9;n++){const j=(HBC+n)%9;if(hbHave(HBS[j][0])){HBC=j;break}}hbRender(true)}
+function hbRender(force){const e=document.getElementById('ishb');if(!e)return;const L=isAxeL();
+ const sig=HBS.map((h,i)=>(hbHave(h[0])?1:0)+':'+(['meat','coco','berry'].includes(h[0])?isInv(h[0]):'')).join('|')+IS.wp+HBC+L+(IS.fl?1:0);if(!force&&sig===HBsig)return;HBsig=sig;
+ e.innerHTML=HBS.map((h,i)=>{const k=h[0],have=hbHave(k),eq=IS.wp===k||(k==='fl'&&IS.fl),cnt=['meat','coco','berry'].includes(k)?isInv(k):0,ic=k==='axe'?(L===1?'🪓':L===2?'⛏':'💎'):h[1];
+  return '<div class="hbs'+(have?'':' no')+(eq?' eq':'')+(i===HBC?' cur':'')+'" data-i="'+i+'"><span class="hbn">'+(i+1)+'</span>'+ic+(cnt?'<b>'+cnt+'</b>':'')+'</div>'}).join('')}
+{const st=document.createElement('style');st.textContent='#ishb{position:fixed;z-index:8;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);transform:translateX(-50%);display:none;gap:3px;padding:4px;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.28);border-radius:8px;font-family:-apple-system,system-ui,sans-serif}body.ison #ishb{display:flex}.hbs{position:relative;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:23px;background:rgba(40,40,46,.75);border:2px solid #555;border-radius:4px;color:#fff;touch-action:none;user-select:none}.hbs.no{opacity:.35}.hbs.eq{border-color:#fff;background:rgba(90,90,100,.85)}.hbs.cur{outline:3px solid #ffd60a;outline-offset:1px}.hbn{position:absolute;left:2px;top:0;font-size:9px;opacity:.7}.hbs b{position:absolute;right:2px;bottom:0;font-size:11px;text-shadow:0 1px 2px #000}@media(max-width:480px){.hbs{width:34px;height:34px;font-size:19px}}';document.head.appendChild(st);
+ const d=document.createElement('div');d.id='ishb';document.body.appendChild(d);
+ d.addEventListener('pointerdown',ev=>{const t=ev.target.closest&&ev.target.closest('.hbs');ev.preventDefault();ev.stopPropagation();if(t){const i=+t.dataset.i;HBC=i;hbAct(i)}});
+ addEventListener('keydown',e=>{if(IS.on&&!ovOn&&!IS.over&&/^Digit[1-9]$/.test(e.code)){const i=+e.code.slice(5)-1;HBC=i;hbAct(i)}})}
+{const _h=isHud;isHud=function(){const r=_h.apply(this,arguments);try{hbRender()}catch(e){}return r}}
+/* Lampen-Button: tippen = Inventar durchschalten, doppeltippen = nehmen/benutzen */
+{const old=document.getElementById('isfl');if(old){const b=old.cloneNode(true);old.parentNode.replaceChild(b,old);let last=0;
+ b.addEventListener('pointerdown',ev=>{ev.preventDefault();ev.stopPropagation();const n=performance.now();if(n-last<380){last=0;hbAct(HBC)}else{last=n;hbCycle();const k=HBS[HBC];isMsg(k[1]+' ausgewählt · nochmal tippen = nehmen')}})}}
+{const _s=isStart;isStart=function(){const r=_s.apply(this,arguments);HBC=4;HBsig='';try{hbRender(true)}catch(e){}return r}}
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

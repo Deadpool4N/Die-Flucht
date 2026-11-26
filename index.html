@@ -7373,17 +7373,18 @@ function petBulkUI(rs){const d0=petD(),have=(rs||PETR).reduce((a,r)=>a+((d0.e&&d
  sum()}
 /* Menü ergänzen: Alle öffnen + Mengen kaufen */
 function petBuyN(r,n){const pr=PETEGG[r];if(!pr||n<1||r==='Kosmisch')return 0;const c=cxCoins();let k=n;if(c!==Infinity)k=Math.min(n,Math.floor(c/pr));if(k<1)return 0;if(c!==Infinity)cxSet(c-pr*k);petEggAdd(r,k);return k}
+function inRow(row,w){row.style.flexWrap='wrap';w.style.flex='0 0 100%';w.style.width='100%';w.style.boxSizing='border-box';w.style.padding='6px 0 2px';row.appendChild(w)}
 {const _m=petMenu;petMenu=function(msg){const r0=_m.apply(this,arguments);try{
  const d=petD(),tot=PETR.reduce((a,r)=>a+((d.e&&d.e[r])|0),0),rows=document.querySelectorAll('[data-buy]');
  rows.forEach(b=>{const r=b.dataset.buy,row=b.closest('.row'),n=(d.e&&d.e[r])|0,pr=PETEGG[r];
-  const tx=row.querySelector('.tx small');if(r==='Kosmisch'){if(tx)tx.textContent='Du hast '+ioN(n)+' · 🎡 Nur im Glücksrad zu gewinnen';b.disabled=true;b.textContent='Nur Glücksrad';b.onclick=null;if(n>1){const w=document.createElement('div');w.style.cssText='padding:0 12px 10px';const x=document.createElement('button');x.className='pill blue';x.style.cssText='padding:6px 11px;font-size:13px';x.textContent='Alle '+ioN(n)+' öffnen';x.onclick=()=>petBulkUI([r]);w.appendChild(x);row.parentNode.insertBefore(w,row.nextSibling)}return}
+  const tx=row.querySelector('.tx small');if(r==='Kosmisch'){if(tx)tx.textContent='Du hast '+ioN(n)+' · 🎡 Nur im Glücksrad zu gewinnen';b.disabled=true;b.textContent='Nur Glücksrad';b.onclick=null;if(n>1){const w=document.createElement('div');w.style.cssText='padding:0 12px 10px';const x=document.createElement('button');x.className='pill blue';x.style.cssText='padding:6px 11px;font-size:13px';x.textContent='Alle '+ioN(n)+' öffnen';x.onclick=()=>petBulkUI([r]);w.appendChild(x);inRow(row,w)}return}
   if(tx)tx.textContent='Du hast '+ioN(n)+' · Preis '+pr.toLocaleString('de-DE')+' 🪙';
   const w=document.createElement('div');w.style.cssText='display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 10px;width:100%;box-sizing:border-box';
   const mk=(t,fn,cls)=>{const x=document.createElement('button');x.className='pill'+(cls?' '+cls:'');x.style.cssText='flex:none;padding:6px 11px;font-size:13px';x.textContent=t;x.onclick=fn;w.appendChild(x)};
   [10,100,1000].forEach(k=>mk('×'+ioN(k),()=>{const g=petBuyN(r,k);petMenu(g?'🥚 '+ioN(g)+' × '+r+'es Ei gekauft.':'Dir fehlen Coins.')}));
   mk('Max',()=>{const c=cxCoins(),m=c===Infinity?10000:Math.min(100000,Math.floor(c/pr));const g=petBuyN(r,m);petMenu(g?'🥚 '+ioN(g)+' × '+r+'es Ei gekauft.':'Dir fehlen Coins.')});
   if(n>1)mk('Alle '+ioN(n)+' öffnen',()=>petBulkUI([r]),'blue');
-  row.parentNode.insertBefore(w,row.nextSibling)});
+  inRow(row,w)});
  const cap=Array.from(document.querySelectorAll('.cap')).find(e=>/Eier/.test(e.textContent));
  if(cap&&tot>0){const g=document.createElement('div');g.style.cssText='padding:0 12px 10px';g.innerHTML='<button class="pill blue" id="ptall" style="width:100%;padding:14px;font-size:17px">🎁 Alle Eier auf einmal öffnen ('+ioN(tot)+')</button>';cap.parentNode.insertBefore(g,cap.nextSibling);document.getElementById('ptall').onclick=()=>petBulkUI()}
  }catch(e){console.error('petBulk',e)}return r0}}
@@ -8272,7 +8273,15 @@ function whMultiSum(R,d){const ks=Object.keys(R.cnt).sort((a,b)=>WHPR[a].w-WHPR[
 {const _ga=isGiveAll;isGiveAll=function(){_ga.apply(this,arguments);try{PETR.forEach(r=>{const have=((petD().e||{})[r])|0;if(have<100)petEggAdd(r,100-have)});isMsg('🎁 Admin: alles erhalten, dazu je 100 Eier aller Sorten (auch Kosmisch)')}catch(e){}}}
 /* Pet-Menü: Kosmisches Ei – Hinweis unter den Knopf */
 {const _pm=petMenu;petMenu=function(){const r=_pm.apply(this,arguments);try{document.querySelectorAll('[data-buy="Kosmisch"]').forEach(b=>{const row=b.closest('.row');b.textContent='🔒';b.style.flex='none';const tx=row.querySelector('.tx small');if(tx)tx.textContent='Du hast '+ioN(((petD().e||{}).Kosmisch)|0);
-  if(!row.nextSibling||!row.nextSibling.dataset||!row.nextSibling.dataset.cosm){const h=document.createElement('div');h.dataset.cosm='1';h.style.cssText='padding:0 12px 6px;font-size:13px;opacity:.8;width:100%;box-sizing:border-box';h.textContent='🎡 Nur im Glücksrad zu gewinnen';row.parentNode.insertBefore(h,row.nextSibling)}})}catch(e){}return r}}
+  if(!row.querySelector('[data-cosm]')){const h=document.createElement('div');h.dataset.cosm='1';h.style.cssText='font-size:13px;opacity:.8';h.textContent='🎡 Nur im Glücksrad zu gewinnen';inRow(row,h)}})}catch(e){}return r}}
+/* Admin: beliebig viele Eier jeder Sorte (auch Kosmisch) */
+{const _h=cxAdminHTML;cxAdminHTML=function(o){let h=_h.apply(this,arguments);if(o)return h;
+ return h+'<div class="cap" style="margin-top:14px">🥚 Eier (Admin)</div><div class="grp" style="padding:10px"><select id="egsel" style="width:100%;padding:10px;border-radius:12px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px">'+PETR.map(r=>'<option value="'+r+'"'+(r==='Kosmisch'?' selected':'')+'>🥚 '+r+'es Ei</option>').join('')+'</select><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><input id="egn" type="number" min="1" value="100" style="width:110px;padding:9px;border-radius:10px;background:#2a2d38;color:#fff;border:1px solid #444;font-size:16px"><button class="pill blue" id="egadd">+ geben</button><button class="pill" id="eginf" style="background:#ff9f0a;color:#000">∞ unendlich</button></div></div><div class="grp" style="margin-top:6px"><button class="row" id="egallinf"><span class="tx"><b>🥚 Alle Sorten unendlich (je 1 Mrd.)</b></span></button></div><div class="foot" id="egam" style="min-height:16px"></div>'}}
+{const _b=cxAdminBind;cxAdminBind=function(online){_b.apply(this,arguments);if(online)return;const g=i=>document.getElementById(i),m=t=>{const e=g('egam');if(e)e.textContent=t};
+ const INF=1e9,set=(r,n)=>{const d=petD();d.e=d.e||{};d.e[r]=Math.min(INF,(d.e[r]||0)+n);petSave(d)};
+ if(g('egadd'))g('egadd').onclick=()=>{const r=g('egsel').value,n=Math.max(1,Math.floor(+g('egn').value)||1);set(r,n);m('✅ '+n.toLocaleString('de-DE')+' × '+r+'es Ei erhalten.')};
+ if(g('eginf'))g('eginf').onclick=()=>{const r=g('egsel').value;const d=petD();d.e=d.e||{};d.e[r]=INF;petSave(d);m('✅ '+r+'es Ei: unendlich ('+INF.toLocaleString('de-DE')+').')};
+ if(g('egallinf'))g('egallinf').onclick=()=>{const d=petD();d.e=d.e||{};PETR.forEach(r=>{d.e[r]=INF});petSave(d);m('✅ Alle Eier-Sorten unendlich.')}}}
 menuStart();
 requestAnimationFrame(frame);
 </script></body></html>

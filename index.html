@@ -7691,7 +7691,8 @@ let FPSCAP=0,RESS=1;
 try{FPSCAP=+localStorage.getItem('dfFpsCap')||0;RESS=+localStorage.getItem('dfRes')||1}catch(e){}
 try{ACCK.push('dfFpsCap','dfRes')}catch(e){}
 {const _pr=perfRatio;perfRatio=function(){return Math.max(.3,_pr.apply(this,arguments)*RESS)}}
-{const _ps=perfSkip;perfSkip=function(now){if(FPSCAP&&PERF.last&&now-PERF.last<1000/FPSCAP-2)return true;return _ps.apply(this,arguments)}}
+let FPSNX=0;
+{const _ps=perfSkip;perfSkip=function(now){if(FPSCAP){const T=1000/FPSCAP;if(!FPSNX||now-FPSNX>T*2||now<FPSNX-T*2)FPSNX=now;if(now<FPSNX-1.5)return true;FPSNX+=T;if(FPSNX<now-T)FPSNX=now}return _ps.apply(this,arguments)}}
 function fcApplyRes(){try{R.setPixelRatio(perfRatio());size()}catch(e){}}
 fcApplyRes();
 function fcRow(){const cap=[[0,'Max'],[30,'30'],[45,'45'],[50,'50'],[60,'60'],[90,'90'],[120,'120']],rs=[[1,'100 %'],[.8,'80 %'],[.65,'65 %'],[.5,'50 %']];
@@ -7703,7 +7704,7 @@ function fcRow(){const cap=[[0,'Max'],[30,'30'],[45,'45'],[50,'50'],[60,'60'],[9
   +'<div class="foot" style="text-align:left;margin:2px 12px 0">Wische zur Seite für mehr Werte. Mehr als deine Bildschirm-Frequenz (meist 60) geht nicht. Für 50 FPS „50“, für flüssig auf dem iPad Pro „120“. Wenn es ruckelt: Auflösung senken.</div>'}
 {const _s=perfSeg;perfSeg=function(){return _s.apply(this,arguments)+fcRow()}}
 {const _b=bindPerf;bindPerf=function(){const r=_b.apply(this,arguments);try{
-  document.querySelectorAll('[data-fc]').forEach(b=>b.onclick=()=>{FPSCAP=+b.dataset.fc;try{localStorage.setItem('dfFpsCap',String(FPSCAP))}catch(e){}PERF.last=0;
+  document.querySelectorAll('[data-fc]').forEach(b=>b.onclick=()=>{FPSCAP=+b.dataset.fc;try{localStorage.setItem('dfFpsCap',String(FPSCAP))}catch(e){}PERF.last=0;FPSNX=0;
    document.querySelectorAll('[data-fc]').forEach(x=>{x.style.background=(+x.dataset.fc===FPSCAP)?'#0a84ff':'rgba(255,255,255,.12)'});toast(FPSCAP?'FPS-Limit: '+FPSCAP:'FPS-Limit: Maximum','good')});
   document.querySelectorAll('[data-fr]').forEach(b=>b.onclick=()=>{RESS=+b.dataset.fr;try{localStorage.setItem('dfRes',String(RESS))}catch(e){}fcApplyRes();
    document.querySelectorAll('[data-fr]').forEach(x=>{x.style.background=(+x.dataset.fr===RESS)?'#0a84ff':'rgba(255,255,255,.12)'});toast('Auflösung: '+Math.round(RESS*100)+' %','good')})}catch(e){}return r}}

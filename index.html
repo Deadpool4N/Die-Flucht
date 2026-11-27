@@ -8182,10 +8182,12 @@ function isGiveAll(){Object.assign(IS.tools,{axe:1,axe2:1,axe3:1,spear:1,bow:1,p
 try{ACCK.push('dfShopFree')}catch(e){}
 const shopFreeLeft=()=>{try{return Math.max(0,(+localStorage.getItem('dfShopFree')||0)-Date.now())}catch(e){return 0}};
 const shopFreeOn=()=>shopFreeLeft()>0;
-{const _i=cxInfOn;cxInfOn=function(){return _i.apply(this,arguments)||shopFreeOn()}}
+let FREEBUY=0;
+{const _i=cxInfOn;cxInfOn=function(){return _i.apply(this,arguments)||FREEBUY>0}}
+['cxBuySkin','cxBuyItem','cxBuyCar','petBuyEgg','petBuyN','bpBuyPrem','bpBuyLevel'].forEach(nm=>{try{const f=eval(nm);if(typeof f!=='function')return;const w=function(){if(!shopFreeOn())return f.apply(this,arguments);FREEBUY++;try{return f.apply(this,arguments)}finally{FREEBUY--}};eval(nm+'=w')}catch(e){console.error('free wrap',nm,e)}});
 {const _sa=shopAvail;shopAvail=function(k,id){return shopFreeOn()||_sa.apply(this,arguments)}}
-{const f=1-.25/Object.keys(WHPR).reduce((s,k)=>s+WHPR[k].w,0);Object.keys(WHPR).forEach(k=>{WHPR[k].w=+(WHPR[k].w*f).toFixed(5)});
- WHPR.tk={t:'🎟 Shop-Token: 2 Tage alles gratis',i:'🎟',w:.25,tk:1,col:'#ff2bd6'};WHSL.splice(9,0,'tk')}
+{const f=1-.0001/Object.keys(WHPR).reduce((s,k)=>s+WHPR[k].w,0);Object.keys(WHPR).forEach(k=>{WHPR[k].w=+(WHPR[k].w*f).toFixed(5)});
+ WHPR.tk={t:'🎟 Shop-Token: 2 Tage alles gratis',i:'🎟',w:.0001,tk:1,col:'#ff2bd6'};WHSL.splice(9,0,'tk')}
 {const _a=whApply;whApply=function(id){if(id==='tk'){const base=Math.max(Date.now(),+localStorage.getItem('dfShopFree')||0);try{localStorage.setItem('dfShopFree',String(base+48*3600*1000))}catch(e){}try{accSave(true)}catch(e){}
    ojPlay();return {tkfx:1,txt:'🎟 SHOP-TOKEN!',sub:'Der ganze Shop ist 48 Stunden gratis (Skins, Eier, Autos, Pass …)'}}
   const r=_a.apply(this,arguments);if(id==='eK'&&r)r.egfx=1;return r}}
